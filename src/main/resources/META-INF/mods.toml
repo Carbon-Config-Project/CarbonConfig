@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+license="Apache-2.0"
+[[mods]]
+	modId="carbonconfig"
+	version="${file.jarVersion}"
+	displayName="Carbon Config Library"
+	#updateJSONURL="https://change.me.example.invalid/updates.json"
+	#displayURL="https://change.me.to.your.mods.homepage.example.invalid/"
+	logoFile="carbonconfig.png"
+	credits="Thanks for this example mod goes to Java"
+	authors="Love, Cheese and small house plants"
+	description='''
+	'''
+	[[dependencies.carbonconfig]]
+		modId="forge"
+		mandatory=true
+		versionRange="[43,)"
+		ordering="NONE"
+		side="BOTH"
+	[[dependencies.carbonconfig]]
+		modId="minecraft"
+		mandatory=true
+		versionRange="[1.19.2,1.20)"
+		ordering="NONE"
+		side="BOTH"

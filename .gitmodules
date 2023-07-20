@@ -1,0 +1,3 @@
+[submodule "carbonconfig"]
+	path = carbonconfig
+	url = ssh://git@github.com/Carbon-Config-Project/CarbonConfigLib.git
