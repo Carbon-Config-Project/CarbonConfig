@@ -84,8 +84,8 @@ The GUI also supports Configured configurations regarding backgrounds.
 
 ## FAQ
 
-Q: **Is this mod required on the server or client?**    
-A: ``No, It will detect if either side has the mod not installed and adjust automatically``    
+Q: **Is this mod client or server sided?**
+A: ``It will detect if either side has the mod not installed and will adjust to the situation. While not necessary that both sides have it, it is suggested to do so.``
 
 Q: **Does it support editing shared forge configs on the server too?**    
 A: ``Yes``    
