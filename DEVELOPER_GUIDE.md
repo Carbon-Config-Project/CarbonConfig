@@ -54,7 +54,7 @@ Relevant Notes:
 
 How to identify that a config has a specific limitation to take effect.    
 
-```
+```java
 	public ExampleMod() {
 		Config config = new Config("example");
 		ConfigSection section = config.add("general");
@@ -69,7 +69,7 @@ Relevant notes:
 
 How to implement PerWorld Configs?
 
-```
+```java
 	public ExampleMod() {
 		Config config = new Config("example");
 		ConfigSection section = config.add("general");
