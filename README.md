@@ -42,7 +42,7 @@ A Developer Guide can be found [Here](DEVELOPER_GUIDE.md)
 Carbon Config isn't just a Config Library it is also a GUI implementation for other Config Libraries.    
 
 ### Simple Config
-<img src="img/basic_example.png" width="45%">    
+<img src="img/basic_example.png" width="65%">    
     
 This example shows you a basic button config layout.   
 Where all the valid types are displayed.    
@@ -50,7 +50,7 @@ Where all the valid types are displayed.
 ### File Selector
 
 If there is multiple config files inside the mod it also automatically allows you which one you want to edit.   
-<img src="img/file_selector_example.png" width="45%">    
+<img src="img/file_selector_example.png" width="65%">    
     
 Which also supports Editing of ALL Multiplayer files if you are on a server.    
 Not just "server specific configs".   
@@ -60,7 +60,7 @@ Not just "server specific configs".
 Carbon Config also comes with Selectors for config settings.   
 These for most cases have to be implemented by the dev via "suggestions".    
 But some config types like Registry Lists come with them as default.    
-<img src="img/entry_selector_example.png" width="45%">    
+<img src="img/entry_selector_example.png" width="65%">    
 
 This for example is a Item Selector example where it also shows you which item is what.    
 
@@ -77,7 +77,7 @@ The following supported types by default are:
 ### Forge Config Support
 
 Carbon Config also supports Forge Configs for its GUI interface    
-<img src="img/one_probe_example.png" width="45%">    
+<img src="img/one_probe_example.png" width="65%">    
     
 As can be seen the One Probe Config works just fine.    
 The GUI also supports Configured configurations regarding backgrounds.   
