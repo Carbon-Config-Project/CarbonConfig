@@ -11,11 +11,13 @@ public class ExampleMod
 {
 	public static ConfigHandler CONFIG;
 	public static BoolValue EXAMPLE_FLAG;
+	public static BoolValue EXAMPLE_SUGGESTION;
 	
 	public ExampleMod() {
 		Config config = new Config("example");
 		ConfigSection section = config.add("general");
 		EXAMPLE_FLAG = section.addBool("example_key", false);
+		EXAMPLE_SUGGESTION = section.addBool("suggestion example", false).addSuggestion("True", true).addSuggestion("False", false).addSuggestion("Random", new Random().nextBoolean());
 		CONFIG = CarbonConfig.CONFIGS.createConfig(config);
 		CONFIG.register();
 	}
@@ -31,6 +33,7 @@ Relevant notes:
 - Register function    
 - Config Sections/ConfigEntries can be added after the register function.   
 - Saving is done via the ConfigHandler since the Config.class itself doesn't handle serialization.    
+- Suggestions are only visible inside the gui, and if it is not an array element are forced values to pick inside the gui. With arrays they are basically templates people can pick
 
 ## Config Ranges / Filters
 
