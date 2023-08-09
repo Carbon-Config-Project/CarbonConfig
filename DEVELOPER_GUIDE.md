@@ -22,6 +22,10 @@ public class ExampleMod
 		CONFIG.register();
 	}
 	
+	/**
+	 * Example on how changing config values works
+	 * Doesn't have to be exactly done like this but is the best way to show it.
+	 */
 	public static void setFlag(boolean value) {
 		EXAMPLE_FLAG.set(value);
 		CONFIG.save();
