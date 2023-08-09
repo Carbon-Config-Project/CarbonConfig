@@ -81,6 +81,7 @@ repositories {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.2.11'
 	implementation fg.deobf("curse.maven:the-one-probe-245211:3965693")
+	implementation fg.deobf("curse.maven:jei-238222:4615177")
     minecraftLibrary ':Primitive Collections-0.8.9'
     jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")
@@ -106,6 +107,15 @@ reobf {
     jarJar { }
 }
 tasks.jarJar.finalizedBy('reobfJarJar')
+
+task deobfJar(type: Jar) {
+    archiveClassifier.set("deobf")
+    from sourceSets.main.output
+}
+
+artifacts {
+    archives deobfJar
+}
 
 publishing {
     publications {

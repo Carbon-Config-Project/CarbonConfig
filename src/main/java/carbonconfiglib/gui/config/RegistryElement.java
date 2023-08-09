@@ -9,6 +9,7 @@ import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
@@ -89,7 +90,7 @@ public class RegistryElement extends ConfigElement
 			}
 		}
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(Component.literal(result.getError().getMessage()));			
+			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
 		}
 		
 	}

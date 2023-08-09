@@ -1,7 +1,9 @@
 package carbonconfiglib;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -13,6 +15,7 @@ import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
 import carbonconfiglib.impl.PerWorldProxy;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.RegistryKeyValue;
 import carbonconfiglib.impl.entries.RegistryValue;
@@ -20,8 +23,13 @@ import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -57,7 +65,7 @@ public class CarbonConfig
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	private static final List<Runnable> LATE_INIT = ObjectLists.synchronize(new ObjectArrayList<>());
 	private static boolean REGISTRIES_LOADED = false;
-	
+	public static BooleanSupplier MOD_GUI = () -> false;
 	ConfigHandler handler;
 	public static BoolValue FORGE_SUPPORT; 
 	
@@ -70,9 +78,10 @@ public class CarbonConfig
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
 		if(FMLEnvironment.dist.isClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
+			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
-			FORGE_SUPPORT = config.add("general").addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System");
-			config.add("general").addBool("Hidden", false).setHidden();
+			FORGE_SUPPORT = config.add("general").addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
 			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			handler.register();
 		}
@@ -90,6 +99,7 @@ public class CarbonConfig
 	/**
 	 * Creates a Setting that will allow Late Loading more easily.
 	 * @return ConfigSetting with just sync/Auto reload
+	 * @apiNote Not required for a Per World Config
 	 */
 	public ConfigSettings createLateLoadSettings() {
 		return ConfigSettings.withSettings(AutomationType.AUTO_RELOAD, AutomationType.AUTO_SYNC);
@@ -156,6 +166,21 @@ public class CarbonConfig
 	@OnlyIn(Dist.CLIENT)
 	public void onClientLoad(FMLClientSetupEvent event) {
 		EventHandler.INSTANCE.onConfigsLoaded();
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public void registerKeys(RegisterKeyMappingsEvent event) {
+		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
+		event.register(mapping);
+		MOD_GUI = mapping::isDown;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public void onKeyPressed(InputEvent.Key event) {
+		Minecraft mc = Minecraft.getInstance();
+		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
+			mc.setScreen(new ModListScreen(mc.screen));
+		}
 	}
 	
 	public void load(ServerAboutToStartEvent event) {

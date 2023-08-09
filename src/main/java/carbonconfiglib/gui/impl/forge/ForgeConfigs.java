@@ -8,6 +8,7 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.impl.internal.ModConfigs;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;
@@ -59,6 +60,8 @@ public class ForgeConfigs implements IModConfigs
 	public BackgroundTexture getBackground() {
 		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
 		if(texture.isPresent()) return texture.get().texture();
+		Optional<BackgroundTexture> carbon_Texture = ModConfigs.computeTexture(container);
+		if(carbon_Texture.isPresent()) return carbon_Texture.get();
 		return getBackgroundTexture(container.getModInfo());
 	}
 	

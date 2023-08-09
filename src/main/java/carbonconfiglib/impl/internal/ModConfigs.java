@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
 
-import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.BackgroundTexture;
@@ -75,15 +74,18 @@ public class ModConfigs implements IModConfigs
 	public BackgroundTexture getBackground() {
 		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
 		if(texture.isPresent()) return texture.get().texture();
+		return computeTexture(container).orElse(BackgroundTexture.DEFAULT);
+	}
+	
+	public static Optional<BackgroundTexture> computeTexture(ModContainer container) {
 		Object obj = container.getModInfo().getModProperties().get("guiconfig");;
 		if(obj instanceof UnmodifiableConfig) {
 			UnmodifiableConfig config = (UnmodifiableConfig)obj;
 			if(config != null) {
-				CarbonConfig.LOGGER.info("Testing: "+config);
 				if(config.contains("texture")) {
 					Builder builder = BackgroundTexture.of((String)config.get("texture"));
 					if(config.contains("brightness")) builder.withBrightness(Integer.parseInt(config.get("brightness")));
-					return builder.build();
+					return Optional.of(builder.build());
 				}
 				if(config.contains("background")) {
 					Builder builder = BackgroundTexture.of((String)config.get("background"));
@@ -91,10 +93,10 @@ public class ModConfigs implements IModConfigs
 					if(config.contains("brightness")) builder.withBrightness(Integer.parseInt(config.get("brightness")));
 					if(config.contains("background_brightness")) builder.withBackground(Integer.parseInt(config.get("background_brightness")));
 					if(config.contains("foreground_brightness")) builder.withForeground(Integer.parseInt(config.get("foreground_brightness")));
-					return builder.build();
+					return Optional.of(builder.build());
 				}
 			}
 		}
-		return BackgroundTexture.DEFAULT;
+		return Optional.empty();
 	}
 }

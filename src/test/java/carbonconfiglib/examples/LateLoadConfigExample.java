@@ -15,6 +15,7 @@ public class LateLoadConfigExample
 		config = new Config("lateLoadExample");
 		handler = CarbonConfig.CONFIGS.createConfig(config);
 		handler.register(); //Registers the config and loads the config file
+		loadLateConfigExample();
 	}
 	
 	/**
@@ -22,6 +23,6 @@ public class LateLoadConfigExample
 	 */
 	public void loadLateConfigExample() {
 		value = config.add("lateSection").addInt("LateExample", 0); //This will load just fine because the config caches "unused" entries. Though unused entries won't be saved until they were added.
-		handler.save(); //Has to  be saved now because if the entry doesn't exist it has to save it.
+		handler.save(); //Has to be saved now because if the entry doesn't exist it has to save it.
 	}
 }

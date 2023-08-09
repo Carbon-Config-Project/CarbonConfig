@@ -124,7 +124,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		if(entries == null) return ParseResult.partial(false, NullPointerException::new, "Value isn't allowed to be null");
 		for(int i = 0,m=entries.size();i<m;i++) {
 			ResourceLocation result = ResourceLocation.tryParse(entries.get(i));
-			if(result == null) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entries.get(i)+"] doesn't exist in the registry");
+			if(result == null || !registry.containsKey(result)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entries.get(i)+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(result)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entries.get(i)+"] isn't allowed");
 		}
 		return ParseResult.success(true);

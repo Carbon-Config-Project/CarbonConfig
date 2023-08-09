@@ -1,5 +1,6 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.List;
 import java.util.Map;
 
 import carbonconfiglib.CarbonConfig;
@@ -19,7 +20,6 @@ import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.utils.SyncType;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
@@ -43,6 +43,9 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
+import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -123,20 +126,22 @@ public class EventHandler implements IConfigChangeListener
 	@OnlyIn(Dist.CLIENT)
 	public void onConfigsLoaded() {
 		loadDefaultTypes();
+		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
 			if(M.getCustomExtension(ConfigScreenFactory.class).isPresent()) return;
-			M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, C)));
+			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
 			ModList.get().forEachModInOrder(T-> {
 				if(T.getCustomExtension(ConfigScreenFactory.class).isEmpty()) {
 					ForgeConfigs configs = new ForgeConfigs(T);
 					if(configs.hasConfigs()) {
-						T.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, configs)));
+						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
 					}
 				};
 			});
 		}
+		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
 	}
 	
 	@OnlyIn(Dist.CLIENT)

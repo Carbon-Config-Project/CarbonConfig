@@ -9,7 +9,6 @@ import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.SyncType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -72,7 +71,7 @@ public class BulkSyncPacket implements ICarbonPacket
 			result = ReloadMode.or(result, packet.processEntry(player));
 		}
 		if(result != null) {
-			player.sendSystemMessage(Component.literal(result.getMessage()));
+			player.sendSystemMessage(result.getMessage());
 		}
 	}
 	

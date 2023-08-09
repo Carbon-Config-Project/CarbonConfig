@@ -8,6 +8,7 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.EditStringScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
@@ -75,7 +76,7 @@ public class StringElement extends ConfigElement
 	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(Component.literal(result.getError().getMessage()));			
+			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
 		}
 	}
 	

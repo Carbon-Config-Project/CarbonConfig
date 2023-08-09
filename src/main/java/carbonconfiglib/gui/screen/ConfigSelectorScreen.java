@@ -62,7 +62,6 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	@Override
 	protected void init() {
-		toAdd = null;
 		super.init();
 		int x = width / 2;
 		int y = height;
@@ -77,9 +76,10 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	@Override
 	protected void collectElements(Consumer<Element> elements) {
-		elements.accept(new Label(Component.literal("Local Configs").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
+		toAdd = new Label(Component.translatable("gui.carbonconfig.configs.local").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
+		toAdd = null;
 		if(minecraft.level != null) {
 			if(!minecraft.hasSingleplayerServer()) {
 				if(!isInstalledOnServer()) {
@@ -91,17 +91,19 @@ public class ConfigSelectorScreen extends ListScreen
 				if(!minecraft.player.hasPermissions(4)) {
 					return;
 				}
-				toAdd = new Label(Component.literal("Multiplayer Configs").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+				//TODO translate this before release
+				toAdd = new Label(Component.translatable("gui.carbonconfig.configs.multiplayer").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}
 			else  {
-				toAdd = new Label(Component.literal("World Configs").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+				toAdd = new Label(Component.translatable("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 			}
 		}
 		else {
-			toAdd = new Label(Component.literal("World Configs").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+			toAdd = new Label(Component.translatable("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 		}
 		addConfigs(ConfigType.SERVER, true, elements);
+		toAdd = null;
 	}
 	
 	private void addConfigs(ConfigType type, boolean multiplayer, Consumer<Element> elements) {

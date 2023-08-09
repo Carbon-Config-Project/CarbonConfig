@@ -22,6 +22,9 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class Icon
 {
+	private static final ResourceLocation LOGO_TEXTURE = new ResourceLocation("carbonconfig:textures/gui/logo.png");
+	public static final Icon LOGO = new Icon(LOGO_TEXTURE, 0, 0, 400, 400);
+	
 	private static final ResourceLocation ICONS = new ResourceLocation("carbonconfig:textures/gui/icons.png");
 	public static final Icon DELETE = new Icon(ICONS, 0, 16, 64, 64);
 	public static final Icon REVERT = new Icon(ICONS, 0, 0, 64, 64);

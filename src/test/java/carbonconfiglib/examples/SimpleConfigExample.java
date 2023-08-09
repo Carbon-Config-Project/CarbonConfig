@@ -57,7 +57,7 @@ public class SimpleConfigExample
 		serverSyncedExample = synced.addInt("Server Synced Value", 0).setServerSynced(); //Syncs the config from the server to the client!
 		clientSyncedValue = synced.addInt("Client Synced Value", 0).setClientSynced(); // Syncs the config from the client to the server to allow client specific configs for customization!
 		
-		handler = CarbonConfig.CONFIGS.createConfig(config, createSettings());
+		handler = CarbonConfig.CONFIGS.createConfig(config);
 		cache = HashSetCache.create(stringArrayExample, handler); //String arrays can not be really read so you can use HashSetCaches to make the tests a lot faster/simpler. Automatically updates if the config reloads. ArrayValue doesn't have to be referenced since its stored inside the cache too.
 		handler.register();
 	}

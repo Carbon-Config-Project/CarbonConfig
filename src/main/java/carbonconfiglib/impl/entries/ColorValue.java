@@ -104,7 +104,7 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 		
 		public static ParseResult<Integer> parseInt(String value) {
 			try { return ParseResult.success(Long.decode(value).intValue()); }
-			catch (Exception e) { return ParseResult.error(value, e, "Couldn't parse Number"); }
+			catch (Exception e) { return ParseResult.error(value, e, "Couldn't parse Colour"); }
 		}
 		
 		public static String serialize(long color) {
