@@ -55,6 +55,13 @@ If there is multiple config files inside the mod it also automatically allows yo
 Which also supports Editing of ALL Multiplayer files if you are on a server.    
 Not just "server specific configs".   
 
+### Compound Configs    
+
+If a config needs multiple datapoints. Instead of using a String, Compounds can be used instead.   
+These are much nicer to edit/read.   
+Instead of: "Testing;2000;512.2423;0x00FF00FF" you have this:    
+<img src="img/compound_example.png" width="65%">    
+
 ### Suggestions
 
 Carbon Config also comes with Selectors for config settings.   
