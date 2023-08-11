@@ -253,6 +253,11 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	@Override
+	public void updateInformation() {
+		visibleList.children().forEach(Element::updateValues);	
+	}
+	
+	@Override
 	public void removeEntry(Element element) {
 	}
 	

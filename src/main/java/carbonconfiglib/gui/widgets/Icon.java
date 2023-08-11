@@ -26,17 +26,21 @@ public class Icon
 	public static final Icon LOGO = new Icon(LOGO_TEXTURE, 0, 0, 400, 400);
 	
 	private static final ResourceLocation ICONS = new ResourceLocation("carbonconfig:textures/gui/icons.png");
-	public static final Icon DELETE = new Icon(ICONS, 0, 16, 64, 64);
-	public static final Icon REVERT = new Icon(ICONS, 0, 0, 64, 64);
-	public static final Icon SET_DEFAULT = new Icon(ICONS, 16, 0, 64, 64);
-	public static final Icon RELOAD = new Icon(ICONS, 16, 16, 64, 64);
-	public static final Icon RESTART = new Icon(ICONS, 32, 16, 64, 64);
-	public static final Icon SEARCH = new Icon(ICONS, 48, 16, 64, 64);
-	public static final Icon SEARCH_SELECTED = new Icon(ICONS, 48, 32, 64, 64);
-	public static final Icon NOT_DEFAULT = new Icon(ICONS, 32, 0, 64, 64);
-	public static final Icon NOT_DEFAULT_SELECTED = new Icon(ICONS, 48, 0, 64, 64);
-	public static final EnumMap<ConfigType, Icon> TYPE_ICON = create(new Icon(ICONS, 0, 32, 64, 64), new Icon(ICONS, 16, 32, 64, 64), new Icon(ICONS, 32, 32, 64, 64));
-	public static final EnumMap<ConfigType, Icon> MULTITYPE_ICON = create(new Icon(ICONS, 0, 48, 64, 64), new Icon(ICONS, 16, 48, 64, 64), new Icon(ICONS, 32, 48, 64, 64));
+	public static final Icon DELETE = new Icon(ICONS, 0, 16, 80, 64);
+	public static final Icon REVERT = new Icon(ICONS, 0, 0, 80, 64);
+	public static final Icon SET_DEFAULT = new Icon(ICONS, 16, 0, 80, 64);
+	public static final Icon RELOAD = new Icon(ICONS, 16, 16, 80, 64);
+	public static final Icon RESTART = new Icon(ICONS, 32, 16, 80, 64);
+	public static final Icon SEARCH = new Icon(ICONS, 48, 16, 80, 64);
+	public static final Icon SEARCH_SELECTED = new Icon(ICONS, 48, 32, 80, 64);
+	public static final Icon NOT_DEFAULT = new Icon(ICONS, 32, 0, 80, 64);
+	public static final Icon NOT_DEFAULT_SELECTED = new Icon(ICONS, 48, 0, 80, 64);
+	public static final Icon MOVE_DOWN = new Icon(ICONS, 64, 0, 80, 64);
+	public static final Icon MOVE_DOWN_HOVERED = new Icon(ICONS, 64, 16, 80, 64);
+	public static final Icon MOVE_UP = new Icon(ICONS, 64, 32, 80, 64);
+	public static final Icon MOVE_UP_HOVERED = new Icon(ICONS, 64, 48, 80, 64);
+	public static final EnumMap<ConfigType, Icon> TYPE_ICON = create(new Icon(ICONS, 0, 32, 80, 64), new Icon(ICONS, 16, 32, 80, 64), new Icon(ICONS, 32, 32, 80, 64));
+	public static final EnumMap<ConfigType, Icon> MULTITYPE_ICON = create(new Icon(ICONS, 0, 48, 80, 64), new Icon(ICONS, 16, 48, 80, 64), new Icon(ICONS, 32, 48, 80, 64));
 
 	ResourceLocation texture;
 	int x;

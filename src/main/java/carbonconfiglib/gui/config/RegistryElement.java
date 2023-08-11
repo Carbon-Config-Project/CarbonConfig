@@ -96,7 +96,7 @@ public class RegistryElement extends ConfigElement
 	}
 	
 	@Override
-	protected void updateValues() {
+	public void updateValues() {
 		if(edit != null) {
 			edit.setValue(value.get());
 		}

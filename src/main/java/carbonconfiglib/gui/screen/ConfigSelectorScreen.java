@@ -91,7 +91,6 @@ public class ConfigSelectorScreen extends ListScreen
 				if(!minecraft.player.hasPermissions(4)) {
 					return;
 				}
-				//TODO translate this before release
 				toAdd = new Label(Component.translatable("gui.carbonconfig.configs.multiplayer").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}

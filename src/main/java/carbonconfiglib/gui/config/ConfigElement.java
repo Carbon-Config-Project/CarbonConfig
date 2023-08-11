@@ -9,6 +9,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
+import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.IOwnable;
@@ -49,6 +51,8 @@ public class ConfigElement extends Element
 	
 	protected CarbonIconButton setReset;
 	protected CarbonIconButton setDefault;
+	protected CarbonHoverIconButton moveDown;
+	protected CarbonHoverIconButton moveUp;
 	
 	public ConfigElement(IConfigNode node) {
 		super(node.getName());
@@ -99,6 +103,10 @@ public class ConfigElement extends Element
 			if(isArray()) {
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, Component.empty(), this::onDeleted).setIconOnly(), -31);
 				setReset.active = isReset();
+				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN, Icon.MOVE_DOWN_HOVERED, this::onMoveDown);
+				listeners.add(moveDown);
+				moveUp = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_UP, Icon.MOVE_UP_HOVERED, this::onMoveUp);
+				listeners.add(moveUp);
 			}
 			else {
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, Component.empty(), this::onReset).setIconOnly(), -21);
@@ -148,6 +156,19 @@ public class ConfigElement extends Element
 		}
 		int maxX = Integer.MAX_VALUE;
 		if(renderChildren()) {
+			if(isArray()) {
+				moveUp.x = left + width - 16;
+				moveUp.y = top;
+				moveUp.visible = canMoveUp();
+				moveUp.render(poseStack, mouseX, mouseY, partialTicks);
+				moveDown.x = left + width - 16;
+				moveDown.y = top + 10;
+				moveDown.visible = canMoveDown();
+				moveDown.render(poseStack, mouseX, mouseY, partialTicks);
+				if(moveDown.visible || moveUp.visible) {
+					left -= 8;
+				}
+			}
 			for(Map.Entry<AbstractWidget, AlignOffset> entry : mappedListeners) {
 				AbstractWidget widget = entry.getKey();
 				AlignOffset offset = entry.getValue();
@@ -181,7 +202,7 @@ public class ConfigElement extends Element
 	}
 	
 	protected int getMaxX(int prevMaxX) {
-		return  prevMaxX;
+		return prevMaxX;
 	}
 	
 	protected boolean isArray() {
@@ -190,6 +211,26 @@ public class ConfigElement extends Element
 	
 	protected boolean isCompound() {
 		return value != null && value.isCompoundNode();
+	}
+	
+	protected void onMoveDown(CarbonHoverIconButton button) {
+		if(!isArray()) return;
+		array.moveDown(indexOf());
+		owner.updateInformation();
+	}
+	
+	protected void onMoveUp(CarbonHoverIconButton button) {
+		if(!isArray()) return;
+		array.moveUp(indexOf());
+		owner.updateInformation();		
+	}
+	
+	protected boolean canMoveUp() {
+		return indexOf() > 0;
+	}
+	
+	protected boolean canMoveDown() {
+		return indexOf() < array.size() - 1;
 	}
 	
 	protected boolean renderName() {
@@ -236,7 +277,8 @@ public class ConfigElement extends Element
 		updateValues();
 	}
 	
-	protected void updateValues() {
+	@Override
+	public void updateValues() {
 	}
 	
 	@Override

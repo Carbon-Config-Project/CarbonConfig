@@ -77,7 +77,7 @@ public class ColorElement extends ConfigElement
 	}
 	
 	@Override
-	protected void updateValues() {
+	public void updateValues() {
 		textBox.setValue(value.get());
 	}
 }

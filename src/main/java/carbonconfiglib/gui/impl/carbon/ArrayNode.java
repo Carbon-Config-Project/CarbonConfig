@@ -88,6 +88,22 @@ public class ArrayNode implements IArrayNode
 	}
 	
 	@Override
+	public void moveDown(int index) {
+		swapValues(index, index+1);
+	}
+	
+	@Override
+	public void moveUp(int index) {
+		swapValues(index, index-1);
+	}
+	
+	private void swapValues(int from, int to) {
+		if(from >= values.size() || from < 0) return;
+		if(to >= values.size() || to < 0) return;
+		currentValues.set(from, currentValues.set(to, currentValues.get(from)));
+	}
+	
+	@Override
 	public void createTemp() {
 		previous.push(new ObjectArrayList<>(currentValues));
 		reload();

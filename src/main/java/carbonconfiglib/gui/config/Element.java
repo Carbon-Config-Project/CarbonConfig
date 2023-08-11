@@ -54,6 +54,9 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 		this.changed = name.copy().withStyle(ChatFormatting.ITALIC);
 	}
 	
+	public void updateValues() {
+	}
+	
 	public boolean isChanged() {
 		return false;
 	}

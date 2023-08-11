@@ -57,6 +57,11 @@ public class GuiUtils
 		RenderSystem._setShaderTexture(0, icon.getTexture());
 		drawTextureRegion(stack, x, y, icon.getX(), icon.getY(), width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
 	}
+	
+	public static void drawTextureRegion(PoseStack stack, float x, float y, int xOff, int yOff, float width, float height, Icon icon, float texWidth, float texHeight) {
+		RenderSystem._setShaderTexture(0, icon.getTexture());
+		drawTextureRegion(stack, x, y, icon.getX() + xOff, icon.getY() + yOff, width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
+	}
     
 	public static void drawTextureRegion(PoseStack stack, float x, float y, float texX, float texY, float width, float height, float texWidth, float texHeight, float textureWidth, float textureHeight) {
 		Matrix4f matrix = stack.last().pose();

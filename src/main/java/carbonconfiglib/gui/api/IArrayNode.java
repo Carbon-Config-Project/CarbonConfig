@@ -33,4 +33,6 @@ public interface IArrayNode extends INode
 	public void createNode();
 	public void removeNode(int index);
 	public int indexOf(INode value);
+	public void moveUp(int index);
+	public void moveDown(int index);
 }

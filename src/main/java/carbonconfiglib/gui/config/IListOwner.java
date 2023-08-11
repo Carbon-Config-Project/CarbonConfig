@@ -28,5 +28,6 @@ public interface IListOwner
 	public boolean isActiveWidget(AbstractWidget widget);
 	public void setActiveWidget(AbstractWidget widget);
 	
+	public void updateInformation();
 	public void removeEntry(Element element);
 }
