@@ -10,7 +10,7 @@ apply plugin: 'eclipse'
 jarJar.enable()
 
 version = MC_VERSION + '-' + MOD_VERSION
-group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'carbonconfiglib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'Carbon Config'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)

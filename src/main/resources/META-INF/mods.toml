@@ -5,12 +5,12 @@ license="Apache-2.0"
 	modId="carbonconfig"
 	version="${file.jarVersion}"
 	displayName="Carbon Config Library"
-	#updateJSONURL="https://change.me.example.invalid/updates.json"
-	#displayURL="https://change.me.to.your.mods.homepage.example.invalid/"
+	displayURL="https://github.com/Carbon-Config-Project/CarbonConfig"
 	logoFile="carbonconfig.png"
-	credits="Thanks for this example mod goes to Java"
-	authors="Love, Cheese and small house plants"
+	credits="Thanks to the IC2Classic team for open sourcing this"
+	authors="Meduris, Speiger"
 	description='''
+		Carbon Config is IC2Classics Config Implementation made open source
 	'''
 	[[dependencies.carbonconfig]]
 		modId="forge"
