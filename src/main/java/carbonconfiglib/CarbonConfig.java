@@ -1,7 +1,7 @@
 package carbonconfiglib;
 
 import java.util.List;
-import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -23,22 +23,15 @@ import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.gui.ModListScreen;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraft.client.gui.screens.Screen;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
@@ -57,34 +50,55 @@ import speiger.src.collections.objects.utils.ObjectLists;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod("carbonconfig")
-public class CarbonConfig
+public class CarbonConfig implements ModInitializer
 {
 	public static final Logger LOGGER = LogUtils.getLogger();
-	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
+	private static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FabricLoader.getInstance().getConfigDir(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	private static final List<Runnable> LATE_INIT = ObjectLists.synchronize(new ObjectArrayList<>());
 	private static boolean REGISTRIES_LOADED = false;
-	public static BooleanSupplier MOD_GUI = () -> false;
 	ConfigHandler handler;
-	public static BoolValue FORGE_SUPPORT; 
+	public static BoolValue MOD_MENU_SUPPORT; 
 	
-	public CarbonConfig()
+	@Override
+	public void onInitialize()
 	{
 		NETWORK.init();
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonLoad);
-		MinecraftForge.EVENT_BUS.addListener(this::load);
-		MinecraftForge.EVENT_BUS.addListener(this::unload);
-		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
-		if(FMLEnvironment.dist.isClient()) {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
-			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
+		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) EventHandler.INSTANCE.initClientEvents(this::onClientLoad, this::registerKeys);
+		else EventHandler.INSTANCE.initServerEvents(this::onCommonLoad);
+		ServerLifecycleEvents.SERVER_STARTING.register(T -> load());
+		ServerLifecycleEvents.SERVER_STOPPING.register(T -> unload());
+		
+		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			Config config = new Config("carbonconfig");
-			FORGE_SUPPORT = config.add("general").addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
-			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
+			MOD_MENU_SUPPORT = config.add("general").addBool("enable-modmenu-support", true, "Enables that CarbonConfig automatically adds Mod Menu Support for all Carbon Configs").setRequiredReload(ReloadMode.GAME);
+			handler = createConfig("carbonconfig", config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			handler.register();
 		}
+	}
+	
+	public static ConfigHandler createConfig(String modId, Config config) {
+		EventHandler.ACTIVE_MOD.set(FabricLoader.getInstance().getModContainer(modId).get());
+		try {
+			return CONFIGS.createConfig(config);
+		}
+		finally {
+			EventHandler.ACTIVE_MOD.set(null);
+		}
+	}
+	
+	public static ConfigHandler createConfig(String modId, Config config, ConfigSettings settings) {
+		EventHandler.ACTIVE_MOD.set(FabricLoader.getInstance().getModContainer(modId).get());
+		try {
+			return CONFIGS.createConfig(config, settings);
+		}
+		finally {
+			EventHandler.ACTIVE_MOD.set(null);
+		}
+	}
+
+	public static FileSystemWatcher getConfigs() {
+		return CONFIGS;
 	}
 	
 	/**
@@ -152,7 +166,7 @@ public class CarbonConfig
 		LATE_INIT.add(run);
 	}
 	
-	public void onCommonLoad(FMLCommonSetupEvent event) {
+	public void onCommonLoad() {
 		REGISTRIES_LOADED = true;
 		LATE_INIT.forEach(Runnable::run);
 		LATE_INIT.clear();
@@ -163,27 +177,31 @@ public class CarbonConfig
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void onClientLoad(FMLClientSetupEvent event) {
+	public void onClientLoad() {
+		onCommonLoad();
 		EventHandler.INSTANCE.onConfigsLoaded();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void registerKeys(RegisterKeyMappingsEvent event) {
-		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
-		event.register(mapping);
-		MOD_GUI = mapping::isDown;
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	public void onKeyPressed(InputEvent.Key event) {
-		Minecraft mc = Minecraft.getInstance();
-		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
-			mc.setScreen(new ModListScreen(mc.screen));
+	@Environment(EnvType.CLIENT)
+	public void registerKeys() {
+		if(FabricLoader.getInstance().isModLoaded("modmenu")) {
+			KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
+			KeyBindingRegistryImpl.registerKeyBinding(mapping);
+			ClientTickEvents.END_CLIENT_TICK.register(T -> {
+				if(T.player != null && mapping.isDown()) {
+					createModMenuScreen(T.screen, T::setScreen);
+				}
+			});
 		}
 	}
 	
-	public void load(ServerAboutToStartEvent event) {
+	@Environment(EnvType.CLIENT)
+	private void createModMenuScreen(Screen parent, Consumer<Screen> toOpen) {
+		try { toOpen.accept((Screen)Class.forName("com.terraformersmc.modmenu.gui.ModsScreen").getDeclaredConstructor(Screen.class).newInstance(parent)); }
+		catch(Exception e) { e.printStackTrace(); }
+	}
+	
+	public void load() {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.load();
@@ -191,7 +209,7 @@ public class CarbonConfig
 		}
 	}
 	
-	public void unload(ServerStoppingEvent event) {
+	public void unload() {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.unload();

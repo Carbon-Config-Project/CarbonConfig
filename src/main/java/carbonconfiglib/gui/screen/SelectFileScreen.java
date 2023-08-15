@@ -16,6 +16,7 @@ import carbonconfiglib.gui.api.IModConfig.IConfigTarget;
 import carbonconfiglib.gui.api.IModConfig.WorldConfigTarget;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -26,7 +27,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -67,7 +67,7 @@ public class SelectFileScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new ExtendedButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
+		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -118,7 +118,7 @@ public class SelectFileScreen extends ListScreen
 		
 		@Override
 		public void init() {
-			button = new ExtendedButton(0, 0, 62, 20, Component.translatable("gui.carbonconfig.pick"), this::onPick);
+			button = new CarbonButton(0, 0, 62, 20, Component.translatable("gui.carbonconfig.pick"), this::onPick);
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
 				LevelSummary sum = world.getSummary();

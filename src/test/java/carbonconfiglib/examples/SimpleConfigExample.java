@@ -18,7 +18,6 @@ import carbonconfiglib.utils.AutomationType;
 import carbonconfiglib.utils.MultilinePolicy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public class SimpleConfigExample
 {
@@ -57,7 +56,7 @@ public class SimpleConfigExample
 		serverSyncedExample = synced.addInt("Server Synced Value", 0).setServerSynced(); //Syncs the config from the server to the client!
 		clientSyncedValue = synced.addInt("Client Synced Value", 0).setClientSynced(); // Syncs the config from the client to the server to allow client specific configs for customization!
 		
-		handler = CarbonConfig.CONFIGS.createConfig(config);
+		handler = CarbonConfig.createConfig("carbonconfig", config);
 		cache = HashSetCache.create(stringArrayExample, handler); //String arrays can not be really read so you can use HashSetCaches to make the tests a lot faster/simpler. Automatically updates if the config reloads. ArrayValue doesn't have to be referenced since its stored inside the cache too.
 		handler.register();
 	}
@@ -69,7 +68,7 @@ public class SimpleConfigExample
 		return settings.withMultiline(MultilinePolicy.ALWAYS_MULTILINE); //Settings are not required, by default it sets all required values, its only to OVERRIDE settings.
 	}
 	
-	public void onCommonEvent(FMLCommonSetupEvent event) {
+	public void onPostLoad() {
 		if(LOAD_LATE) {
 			handler.load();//If you need to load your config late just remove the AUTO_LOAD function and call load when you need it. NOTE: REGISTER HAS TO BE CALLED IN THE MOD CONSTRUCTOR! But Register doesn't load it unless auto load was being set.
 		}

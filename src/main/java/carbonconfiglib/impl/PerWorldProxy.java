@@ -9,17 +9,16 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy;
 import carbonconfiglib.api.SimpleConfigProxy.SimpleTarget;
 import carbonconfiglib.config.ConfigSettings;
+import carbonconfiglib.impl.internal.EventHandler;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -38,8 +37,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
  */
 public final class PerWorldProxy implements IConfigProxy
 {
-	public static final LevelResource SERVERCONFIG = new LevelResource("serverconfig");
-	public static final IConfigProxy INSTANCE = new PerWorldProxy(FMLPaths.GAMEDIR.get().resolve("multiplayerconfigs"), FMLPaths.GAMEDIR.get().resolve("defaultconfigs"), FMLPaths.GAMEDIR.get().resolve("saves"));
+	public static final IConfigProxy INSTANCE = new PerWorldProxy(getGameDir("multiplayerconfigs"), getGameDir("defaultconfigs"), getGameDir("saves"));
 	Path baseClientPath;
 	Path baseServerPath;
 	Path saveFolders;
@@ -48,6 +46,10 @@ public final class PerWorldProxy implements IConfigProxy
 		this.baseClientPath = baseClientPath;
 		this.baseServerPath = baseServerPath;
 		this.saveFolders = saveFolders;
+	}
+	
+	private static Path getGameDir(String path) {
+		return FabricLoader.getInstance().getGameDir().resolve(path);
 	}
 	
 	public static boolean isProxy(IConfigProxy proxy) {
@@ -61,20 +63,20 @@ public final class PerWorldProxy implements IConfigProxy
 	@Override
 	public List<Path> getBasePaths() {
 		List<Path> paths = new ObjectArrayList<>();
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		if(server != null) paths.add(server.getWorldPath(SERVERCONFIG));
-		else if(FMLEnvironment.dist.isClient()) paths.add(baseClientPath);
+		MinecraftServer server = EventHandler.getServer();
+		if(server != null) paths.add(server.getWorldPath(LevelResource.ROOT).resolve("serverconfig"));
+		else if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) paths.add(baseClientPath);
 		paths.add(baseServerPath);
 		return paths;
 	}
 	
 	@Override
 	public List<? extends IPotentialTarget> getPotentialConfigs() {
-		if(FMLEnvironment.dist.isClient()) return getLevels();
-		else return Collections.singletonList(new SimpleTarget(ServerLifecycleHooks.getCurrentServer().getWorldPath(SERVERCONFIG), "server"));
+		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) return getLevels();
+		else return Collections.singletonList(new SimpleTarget(EventHandler.getServer().getWorldPath(LevelResource.ROOT).resolve("serverconfig"), "server"));
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	private List<IPotentialTarget> getLevels() {
 		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
 		List<IPotentialTarget> folders = new ObjectArrayList<>();
@@ -84,7 +86,7 @@ public final class PerWorldProxy implements IConfigProxy
 		for(LevelSummary sum : storage.loadLevelSummaries(storage.findLevelCandidates()).join()) {
 			try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
 			{
-				Path path = access.getLevelPath(SERVERCONFIG);
+				Path path = access.getLevelPath(LevelResource.ROOT).resolve("serverconfig");
 				if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path));
 			}
 			catch(Exception e)

@@ -2,13 +2,13 @@ package carbonconfiglib.networking.carbon;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.ICarbonPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -56,7 +56,7 @@ public class SaveConfigPacket implements ICarbonPacket
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;
 		}
-		ConfigHandler handler = CarbonConfig.CONFIGS.getConfig(identifier);
+		ConfigHandler handler = CarbonConfig.getConfigs().getConfig(identifier);
 		if(handler == null) return;
 		try {
 			ConfigHandler.load(handler, handler.getConfig(), ObjectArrayList.wrap(data.split("\n")), false);
@@ -70,7 +70,7 @@ public class SaveConfigPacket implements ICarbonPacket
 	}
 	
 	private boolean canIgnorePermissionCheck() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = EventHandler.getServer();
 		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
 	}
 	

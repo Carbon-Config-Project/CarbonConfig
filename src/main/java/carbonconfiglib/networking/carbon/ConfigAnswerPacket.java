@@ -5,12 +5,12 @@ import java.util.UUID;
 import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.networking.ICarbonPacket;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -56,7 +56,7 @@ public class ConfigAnswerPacket implements ICarbonPacket
 		processClient();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	private void processClient() {
 		Screen screen = Minecraft.getInstance().screen;
 		if(screen instanceof IRequestScreen) {

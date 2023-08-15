@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "carbonconfig",
+  "version": "${version}",
+
+  "name": "Carbon Config",
+  "description": "Carbon Config is IC2Classics Config Implementation made open source",
+  "authors": [
+    "Meduris",
+    "Speiger"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Carbon-Config-Project/CarbonConfig",
+    "sources": "https://github.com/Carbon-Config-Project/CarbonConfig/issues"
+  },
+
+  "license": "Apache 2",
+  "icon": "carbonconfig.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "carbonconfiglib.CarbonConfig"
+    ],
+    "modmenu": [
+      "carbonconfiglib.impl.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "fabric-api": "*",
+    "minecraft": "~1.19.2",
+    "java": ">=17"
+  },
+  "suggests": {
+  }
+}

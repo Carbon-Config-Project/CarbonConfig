@@ -1,9 +1,12 @@
 package carbonconfiglib.gui.api;
 
 import java.util.List;
+import java.util.Map;
 
 import carbonconfiglib.api.ConfigType;
-import net.minecraftforge.fml.IExtensionPoint;
+import net.fabricmc.loader.api.ModContainer;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -26,5 +29,5 @@ public interface IModConfigs
 	public List<IModConfig> getConfigInstances(ConfigType type);
 	public BackgroundTexture getBackground();
 	
-	public static record Background(BackgroundTexture texture) implements IExtensionPoint<Background> {}
+	public static Map<ModContainer, BackgroundTexture> TEXTURE_REGISTRY = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 }

@@ -13,12 +13,12 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ConfigElement;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -58,8 +58,8 @@ public class CompoundScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		applyValue = addRenderableWidget(new ExtendedButton(x-82, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
-		addRenderableWidget(new ExtendedButton(x+2, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
+		applyValue = addRenderableWidget(new CarbonButton(x-82, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
+		addRenderableWidget(new CarbonButton(x+2, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override

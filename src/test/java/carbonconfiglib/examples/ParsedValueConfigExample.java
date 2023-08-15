@@ -33,7 +33,7 @@ public class ParsedValueConfigExample
 		// The Example is mainly used for the config comment that will display it, which is especially useful for arrays where no default could be a thing.
 		IConfigSerializer<TestValue> serializer = IConfigSerializer.noSync(type, new TestValue(), TestValue::parse, TestValue::serialize);
 		value = section.addParsed("testExample", new TestValue(), serializer);
-		handler = CarbonConfig.CONFIGS.createConfig(config);
+		handler = CarbonConfig.createConfig("carbonconfig", config);
 		handler.register();
 	}
 	

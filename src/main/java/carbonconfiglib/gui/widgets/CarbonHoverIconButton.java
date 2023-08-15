@@ -45,7 +45,7 @@ public class CarbonHoverIconButton extends AbstractButton
 	
 	@Override
 	public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_93679_) {
-		int j = getFGColor();
+		int j = active ? 0xFFFFFF : 0xA0A0A0;
         RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
 		GuiUtils.drawTextureRegion(stack, x + info.xOff, y + info.yOff, info.width, info.height, icons[isHoveredOrFocused() ? 1 : 0], 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);

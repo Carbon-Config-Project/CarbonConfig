@@ -4,12 +4,12 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -62,10 +62,10 @@ public class MultiChoiceScreen extends Screen
 	
 	protected void addButtons(int y) {
 		boolean singleOption = otherButton == null && cancelButton == null;
-		addRenderableWidget(new ExtendedButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton, T -> callback.accept(Result.MAIN)));
+		addRenderableWidget(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton, T -> callback.accept(Result.MAIN)));
 		if(singleOption) return;
-		addRenderableWidget(new ExtendedButton(this.width / 2 - 50, y, 100, 20, this.otherButton, T -> callback.accept(Result.OTHER)));
-		addRenderableWidget(new ExtendedButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton, T -> callback.accept(Result.CANCEL)));
+		addRenderableWidget(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton, T -> callback.accept(Result.OTHER)));
+		addRenderableWidget(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton, T -> callback.accept(Result.CANCEL)));
 	}
 	
 	@Override

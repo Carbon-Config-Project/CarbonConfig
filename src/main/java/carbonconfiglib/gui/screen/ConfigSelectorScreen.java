@@ -14,6 +14,7 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.IIgnoreSearch;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
@@ -25,7 +26,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -65,7 +65,7 @@ public class ConfigSelectorScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new ExtendedButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
+		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -169,11 +169,11 @@ public class ConfigSelectorScreen extends ListScreen
 		public void init() {
 			multi = shouldCreatePick();
 			if(multi) {
-				button = new ExtendedButton(0, 0, 82, 20, Component.translatable("gui.carbonconfig.pick_file"), this::onPick);
+				button = new CarbonButton(0, 0, 82, 20, Component.translatable("gui.carbonconfig.pick_file"), this::onPick);
 				children.add(button);
 			}
 			else {
-				button = new ExtendedButton(0, 0, 60, 20, Component.translatable("gui.carbonconfig.modify"), this::onEdit);
+				button = new CarbonButton(0, 0, 60, 20, Component.translatable("gui.carbonconfig.modify"), this::onEdit);
 				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, Component.empty(), this::reset).setIconOnly();
 				reset.active = !handler.isDefault() && !isInWorldConfig();
 				children.add(button);

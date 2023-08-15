@@ -21,10 +21,10 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.item.ItemStack;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -104,7 +104,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 			for(Component entry : tooltips) {
 				text.addAll(font.getSplitter().splitLines(entry, Integer.MAX_VALUE, Style.EMPTY));
 			}
-			renderComponentTooltip(stack, text, mouseX, mouseY, ItemStack.EMPTY);
+			renderTooltip(stack, Language.getInstance().getVisualOrder(text), mouseX, mouseY);
 			tooltips.clear();
 		}
 

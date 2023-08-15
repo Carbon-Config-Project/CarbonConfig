@@ -99,7 +99,7 @@ public class SyncPacket implements ICarbonPacket
 	
 	public ReloadMode processEntry(Player player) {
 		if(entries.isEmpty()) return null;
-		ConfigHandler cfg = CarbonConfig.CONFIGS.getConfig(identifier);
+		ConfigHandler cfg = CarbonConfig.getConfigs().getConfig(identifier);
 		if(cfg == null) {
 			CarbonConfig.LOGGER.warn("Received packet for ["+identifier+"] which didn't exist!");
 			return null;

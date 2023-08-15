@@ -3,8 +3,8 @@ package carbonconfiglib.impl.internal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import com.electronwill.nightconfig.core.UnmodifiableConfig;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.ConfigHandler;
@@ -14,8 +14,10 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.impl.carbon.ModConfig;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.CustomValue;
+import net.fabricmc.loader.api.metadata.CustomValue.CvObject;
+import net.fabricmc.loader.api.metadata.CustomValue.CvType;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -40,20 +42,16 @@ public class ModConfigs implements IModConfigs
 	public ModConfigs(ModContainer container) {
 		this.container = container;
 	}
-	
-	public static ModConfigs of() {
-		return new ModConfigs(ModLoadingContext.get().getActiveContainer());
-	}
-	
-	public static ModConfigs of(ConfigHandler handler) {
-		ModConfigs configs = new ModConfigs(ModLoadingContext.get().getActiveContainer());
+		
+	public static ModConfigs of(ModContainer container, ConfigHandler handler) {
+		ModConfigs configs = new ModConfigs(container);
 		configs.addConfig(handler);
 		return configs;
 	}
 	
 	@Override
 	public String getModName() {
-		return container.getModInfo().getDisplayName();
+		return container.getMetadata().getName();
 	}
 	
 	public void addConfig(ConfigHandler config) {
@@ -64,7 +62,7 @@ public class ModConfigs implements IModConfigs
 		List<IModConfig> instance = new ObjectArrayList<>();
 		for(ConfigHandler handler : knownConfigs) {
 			if(!handler.isRegistered() || handler.getConfigType() != type) continue;
-			instance.add(new ModConfig(container.getModId(), handler));
+			instance.add(new ModConfig(container.getMetadata().getId(), handler));
 		}
 		instance.sort(Comparator.comparing(IModConfig::getConfigName, String.CASE_INSENSITIVE_ORDER));
 		return instance;
@@ -72,31 +70,50 @@ public class ModConfigs implements IModConfigs
 
 	@Override
 	public BackgroundTexture getBackground() {
-		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
-		if(texture.isPresent()) return texture.get().texture();
+		BackgroundTexture texture = IModConfigs.TEXTURE_REGISTRY.get(container);
+		if(texture != null) return texture;
 		return computeTexture(container).orElse(BackgroundTexture.DEFAULT);
 	}
 	
 	public static Optional<BackgroundTexture> computeTexture(ModContainer container) {
-		Object obj = container.getModInfo().getModProperties().get("guiconfig");;
-		if(obj instanceof UnmodifiableConfig) {
-			UnmodifiableConfig config = (UnmodifiableConfig)obj;
-			if(config != null) {
-				if(config.contains("texture")) {
-					Builder builder = BackgroundTexture.of((String)config.get("texture"));
-					if(config.contains("brightness")) builder.withBrightness(Integer.parseInt(config.get("brightness")));
-					return Optional.of(builder.build());
-				}
-				if(config.contains("background")) {
-					Builder builder = BackgroundTexture.of((String)config.get("background"));
-					if(config.contains("foreground")) builder.withForeground((String)config.get("foreground"));
-					if(config.contains("brightness")) builder.withBrightness(Integer.parseInt(config.get("brightness")));
-					if(config.contains("background_brightness")) builder.withBackground(Integer.parseInt(config.get("background_brightness")));
-					if(config.contains("foreground_brightness")) builder.withForeground(Integer.parseInt(config.get("foreground_brightness")));
-					return Optional.of(builder.build());
-				}
+		CustomValue value = container.getMetadata().getCustomValue("guiconfig");
+		if(value != null && value.getType() == CvType.OBJECT) {
+			CvObject obj = value.getAsObject();
+			if(obj.containsKey("texture")) {
+				Builder builder = BackgroundTexture.of();
+				parseString(obj, "texture", builder::withTexture);
+				parseNumber(obj, "brightness", builder::withBrightness);
+				return Optional.of(builder.build());
+			}
+			if(obj.containsKey("background")) {
+				Builder builder = BackgroundTexture.of();
+				parseString(obj, "background", builder::withTexture);
+				parseString(obj, "foreground", builder::withForeground);
+				parseNumber(obj, "brightness", builder::withBrightness);
+				parseNumber(obj, "background_brightness", builder::withBackground);
+				parseNumber(obj, "foreground_brightness", builder::withForeground);
+				return Optional.of(builder.build());
 			}
 		}
 		return Optional.empty();
+	}
+	
+	private static void parseString(CvObject obj, String key, Consumer<String> value) { 
+		CustomValue result = obj.get(key);
+		if(result != null && result.getType() == CvType.STRING) {
+			value.accept(result.getAsString());
+		}
+	}
+	
+	private static void parseNumber(CvObject obj, String key, IntConsumer value) { 
+		CustomValue result = obj.get(key);
+		if(result != null) {
+			if(result.getType() == CvType.NUMBER) {
+				value.accept(result.getAsNumber().intValue());
+			}
+			else if(result.getType() == CvType.STRING) {
+				value.accept(Integer.parseInt(result.getAsString()));
+			}
+		}
 	}
 }

@@ -13,7 +13,7 @@ public class LateLoadConfigExample
 	
 	public LateLoadConfigExample() {
 		config = new Config("lateLoadExample");
-		handler = CarbonConfig.CONFIGS.createConfig(config);
+		handler = CarbonConfig.createConfig("carbonconfig", config);
 		handler.register(); //Registers the config and loads the config file
 		loadLateConfigExample();
 	}
