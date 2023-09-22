@@ -18,6 +18,7 @@ import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -107,10 +108,10 @@ public abstract class ListSelectionScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		apply.active = value.isChanged();
 		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 8, -1);
+		stack.drawString(font, title, (width/2)-(font.width(title)/2), 8, -1);
 	}
 	
 	@Override
@@ -198,7 +199,7 @@ public abstract class ListSelectionScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			ISuggestionRenderer renderer = getRenderer();
 			if(renderer != null) {
 				Component comp = renderer.renderSuggestion(poseStack, suggestion.getValue(), left, top);

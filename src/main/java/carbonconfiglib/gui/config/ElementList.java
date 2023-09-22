@@ -17,6 +17,7 @@ import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.screen.SmoothFloat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
@@ -175,7 +176,7 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		value.update(partialTicks);
 		super.setScrollAmount(value.getValue());
 		super.render(stack, mouseX, mouseY, partialTicks);
@@ -188,13 +189,13 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	protected void renderBackground(PoseStack stack) {
+	protected void renderBackground(GuiGraphics stack) {
 		if(customBackground == null || (minecraft.level != null && customBackground.shouldDisableInLevel())) return;
 		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground);
 	}
 	
 	@Override
-	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderList(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		super.renderList(stack, mouseX, mouseY, partialTicks);
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground);

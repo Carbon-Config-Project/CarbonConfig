@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.config.IListOwner;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
@@ -40,10 +41,11 @@ public class CarbonEditBox extends EditBox implements IOwnable
 	public void setOwner(IListOwner owner) {
 		this.owner = owner;
 	}
-	
+
+
 	@Override
-	public void setFocus(boolean focus) {
-		super.setFocus(focus);
+	public void setFocused(boolean focus) {
+		super.setFocused(focus);
 		if(focus && owner != null) {
 			owner.setActiveWidget(this);
 		}
@@ -61,9 +63,9 @@ public class CarbonEditBox extends EditBox implements IOwnable
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		if(this.isFocused() && owner != null && !owner.isActiveWidget(this)) {
-			setFocus(false);
+			setFocused(false);
 		}
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}

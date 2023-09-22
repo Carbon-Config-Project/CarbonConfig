@@ -20,6 +20,7 @@ import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -69,9 +70,10 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, modName, (width/2)-(font.width(modName)/2), 8, -1);
+
+		stack.drawString(font, modName, (width/2)-(font.width(modName)/2), 8, -1);
 	}
 	
 	@Override
@@ -140,7 +142,7 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			renderText(poseStack, name, GuiAlign.CENTER.align(left, width, font.width(name)), GuiAlign.CENTER.align(top, height, font.lineHeight), -1);
 		}
 	}
@@ -184,18 +186,18 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left+width-82;
-			button.y = top + 2;
+		public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			button.setX(left+width-82);
+			button.setY(top + 2);
 			button.render(poseStack, mouseX, mouseY, partialTicks);
 			if(reset != null) {
-				reset.x = left+width-20;
-				reset.y = top + 2;
+				reset.setX(left+width-20);
+				reset.setY(top + 2);
 				reset.render(poseStack, mouseX, mouseY, partialTicks);
 			}
 			
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(type, 130, font)), left+5, top+2, -1);
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(fileName, 130, font)), left+5, top+11, -1);
+			poseStack.drawString(font, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(type, 130, font)), left+5, top+2, -1);
+			poseStack.drawString(font, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(fileName, 130, font)), left+5, top+11, -1);
 			GuiUtils.drawTextureRegion(poseStack, left-20, top, 22, 22, getIcon(), 16, 16);
 		}
 		

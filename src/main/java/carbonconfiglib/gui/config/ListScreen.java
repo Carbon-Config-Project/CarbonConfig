@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -92,7 +93,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(stack);
 		super.render(stack, mouseX, mouseY, partialTicks);
 		GuiUtils.drawTextureRegion(stack, 5, 5, 40, 40, Icon.LOGO, 400, 400);
@@ -104,7 +105,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 			for(Component entry : tooltips) {
 				text.addAll(font.getSplitter().splitLines(entry, Integer.MAX_VALUE, Style.EMPTY));
 			}
-			renderTooltip(stack, Language.getInstance().getVisualOrder(text), mouseX, mouseY);
+			stack.renderTooltip(font, Language.getInstance().getVisualOrder(text), mouseX, mouseY);
 			tooltips.clear();
 		}
 

@@ -20,6 +20,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -81,9 +82,9 @@ public class SelectFileScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, TEXT, (width/2)-(font.width(TEXT)/2), 8, -1);
+		stack.drawString(font, TEXT, (width/2)-(font.width(TEXT)/2), 8, -1);
 	}
 	
 	@Override
@@ -136,12 +137,12 @@ public class SelectFileScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left+width-62;
-			button.y = top + 2;
+		public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			button.setX(left+width-62);
+			button.setY(top + 2);
 			button.render(poseStack, mouseX, mouseY, partialTicks);
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(title, 140, font)), left+5, top+4, -1);
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(path, 140, font)), left+5, top+13, -1);
+			poseStack.drawString(font, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(title, 140, font)), left+5, top+4, -1);
+			poseStack.drawString(font, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(path, 140, font)), left+5, top+13, -1);
 			if(texture != null) {
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.setShaderTexture(0, texture.getId());

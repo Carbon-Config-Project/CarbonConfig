@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.widgets.CarbonButton;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -69,9 +70,9 @@ public class MultiChoiceScreen extends Screen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks){
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks){
 		this.renderBackground(stack);
-		drawCenteredString(stack, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
+		stack.drawCenteredString(this.font, this.title, this.width / 2, this.titleTop(), 16777215);
 		this.multilineMessage.renderCentered(stack, this.width / 2, this.messageTop());
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}

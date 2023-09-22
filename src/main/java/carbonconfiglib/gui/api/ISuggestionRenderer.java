@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -25,7 +26,7 @@ import net.minecraft.network.chat.Component;
  */
 public interface ISuggestionRenderer
 {
-	public Component renderSuggestion(PoseStack stack, String value, int x, int y);
+	public Component renderSuggestion(GuiGraphics stack, String value, int x, int y);
 	
 	public static class SuggestionRegistry {
 		private static final Map<Class<?>, ISuggestionRenderer> REGISTRY = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());

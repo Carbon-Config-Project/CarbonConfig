@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -72,19 +73,19 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 	}
 	
-	protected void renderName(PoseStack stack, float x, float y, boolean changed) {
+	protected void renderName(GuiGraphics stack, int x, int y, boolean changed) {
 		 renderText(stack, changed ? this.changed : unchanged, x, y, -1);
 	}
 	
-	protected void renderName(PoseStack stack, float x, float y, boolean changed, int maxWidth) {
-		font.draw(stack, Language.getInstance().getVisualOrder(GuiUtils.ellipsizeStyled((changed ? this.changed : unchanged), maxWidth, font)), x, y, -1);		
+	protected void renderName(GuiGraphics stack, int x, int y, boolean changed, int maxWidth) {
+		stack.drawString(font, Language.getInstance().getVisualOrder(GuiUtils.ellipsizeStyled((changed ? this.changed : unchanged), maxWidth, font)), x, y, -1);
 	}
 	
-	protected void renderText(PoseStack stack, Component text, float x, float y, int color) {
-		font.draw(stack, text, x, y, color);
+	protected void renderText(GuiGraphics stack, Component text, int x, int y, int color) {
+		stack.drawString(font, text, x, y, color);
 	}
 	
 	@Override

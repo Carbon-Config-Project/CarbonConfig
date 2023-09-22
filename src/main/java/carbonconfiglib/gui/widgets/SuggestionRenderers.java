@@ -9,9 +9,11 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -48,10 +50,10 @@ public class SuggestionRenderers
 {
 	public static class ItemEntry implements ISuggestionRenderer {
 		@Override
-		public Component renderSuggestion(PoseStack stack, String value, int x, int y) {
+		public Component renderSuggestion(GuiGraphics stack, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			Item item = Registry.ITEM.get(id);
+			Item item = BuiltInRegistries.ITEM.get(id);
 			if(item == Items.AIR || item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(itemStack, x, y);
@@ -61,23 +63,23 @@ public class SuggestionRenderers
 	
 	public static class FluidEntry implements ISuggestionRenderer {
 		@Override
-		public Component renderSuggestion(PoseStack stack, String value, int x, int y) {
+		public Component renderSuggestion(GuiGraphics stack, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			Fluid fluid = Registry.FLUID.get(id);
-			if(fluid == Fluids.EMPTY || fluid == null) return null;
+			Fluid fluid = BuiltInRegistries.FLUID.get(id);
+			if(fluid == Fluids.EMPTY) return null;
 			TextureAtlasSprite sprite = getSprite(fluid);
 			if(sprite == null) return null;
 			RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
 			int color = FluidRenderHandlerRegistry.INSTANCE.get(fluid).getFluidColor(null, null, fluid.defaultFluidState());
 			RenderSystem.setShaderColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
-			GuiComponent.blit(stack, x, y, 0, 18, 18, sprite);
+			stack.blit(x, y, 0, 18, 18, sprite);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			return getDescription(fluid).withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 		
 		private MutableComponent getDescription(Fluid fluid) {
-			return Component.translatable(Util.makeDescriptionId("fluid", Registry.FLUID.getKey(fluid)));
+			return Component.translatable(Util.makeDescriptionId("fluid", BuiltInRegistries.FLUID.getKey(fluid)));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
@@ -87,10 +89,10 @@ public class SuggestionRenderers
 	
 	public static class EnchantmentEntry implements ISuggestionRenderer {
 		@Override
-		public Component renderSuggestion(PoseStack stack, String value, int x, int y) {
+		public Component renderSuggestion(GuiGraphics stack, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			Enchantment ench = Registry.ENCHANTMENT.get(id);
+			Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(id);
 			if(ench == null) return null;
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, ench.getMinLevel())), x, y);
 			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
@@ -99,10 +101,10 @@ public class SuggestionRenderers
 	
 	public static class PotionEntry implements ISuggestionRenderer {
 		@Override
-		public Component renderSuggestion(PoseStack stack, String value, int x, int y) {
+		public Component renderSuggestion(GuiGraphics stack, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			MobEffect potion = Registry.MOB_EFFECT.get(id);
+			MobEffect potion = BuiltInRegistries.MOB_EFFECT.get(id);
 			if(potion == null) return null;
 			ItemStack item = new ItemStack(Items.POTION);
 			PotionUtils.setCustomEffects(item, ObjectLists.singleton(new MobEffectInstance(potion)));
@@ -114,10 +116,10 @@ public class SuggestionRenderers
 	
 	public static class ColorEntry implements ISuggestionRenderer {
 		@Override
-		public Component renderSuggestion(PoseStack stack, String value, int x, int y) {
+		public Component renderSuggestion(GuiGraphics stack, String value, int x, int y) {
 			try {
-				GuiComponent.fill(stack, x+1, y+1, x+18, y+19, 0xFFA0A0A0);
-				GuiComponent.fill(stack, x+2, y+2, x+17, y+18, Integer.decode(value) | 0xFF000000);
+				stack.fill(x+1, y+1, x+18, y+19, 0xFFA0A0A0);
+				stack.fill(x+2, y+2, x+17, y+18, Integer.decode(value) | 0xFF000000);
 			}
 			catch(Exception e) {
 			}
