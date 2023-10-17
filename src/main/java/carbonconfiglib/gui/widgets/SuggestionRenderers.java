@@ -56,7 +56,7 @@ public class SuggestionRenderers
 			Item item = BuiltInRegistries.ITEM.get(id);
 			if(item == Items.AIR || item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(itemStack, x, y);
+			stack.renderItem(itemStack, x, y);
 			return itemStack.getHoverName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));			
 		}
 	}
@@ -94,7 +94,7 @@ public class SuggestionRenderers
 			if(id == null) return null;
 			Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(id);
 			if(ench == null) return null;
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, ench.getMinLevel())), x, y);
+			stack.renderItem(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, ench.getMinLevel())), x, y);
 			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 	}
@@ -109,7 +109,7 @@ public class SuggestionRenderers
 			ItemStack item = new ItemStack(Items.POTION);
 			PotionUtils.setCustomEffects(item, ObjectLists.singleton(new MobEffectInstance(potion)));
 			item.addTagElement("CustomPotionColor", IntTag.valueOf(potion.getColor()));
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item, x, y);
+			stack.renderItem(item, x, y);
 			return potion.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 	}

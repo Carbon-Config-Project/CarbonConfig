@@ -69,7 +69,17 @@ public class CarbonIconButton extends AbstractButton
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		stack.drawString(font, Language.getInstance().getVisualOrder(text), (int) (minX+15), getY()+(height-8)/2, j);
 	}
-	
+
+	protected int getYImage(boolean isHovered) {
+		int i = 1;
+		if (!this.active) {
+			i = 0;
+		} else if (isHovered) {
+			i = 2;
+		}
+
+		return i;
+	}
 	@Override
 	public void onPress() {
 		if(listener == null) return;

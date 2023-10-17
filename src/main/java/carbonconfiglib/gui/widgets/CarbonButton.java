@@ -31,4 +31,15 @@ public class CarbonButton extends Button
 		FormattedText text = GuiUtils.ellipsize(getMessage(), width - 6, mc.font);
 		poseStack.drawString(mc.font, Language.getInstance().getVisualOrder(text), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, active ? 0xFFFFFF : 0xA0A0A0);
 	}
+
+	protected int getYImage(boolean isHovered) {
+		int i = 1;
+		if (!this.active) {
+			i = 0;
+		} else if (isHovered) {
+			i = 2;
+		}
+
+		return i;
+	}
 }
