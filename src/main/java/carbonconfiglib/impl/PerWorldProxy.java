@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy;
 import carbonconfiglib.api.SimpleConfigProxy.SimpleTarget;
@@ -17,6 +18,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 
@@ -83,16 +85,20 @@ public final class PerWorldProxy implements IConfigProxy
 		if(Files.exists(baseServerPath)) {
 			folders.add(new SimpleTarget(baseServerPath, "Default Config"));
 		}
-		for(LevelSummary sum : storage.loadLevelSummaries(storage.findLevelCandidates()).join()) {
-			try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
-			{
-				Path path = access.getLevelPath(LevelResource.ROOT).resolve("serverconfig");
-				if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path));
+		try {
+			for(LevelSummary sum : storage.getLevelList()) {
+				try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
+				{
+					Path path = access.getLevelPath(LevelResource.ROOT).resolve("serverconfig");
+					if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path));
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+		} catch (LevelStorageException e) {
+			CarbonConfig.LOGGER.error("Level loading failed", e);
 		}
 		return folders;
 	}
