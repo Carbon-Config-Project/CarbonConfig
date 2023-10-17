@@ -1,11 +1,10 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.config.IListOwner;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -29,7 +28,7 @@ public class CarbonEditBox extends EditBox implements IOwnable
 	int innerDiff = 8;
 	
 	public CarbonEditBox(Font font, int x, int y, int width, int height) {
-		super(font, x, y, width, height, Component.empty());
+		super(font, x, y, width, height, new TextComponent(""));
 	}
 	
 	public CarbonEditBox setInnerDiff(int innerDiff) {

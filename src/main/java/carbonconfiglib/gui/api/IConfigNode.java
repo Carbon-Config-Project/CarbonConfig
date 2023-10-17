@@ -5,6 +5,9 @@ import java.util.List;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+
+import java.util.List;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +51,7 @@ public interface IConfigNode
 	
 	
 	public static MutableComponent createLabel(String name) {
-		MutableComponent comp = Component.empty();
+		MutableComponent comp = new TextComponent("");
 		for(String s : name.split("\\-|\\_|(?<!^)(?=[A-Z][a-z])|(?<!(^|[A-Z]))(?=[A-Z])")) {
 			String first = Character.toString(s.charAt(0));
 			comp.append(s.replaceFirst(first, first.toUpperCase())).append(" ");

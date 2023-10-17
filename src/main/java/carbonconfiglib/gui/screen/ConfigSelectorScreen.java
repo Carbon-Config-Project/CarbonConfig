@@ -1,10 +1,5 @@
 package carbonconfiglib.gui.screen;
 
-import java.util.List;
-import java.util.function.Consumer;
-
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -19,6 +14,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
@@ -26,6 +22,11 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -54,10 +55,10 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	public ConfigSelectorScreen(IModConfigs configs, BackgroundHolder customTexture, Screen parent) {
-		super(Component.translatable("gui.carbonconfig.select_config"), customTexture);
+		super(new TranslatableComponent("gui.carbonconfig.select_config"), customTexture);
 		this.configs = configs;
 		this.parent = parent;
-		modName = Component.literal(configs.getModName());
+		modName = new TextComponent(configs.getModName());
 	}
 	
 	@Override
@@ -65,7 +66,7 @@ public class ConfigSelectorScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
+		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, new TranslatableComponent("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -76,7 +77,7 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	@Override
 	protected void collectElements(Consumer<Element> elements) {
-		toAdd = new Label(Component.translatable("gui.carbonconfig.configs.local").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+		toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.local").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
 		toAdd = null;
@@ -91,15 +92,15 @@ public class ConfigSelectorScreen extends ListScreen
 				if(!minecraft.player.hasPermissions(4)) {
 					return;
 				}
-				toAdd = new Label(Component.translatable("gui.carbonconfig.configs.multiplayer").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+				toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.multiplayer").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}
 			else  {
-				toAdd = new Label(Component.translatable("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+				toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 			}
 		}
 		else {
-			toAdd = new Label(Component.translatable("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+			toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 		}
 		addConfigs(ConfigType.SERVER, true, elements);
 		toAdd = null;
@@ -159,7 +160,7 @@ public class ConfigSelectorScreen extends ListScreen
 		Component baseName;
 		
 		public DirectConfig(IModConfig handler, Component baseName, Screen parent, boolean multiplayer) {
-			super(Component.literal(handler.getFileName()));
+			super(new TextComponent(handler.getFileName()));
 			nav = new Navigator(baseName);
 			nav.setScreenForLayer(parent);
 			this.handler = handler;
@@ -172,18 +173,18 @@ public class ConfigSelectorScreen extends ListScreen
 		public void init() {
 			multi = shouldCreatePick();
 			if(multi) {
-				button = new CarbonButton(0, 0, 82, 20, Component.translatable("gui.carbonconfig.pick_file"), this::onPick);
+				button = new CarbonButton(0, 0, 82, 20, new TranslatableComponent("gui.carbonconfig.pick_file"), this::onPick);
 				children.add(button);
 			}
 			else {
-				button = new CarbonButton(0, 0, 60, 20, Component.translatable("gui.carbonconfig.modify"), this::onEdit);
-				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, Component.empty(), this::reset).setIconOnly();
+				button = new CarbonButton(0, 0, 60, 20, new TranslatableComponent("gui.carbonconfig.modify"), this::onEdit);
+				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, new TextComponent(""), this::reset).setIconOnly();
 				reset.active = !handler.isDefault() && !isInWorldConfig();
 				children.add(button);
 				children.add(reset);
 			}
-			type = Component.translatable("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
-			fileName = Component.literal(handler.getFileName()).withStyle(ChatFormatting.GRAY);
+			type = new TranslatableComponent("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
+			fileName = new TextComponent(handler.getFileName()).withStyle(ChatFormatting.GRAY);
 		}
 		
 		@Override

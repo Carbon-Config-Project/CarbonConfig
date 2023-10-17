@@ -5,11 +5,7 @@ import java.util.Deque;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 
@@ -20,6 +16,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -46,7 +43,7 @@ public class GuiUtils
 	private static final ScissorsStack STACK = new ScissorsStack();
 
 	public static FormattedText ellipsizeStyled(Component text, int maxWidth, Font font) {
-		final Component dots = Component.literal("...").withStyle(text.getStyle());
+		final Component dots = new TextComponent("...").withStyle(text.getStyle());
 		final int strWidth = font.width(text);
 		final int ellipsisWidth = font.width(dots);
 		if (strWidth > maxWidth) {

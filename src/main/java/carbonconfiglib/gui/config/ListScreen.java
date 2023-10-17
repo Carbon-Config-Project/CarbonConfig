@@ -12,6 +12,7 @@ import carbonconfiglib.gui.screen.MultiChoiceScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -22,7 +23,15 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -41,7 +50,7 @@ import net.minecraft.util.FormattedCharSequence;
  */
 public abstract class ListScreen extends Screen implements IListOwner
 {
-	private static final Component LOG_INFO = Component.translatable("gui.carbonconfig.logo.name").withStyle(ChatFormatting.GOLD).append("\n").append(Component.translatable("gui.carbonconfig.logo.page").withStyle(ChatFormatting.GRAY));
+	private static final Component LOG_INFO = new TranslatableComponent("gui.carbonconfig.logo.name").withStyle(ChatFormatting.GOLD).append("\n").append(new TranslatableComponent("gui.carbonconfig.logo.page").withStyle(ChatFormatting.GRAY));
 	protected ElementList visibleList;
 	protected List<Element> allEntries = new ObjectArrayList<>();
 	protected List<Component> tooltips = new ObjectArrayList<>();
@@ -126,8 +135,8 @@ public abstract class ListScreen extends Screen implements IListOwner
 				if(T.isMain()) openURL("https://curseforge.com/minecraft/mc-mods/carbon-config");
 				else if(T.isOther()) openURL("https://modrinth.com/mod/carbon-config");
 				else minecraft.setScreen(this);
-			}, Component.translatable("gui.carbonconfig.logo.link.title"), Component.translatable("gui.carbonconfig.logo.link.message").withStyle(ChatFormatting.GRAY), 
-			   Component.translatable("gui.carbonconfig.logo.link.curseforge"), Component.translatable("gui.carbonconfig.logo.link.modrinth"), Component.translatable("gui.carbonconfig.reset_all.cancel"));
+			}, new TranslatableComponent("gui.carbonconfig.logo.link.title"), new TranslatableComponent("gui.carbonconfig.logo.link.message").withStyle(ChatFormatting.GRAY),
+			   new TranslatableComponent("gui.carbonconfig.logo.link.curseforge"), new TranslatableComponent("gui.carbonconfig.logo.link.modrinth"), new TranslatableComponent("gui.carbonconfig.reset_all.cancel"));
 			minecraft.setScreen(screen);
 			return true;
 		}

@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -9,12 +7,15 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.utils.ParseResult;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -55,9 +56,9 @@ public class EditStringScreen extends Screen
 	protected void init() {
 		super.init();
 		int x = width / 2 - 100;
-		Button apply = addRenderableWidget(new CarbonButton(x+10, 160, 85, 20, Component.translatable("gui.carbonconfig.apply"), this::save));
-		addRenderableWidget(new CarbonButton(x+105, 160, 85, 20, Component.translatable("gui.carbonconfig.cancel"), this::cancel));
-		textBox = new EditBox(font, x, 113, 200, 18, Component.empty());
+		Button apply = addRenderableWidget(new CarbonButton(x+10, 160, 85, 20, new TranslatableComponent("gui.carbonconfig.apply"), this::save));
+		addRenderableWidget(new CarbonButton(x+105, 160, 85, 20, new TranslatableComponent("gui.carbonconfig.cancel"), this::cancel));
+		textBox = new EditBox(font, x, 113, 200, 18, new TextComponent(""));
 		addRenderableWidget(textBox);
 		textBox.setValue(value.get());
 		textBox.setResponder(T -> {
@@ -101,7 +102,7 @@ public class EditStringScreen extends Screen
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				if(T) value.setPrevious();
 				minecraft.setScreen(T ? parent : this);
-			}, Component.translatable("gui.carbonconfig.warn.changed"), Component.translatable("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
 			return;
 		}
 		value.setPrevious();

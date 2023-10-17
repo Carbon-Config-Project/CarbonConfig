@@ -93,7 +93,7 @@ public class SyncPacket implements ICarbonPacket
 	public void process(Player player) {
 		ReloadMode mode = processEntry(player);
 		if(mode != null) {
-			player.sendSystemMessage(mode.getMessage());
+			player.sendMessage(mode.getMessage(), player.getUUID());
 		}
 	}
 	
