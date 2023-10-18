@@ -4,6 +4,7 @@ import java.util.List;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import net.minecraftforge.fml.ModContainer;
@@ -38,11 +39,11 @@ public class ModConfigList implements IModConfigs
 	}
 	
 	@Override
-	public BackgroundTexture getBackground() {
+	public BackgroundHolder getBackground() {
 		for(IModConfigs config : configs) {
-			BackgroundTexture texture = config.getBackground();
-			if(texture != BackgroundTexture.DEFAULT) return texture;
+			BackgroundHolder texture = config.getBackground();
+			if(texture.getTexture() != BackgroundTexture.DEFAULT) return texture;
 		}
-		return BackgroundTexture.DEFAULT;
+		return BackgroundTexture.DEFAULT.asHolder();
 	}
 }

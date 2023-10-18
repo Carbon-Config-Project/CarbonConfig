@@ -6,22 +6,23 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.config.ConfigEntry.Suggestion;
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +49,7 @@ public abstract class ListSelectionScreen extends ListScreen
 	Runnable successListener;
 	boolean dontWarn;
 	
-	public ListSelectionScreen(Screen parent, IConfigNode node, INode value, BackgroundTexture customTexture) {
+	public ListSelectionScreen(Screen parent, IConfigNode node, INode value, BackgroundHolder customTexture) {
 		super(node.getName(), customTexture);
 		this.parent = parent;
 		this.node = node;
@@ -56,12 +57,16 @@ public abstract class ListSelectionScreen extends ListScreen
 		this.value.createTemp();
 	}
 	
-	public static ListSelectionScreen ofValue(Screen parent, IConfigNode node, IValueNode value, BackgroundTexture customTexture) {
+	public static ListSelectionScreen ofValue(Screen parent, IConfigNode node, IValueNode value, BackgroundHolder customTexture) {
 		return new Value(parent, node, value, customTexture);
 	}
 	
-	public static ListSelectionScreen ofCompound(Screen parent, IConfigNode node, ICompoundNode value, BackgroundTexture customTexture) {
+	public static ListSelectionScreen ofCompound(Screen parent, IConfigNode node, ICompoundNode value, BackgroundHolder customTexture) {
 		return new Compound(parent, node, value, customTexture);
+	}
+	
+	public static ListSelectionScreen ofCompoundValue(Screen parent, IConfigNode node, IValueNode value, ICompoundNode compound, int index, BackgroundHolder customTexture) {
+		return new CompoundValue(parent, node, value, compound, index, customTexture);
 	}
 	
 	@Override
@@ -72,8 +77,8 @@ public abstract class ListSelectionScreen extends ListScreen
 		visibleList.setCallback(T -> setValue(((SelectionElement)T).getSuggestion().getValue()));
 		int x = width / 2 - 100;
 		int y = height;
-		apply = addRenderableWidget(new ExtendedButton(x+10, y-27, 85, 20, Component.translatable("gui.carbonconfig.pick"), this::save));
-		addRenderableWidget(new ExtendedButton(x+105, y-27, 85, 20, Component.translatable("gui.carbonconfig.cancel"), this::cancel));
+		apply = addRenderableWidget(new CarbonButton(x+10, y-27, 85, 20, Component.translatable("gui.carbonconfig.pick"), this::save));
+		addRenderableWidget(new CarbonButton(x+105, y-27, 85, 20, Component.translatable("gui.carbonconfig.cancel"), this::cancel));
 	}
 	
 	public ListSelectionScreen withListener(Runnable success, Runnable abort) {
@@ -151,7 +156,7 @@ public abstract class ListSelectionScreen extends ListScreen
 	
 	public static class Value extends ListSelectionScreen {
 
-		public Value(Screen parent, IConfigNode node, IValueNode value, BackgroundTexture customTexture) {
+		public Value(Screen parent, IConfigNode node, IValueNode value, BackgroundHolder customTexture) {
 			super(parent, node, value, customTexture);
 		}
 		
@@ -166,9 +171,37 @@ public abstract class ListSelectionScreen extends ListScreen
 		}
 	}
 	
+	public static class CompoundValue extends ListSelectionScreen {
+		ICompoundNode compound;
+		int index;
+		
+		public CompoundValue(Screen parent, IConfigNode node, IValueNode value, ICompoundNode compound, int index, BackgroundHolder customTexture) {
+			super(parent, node, value, customTexture);
+			this.compound = compound;
+			this.index = index;
+		}
+		
+		@Override
+		protected void loadDefault() {
+			findDefault(((IValueNode)value).get());
+		}
+		
+		@Override
+		protected void setValue(String value) {
+			((IValueNode)this.value).set(value);
+		}
+		
+		@Override
+		protected void collectElements(Consumer<Element> elements) {
+			for(Suggestion entry : compound.getValidValues(index)) {
+				elements.accept(new SelectionElement(entry, visibleList));
+			}
+		}
+	}
+	
 	public static class Compound extends ListSelectionScreen {
 
-		public Compound(Screen parent, IConfigNode node, ICompoundNode value, BackgroundTexture customTexture) {
+		public Compound(Screen parent, IConfigNode node, ICompoundNode value, BackgroundHolder customTexture) {
 			super(parent, node, value, customTexture);
 		}
 		
@@ -206,14 +239,14 @@ public abstract class ListSelectionScreen extends ListScreen
 					owner.addTooltips(comp);
 				}
 			}
-			renderText(poseStack, Component.empty().withStyle(myList.getSelected() == this ? ChatFormatting.YELLOW : ChatFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top+6, 0xFFFFFFFF);
+			renderText(poseStack, Component.empty().withStyle(myList.getSelected() == this ? ChatFormatting.YELLOW : ChatFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
 		}
 		
 		private ISuggestionRenderer getRenderer() {
 			if(loaded) return renderer;
 			loaded = true;
-			if(suggestion.getExtra() != null) {
-				renderer = ISuggestionRenderer.Registry.getRendererForType(suggestion.getExtra());	
+			if(suggestion.getType() != null) {
+				renderer = ISuggestionRenderer.Registry.getRendererForType(suggestion.getType());	
 			}
 			return renderer;
 		}

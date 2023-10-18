@@ -1,5 +1,8 @@
 package carbonconfiglib.impl.entries;
 
+import java.util.List;
+
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.api.buffer.IReadBuffer;
 import carbonconfiglib.api.buffer.IWriteBuffer;
 import carbonconfiglib.config.ConfigEntry.BasicConfigEntry;
@@ -8,6 +11,7 @@ import carbonconfiglib.utils.IEntryDataType;
 import carbonconfiglib.utils.IEntryDataType.SimpleDataType;
 import carbonconfiglib.utils.MultilinePolicy;
 import carbonconfiglib.utils.ParseResult;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,14 +40,15 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 	}
 	
 	public final ColorValue addSuggestions(int... values) {
+		List<Suggestion> suggestions = new ObjectArrayList<>();
 		for(int value : values) {
-			addSuggestionInternal(Long.toHexString(0xFF00000000L | value).substring(2), serializedValue(MultilinePolicy.DISABLED, new ColorWrapper(value)), ColorWrapper.class);		
+			suggestions.add(Suggestion.namedTypeValue(Long.toHexString(0xFF00000000L | value).substring(2), serializedValue(MultilinePolicy.DISABLED, new ColorWrapper(value)), ColorWrapper.class));
 		}
 		return this;
 	}
 	
 	public final ColorValue addSuggestion(String name, int value) {
-		return addSuggestionInternal(name, serializedValue(MultilinePolicy.DISABLED, new ColorWrapper(value)), ColorWrapper.class);
+		return addSingleSuggestion(Suggestion.namedTypeValue(name, serializedValue(MultilinePolicy.DISABLED, new ColorWrapper(value)), ColorWrapper.class));
 	}
 	
 	@Override
@@ -59,6 +64,14 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 	
 	public int get() {
 		return getValue().getColor();
+	}
+	
+	public int getRGB() {
+		return getValue().getColor() & 0xFFFFFF;
+	}
+	
+	public int getRGBA() {
+		return getValue().getColor() & 0xFFFFFFFF;
 	}
 	
 	protected String serializedValue(MultilinePolicy policy, ColorWrapper value) {

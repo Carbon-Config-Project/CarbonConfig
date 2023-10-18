@@ -2,7 +2,7 @@ package carbonconfiglib.gui.api;
 
 import java.util.List;
 
-import carbonconfiglib.config.ConfigEntry.Suggestion;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -24,6 +24,8 @@ public interface IConfigFolderNode extends IConfigNode
 {
 	@Override
 	public default List<Suggestion> getValidValues() { return null; }
+	@Override
+	public default boolean isForcingSuggestions() { return false; }
 	@Override
 	public default IValueNode asValue() { return null; }
 	@Override

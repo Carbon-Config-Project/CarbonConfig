@@ -29,38 +29,39 @@ import net.minecraft.network.chat.Component;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class StringElement extends ConfigElement
+public class EnumElement extends ConfigElement
 {
 	EditBox edit;
 	ParseResult<Boolean> result;
 	
-	public StringElement(IConfigNode node, IValueNode value) {
+	public EnumElement(IConfigNode node, IValueNode value) {
 		super(node, value);
 	}
 	
-	public StringElement(IConfigNode node, IArrayNode array, int index) {
+	public EnumElement(IConfigNode node, IArrayNode array, int index) {
 		super(node, array, index);
 	}
 	
 	@Override
-	public void init()
-	{
+	public void init() {
 		super.init();
-		if(this.isArray()) {
-			edit = addChild(new CarbonEditBox(font, 0, 0, 150, 18), GuiAlign.CENTER, 0);
-			edit.setValue(value.get());
-			edit.setResponder(T -> {
-				edit.setTextColor(0xE0E0E0);
-				result = null;
-				if(!T.isEmpty() && !(result = value.isValid(T)).getValue()) {
-					edit.setTextColor(0xFF0000);
-					return;
-				}
-				value.set(T);
-			});
-		}
-		else {
-			addChild(new CarbonButton(0, 0, 72, 18, Component.translatable("gui.carbonconfig.edit"), this::onPress));
+		if(!hasSuggestions() || isArray()) {
+			if(this.isArray()) {
+				edit = addChild(new CarbonEditBox(font, 0, 0, 150, 18), GuiAlign.CENTER, 0);
+				edit.setValue(value.get());
+				edit.setResponder(T -> {
+					edit.setTextColor(0xE0E0E0);
+					result = null;
+					if(!T.isEmpty() && !(result = value.isValid(T)).getValue()) {
+						edit.setTextColor(0xFF0000);
+						return;
+					}
+					value.set(T);
+				});
+			}
+			else {
+				addChild(new CarbonButton(0, 0, 72, 18, Component.translatable("gui.carbonconfig.edit"), this::onPress));
+			}
 		}
 	}
 	
@@ -77,6 +78,10 @@ public class StringElement extends ConfigElement
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
 			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
+		}
+		else if(edit == null) {
+			String value = this.value.get();
+			font.draw(poseStack, value, left + width - 97 - (font.width(value) / 2), top + (height / 2) - 4.5F, 0xFFAAAAAA);
 		}
 	}
 	

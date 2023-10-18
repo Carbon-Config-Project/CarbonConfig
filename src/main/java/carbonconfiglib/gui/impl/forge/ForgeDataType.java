@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import carbonconfiglib.api.ISuggestedEnum;
-import carbonconfiglib.config.ConfigEntry.Suggestion;
+import carbonconfiglib.api.ISuggestionProvider;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
@@ -107,12 +107,7 @@ public class ForgeDataType<T>
 		
 		public List<Suggestion> getSuggestions(ValueSpec spec) {
 			List<Suggestion> result = new ObjectArrayList<>();
-			for(T value : clz.getEnumConstants()) {
-				if(!spec.test(value)) continue;
-				ISuggestedEnum<T> wrapper = ISuggestedEnum.getWrapper(value);
-				if(wrapper != null) result.add(new Suggestion(wrapper.getName(value), value));
-				else result.add(new Suggestion(value.toString()));
-			}
+			ISuggestionProvider.enums(clz).provideSuggestions(result::add, spec::test);
 			return result;
 		}
 		

@@ -23,5 +23,4 @@ public interface IValueNode extends INode
 	public void set(String value);
 	
 	public ParseResult<Boolean> isValid(String value);
-	public boolean isCompoundNode();
 }

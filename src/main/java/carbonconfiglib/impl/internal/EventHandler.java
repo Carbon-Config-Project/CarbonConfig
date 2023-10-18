@@ -12,6 +12,7 @@ import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.config.ColorElement;
 import carbonconfiglib.gui.config.RegistryElement;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
+import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screen.ConfigSelectorScreen;
 import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.impl.PerWorldProxy;
@@ -42,6 +43,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
@@ -137,6 +139,9 @@ public class EventHandler implements IConfigChangeListener
 					ForgeConfigs configs = new ForgeConfigs(T);
 					if(configs.hasConfigs()) {
 						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
+					}
+					else if(T instanceof MinecraftModContainer) {
+						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
 					}
 				};
 			});

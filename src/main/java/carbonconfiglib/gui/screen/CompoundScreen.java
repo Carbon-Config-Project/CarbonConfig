@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -13,12 +13,13 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ConfigElement;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.config.SelectionElement;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,7 +45,7 @@ public class CompoundScreen extends ListScreen
 	Button applyValue;
 	Runnable closeListener = null;
 	
-	public CompoundScreen(IConfigNode entry, ICompoundNode node, Screen prev, BackgroundTexture customTexture) {
+	public CompoundScreen(IConfigNode entry, ICompoundNode node, Screen prev, BackgroundHolder customTexture) {
 		super(entry.getName(), customTexture);
 		this.prev = prev;
 		this.entry = entry;
@@ -58,8 +59,8 @@ public class CompoundScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		applyValue = addRenderableWidget(new ExtendedButton(x-82, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
-		addRenderableWidget(new ExtendedButton(x+2, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
+		applyValue = addRenderableWidget(new CarbonButton(x-82, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
+		addRenderableWidget(new CarbonButton(x+2, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override
@@ -110,9 +111,13 @@ public class CompoundScreen extends ListScreen
 	protected void collectElements(Consumer<Element> elements) {
 		List<IValueNode> values = compound.getValues();
 		for(int i = 0,m=type.size();i<m;i++) {
+			if(compound.isForcedSuggestion(i)) {
+				elements.accept(new SelectionElement(entry, values.get(i)));
+				continue;
+			}
 			ConfigElement element = type.get(i).create(entry, values.get(i));
 			if(element != null) {
-				element.setName(compound.getName(i));
+				element.setCompound(compound, i);
 				elements.accept(element);
 			}
 		}

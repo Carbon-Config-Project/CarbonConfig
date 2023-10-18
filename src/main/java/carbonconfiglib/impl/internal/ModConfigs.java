@@ -9,6 +9,7 @@ import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.BackgroundTexture.Builder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
@@ -71,10 +72,10 @@ public class ModConfigs implements IModConfigs
 	}
 
 	@Override
-	public BackgroundTexture getBackground() {
+	public BackgroundHolder getBackground() {
 		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
-		if(texture.isPresent()) return texture.get().texture();
-		return computeTexture(container).orElse(BackgroundTexture.DEFAULT);
+		if(texture.isPresent()) return texture.get().texture().asHolder();
+		return computeTexture(container).orElse(BackgroundTexture.DEFAULT).asHolder();
 	}
 	
 	public static Optional<BackgroundTexture> computeTexture(ModContainer container) {

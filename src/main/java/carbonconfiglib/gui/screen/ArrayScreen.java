@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -13,12 +13,12 @@ import carbonconfiglib.gui.config.CompoundElement;
 import carbonconfiglib.gui.config.ConfigElement;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -42,7 +42,7 @@ public class ArrayScreen extends ListScreen
 	IArrayNode array;
 	List<DataType> type;
 	
-	public ArrayScreen(IConfigNode entry, Screen prev, BackgroundTexture customTexture) {
+	public ArrayScreen(IConfigNode entry, Screen prev, BackgroundHolder customTexture) {
 		super(entry.getName(), customTexture);
 		this.prev = prev;
 		this.entry = entry;
@@ -56,9 +56,9 @@ public class ArrayScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new ExtendedButton(x-92, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
-		addRenderableWidget(new ExtendedButton(x-10, y-27, 20, 20, Component.literal("+"), this::createEntry));
-		addRenderableWidget(new ExtendedButton(x+12, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
+		addRenderableWidget(new CarbonButton(x-92, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
+		addRenderableWidget(new CarbonButton(x-10, y-27, 20, 20, Component.literal("+"), this::createEntry));
+		addRenderableWidget(new CarbonButton(x+12, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override

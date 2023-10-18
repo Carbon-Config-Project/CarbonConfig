@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.api.ISuggestionProvider;
 import carbonconfiglib.api.buffer.IReadBuffer;
 import carbonconfiglib.api.buffer.IWriteBuffer;
 import carbonconfiglib.config.ConfigEntry.CollectionConfigEntry;
@@ -51,16 +52,11 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		this.registry = (ForgeRegistry<T>)registry;
 		this.clz = clz;
 		this.filter = filter;
+		addSuggestionProvider(new RegistrySuggestions<>(this));
 	}
 	
 	public static <E> Builder<E> builder(String key, Class<E> clz) {
 		return new Builder<>(key, clz);
-	}
-	
-	private void loadSuggestions() {
-		for(T entry : registry) {
-			if(filter == null || filter.test(entry)) addSuggestion(registry.getKey(entry).toString(), entry, clz);
-		}
 	}
 	
 	@Override
@@ -182,6 +178,23 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		return ObjectSets.singleton(value);
 	}
 	
+	public static class RegistrySuggestions<T> implements ISuggestionProvider {
+		RegistryValue<T> value;
+		
+		public RegistrySuggestions(RegistryValue<T> value) {
+			this.value = value;
+		}
+		
+		@Override
+		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
+			for(T entry : value.registry) {
+				String key = value.registry.getKey(entry).toString();
+				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
+				if(filter.test(suggestion)) output.accept(suggestion);
+			}
+		}
+	}
+	
 	public static class Builder<E> {
 		Class<E> clz;
 		String key;
@@ -216,16 +229,11 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		}
 		
 		public RegistryValue<E> build(IForgeRegistry<E> registry) {
-			RegistryValue<E> result = new RegistryValue<>(key, registry, clz, values, filter, comments);
-			CarbonConfig.runAfterRegistries(result::loadSuggestions);
-			return result;
+			return new RegistryValue<>(key, registry, clz, values, filter, comments);
 		}
 		
 		public RegistryValue<E> build(IForgeRegistry<E> registry, ConfigSection section) {
-			RegistryValue<E> result = new RegistryValue<>(key, registry, clz, values, filter, comments);
-			CarbonConfig.runAfterRegistries(result::loadSuggestions);
-			section.add(result);
-			return result;
+			return section.add(new RegistryValue<>(key, registry, clz, values, filter, comments));
 		}
 	}
 

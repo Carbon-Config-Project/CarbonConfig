@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.impl.forge;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
@@ -47,6 +48,8 @@ public class ForgeHelpers
 		Path path = getConfigFolder(config.getType()).resolve(config.getFileName());
 		Helpers.ensureFolder(path.getParent());
 		data.configFormat().createWriter().write(data, path, WritingMode.REPLACE);
+		try { config.acceptSyncedConfig(Files.readAllBytes(path)); }
+		catch(Exception e) { e.printStackTrace(); }
 	}
 	
 	public static ParseResult<Boolean> parseBoolean(String value) {

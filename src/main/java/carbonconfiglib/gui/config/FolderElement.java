@@ -4,10 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
-import net.minecraft.ChatFormatting;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -26,18 +26,18 @@ import net.minecraftforge.client.gui.widget.ExtendedButton;
  */
 public class FolderElement extends ConfigElement
 {
-	Button button = addChild(new ExtendedButton(0, 0, 0, 18, Component.empty(), this::onPress));
-	Component name;
+	Button button = addChild(new CarbonButton(0, 0, 0, 18, Component.empty(), this::onPress));
+	Navigator nav;
 	
-	public FolderElement(IConfigNode node, Component name)
+	public FolderElement(IConfigNode node, Navigator prev)
 	{
 		super(node);
 		button.setMessage(node.getName());
-		this.name = name.copy().append(Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(node.getName());
+		nav = prev.add(node.getName());
 	}
 	
 	protected void onPress(Button button) {
-		mc.setScreen(new ConfigScreen(name, node, mc.screen, owner.getCustomTexture()));
+		mc.setScreen(new ConfigScreen(nav, node, mc.screen, owner.getCustomTexture()));
 	}
 	
 	@Override

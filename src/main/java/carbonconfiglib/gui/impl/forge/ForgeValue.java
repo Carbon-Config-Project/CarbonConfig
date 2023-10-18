@@ -70,8 +70,6 @@ public class ForgeValue implements IValueNode
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public boolean isCompoundNode() { return false; }
-	@Override
 	public void setDefault() { current = defaultValue; }
 	@Override
 	public void setPrevious() {

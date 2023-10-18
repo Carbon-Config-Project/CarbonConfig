@@ -7,7 +7,7 @@ import org.apache.logging.log4j.util.Strings;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.google.common.collect.Iterables;
 
-import carbonconfiglib.config.ConfigEntry.Suggestion;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -108,6 +108,11 @@ public class ForgeLeaf implements IConfigNode
 	}
 	
 	@Override
+	public boolean isForcingSuggestions() {
+		return type instanceof EnumDataType;
+	}
+	
+	@Override
 	public boolean isArray() { return isArray; }
 	@Override
 	public boolean isLeaf() { return true; }
@@ -115,7 +120,7 @@ public class ForgeLeaf implements IConfigNode
 	public boolean isRoot() { return false; }
 	
 	@Override
-	public boolean isChanged() { return (value != null && value.isChanged()); }//|| (arrayValue != null && arrayValue.isChanged()); }
+	public boolean isChanged() { return (value != null && value.isChanged()) || (array != null && array.isChanged()); }
 	
 	@Override
 	public void save() {

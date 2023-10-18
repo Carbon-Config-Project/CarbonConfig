@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.impl.internal.ModConfigs;
@@ -57,12 +58,12 @@ public class ForgeConfigs implements IModConfigs
 	}
 	
 	@Override
-	public BackgroundTexture getBackground() {
+	public BackgroundHolder getBackground() {
 		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
-		if(texture.isPresent()) return texture.get().texture();
+		if(texture.isPresent()) return texture.get().texture().asHolder();
 		Optional<BackgroundTexture> carbon_Texture = ModConfigs.computeTexture(container);
-		if(carbon_Texture.isPresent()) return carbon_Texture.get();
-		return getBackgroundTexture(container.getModInfo());
+		if(carbon_Texture.isPresent()) return carbon_Texture.get().asHolder();
+		return getBackgroundTexture(container.getModInfo()).asHolder();
 	}
 	
 	private static BackgroundTexture getBackgroundTexture(final IModInfo info) {

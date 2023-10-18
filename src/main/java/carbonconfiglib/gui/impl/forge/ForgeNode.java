@@ -81,7 +81,7 @@ public class ForgeNode implements IConfigFolderNode
 		}
 		return children;
 	}
-
+	
 	@Override
 	public Component getName() {
 		return IConfigNode.createLabel(Iterables.getLast(paths, "Root"));

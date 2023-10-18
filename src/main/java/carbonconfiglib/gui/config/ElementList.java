@@ -15,6 +15,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.screen.SmoothFloat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -38,7 +39,7 @@ import net.minecraft.util.Mth;
  */
 public class ElementList extends ContainerObjectSelectionList<Element>
 {
-	BackgroundTexture customBackground;
+	BackgroundHolder customBackground;
 	int listWidth = 220;
 	int scrollPadding = 124;
 	Consumer<Element> callback;
@@ -181,7 +182,7 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}
 	
-	public void setCustomBackground(BackgroundTexture customBackground) {
+	public void setCustomBackground(BackgroundHolder customBackground) {
 		this.customBackground = customBackground;
 		setRenderBackground(this.customBackground == null);
 		setRenderTopAndBottom(this.customBackground == null);
@@ -190,14 +191,14 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	@Override
 	protected void renderBackground(PoseStack stack) {
 		if(customBackground == null || (minecraft.level != null && customBackground.shouldDisableInLevel())) return;
-		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground);
+		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground.getTexture());
 	}
 	
 	@Override
 	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		super.renderList(stack, mouseX, mouseY, partialTicks);
 		if(customBackground == null) return;
-		renderListOverlay(x0, x1, y0, y1, width, height, customBackground);
+		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}
 	
 	public static void renderListOverlay(int x0, int x1, int y0, int y1, int width, int height, BackgroundTexture texture) {

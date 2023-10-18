@@ -10,12 +10,15 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfig.IConfigTarget;
 import carbonconfiglib.gui.api.IModConfig.WorldConfigTarget;
+import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -23,10 +26,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -49,7 +50,7 @@ public class SelectFileScreen extends ListScreen
 	IModConfig config;
 	Screen parent;
 	
-	public SelectFileScreen(Component name, BackgroundTexture customTexture, Screen parent, IModConfig config) {
+	public SelectFileScreen(Component name, BackgroundHolder customTexture, Screen parent, IModConfig config) {
 		super(name, customTexture);
 		this.config = config;
 		this.parent = parent;
@@ -67,7 +68,7 @@ public class SelectFileScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new ExtendedButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
+		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -106,19 +107,20 @@ public class SelectFileScreen extends ListScreen
 		Component title;
 		Component path;
 		DynamicTexture texture;
-		Component prevName;
+		Navigator nav;
 		
 		public WorldElement(IConfigTarget target, IModConfig config, Screen parent, Component prevName) {
 			super(Component.literal(target.getName()));
+			nav = new Navigator(prevName);
+			nav.setScreenForLayer(parent);
 			this.target = target;
 			this.config = config;
 			this.parent = parent;
-			this.prevName = prevName;
 		}
 		
 		@Override
 		public void init() {
-			button = new ExtendedButton(0, 0, 62, 20, Component.translatable("gui.carbonconfig.pick"), this::onPick);
+			button = new CarbonButton(0, 0, 62, 20, Component.translatable("gui.carbonconfig.pick"), this::onPick);
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
 				LevelSummary sum = world.getSummary();
@@ -140,8 +142,8 @@ public class SelectFileScreen extends ListScreen
 			button.x = left+width-62;
 			button.y = top + 2;
 			button.render(poseStack, mouseX, mouseY, partialTicks);
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(title, 140, font)), left+5, top+4, -1);
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(path, 140, font)), left+5, top+13, -1);
+			GuiUtils.drawScrollingString(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
 			if(texture != null) {
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.setShaderTexture(0, texture.getId());
@@ -170,7 +172,7 @@ public class SelectFileScreen extends ListScreen
 				mc.setScreen(parent);
 				return;
 			}
-			mc.setScreen(new ConfigScreen(prevName.copy().append(Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(path.copy().withStyle(ChatFormatting.WHITE)), config, parent, owner.getCustomTexture()));
+			mc.setScreen(new ConfigScreen(nav.add(path.copy().withStyle(ChatFormatting.WHITE)), config, parent, owner.getCustomTexture()));
 		}
 		
 		private void cleanup() {

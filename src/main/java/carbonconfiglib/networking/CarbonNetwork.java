@@ -8,6 +8,8 @@ import carbonconfiglib.networking.carbon.ConfigRequestPacket;
 import carbonconfiglib.networking.carbon.SaveConfigPacket;
 import carbonconfiglib.networking.forge.RequestConfigPacket;
 import carbonconfiglib.networking.forge.SaveForgeConfigPacket;
+import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
+import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -56,6 +58,8 @@ public class CarbonNetwork
 		registerPacket(4, SaveConfigPacket.class, SaveConfigPacket::new);
 		registerPacket(5, RequestConfigPacket.class, RequestConfigPacket::new);
 		registerPacket(6, SaveForgeConfigPacket.class, SaveForgeConfigPacket::new);
+		registerPacket(7, RequestGameRulesPacket.class, RequestGameRulesPacket::new);
+		registerPacket(8, SaveGameRulesPacket.class, SaveGameRulesPacket::new);
 		
 	}
 	

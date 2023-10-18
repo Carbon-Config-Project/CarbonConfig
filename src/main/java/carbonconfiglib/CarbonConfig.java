@@ -1,6 +1,5 @@
 package carbonconfiglib;
 
-import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import org.lwjgl.glfw.GLFW;
@@ -11,9 +10,12 @@ import com.mojang.logging.LogUtils;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigEntry.BoolValue;
+import carbonconfiglib.config.ConfigEntry.EnumValue;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
+import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -39,8 +41,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import speiger.src.collections.objects.lists.ObjectArrayList;
-import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -63,11 +63,11 @@ public class CarbonConfig
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
-	private static final List<Runnable> LATE_INIT = ObjectLists.synchronize(new ObjectArrayList<>());
-	private static boolean REGISTRIES_LOADED = false;
 	public static BooleanSupplier MOD_GUI = () -> false;
 	ConfigHandler handler;
 	public static BoolValue FORGE_SUPPORT; 
+	public static BoolValue FORCE_CUSTOM_BACKGROUND;
+	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	
 	public CarbonConfig()
 	{
@@ -81,7 +81,10 @@ public class CarbonConfig
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
-			FORGE_SUPPORT = config.add("general").addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
+			ConfigSection section = config.add("general");
+			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
+			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
+			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			handler.register();
 		}
@@ -144,18 +147,7 @@ public class CarbonConfig
 		return RegistryValue.builder(key, clz);
 	}
 	
-	public static void runAfterRegistries(Runnable run) {
-		if(REGISTRIES_LOADED) {
-			run.run();
-			return;
-		}
-		LATE_INIT.add(run);
-	}
-	
 	public void onCommonLoad(FMLCommonSetupEvent event) {
-		REGISTRIES_LOADED = true;
-		LATE_INIT.forEach(Runnable::run);
-		LATE_INIT.clear();
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.createDefaultConfig();

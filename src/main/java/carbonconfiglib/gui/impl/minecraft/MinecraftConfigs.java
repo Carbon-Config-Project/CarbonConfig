@@ -1,10 +1,13 @@
-package carbonconfiglib.gui.api;
+package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
 
 import carbonconfiglib.api.ConfigType;
+import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.minecraftforge.fml.IExtensionPoint;
+import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.IModConfigs;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,11 +24,22 @@ import net.minecraftforge.fml.IExtensionPoint;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface IModConfigs
+public class MinecraftConfigs implements IModConfigs
 {
-	public String getModName();
-	public List<IModConfig> getConfigInstances(ConfigType type);
-	public BackgroundHolder getBackground();
+
+	@Override
+	public String getModName() {
+		return "Minecraft";
+	}
 	
-	public static record Background(BackgroundTexture texture) implements IExtensionPoint<Background> {}
+	@Override
+	public List<IModConfig> getConfigInstances(ConfigType type) {
+		return type == ConfigType.SERVER ? ObjectLists.singleton(new MinecraftConfig()) : ObjectLists.empty();
+	}
+	
+	@Override
+	public BackgroundHolder getBackground() {
+		return BackgroundTexture.DEFAULT.asHolder();
+	}
+	
 }

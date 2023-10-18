@@ -1,13 +1,13 @@
-package carbonconfiglib.gui.impl.carbon;
+package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
+import java.util.Map;
 
-import carbonconfiglib.config.Config;
-import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.GameRules.Category;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,27 +24,29 @@ import net.minecraft.network.chat.Component;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class ConfigRoot implements IConfigFolderNode
-{
-	Config config;
+public class MinecraftFolder implements IConfigFolderNode {
+	Category cat;
+	List<IGameRuleValue> values;
 	List<IConfigNode> children;
-	
-	public ConfigRoot(Config config) {
-		this.config = config;
+
+	public MinecraftFolder(Map.Entry<Category, List<IGameRuleValue>> entry) {
+		this.cat = entry.getKey();
+		this.values = entry.getValue();
 	}
 
 	@Override
 	public List<IConfigNode> getChildren() {
 		if(children == null) {
 			children = new ObjectArrayList<>();
-			for(ConfigSection section : config.getChildren()) {
-				children.add(new ConfigNode(section));
+			for(IGameRuleValue value : values) {
+				children.add(new MinecraftLeaf(value));
 			}
 		}
 		return children;
 	}
+	
 	@Override
-	public Component getName() { return IConfigNode.createLabel(config.getName()); }
-	@Override
-	public boolean isRoot() { return true; }
+	public Component getName() {
+		return Component.translatable(cat.getDescriptionId());
+	}
 }

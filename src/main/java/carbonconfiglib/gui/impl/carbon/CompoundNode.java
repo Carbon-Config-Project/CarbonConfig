@@ -3,11 +3,13 @@ package carbonconfiglib.gui.impl.carbon;
 import java.util.Arrays;
 import java.util.List;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.utils.Helpers;
+import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.chat.Component;
@@ -32,15 +34,17 @@ public class CompoundNode implements ICompoundNode, ICompoundProvider
 	ConfigEntry<?> entry;
 	List<DataType> types;
 	String[] names;
+	CompoundDataType type;
 	List<IValueNode> values = new ObjectArrayList<>();
 	ObjectArrayList<String[]> previous = new ObjectArrayList<>();
 	String[] current;
 	String[] defaultValues;
 	
-	public CompoundNode(ConfigEntry<?> entry, List<DataType> types, String[] names) {
+	public CompoundNode(ConfigEntry<?> entry, List<DataType> types, String[] names, CompoundDataType type) {
 		this.entry = entry;
 		this.types = types;
 		this.names = names;
+		this.type = type;
 		String[] value = Helpers.splitArray(entry.serialize(), ";");
 		current = value;
 		previous.push(Arrays.copyOf(value, value.length));
@@ -60,6 +64,16 @@ public class CompoundNode implements ICompoundNode, ICompoundProvider
 	@Override
 	public Component getName(int index) {
 		return Component.literal(names[index]);
+	}
+	
+	@Override
+	public boolean isForcedSuggestion(int index) {
+		return type.isForcedSuggestion(names[index]);
+	}
+
+	@Override
+	public List<Suggestion> getValidValues(int index) {
+		return type.getSuggestions(names[index], T -> isValid(T.getValue(), index).isValid());
 	}
 	
 	@Override
@@ -157,11 +171,6 @@ public class CompoundNode implements ICompoundNode, ICompoundProvider
 		@Override
 		public boolean isChanged() {
 			return !values[index].equals(startingValue.top());
-		}
-		
-		@Override
-		public boolean isCompoundNode() {
-			return true; 
 		}
 		
 		@Override
