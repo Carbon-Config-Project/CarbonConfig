@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "carbonconfiglib.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "carbonconfiglib.mixins.MixinConfig",
+  "client": [
+    "ModMenuMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "carbonconfig-refmap.json"
+}
