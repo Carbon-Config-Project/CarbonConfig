@@ -8,6 +8,8 @@ import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
 import carbonconfiglib.networking.carbon.ConfigRequestPacket;
 import carbonconfiglib.networking.carbon.SaveConfigPacket;
+import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
+import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -50,7 +52,9 @@ public class CarbonNetwork
 		registerPacket("bulk_sync", BulkSyncPacket.class, BulkSyncPacket::new);
 		registerPacket("config_request", ConfigRequestPacket.class, ConfigRequestPacket::new);
 		registerPacket("config_answer", ConfigAnswerPacket.class, ConfigAnswerPacket::new);
-		registerPacket("config_save", SaveConfigPacket.class, SaveConfigPacket::new);		
+		registerPacket("config_save", SaveConfigPacket.class, SaveConfigPacket::new);
+		registerPacket("rules_request", RequestGameRulesPacket.class, RequestGameRulesPacket::new);
+		registerPacket("rules_save", SaveGameRulesPacket.class, SaveGameRulesPacket::new);
 	}
 	
 	private <T extends ICarbonPacket> void registerPacket(String id, Class<T> packet, Supplier<T> creator) {
