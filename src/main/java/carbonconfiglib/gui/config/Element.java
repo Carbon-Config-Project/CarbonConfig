@@ -33,7 +33,6 @@ import net.minecraft.network.chat.Component;
  * limitations under the License.
  */
 public class Element extends ContainerObjectSelectionList.Entry<Element> {
-	int itemheight;
 	protected Minecraft mc = Minecraft.getInstance();
 	protected Font font = mc.font;
 	protected Component name;
@@ -55,9 +54,7 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 		this.unchanged = name.copy().withStyle(ChatFormatting.GRAY);
 		this.changed = name.copy().withStyle(ChatFormatting.ITALIC);
 	}
-	
-	public int getItemHeight() { return itemheight; }
-	
+		
 	public void updateValues() {
 	}
 	
