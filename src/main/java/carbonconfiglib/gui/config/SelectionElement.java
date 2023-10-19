@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.config;
 
 import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.components.Button;
@@ -27,6 +28,10 @@ public class SelectionElement extends ConfigElement
 	
 	public SelectionElement(IConfigNode node) {
 		super(node);
+	}
+	
+	public SelectionElement(IConfigNode node, IValueNode value) {
+		super(node, value);
 	}
 	
 	private void onPress(Button button) {

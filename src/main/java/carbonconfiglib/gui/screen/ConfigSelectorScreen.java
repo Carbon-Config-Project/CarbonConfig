@@ -7,13 +7,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.IIgnoreSearch;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
@@ -24,7 +25,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -53,7 +53,7 @@ public class ConfigSelectorScreen extends ListScreen
 		this(configs, configs.getBackground(), parent);
 	}
 	
-	public ConfigSelectorScreen(IModConfigs configs, BackgroundTexture customTexture, Screen parent) {
+	public ConfigSelectorScreen(IModConfigs configs, BackgroundHolder customTexture, Screen parent) {
 		super(Component.translatable("gui.carbonconfig.select_config"), customTexture);
 		this.configs = configs;
 		this.parent = parent;
@@ -141,7 +141,7 @@ public class ConfigSelectorScreen extends ListScreen
 		
 		@Override
 		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			renderText(poseStack, name, GuiAlign.CENTER.align(left, width, font.width(name)), GuiAlign.CENTER.align(top, height, font.lineHeight), -1);
+			renderText(poseStack, name, left, top+1, width, height, GuiAlign.CENTER, -1);
 		}
 	}
 	
@@ -153,12 +153,15 @@ public class ConfigSelectorScreen extends ListScreen
 		CarbonIconButton reset;
 		boolean multi;
 		boolean multiplayer;
+		Navigator nav;
 		Component type;
 		Component fileName;
 		Component baseName;
 		
 		public DirectConfig(IModConfig handler, Component baseName, Screen parent, boolean multiplayer) {
 			super(Component.literal(handler.getFileName()));
+			nav = new Navigator(baseName);
+			nav.setScreenForLayer(parent);
 			this.handler = handler;
 			this.baseName = baseName;
 			this.parent = parent;
@@ -194,8 +197,8 @@ public class ConfigSelectorScreen extends ListScreen
 				reset.render(poseStack, mouseX, mouseY, partialTicks);
 			}
 			
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(type, 130, font)), left+5, top+2, -1);
-			font.draw(poseStack, Language.getInstance().getVisualOrder(GuiUtils.ellipsize(fileName, 130, font)), left+5, top+11, -1);
+			GuiUtils.drawScrollingString(poseStack, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(poseStack, font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawTextureRegion(poseStack, left-20, top, 22, 22, getIcon(), 16, 16);
 		}
 		
@@ -227,8 +230,8 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		private void onEdit(Button button) {
-			if(isInWorldConfig() && !mc.hasSingleplayerServer()) mc.setScreen(new RequestScreen(owner.getCustomTexture(), parent, handler));
-			else mc.setScreen(new ConfigScreen(baseName.copy().append(Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(type), handler, parent, owner.getCustomTexture()));
+			if(isInWorldConfig() && !mc.hasSingleplayerServer()) mc.setScreen(new RequestScreen(owner.getCustomTexture(), nav.add(type), parent, handler));
+			else mc.setScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
 		}
 	}
 }

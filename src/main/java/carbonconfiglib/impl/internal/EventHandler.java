@@ -11,6 +11,7 @@ import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.config.ColorElement;
 import carbonconfiglib.gui.config.RegistryElement;
+import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -150,6 +151,7 @@ public class EventHandler implements IConfigChangeListener
 		configs.forEach((M, C) -> mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C));
 		Object2ObjectMap<String, IModConfigs> result = new Object2ObjectLinkedOpenHashMap<>();
 		mappedConfigs.forEach((K, V) -> result.put(K.getMetadata().getId(), ModConfigList.createMultiIfApplicable(K, V)));
+		result.put("minecraft", new MinecraftConfigs());
 		return result;
 	}
 	

@@ -1,8 +1,7 @@
-package carbonconfiglib.gui.impl.carbon;
+package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.Objects;
 
-import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -22,31 +21,24 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class ValueNode implements IValueNode
+public class MinecraftValue implements IValueNode
 {
 	ObjectArrayList<String> previous = new ObjectArrayList<>();
-	String current;
+	IGameRuleValue entry;
 	String defaultValue;
-	ConfigEntry<?> entry;
+	String current;
 	
-	public ValueNode(ConfigEntry<?> entry) {
+	public MinecraftValue(IGameRuleValue entry) {
 		this.entry = entry;
-		String start = entry.serialize();
-		previous.push(start);
-		current = start;
-		defaultValue = entry.serializeDefault();
+		this.defaultValue = entry.getDefault(); 
+		this.current = entry.get();
+		this.previous.push(current);
 	}
 	
-	public void save() { entry.deserializeValue(current); }
+	public void save() { entry.set(current); }
 	
 	@Override
-	public String get() { return current; }
-	@Override
-	public void set(String value) { current = value; }
-	@Override
-	public ParseResult<Boolean> isValid(String value) { return entry.canSetValue(value); }
-	@Override
-	public boolean isDefault() { return Objects.equals(defaultValue, current); }
+	public boolean isDefault() { return Objects.equals(current, defaultValue); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
@@ -62,4 +54,11 @@ public class ValueNode implements IValueNode
 	public void apply() {
 		if(previous.size() > 1) previous.pop();
 	}
+	
+	@Override
+	public String get() { return current; }
+	@Override
+	public void set(String value) { this.current = value; }
+	@Override
+	public ParseResult<Boolean> isValid(String value) { return entry.isValid(value); }
 }

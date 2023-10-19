@@ -5,13 +5,12 @@ import java.util.function.Consumer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -33,11 +32,13 @@ public class CarbonIconButton extends AbstractButton
 	Consumer<CarbonIconButton> listener;
 	Icon icon;
 	boolean iconOnly = false;
+	int hash;
 	
 	public CarbonIconButton(int x, int y, int width, int height, Icon icon, Component name, Consumer<CarbonIconButton> listener) {
 		super(x, y, width, height, name);
 		this.listener = listener;
 		this.icon = icon;
+		this.hash = name.getString().hashCode();
 	}
 	
 	public CarbonIconButton setIconOnly() {
@@ -59,14 +60,13 @@ public class CarbonIconButton extends AbstractButton
 		
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
-		FormattedText text = GuiUtils.ellipsize(getMessage(), width - 21, font);
-		int width = font.width(text) + 21;
+		int width = font.width(getMessage()) + 21;
 		float minX = x + 4 + (this.width / 2) - (width / 2);
 		int j = active ? 0xFFFFFF : 0xA0A0A0;
 		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
 		GuiUtils.drawTextureRegion(stack, minX, y+(height-8)/2, 11, 11, icon, 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		font.draw(stack, Language.getInstance().getVisualOrder(text), minX+15, y+(height-8)/2, j);
+		GuiUtils.drawScrollingShadowString(stack, font, getMessage(), minX+15, y, width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
 	}
 	
 	@Override

@@ -1,6 +1,6 @@
 package carbonconfiglib.gui.config;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 
@@ -23,7 +23,7 @@ public interface IListOwner
 {
 	public void addTooltips(Component tooltip);
 	public boolean isInsideList(double mouseX, double mouseY);
-	public BackgroundTexture getCustomTexture();
+	public BackgroundHolder getCustomTexture();
 	
 	public boolean isActiveWidget(AbstractWidget widget);
 	public void setActiveWidget(AbstractWidget widget);

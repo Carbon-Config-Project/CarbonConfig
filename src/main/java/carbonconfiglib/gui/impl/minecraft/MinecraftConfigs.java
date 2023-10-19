@@ -1,13 +1,13 @@
-package carbonconfiglib.gui.api;
+package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
-import java.util.Map;
 
 import carbonconfiglib.api.ConfigType;
+import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.fabricmc.loader.api.ModContainer;
-import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
-import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
+import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.IModConfigs;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,11 +24,22 @@ import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface IModConfigs
+public class MinecraftConfigs implements IModConfigs
 {
-	public String getModName();
-	public List<IModConfig> getConfigInstances(ConfigType type);
-	public BackgroundHolder getBackground();
+
+	@Override
+	public String getModName() {
+		return "Minecraft";
+	}
 	
-	public static Map<ModContainer, BackgroundTexture> TEXTURE_REGISTRY = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
+	@Override
+	public List<IModConfig> getConfigInstances(ConfigType type) {
+		return type == ConfigType.SERVER ? ObjectLists.singleton(new MinecraftConfig()) : ObjectLists.empty();
+	}
+	
+	@Override
+	public BackgroundHolder getBackground() {
+		return BackgroundTexture.DEFAULT.asHolder();
+	}
+	
 }

@@ -3,6 +3,7 @@ package carbonconfiglib.gui.impl.carbon;
 import java.util.Arrays;
 import java.util.List;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.IArrayConfig;
 import carbonconfiglib.gui.api.DataType;
@@ -12,6 +13,7 @@ import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.impl.carbon.CompoundNode.CompoundValue;
 import carbonconfiglib.utils.Helpers;
+import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -38,17 +40,19 @@ public class CompoundArrayNode implements IArrayNode
 	IArrayConfig config;
 	String[] names;
 	List<DataType> dataTypes;
+	CompoundDataType type;
 	List<ICompoundNode> values = new ObjectArrayList<>();
 	ObjectArrayList<List<String>> previous = new ObjectArrayList<>();
 	List<String> currentValues;
 	List<String> defaults;
 	String defaultEmptyValue;
 	
-	public CompoundArrayNode(ConfigEntry<?> entry, IArrayConfig config, List<DataType> dataTypes, String[] names) {
+	public CompoundArrayNode(ConfigEntry<?> entry, IArrayConfig config, List<DataType> dataTypes, String[] names, CompoundDataType type) {
 		this.entry = entry;
 		this.config = config;
 		this.dataTypes = dataTypes;
 		this.names = names;
+		this.type = type;
 		previous.push(config.getEntries());
 		currentValues = config.getEntries();
 		defaults = config.getDefaults();
@@ -65,7 +69,7 @@ public class CompoundArrayNode implements IArrayNode
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new CompoundEntry(this, config, currentValues, i >= defaults.size() ? defaultEmptyValue : defaults.get(i), i, dataTypes, names));
+			values.add(new CompoundEntry(this, config, currentValues, i >= defaults.size() ? defaultEmptyValue : defaults.get(i), i, dataTypes, names, type));
 		}
 	}
 	
@@ -144,7 +148,7 @@ public class CompoundArrayNode implements IArrayNode
 	@Override
 	public void createNode() {
 		currentValues.add(defaultEmptyValue);
-		values.add(new CompoundEntry(this, config, currentValues, defaultEmptyValue, values.size(), dataTypes, names));
+		values.add(new CompoundEntry(this, config, currentValues, defaultEmptyValue, values.size(), dataTypes, names, type));
 	}
 	
 	@Override
@@ -158,6 +162,7 @@ public class CompoundArrayNode implements IArrayNode
 		IArrayNode node;
 		List<DataType> types;
 		String[] names;
+		CompoundDataType type;
 		List<IValueNode> values = new ObjectArrayList<>();
 		
 		List<String> results;
@@ -165,12 +170,13 @@ public class CompoundArrayNode implements IArrayNode
 		String[] current;
 		String[] defaultValues;
 		
-		public CompoundEntry(IArrayNode node, IArrayConfig config, List<String> values, String defaultValue, int index, List<DataType> types, String[] names) {
+		public CompoundEntry(IArrayNode node, IArrayConfig config, List<String> values, String defaultValue, int index, List<DataType> types, String[] names, CompoundDataType type) {
 			this.node = node;
 			this.config = config;
 			this.types = types;
 			this.results = values;
 			this.names = names;
+			this.type = type;
 			String[] value = Helpers.splitArray(values.get(index), ";");
 			current = value;
 			previous.push(Arrays.copyOf(value, value.length));
@@ -270,6 +276,16 @@ public class CompoundArrayNode implements IArrayNode
 		@Override
 		public Component getName(int index) {
 			return Component.literal(names[index]);
+		}
+
+		@Override
+		public boolean isForcedSuggestion(int index) {
+			return type.isForcedSuggestion(names[index]);
+		}
+
+		@Override
+		public List<Suggestion> getValidValues(int index) {
+			return type.getSuggestions(names[index], T -> isValid(T.getValue(), index).isValid());
 		}
 		
 	}

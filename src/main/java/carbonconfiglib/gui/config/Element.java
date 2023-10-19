@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -39,6 +39,7 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	protected Component unchanged;
 	protected Component changed;
 	protected IListOwner owner;
+	protected int hash = hashCode();
 	
 	public Element(Component name) {
 		setName(name);
@@ -75,16 +76,12 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 	}
 	
-	protected void renderName(PoseStack stack, float x, float y, boolean changed) {
-		 renderText(stack, changed ? this.changed : unchanged, x, y, -1);
+	protected void renderName(PoseStack stack, float x, float y, boolean changed, int width, int height) {
+		GuiUtils.drawScrollingString(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
-	protected void renderName(PoseStack stack, float x, float y, boolean changed, int maxWidth) {
-		font.draw(stack, Language.getInstance().getVisualOrder(GuiUtils.ellipsizeStyled((changed ? this.changed : unchanged), maxWidth, font)), x, y, -1);		
-	}
-	
-	protected void renderText(PoseStack stack, Component text, float x, float y, int color) {
-		font.draw(stack, text, x, y, color);
+	protected void renderText(PoseStack stack, Component text, float x, float y, float width, float height, GuiAlign align, int color) {
+		GuiUtils.drawScrollingString(stack, font, text, x, y, width, height, align, -1, hash);
 	}
 	
 	@Override

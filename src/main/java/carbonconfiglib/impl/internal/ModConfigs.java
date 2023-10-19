@@ -9,6 +9,7 @@ import java.util.function.IntConsumer;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.BackgroundTexture.Builder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
@@ -69,10 +70,10 @@ public class ModConfigs implements IModConfigs
 	}
 
 	@Override
-	public BackgroundTexture getBackground() {
+	public BackgroundHolder getBackground() {
 		BackgroundTexture texture = IModConfigs.TEXTURE_REGISTRY.get(container);
-		if(texture != null) return texture;
-		return computeTexture(container).orElse(BackgroundTexture.DEFAULT);
+		if(texture != null) return texture.asHolder();
+		return computeTexture(container).orElse(BackgroundTexture.DEFAULT).asHolder();
 	}
 	
 	public static Optional<BackgroundTexture> computeTexture(ModContainer container) {

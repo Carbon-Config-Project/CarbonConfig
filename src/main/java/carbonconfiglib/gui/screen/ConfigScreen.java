@@ -9,26 +9,31 @@ import java.util.function.Predicate;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.config.ArrayElement;
 import carbonconfiglib.gui.config.CompoundElement;
+import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.FolderElement;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.config.SelectionElement;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconCheckbox;
+import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -60,22 +65,27 @@ public class ConfigScreen extends ListScreen
 	CarbonIconCheckbox onlyNonDefault;
 	boolean wasChanged = false;
 	List<Element> cache = null;
+	Navigator nav;
 	
-	public ConfigScreen(Component name, IModConfig config, Screen parent) {
-		this(name, config, parent, BackgroundTexture.DEFAULT);
+	public ConfigScreen(Navigator nav, IModConfig config, Screen parent) {
+		this(nav, config, parent, BackgroundTexture.DEFAULT.asHolder());
 	}
 	
-	public ConfigScreen(Component name, IModConfig config, Screen parent, BackgroundTexture customTexture) {
-		super(name, customTexture);
+	public ConfigScreen(Navigator nav, IModConfig config, Screen parent, BackgroundHolder customTexture) {
+		super(Component.empty(), customTexture);
+		this.nav = nav;
 		this.config = config;
 		this.node = config.getRootNode();
 		this.parent = parent;
+		this.nav.setScreenForLayer(this);
 	}
 	
-	public ConfigScreen(Component name, IConfigNode node, Screen parent, BackgroundTexture customTexture) {
-		super(name, customTexture);
+	public ConfigScreen(Navigator nav, IConfigNode node, Screen parent, BackgroundHolder customTexture) {
+		super(Component.empty(), customTexture);
+		this.nav = nav;
 		this.node = node;
 		this.parent = parent;
+		this.nav.setScreenForLayer(this);
 	}
 	
 	@Override
@@ -126,9 +136,25 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 8, -1);
+	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+		GuiUtils.drawScrollingString(stack, font, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
+	}
+	
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if(mouseX >= 50F && mouseX <= width-100 && mouseY >= 6 && mouseY <= 16) {
+			float scroll = GuiUtils.calculateScrollOffset(width-100, font, GuiAlign.CENTER, nav.getHeader(), 0);
+			Screen screen = nav.getScreen(font, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, font.width(nav.getHeader())) - scroll));
+			if(screen instanceof ConfigScreen) {
+				minecraft.setScreen(screen);
+				return true;
+			}
+			else if(screen != null) { 
+				leave();
+				return true;
+			}
+		}
+		return super.mouseClicked(mouseX, mouseY, button);
 	}
 	
 	@Override
@@ -146,6 +172,25 @@ public class ConfigScreen extends ListScreen
 		}
 		if(prev != this) {
 			minecraft.setScreen(prev);
+		}
+	}
+	
+	private void leave() {
+		ConfigScreen prev = this;
+		Screen parent = this;
+		while(parent instanceof ConfigScreen) {
+			prev = (ConfigScreen)parent;
+			parent = ((ConfigScreen)parent).parent;
+		}
+		if(prev != this) {
+			Screen toOpen = prev.parent;
+			if(node.isRoot() && prev.isChanged()) {
+				minecraft.setScreen(new ConfirmScreen(T -> {
+					minecraft.setScreen(T ? toOpen : this);	
+				}, Component.translatable("gui.carbonconfig.warn.changed"), Component.translatable("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+				return;
+			}
+			minecraft.setScreen(toOpen);
 		}
 	}
 	
@@ -271,12 +316,12 @@ public class ConfigScreen extends ListScreen
 	
 	@Override
 	protected int getListWidth() {
-		return 300;
+		return 340;
 	}
 	
 	@Override
 	protected int getScrollPadding() {
-		return 155;
+		return 175;
 	}
 		
 	@Override
@@ -291,14 +336,14 @@ public class ConfigScreen extends ListScreen
 					elements.accept(new CompoundElement(child));
 					continue;
 				}
-				if(child.getValidValues().size() > 0) {
+				if(child.isForcingSuggestions()) {
 					elements.accept(new SelectionElement(child));
 					continue;
 				}
 				Element element = child.getDataType().get(0).create(child);
 				if(element != null) elements.accept(element);
 			}
-			else elements.accept(new FolderElement(child, title));
+			else elements.accept(new FolderElement(child, nav));
 		}
 	}
 	
@@ -329,5 +374,54 @@ public class ConfigScreen extends ListScreen
 		}
 		
 		return results;
+	}
+	
+	public static class Navigator {
+		private static final Component SPLITTER = Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+		List<Component> layer = new ObjectArrayList<>();
+		List<Screen> screenByIndex = new ObjectArrayList<>();
+		MutableComponent buildCache = null;
+
+		private Navigator() {}
+
+		public Navigator(Component base) {
+			layer.add(base);
+		}
+
+		public Navigator add(Component name) {
+			Navigator nav = new Navigator();
+			nav.layer.addAll(layer);
+			nav.screenByIndex.addAll(screenByIndex);
+			nav.layer.add(name);
+			return nav;
+		}
+
+		public void setScreenForLayer(Screen owner) {
+			if(layer.size() > screenByIndex.size()) screenByIndex.add(owner);
+			else screenByIndex.set(layer.size()-1, owner);
+		}
+
+		public Screen getScreen(Font font, int x) {
+			int splitterWidth = font.width(SPLITTER);
+			for(int i = 0,m=layer.size();i<m;i++) {
+				int width = font.width(layer.get(i));
+				if(x >= 0 && x <= width) return screenByIndex.get(i);
+				x-=width;
+				x-=splitterWidth;
+			}
+			return null;
+		}
+
+		public Component getHeader() {
+			if(buildCache == null) {
+				buildCache = Component.empty();
+				for(int i = 0,m=layer.size();i<m;i++) {
+					buildCache.append(layer.get(i));
+					if(i == m-1) continue;
+					buildCache.append(SPLITTER);
+				}
+			}
+			return buildCache;
+		}
 	}
 }

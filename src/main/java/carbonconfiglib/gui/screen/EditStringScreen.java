@@ -3,6 +3,7 @@ package carbonconfiglib.gui.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ElementList;
@@ -32,23 +33,22 @@ import net.minecraft.network.chat.Component;
  */
 public class EditStringScreen extends Screen
 {
-	private static final BackgroundTexture DEFAULT = BackgroundTexture.of(BACKGROUND_LOCATION).build();
 	
 	Screen parent;
 	IConfigNode node;
 	IValueNode value;
 	EditBox textBox;
 	boolean valid = true;
-	BackgroundTexture texture;
+	BackgroundHolder texture;
 	ParseResult<Boolean> result;
 
-	public EditStringScreen(Screen parent, Component name, IConfigNode node, IValueNode value, BackgroundTexture texture) {
+	public EditStringScreen(Screen parent, Component name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
 		super(name);
 		this.parent = parent;
 		this.node = node;
 		this.value = value;
 		this.value.createTemp();
-		this.texture = texture == null ? DEFAULT : texture;
+		this.texture = texture == null ? BackgroundTexture.DEFAULT.asHolder() : texture;
 	}
 	
 	@Override
@@ -75,12 +75,12 @@ public class EditStringScreen extends Screen
 	
 	@Override
 	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		ElementList.renderBackground(0, width, 0, height, 0F, texture);
-		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture);
+		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
+		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, title, (width/2)-(font.width(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderTooltip(stack, Component.literal(result.getError().getMessage()), mouseX, mouseY);
+			renderTooltip(stack, font.split(Component.literal(result.getError().getMessage()), Integer.MAX_VALUE), mouseX, mouseY);
 		}
 	}
 	

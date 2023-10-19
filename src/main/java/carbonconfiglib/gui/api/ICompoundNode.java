@@ -2,6 +2,7 @@ package carbonconfiglib.gui.api;
 
 import java.util.List;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.network.chat.Component;
 
@@ -28,4 +29,6 @@ public interface ICompoundNode extends INode
 	public String get();
 	public ParseResult<Boolean> isValid(String value);
 	public void set(String value);
+	public boolean isForcedSuggestion(int index);
+	public List<Suggestion> getValidValues(int index);
 }

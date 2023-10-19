@@ -1,6 +1,5 @@
 package carbonconfiglib;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
@@ -11,9 +10,12 @@ import com.mojang.logging.LogUtils;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigEntry.BoolValue;
+import carbonconfiglib.config.ConfigEntry.EnumValue;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
+import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -32,8 +34,6 @@ import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
-import speiger.src.collections.objects.lists.ObjectArrayList;
-import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -55,10 +55,10 @@ public class CarbonConfig implements ModInitializer
 	public static final Logger LOGGER = LogUtils.getLogger();
 	private static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FabricLoader.getInstance().getConfigDir(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
-	private static final List<Runnable> LATE_INIT = ObjectLists.synchronize(new ObjectArrayList<>());
-	private static boolean REGISTRIES_LOADED = false;
 	ConfigHandler handler;
 	public static BoolValue MOD_MENU_SUPPORT; 
+	public static BoolValue FORCE_CUSTOM_BACKGROUND;
+	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	
 	@Override
 	public void onInitialize()
@@ -71,7 +71,10 @@ public class CarbonConfig implements ModInitializer
 		
 		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			Config config = new Config("carbonconfig");
-			MOD_MENU_SUPPORT = config.add("general").addBool("enable-modmenu-support", true, "Enables that CarbonConfig automatically adds Mod Menu Support for all Carbon Configs").setRequiredReload(ReloadMode.GAME);
+			ConfigSection section = config.add("general");
+			MOD_MENU_SUPPORT = section.addBool("enable-modmenu-support", true, "Enables that CarbonConfig automatically adds Mod Menu Support for all Carbon Configs").setRequiredReload(ReloadMode.GAME);
+			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
+			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			handler = createConfig("carbonconfig", config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			handler.register();
 		}
@@ -158,18 +161,7 @@ public class CarbonConfig implements ModInitializer
 		return RegistryValue.builder(key, clz);
 	}
 	
-	public static void runAfterRegistries(Runnable run) {
-		if(REGISTRIES_LOADED) {
-			run.run();
-			return;
-		}
-		LATE_INIT.add(run);
-	}
-	
 	public void onCommonLoad() {
-		REGISTRIES_LOADED = true;
-		LATE_INIT.forEach(Runnable::run);
-		LATE_INIT.clear();
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.createDefaultConfig();

@@ -176,11 +176,6 @@ public class ArrayNode implements IArrayNode
 		}
 		
 		@Override
-		public boolean isCompoundNode() {
-			return false; 
-		}
-		
-		@Override
 		public boolean isDefault() {
 			return defaultValue == null || Objects.equal(defaultValue, values.get(getIndex()));
 		}

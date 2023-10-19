@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.api.ISuggestionProvider;
 import carbonconfiglib.api.buffer.IReadBuffer;
 import carbonconfiglib.api.buffer.IWriteBuffer;
 import carbonconfiglib.config.ConfigEntry.CollectionConfigEntry;
@@ -50,18 +51,13 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		this.registry = registry;
 		this.clz = clz;
 		this.filter = filter;
+		addSuggestionProvider(new RegistryKeySuggestions(this));
 	}
 	
 	public static <E> Builder<E> builder(String key, Class<E> clz) {
 		return new Builder<>(key, clz);
 	}
-	
-	private void loadSuggestions() {
-		for(ResourceLocation entry : registry.keySet()) {
-			if(filter == null || filter.test(entry)) addSuggestion(entry.toString(), entry, clz);
-		}
-	}
-	
+		
 	@Override
 	protected RegistryKeyValue copy() {
 		return new RegistryKeyValue(getKey(), registry, clz, getDefault(), filter, getComment());
@@ -179,6 +175,23 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		return ObjectSets.singleton(value);
 	}
 	
+	public static class RegistryKeySuggestions implements ISuggestionProvider {
+		RegistryKeyValue value;
+
+		public RegistryKeySuggestions(RegistryKeyValue value) {
+			this.value = value;
+		}
+
+		@Override
+		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
+			for(ResourceLocation entry : value.registry.keySet()) {
+				String key = entry.toString();
+				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
+				if(filter.test(suggestion)) output.accept(suggestion);
+			}
+		}
+	}
+	
 	public static class Builder<E> {
 		Class<E> clz;
 		String key;
@@ -233,17 +246,12 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		
 		public RegistryKeyValue build(Registry<E> registry) {
 			parseValues(registry);
-			RegistryKeyValue result = new RegistryKeyValue(key, registry, clz, values, filter, comments);
-			CarbonConfig.runAfterRegistries(result::loadSuggestions);
-			return result;
+			return new RegistryKeyValue(key, registry, clz, values, filter, comments);
 		}
 		
 		public RegistryKeyValue build(Registry<E> registry, ConfigSection section) {
 			parseValues(registry);
-			RegistryKeyValue result = new RegistryKeyValue(key, registry, clz, values, filter, comments);
-			CarbonConfig.runAfterRegistries(result::loadSuggestions);
-			section.add(result);
-			return result;
+			return section.add(new RegistryKeyValue(key, registry, clz, values, filter, comments));
 		}
 	}
 

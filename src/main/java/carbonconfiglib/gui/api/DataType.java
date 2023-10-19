@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 
 import carbonconfiglib.gui.config.BooleanElement;
 import carbonconfiglib.gui.config.ConfigElement;
+import carbonconfiglib.gui.config.EnumElement;
 import carbonconfiglib.gui.config.NumberElement;
 import carbonconfiglib.gui.config.StringElement;
 import carbonconfiglib.utils.IEntryDataType.EntryDataType;
@@ -33,6 +34,7 @@ public class DataType
 	public static final DataType INTEGER = new DataType(false, "0", NumberElement::new, NumberElement::new);
 	public static final DataType DOUBLE = new DataType(false, "0.0", NumberElement::new, NumberElement::new);
 	public static final DataType STRING = new DataType(true, " ", StringElement::new, StringElement::new);
+	public static final DataType ENUM = new DataType(true, " ", EnumElement::new, EnumElement::new);
 	private static final Map<Class<?>, DataType> AUTO_DATA_TYPES = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 	
 	boolean allowsEmptyValue;
@@ -77,6 +79,7 @@ public class DataType
 			case INTEGER: return INTEGER;
 			case DOUBLE: return DOUBLE;
 			case STRING: return STRING;
+			case ENUM: return ENUM;
 			case CUSTOM: return byClass(variant);
 			default: throw new IllegalStateException("Undefined DataType shouldn't be used");
 		}
