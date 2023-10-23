@@ -123,6 +123,7 @@ public class SyncPacket implements ICarbonPacket
 		}
 		if(hasChanged) {
 			cfg.onSynced();
+			cfg.saveQuietly();
 			return mode;
 		}
 		return null;
