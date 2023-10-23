@@ -143,14 +143,14 @@ public class MinecraftConfig implements IModConfig
 	public List<IConfigTarget> getPotentialFiles() {
 		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
 		List<IConfigTarget> folders = new ObjectArrayList<>();
-		for(LevelSummary sum : storage.loadLevelSummaries(storage.findLevelCandidates()).join()) {
+		/*for(LevelSummary sum : storage.loadLevelSummaries(storage.findLevelCandidates()).join()) {
 			try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
 				Path path = access.getLevelPath(LevelResource.LEVEL_DATA_FILE);
 				if(Files.notExists(path)) continue;
 				folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path), path));
 			}
 			catch(Exception e) { e.printStackTrace(); }
-		}
+		}*/
 		return folders;
 	}
 	

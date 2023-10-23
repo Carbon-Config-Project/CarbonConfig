@@ -81,7 +81,7 @@ public class EditStringScreen extends Screen
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, title, (width/2)-(font.width(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderTooltip(stack, font.split(Component.literal(result.getError().getMessage()), Integer.MAX_VALUE), mouseX, mouseY);
+			renderTooltip(stack, font.split(new TextComponent(result.getError().getMessage()), Integer.MAX_VALUE), mouseX, mouseY);
 		}
 	}
 	

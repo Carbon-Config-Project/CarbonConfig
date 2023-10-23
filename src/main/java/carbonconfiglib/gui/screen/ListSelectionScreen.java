@@ -246,7 +246,7 @@ public abstract class ListSelectionScreen extends ListScreen
 					owner.addTooltips(comp);
 				}
 			}
-			renderText(poseStack, Component.empty().withStyle(myList.getSelected() == this ? ChatFormatting.YELLOW : ChatFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
+			renderText(poseStack, new TextComponent("").withStyle(myList.getSelected() == this ? ChatFormatting.YELLOW : ChatFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
 		}
 		
 		private ISuggestionRenderer getRenderer() {

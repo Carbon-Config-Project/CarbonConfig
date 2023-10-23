@@ -27,6 +27,8 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Comparator;
 import java.util.List;
@@ -71,7 +73,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public ConfigScreen(Navigator nav, IModConfig config, Screen parent, BackgroundHolder customTexture) {
-		super(Component.empty(), customTexture);
+		super(new TextComponent(""), customTexture);
 		this.nav = nav;
 		this.config = config;
 		this.node = config.getRootNode();
@@ -80,7 +82,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public ConfigScreen(Navigator nav, IConfigNode node, Screen parent, BackgroundHolder customTexture) {
-		super(Component.empty(), customTexture);
+		super(new TextComponent(""), customTexture);
 		this.nav = nav;
 		this.node = node;
 		this.parent = parent;
@@ -186,7 +188,7 @@ public class ConfigScreen extends ListScreen
 			if(node.isRoot() && prev.isChanged()) {
 				minecraft.setScreen(new ConfirmScreen(T -> {
 					minecraft.setScreen(T ? toOpen : this);	
-				}, Component.translatable("gui.carbonconfig.warn.changed"), Component.translatable("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+				}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
 				return;
 			}
 			minecraft.setScreen(toOpen);
@@ -376,7 +378,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public static class Navigator {
-		private static final Component SPLITTER = Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
+		private static final Component SPLITTER = new TextComponent(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
 		List<Component> layer = new ObjectArrayList<>();
 		List<Screen> screenByIndex = new ObjectArrayList<>();
 		MutableComponent buildCache = null;
@@ -413,7 +415,7 @@ public class ConfigScreen extends ListScreen
 
 		public Component getHeader() {
 			if(buildCache == null) {
-				buildCache = Component.empty();
+				buildCache = new TextComponent("");
 				for(int i = 0,m=layer.size();i<m;i++) {
 					buildCache.append(layer.get(i));
 					if(i == m-1) continue;

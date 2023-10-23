@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import carbonconfiglib.gui.widgets.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
@@ -12,7 +13,6 @@ import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
-import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -49,7 +49,7 @@ public class ConfigElement extends Element
 	private static final Component DEFAULT = new TranslatableComponent("gui.carbonconfig.default");
 	private static final Component RELOAD = new TranslatableComponent("gui.carbonconfig.reload").withStyle(ChatFormatting.YELLOW);
 	private static final Component RESTART = new TranslatableComponent("gui.carbonconfig.restart").withStyle(ChatFormatting.YELLOW);
-	private static final Component SUGGESTIONS = Component.translatable("gui.carbonconfig.suggestions");
+	private static final Component SUGGESTIONS = new TranslatableComponent("gui.carbonconfig.suggestions");
 	protected List<GuiEventListener> listeners = new ObjectArrayList<>();
 	protected List<Map.Entry<AbstractWidget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
@@ -121,7 +121,7 @@ public class ConfigElement extends Element
 			else {
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, new TextComponent(""), this::onReset).setIconOnly(), -21);
 				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, new TextComponent(""), this::onDefault).setIconOnly(), -40);
-				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, Component.empty(), this::onSuggestion).setIconOnly(), -59);
+				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, new TextComponent(""), this::onSuggestion).setIconOnly(), -59);
 				setReset.active = isReset();
 				setDefault.active = !isDefault();
 				suggestion.visible = false;

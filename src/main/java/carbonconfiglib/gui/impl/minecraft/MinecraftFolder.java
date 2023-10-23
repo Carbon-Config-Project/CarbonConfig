@@ -6,6 +6,7 @@ import java.util.Map;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.GameRules.Category;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
@@ -47,6 +48,6 @@ public class MinecraftFolder implements IConfigFolderNode {
 	
 	@Override
 	public Component getName() {
-		return Component.translatable(cat.getDescriptionId());
+		return new TranslatableComponent(cat.getDescriptionId());
 	}
 }
