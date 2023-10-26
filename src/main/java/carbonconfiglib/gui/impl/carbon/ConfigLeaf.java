@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.apache.logging.log4j.util.Strings;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.IArrayConfig;
-import carbonconfiglib.config.ConfigEntry.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -64,7 +64,9 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public List<DataType> getDataType() { return ObjectLists.singleton(DataType.bySimple(entry.getDataType().asDataType())); }
 	@Override
-	public List<Suggestion> getValidValues() { return entry.getSuggestions(); }
+	public List<Suggestion> getValidValues() { return entry.getSuggestions(T -> true); }
+	@Override
+	public boolean isForcingSuggestions() { return entry.areSuggestionsForced(); }
 	@Override
 	public boolean isLeaf() { return true; }
 	@Override

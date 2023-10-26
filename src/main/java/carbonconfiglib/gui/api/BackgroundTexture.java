@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.api;
 
+import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.utils.Helpers;
 import net.minecraft.resources.ResourceLocation;
 
@@ -27,6 +28,7 @@ public class BackgroundTexture
 	int backgroundBrightness = 32;
 	int foregroundBrightness = 64;
 	boolean disableBackgroundInLevel = true;
+	BackgroundHolder holder = new BackgroundHolder(this);
 	
 	private BackgroundTexture() {}
 	
@@ -44,6 +46,10 @@ public class BackgroundTexture
 	
 	public static Builder of(ResourceLocation location) {
 		return new Builder().withTexture(location);
+	}
+	
+	public BackgroundHolder asHolder() {
+		return holder;
 	}
 	
 	public ResourceLocation getBackgroundTexture() {
@@ -64,6 +70,23 @@ public class BackgroundTexture
 	
 	public int getForegroundBrightness() {
 		return foregroundBrightness;
+	}
+	
+	public static class BackgroundHolder {
+		BackgroundTexture texture;
+
+		private BackgroundHolder(BackgroundTexture texture) {
+			this.texture = texture;
+		}
+
+		public boolean shouldDisableInLevel() {
+			return getTexture().shouldDisableInLevel();
+		}
+		
+		public BackgroundTexture getTexture() {
+			if(texture == DEFAULT || CarbonConfig.FORCE_CUSTOM_BACKGROUND.get()) return CarbonConfig.BACKGROUNDS.get().getTexture();
+			return texture;
+		}
 	}
 	
 	public static class Builder {

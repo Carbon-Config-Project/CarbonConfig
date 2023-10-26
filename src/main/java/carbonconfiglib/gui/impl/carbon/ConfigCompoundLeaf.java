@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.util.Strings;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.IArrayConfig;
-import carbonconfiglib.config.ConfigEntry.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -55,14 +55,14 @@ public class ConfigCompoundLeaf implements IConfigNode
 	@Override
 	public IArrayNode asArray() {
 		if(!isArray()) return null;
-		if(array == null) array = new CompoundArrayNode(entry, (IArrayConfig)entry, getDataType(), generateNames());
+		if(array == null) array = new CompoundArrayNode(entry, (IArrayConfig)entry, getDataType(), generateNames(), entry.getDataType().asCompound());
 		return array;
 	}
 	
 	@Override
 	public ICompoundNode asCompound() {
 		if(isArray()) return null;
-		if(value == null) value = new CompoundNode(entry, getDataType(), generateNames());
+		if(value == null) value = new CompoundNode(entry, getDataType(), generateNames(), entry.getDataType().asCompound());
 		return value;
 	}
 	
@@ -86,7 +86,9 @@ public class ConfigCompoundLeaf implements IConfigNode
 	}
 	
 	@Override
-	public List<Suggestion> getValidValues() { return entry.getSuggestions(); }
+	public List<Suggestion> getValidValues() { return entry.getSuggestions(T -> true); }
+	@Override
+	public boolean isForcingSuggestions() { return entry.areSuggestionsForced(); }
 	@Override
 	public boolean isArray() { return entry instanceof IArrayConfig; }
 	@Override

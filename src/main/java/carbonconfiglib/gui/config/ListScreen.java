@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.screen.MultiChoiceScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.gui.widgets.GuiUtils;
@@ -24,8 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -53,9 +52,9 @@ public abstract class ListScreen extends Screen implements IListOwner
 	protected long lastTick = -1;
 	protected double lastScroll = -1;
 	protected CarbonEditBox searchBox;
-	BackgroundTexture customTexture;
+	BackgroundHolder customTexture;
 	
-	public ListScreen(Component name, BackgroundTexture customTexture) {
+	public ListScreen(Component name, BackgroundHolder customTexture) {
 		super(name);
 		this.customTexture = customTexture;
 	}
@@ -100,15 +99,19 @@ public abstract class ListScreen extends Screen implements IListOwner
 		if(mouseX >= 5 && mouseX <= 45 && mouseY >= 5 && mouseY <= 40) {
 			addTooltips(LOG_INFO);
 		}
+		handleForground(stack, mouseX, mouseY, partialTicks);
 		if(!tooltips.isEmpty()) {
-			List<FormattedText> text = new ObjectArrayList<>();
+			List<FormattedCharSequence> text = new ObjectArrayList<>();
 			for(Component entry : tooltips) {
-				text.addAll(font.getSplitter().splitLines(entry, Integer.MAX_VALUE, Style.EMPTY));
+				text.addAll(font.split(entry, Math.max(mouseX, width - mouseX) - 20));
 			}
-			stack.renderTooltip(font, Language.getInstance().getVisualOrder(text), mouseX, mouseY);
+			stack.renderTooltip(font, text, mouseX, mouseY);
 			tooltips.clear();
 		}
 
+	}
+	
+	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 	}
 	
 	@Override
@@ -263,7 +266,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	@Override
-	public BackgroundTexture getCustomTexture() {
+	public BackgroundHolder getCustomTexture() {
 		return customTexture;
 	}
 }

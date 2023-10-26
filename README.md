@@ -81,6 +81,13 @@ The following supported types by default are:
 - Enchantments
 - Colors    
 
+### Background Skin System
+
+Carbon Config also comes with a Background Selector system.    
+if you don't like the current look, simply change it.    
+<img src="img/background_example.png" width="65%">    
+
+
 ### Forge Config Support
 
 Carbon Config also supports Forge Configs for its GUI interface    
@@ -88,6 +95,12 @@ Carbon Config also supports Forge Configs for its GUI interface
     
 As can be seen the One Probe Config works just fine.    
 The GUI also supports Configured configurations regarding backgrounds.   
+
+### Game Rule Support
+
+Carbon Config also supports Minecrafts game rules.    
+Simply select the minecrafts config in the "ModList" and it will allow you to choose either your existing worlds or your currently played world/server.
+<img src="img/game_rule_support.png" width="65%">    
 
 ## FAQ
 

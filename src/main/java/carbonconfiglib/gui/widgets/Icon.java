@@ -39,6 +39,7 @@ public class Icon
 	public static final Icon MOVE_DOWN_HOVERED = new Icon(ICONS, 64, 16, 80, 64);
 	public static final Icon MOVE_UP = new Icon(ICONS, 64, 32, 80, 64);
 	public static final Icon MOVE_UP_HOVERED = new Icon(ICONS, 64, 48, 80, 64);
+	public static final Icon SUGGESTIONS = new Icon(ICONS, 48, 48, 80, 64);
 	public static final EnumMap<ConfigType, Icon> TYPE_ICON = create(new Icon(ICONS, 0, 32, 80, 64), new Icon(ICONS, 16, 32, 80, 64), new Icon(ICONS, 32, 32, 80, 64));
 	public static final EnumMap<ConfigType, Icon> MULTITYPE_ICON = create(new Icon(ICONS, 0, 48, 80, 64), new Icon(ICONS, 16, 48, 80, 64), new Icon(ICONS, 32, 48, 80, 64));
 

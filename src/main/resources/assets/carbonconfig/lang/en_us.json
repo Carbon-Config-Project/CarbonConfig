@@ -8,6 +8,7 @@
 	"gui.carbonconfig.cancel": "Cancel",
 	"gui.carbonconfig.pick": "Pick",
 	"gui.carbonconfig.delete": "Delete",
+	"gui.carbonconfig.suggestions": "Suggestions",
 	"gui.carbonconfig.revert": "Revert",
 	"gui.carbonconfig.default": "Default",
 	"gui.carbonconfig.reload": "Requires Reload",

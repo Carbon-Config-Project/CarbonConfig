@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -43,7 +43,7 @@ public class ArrayScreen extends ListScreen
 	IArrayNode array;
 	List<DataType> type;
 	
-	public ArrayScreen(IConfigNode entry, Screen prev, BackgroundTexture customTexture) {
+	public ArrayScreen(IConfigNode entry, Screen prev, BackgroundHolder customTexture) {
 		super(entry.getName(), customTexture);
 		this.prev = prev;
 		this.entry = entry;

@@ -25,6 +25,9 @@
       "carbonconfiglib.impl.ModMenuIntegration"
     ]
   },
+  "mixins": [
+    "mixins.carbonconfig.json"
+  ],
   "depends": {
     "fabricloader": ">=0.14.9",
     "fabric-api": "*",

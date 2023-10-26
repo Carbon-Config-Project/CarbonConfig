@@ -7,7 +7,9 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -53,4 +55,14 @@ public class ConfigNode implements IConfigFolderNode
 	}
 	@Override
 	public Component getName() { return IConfigNode.createLabel(section.getName()); }
+	@Override
+	public Component getTooltip() {
+		MutableComponent comp = Component.empty();
+		comp.append(Component.literal(section.getName()).withStyle(ChatFormatting.YELLOW));
+		String[] array = section.getComment();
+		if(array != null && array.length > 0) {
+			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+		}
+		return comp;
+	}
 }

@@ -6,11 +6,12 @@ import java.util.function.Predicate;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
+import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -46,11 +47,13 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	IModConfig config;
 	UUID requestId;
 	Predicate<FriendlyByteBuf> result;
+	Navigator nav;
 	int tick = 0;
 	
-	public RequestScreen(BackgroundTexture customTexture, Screen parent, IModConfig config) {
+	public RequestScreen(BackgroundHolder customTexture, Navigator nav, Screen parent, IModConfig config) {
 		super(Component.literal("Request Screen"), customTexture);
 		this.parent = parent;
+		this.nav = nav;
 		requestId = UUID.randomUUID();
 		this.config = config.loadFromNetworking(requestId, T -> result = T);
 	}
@@ -63,7 +66,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
-			minecraft.setScreen(new ConfigScreen(Component.literal(config.getConfigName()), config, parent, getCustomTexture()));
+			minecraft.setScreen(new ConfigScreen(nav, config, parent, getCustomTexture()));
 			return;
 		}
 		minecraft.setScreen(parent);

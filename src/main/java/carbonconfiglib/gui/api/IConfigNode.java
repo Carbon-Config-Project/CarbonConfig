@@ -2,7 +2,7 @@ package carbonconfiglib.gui.api;
 
 import java.util.List;
 
-import carbonconfiglib.config.ConfigEntry.Suggestion;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -29,6 +29,7 @@ public interface IConfigNode
 	public ICompoundNode asCompound();
 	public List<DataType> getDataType();
 	public List<Suggestion> getValidValues();
+	public boolean isForcingSuggestions();
 	
 	public boolean isArray();
 	public boolean isLeaf();
@@ -48,7 +49,7 @@ public interface IConfigNode
 	
 	public static MutableComponent createLabel(String name) {
 		MutableComponent comp = Component.empty();
-		for(String s : name.split("(?=\\p{Lu})|\\_|\\-")) {
+		for(String s : name.split("\\-|\\_|(?<!^)(?=[A-Z][a-z])|(?<!(^|[A-Z]))(?=[A-Z])")) {
 			String first = Character.toString(s.charAt(0));
 			comp.append(s.replaceFirst(first, first.toUpperCase())).append(" ");
 		}

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,17 +29,16 @@ import net.minecraft.network.chat.Component;
 public class FolderElement extends ConfigElement
 {
 	Button button = addChild(new CarbonButton(0, 0, 0, 18, Component.empty(), this::onPress));
-	Component name;
+	Navigator nav;
 	
-	public FolderElement(IConfigNode node, Component name)
-	{
+	public FolderElement(IConfigNode node, Navigator prev) {
 		super(node);
 		button.setMessage(node.getName());
-		this.name = name.copy().append(Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(node.getName());
+		nav = prev.add(node.getName());	
 	}
 	
 	protected void onPress(Button button) {
-		mc.setScreen(new ConfigScreen(name, node, mc.screen, owner.getCustomTexture()));
+		mc.setScreen(new ConfigScreen(nav, node, mc.screen, owner.getCustomTexture()));
 	}
 	
 	@Override

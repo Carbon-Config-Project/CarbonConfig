@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -15,7 +16,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -40,6 +40,7 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	protected Component unchanged;
 	protected Component changed;
 	protected IListOwner owner;
+	protected int hash = hashCode();
 	
 	public Element(Component name) {
 		setName(name);
@@ -77,15 +78,11 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	}
 	
 	protected void renderName(GuiGraphics stack, int x, int y, boolean changed) {
-		 renderText(stack, changed ? this.changed : unchanged, x, y, -1);
+		GuiUtils.drawScrollingString(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
 	protected void renderName(GuiGraphics stack, int x, int y, boolean changed, int maxWidth) {
-		stack.drawString(font, Language.getInstance().getVisualOrder(GuiUtils.ellipsizeStyled((changed ? this.changed : unchanged), maxWidth, font)), x, y, -1);
-	}
-	
-	protected void renderText(GuiGraphics stack, Component text, int x, int y, int color) {
-		stack.drawString(font, text, x, y, color);
+		GuiUtils.drawScrollingString(stack, font, text, x, y, width, height, align, -1, hash);
 	}
 	
 	@Override

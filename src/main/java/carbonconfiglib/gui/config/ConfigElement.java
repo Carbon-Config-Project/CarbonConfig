@@ -6,9 +6,12 @@ import java.util.Map;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IArrayNode;
+import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
@@ -44,14 +47,18 @@ public class ConfigElement extends Element
 	private static final Component DEFAULT = Component.translatable("gui.carbonconfig.default");
 	private static final Component RELOAD = Component.translatable("gui.carbonconfig.reload").withStyle(ChatFormatting.YELLOW);
 	private static final Component RESTART = Component.translatable("gui.carbonconfig.restart").withStyle(ChatFormatting.YELLOW);
+	private static final Component SUGGESTIONS = Component.translatable("gui.carbonconfig.suggestions");
 	protected List<GuiEventListener> listeners = new ObjectArrayList<>();
 	protected List<Map.Entry<AbstractWidget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
 	protected IValueNode value;
 	protected IArrayNode array;
+	protected ICompoundNode compound;
+	protected int compoundIndex = -1;
 	
 	protected CarbonIconButton setReset;
 	protected CarbonIconButton setDefault;
+	protected CarbonIconButton suggestion;
 	protected CarbonHoverIconButton moveDown;
 	protected CarbonHoverIconButton moveUp;
 	
@@ -90,7 +97,7 @@ public class ConfigElement extends Element
 	
 	protected <T extends AbstractWidget> T addChild(T element, GuiAlign align, int xOffset) {
 		listeners.add(element);
-		mappedListeners.add(new AbstractMap.SimpleEntry<>(element, new AlignOffset(align, -xOffset)));
+		mappedListeners.add(new AbstractMap.SimpleEntry<>(element, new AlignOffset(align, -xOffset - 19)));
 		if(owner != null && element instanceof IOwnable) {
 			((IOwnable)element).setOwner(owner);
 		}
@@ -112,8 +119,10 @@ public class ConfigElement extends Element
 			else {
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, Component.empty(), this::onReset).setIconOnly(), -21);
 				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, Component.empty(), this::onDefault).setIconOnly(), -40);
+				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, Component.empty(), this::onSuggestion).setIconOnly(), -59);
 				setReset.active = isReset();
 				setDefault.active = !isDefault();
+				suggestion.visible = false;
 			}
 		}
 		if(owner != null) {
@@ -139,7 +148,7 @@ public class ConfigElement extends Element
 	@Override
 	public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		if(renderName() && !isArray()) {
-			renderName(poseStack, left, top+6, isChanged(), width-115);
+			renderName(poseStack, left, top, isChanged(), isCompound() ? 80 : 200, height);
 			if(!isCompound()) {
 				if(node.requiresReload()) {
 					GuiUtils.drawTextureRegion(poseStack, left-16, top+(height/2)-6, 12, 12, Icon.RELOAD, 16, 16);
@@ -182,7 +191,7 @@ public class ConfigElement extends Element
 		maxX = getMaxX(maxX);
 		if(isArray()) {
 			Component comp = Component.literal(indexOf()+":");
-			renderText(poseStack, comp, maxX-15-font.width(comp), top+6, -1);
+			renderText(poseStack, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
 			owner.addTooltips(node.getTooltip());
@@ -199,7 +208,29 @@ public class ConfigElement extends Element
 			if(setDefault.isHoveredOrFocused() && owner.isInsideList(mouseX, mouseY)) {
 				owner.addTooltips(DEFAULT);
 			}
+			suggestion.visible = hasSuggestions();
+			if(suggestion.visible && suggestion.isHoveredOrFocused() & owner.isInsideList(mouseX, mouseY)) {
+				owner.addTooltips(SUGGESTIONS);
+			}
 		}
+	}
+	
+	protected boolean hasSuggestions() {
+		if(isCompound()) {
+			if(compound.isForcedSuggestion(compoundIndex)) return false;
+			List<Suggestion> suggestions = compound.getValidValues(compoundIndex);
+			return suggestions != null && suggestions.size() > 0;
+		}
+		if(node != null && node.isForcingSuggestions()) return false;
+		List<Suggestion> suggestions = node == null ? null : node.getValidValues();
+		return suggestions != null && suggestions.size() > 0;
+	}
+
+	public void setCompound(ICompoundNode compound, int index) {
+		this.compound = compound;
+		this.compoundIndex = index;
+		if(compound == null || index < 0) return;
+		setName(compound.getName(index));
 	}
 	
 	protected int getMaxX(int prevMaxX) {
@@ -211,7 +242,16 @@ public class ConfigElement extends Element
 	}
 	
 	protected boolean isCompound() {
-		return value != null && value.isCompoundNode();
+		return compound != null && compoundIndex >= 0;
+	}
+	
+	protected void onSuggestion(CarbonIconButton button) {
+		if(value == null) return;
+		if(isCompound()) {
+			mc.setScreen(ListSelectionScreen.ofCompoundValue(mc.screen, node, value, compound, compoundIndex, owner.getCustomTexture()));
+			return;
+		}
+		mc.setScreen(ListSelectionScreen.ofValue(mc.screen, node, value, owner.getCustomTexture()));
 	}
 	
 	protected void onMoveDown(CarbonHoverIconButton button) {
@@ -308,6 +348,22 @@ public class ConfigElement extends Element
 				case CENTER: return left + (bounds/2) - (width / 2);
 				case RIGHT: return left + bounds - width - 42;
 				default: return left;
+			}
+		}
+		
+		public float align(float width) {
+			switch(this) {
+				case CENTER: return width * -0.5F;
+				case RIGHT: return -width;
+				default: return 0F;
+			}
+		}
+
+		public float alignCenter() {
+			switch(this) {
+				case CENTER: return 0F;
+				case RIGHT: return 0.5F;
+				default: return -0.5F;
 			}
 		}
 	}
