@@ -4,7 +4,11 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import carbonconfiglib.gui.widgets.*;
+import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
+import carbonconfiglib.gui.widgets.CarbonIconButton;
+import carbonconfiglib.gui.widgets.GuiUtils;
+import carbonconfiglib.gui.widgets.IOwnable;
+import carbonconfiglib.gui.widgets.Icon;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
