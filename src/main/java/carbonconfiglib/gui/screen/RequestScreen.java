@@ -16,6 +16,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -34,13 +36,13 @@ import net.minecraft.network.chat.Component;
  */
 public class RequestScreen extends ListScreen implements IRequestScreen
 {
-	static final Component REQUEST = Component.translatable("gui.carbonconfig.requesting_config");
+	static final Component REQUEST = new TranslatableComponent("gui.carbonconfig.requesting_config");
 	static final Component[] ANIMATION = new Component[] {
-			Component.literal("Ooooo").withStyle(ChatFormatting.GRAY),
-			Component.literal("oOooo").withStyle(ChatFormatting.GRAY),
-			Component.literal("ooOoo").withStyle(ChatFormatting.GRAY),
-			Component.literal("oooOo").withStyle(ChatFormatting.GRAY),
-			Component.literal("ooooO").withStyle(ChatFormatting.GRAY),
+			new TextComponent("Ooooo").withStyle(ChatFormatting.GRAY),
+			new TextComponent("oOooo").withStyle(ChatFormatting.GRAY),
+			new TextComponent("ooOoo").withStyle(ChatFormatting.GRAY),
+			new TextComponent("oooOo").withStyle(ChatFormatting.GRAY),
+			new TextComponent("ooooO").withStyle(ChatFormatting.GRAY),
 	};
 	Screen parent;
 	IModConfig config;
@@ -50,7 +52,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	int tick = 0;
 	
 	public RequestScreen(BackgroundHolder customTexture, Navigator nav, Screen parent, IModConfig config) {
-		super(Component.literal("Request Screen"), customTexture);
+		super(new TextComponent("Request Screen"), customTexture);
 		this.parent = parent;
 		this.nav = nav;
 		requestId = UUID.randomUUID();
@@ -87,7 +89,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		font.draw(stack, ANIMATION[index], width / 2 - font.width(ANIMATION[index]) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
-			Component draw = Component.translatable("gui.carbonconfig.timeout", timeout).withStyle(ChatFormatting.RED);
+			Component draw = new TranslatableComponent("gui.carbonconfig.timeout", timeout).withStyle(ChatFormatting.RED);
 			font.draw(stack, draw, width / 2 - font.width(draw) / 2, height / 2 + 12, -1);
 		}
 	}

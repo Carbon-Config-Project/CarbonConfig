@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -55,7 +56,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		addSuggestionProvider(new RegistryKeySuggestions(this));
 	}
 	
-	public static <E> Builder<E> builder(String key, Class<E> clz) {
+	public static <E extends IForgeRegistryEntry<E>> Builder<E> builder(String key, Class<E> clz) {
 		return new Builder<>(key, clz);
 	}
 	
@@ -193,7 +194,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		}
 	}
 	
-	public static class Builder<E> {
+	public static class Builder<E extends IForgeRegistryEntry<E>> {
 		Class<E> clz;
 		String key;
 		Set<E> unparsedValues = new ObjectLinkedOpenHashSet<>();

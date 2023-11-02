@@ -16,6 +16,7 @@ import carbonconfiglib.utils.SyncType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
@@ -93,7 +94,7 @@ public class SyncPacket implements ICarbonPacket
 	public void process(Player player) {
 		ReloadMode mode = processEntry(player);
 		if(mode != null) {
-			player.sendSystemMessage(mode.getMessage());
+			player.sendMessage(mode.getMessage(), Util.NIL_UUID);
 		}
 	}
 	

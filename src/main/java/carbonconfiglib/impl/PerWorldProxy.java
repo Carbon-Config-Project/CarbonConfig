@@ -81,17 +81,17 @@ public final class PerWorldProxy implements IConfigProxy
 		if(Files.exists(baseServerPath)) {
 			folders.add(new SimpleTarget(baseServerPath, "Default Config"));
 		}
-		for(LevelSummary sum : storage.loadLevelSummaries(storage.findLevelCandidates()).join()) {
-			try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
-			{
-				Path path = access.getLevelPath(SERVERCONFIG);
-				if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path));
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
+		try {
+			for(LevelSummary sum : storage.getLevelList()) {
+				try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
+				{
+					Path path = access.getLevelPath(SERVERCONFIG);
+					if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path));
+				}
+				catch(Exception e) { e.printStackTrace(); }
 			}
 		}
+		catch(Exception e) { e.printStackTrace(); }
 		return folders;
 	}
 	

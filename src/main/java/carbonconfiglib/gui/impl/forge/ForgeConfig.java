@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
@@ -36,6 +37,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -115,7 +117,7 @@ public class ForgeConfig implements IModConfig
 		if(data == null) return true;
 		for(int i = 0,m=entries.size();i<m;i++) {
 			ConfigValue<?> entry = entries.get(i);
-			if(!Objects.equals(entry.getDefault(), data.get(entry.getPath()))) return false;
+			if(!Objects.equals(getDefault(entry), data.get(entry.getPath()))) return false;
 		}
 		return true;
 	}
@@ -125,9 +127,11 @@ public class ForgeConfig implements IModConfig
 		if(data == null) return;
 		for(int i = 0,m=entries.size();i<m;i++) {
 			ConfigValue<?> entry = entries.get(i);
-			this.data.set(entry.getPath(), entry.getDefault());
+			this.data.set(entry.getPath(), getDefault(entry));
 		}
 	}
+	
+
 	
 	@Override
 	public List<IConfigTarget> getPotentialFiles() {
@@ -185,17 +189,31 @@ public class ForgeConfig implements IModConfig
 	private List<IConfigTarget> getLevels() {
 		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
 		List<IConfigTarget> folders = new ObjectArrayList<>();
-		for(LevelSummary sum : storage.loadLevelSummaries(storage.findLevelCandidates()).join()) {
-			try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
-				Path path = access.getLevelPath(PerWorldProxy.SERVERCONFIG);
-				if(Files.notExists(path)) continue;
-				Path file = path.resolve(config.getFileName());
-				if(Files.notExists(file)) continue;
-				folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path), file));
+		try {
+			for(LevelSummary sum : storage.getLevelList()) {
+				try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
+					Path path = access.getLevelPath(PerWorldProxy.SERVERCONFIG);
+					if(Files.notExists(path)) continue;
+					Path file = path.resolve(config.getFileName());
+					if(Files.notExists(file)) continue;
+					folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path), file));
+				}
+				catch(Exception e) { e.printStackTrace(); }
 			}
-			catch(Exception e) { e.printStackTrace(); }
 		}
+		catch(Exception e) { e.printStackTrace(); }
 		return folders;
+	}
+	
+	private <T> T getDefault(ConfigValue<T> value) {
+		try {
+			Supplier<T> provider = ObfuscationReflectionHelper.getPrivateValue(ConfigValue.class, value, "defaultSupplier");
+			return provider == null ? null : provider.get();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static class NetworkForgeConfig extends ForgeConfig implements Predicate<FriendlyByteBuf> {

@@ -17,6 +17,8 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -57,9 +59,9 @@ public class EditStringScreen extends Screen
 	protected void init() {
 		super.init();
 		int x = width / 2 - 100;
-		Button apply = addRenderableWidget(new CarbonButton(x+10, 160, 85, 20, Component.translatable("gui.carbonconfig.apply"), this::save));
-		addRenderableWidget(new CarbonButton(x+105, 160, 85, 20, Component.translatable("gui.carbonconfig.cancel"), this::cancel));
-		textBox = new EditBox(font, x, 113, 200, 18, Component.empty());
+		Button apply = addRenderableWidget(new CarbonButton(x+10, 160, 85, 20, new TranslatableComponent("gui.carbonconfig.apply"), this::save));
+		addRenderableWidget(new CarbonButton(x+105, 160, 85, 20, new TranslatableComponent("gui.carbonconfig.cancel"), this::cancel));
+		textBox = new EditBox(font, x, 113, 200, 18, new TextComponent(""));
 		addRenderableWidget(textBox);
 		textBox.setValue(value.get());
 		textBox.setResponder(T -> {
@@ -82,7 +84,7 @@ public class EditStringScreen extends Screen
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, title, (width/2)-(font.width(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderComponentTooltip(stack, new ObjectArrayList<>(font.getSplitter().splitLines(Component.literal(result.getError().getMessage()), Integer.MAX_VALUE, Style.EMPTY)), mouseX, mouseY, ItemStack.EMPTY);
+			renderComponentTooltip(stack, new ObjectArrayList<>(font.getSplitter().splitLines(new TextComponent(result.getError().getMessage()), Integer.MAX_VALUE, Style.EMPTY)), mouseX, mouseY, ItemStack.EMPTY);
 		}
 	}
 	
@@ -103,7 +105,7 @@ public class EditStringScreen extends Screen
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				if(T) value.setPrevious();
 				minecraft.setScreen(T ? parent : this);
-			}, Component.translatable("gui.carbonconfig.warn.changed"), Component.translatable("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
 			return;
 		}
 		value.setPrevious();

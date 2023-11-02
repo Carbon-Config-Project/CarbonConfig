@@ -9,7 +9,7 @@ import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -72,7 +72,7 @@ public class ColorElement extends ConfigElement
 			GuiComponent.fill(poseStack, left+xOff+1, top, left+xOff+16, top+18, Integer.decode(value.get()) | 0xFF000000);
 		}
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));
+			owner.addTooltips(new TextComponent(result.getError().getMessage()).withStyle(ChatFormatting.RED));
 		}
 	}
 	

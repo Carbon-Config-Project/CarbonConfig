@@ -195,8 +195,8 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.renderList(stack, mouseX, mouseY, partialTicks);
+	protected void renderList(PoseStack stack, int left, int top, int mouseX, int mouseY, float partialTicks) {
+		super.renderList(stack, left, top, mouseX, mouseY, partialTicks);
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}

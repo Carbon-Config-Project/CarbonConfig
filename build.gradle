@@ -10,7 +10,7 @@ apply plugin: 'eclipse'
 jarJar.enable()
 
 version = MC_VERSION + '-' + MOD_VERSION
-group = 'carbonconfiglib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'carbonconfiglib'
 archivesBaseName = 'Carbon Config'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -27,7 +27,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'official', version: '1.18.2'
     runs {
         client {
             workingDirectory project.file('run')
@@ -79,9 +79,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.2.11'
-	implementation fg.deobf("curse.maven:the-one-probe-245211:3965693")
-	implementation fg.deobf("curse.maven:jei-238222:4615177")
+    minecraft 'net.minecraftforge:forge:1.18.2-40.2.11'
     minecraftLibrary ':Primitive Collections-0.8.9'
     jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")

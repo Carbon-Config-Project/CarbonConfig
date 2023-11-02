@@ -5,7 +5,7 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -39,8 +39,8 @@ public class BooleanElement extends ConfigElement
 	public void init() {
 		super.init();
 		int width = isArray() ? 72 : 36;
-		trueButton = addChild(new CarbonButton(0, 0, width, 18, Component.translatable("gui.carbonconfig.boolean.true"), this::onTrue), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, isArray() ? width/2 : width);
-		falseButton = addChild(new CarbonButton(0, 0, width, 18, Component.translatable("gui.carbonconfig.boolean.false"), this::onFalse), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, isArray() ? -(width/2) : 0);
+		trueButton = addChild(new CarbonButton(0, 0, width, 18, new TranslatableComponent("gui.carbonconfig.boolean.true"), this::onTrue), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, isArray() ? width/2 : width);
+		falseButton = addChild(new CarbonButton(0, 0, width, 18, new TranslatableComponent("gui.carbonconfig.boolean.false"), this::onFalse), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, isArray() ? -(width/2) : 0);
 		updateData();
 	}
 	

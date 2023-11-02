@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -24,7 +25,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /**
@@ -53,7 +54,7 @@ public class SuggestionRenderers
 			if(item == Items.AIR || item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(itemStack, x, y);
-			return itemStack.getHoverName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));			
+			return itemStack.getHoverName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));			
 		}
 	}
 	
@@ -67,15 +68,15 @@ public class SuggestionRenderers
 			TextureAtlasSprite sprite = getSprite(fluid);
 			if(sprite == null) return null;
 			RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-			int color = IClientFluidTypeExtensions.of(fluid).getTintColor();
+			int color = fluid.getAttributes().getColor();
 			RenderSystem.setShaderColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
 			GuiComponent.blit(stack, x, y, 0, 18, 18, sprite);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			return fluid.getFluidType().getDescription().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
+			return fluid.getAttributes().getDisplayName(new FluidStack(fluid, 1)).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
-			return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluid).getStillTexture());
+			return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluid.getAttributes().getStillTexture());
 		}
 	}
 	
@@ -87,7 +88,7 @@ public class SuggestionRenderers
 			Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(id);
 			if(ench == null) return null;
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, ench.getMinLevel())), x, y);
-			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
+			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 	
@@ -102,7 +103,7 @@ public class SuggestionRenderers
 			PotionUtils.setCustomEffects(item, ObjectLists.singleton(new MobEffectInstance(potion)));
 			item.addTagElement("CustomPotionColor", IntTag.valueOf(potion.getColor()));
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item, x, y);
-			return potion.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
+			return potion.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 	

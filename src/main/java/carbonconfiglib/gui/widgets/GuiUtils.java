@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 
@@ -18,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 /**
@@ -37,6 +39,8 @@ import net.minecraft.util.Mth;
  */
 public class GuiUtils
 {
+	private static final float U_SCALE = 1F / 0x100;
+	private static final float V_SCALE = 1F / 0x100;
 	private static final ScissorsStack STACK = new ScissorsStack();
 	
 	public static float calculateScrollOffset(float width, Font font, GuiAlign align, Component text, int seed) {
@@ -106,6 +110,56 @@ public class GuiUtils
 		double scaledHeight = (double)window.getHeight() / (double)window.getGuiScaledHeight();
 		double scaledWidth = (double)window.getWidth() / (double)window.getGuiScaledWidth();
 		RenderSystem.enableScissor((int)(rect.getX() * scaledWidth), (int)(window.getHeight() - bottom * scaledHeight), (int)(rect.getWidth() * scaledWidth), (int)(rect.getHeigth() * scaledHeight));
+	}
+	
+	public static void drawTextureWithBorder(PoseStack poseStack, ResourceLocation res, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, res);
+		drawTexture(poseStack, x, y, u, v, width, height, textureWidth, textureHeight, topBorder, bottomBorder, leftBorder, rightBorder, zLevel);
+	}
+	
+	private static void drawTexture(PoseStack poseStack, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel) {
+		Tesselator tessellator = Tesselator.getInstance();
+		BufferBuilder builder = tessellator.getBuilder();
+		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		Matrix4f matrix = poseStack.last().pose();
+		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		
+		int fillerWidth = textureWidth - leftBorder - rightBorder;
+		int fillerHeight = textureHeight - topBorder - bottomBorder;
+		int canvasWidth = width - leftBorder - rightBorder;
+		int canvasHeight = height - topBorder - bottomBorder;
+		int xPasses = canvasWidth / fillerWidth;
+		int remainderWidth = canvasWidth % fillerWidth;
+		int yPasses = canvasHeight / fillerHeight;
+		int remainderHeight = canvasHeight % fillerHeight;
+
+		drawTextured(poseStack, x, y, u, v, leftBorder, topBorder, zLevel, builder, matrix);
+		drawTextured(poseStack, x + leftBorder + canvasWidth, y, u + leftBorder + fillerWidth, v, rightBorder, topBorder, zLevel, builder, matrix);
+		drawTextured(poseStack, x, y + topBorder + canvasHeight, u, v + topBorder + fillerHeight, leftBorder, bottomBorder, zLevel, builder, matrix);
+		drawTextured(poseStack, x + leftBorder + canvasWidth, y + topBorder + canvasHeight, u + leftBorder + fillerWidth, v + topBorder + fillerHeight, rightBorder, bottomBorder, zLevel, builder, matrix);
+
+		for (int i = 0; i < xPasses + (remainderWidth > 0 ? 1 : 0); i++) {
+			drawTextured(poseStack, x + leftBorder + (i * fillerWidth), y, u + leftBorder, v, (i == xPasses ? remainderWidth : fillerWidth), topBorder, zLevel, builder, matrix);
+			drawTextured(poseStack, x + leftBorder + (i * fillerWidth), y + topBorder + canvasHeight, u + leftBorder, v + topBorder + fillerHeight, (i == xPasses ? remainderWidth : fillerWidth), bottomBorder, zLevel, builder, matrix);
+			for (int j = 0; j < yPasses + (remainderHeight > 0 ? 1 : 0); j++)
+				drawTextured(poseStack, x + leftBorder + (i * fillerWidth), y + topBorder + (j * fillerHeight), u + leftBorder, v + topBorder, (i == xPasses ? remainderWidth : fillerWidth), (j == yPasses ? remainderHeight : fillerHeight), zLevel, builder, matrix);
+		}
+
+		for (int j = 0; j < yPasses + (remainderHeight > 0 ? 1 : 0); j++) {
+			drawTextured(poseStack, x, y + topBorder + (j * fillerHeight), u, v + topBorder, leftBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel, builder, matrix);
+			drawTextured(poseStack, x + leftBorder + canvasWidth, y + topBorder + (j * fillerHeight), u + leftBorder + fillerWidth, v + topBorder, rightBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel, builder, matrix);
+		}
+		tessellator.end();
+	}
+	
+	private static void drawTextured(PoseStack poseStack, int x, int y, int u, int v, int width, int height, float zLevel, BufferBuilder builder, Matrix4f matrix) {
+		builder.vertex(matrix, x, y + height, zLevel).uv(u * U_SCALE, (v + height) * V_SCALE).endVertex();
+		builder.vertex(matrix, x + width, y + height, zLevel).uv((u + width) * U_SCALE, (v + height) * V_SCALE).endVertex();
+		builder.vertex(matrix, x + width, y, zLevel).uv((u + width) * U_SCALE, v * V_SCALE).endVertex();
+		builder.vertex(matrix, x, y, zLevel).uv(u * U_SCALE, v * V_SCALE).endVertex();
 	}
 	
 	public static void drawTextureRegion(PoseStack stack, float x, float y, float width, float height, Icon icon, float texWidth, float texHeight) {

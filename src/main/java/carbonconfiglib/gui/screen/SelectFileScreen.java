@@ -27,6 +27,8 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelSummary;
 
 /**
@@ -46,7 +48,7 @@ import net.minecraft.world.level.storage.LevelSummary;
  */
 public class SelectFileScreen extends ListScreen
 {
-	private static final Component TEXT = Component.translatable("gui.carbonconfig.select_world");
+	private static final Component TEXT = new TranslatableComponent("gui.carbonconfig.select_world");
 	IModConfig config;
 	Screen parent;
 	
@@ -68,7 +70,7 @@ public class SelectFileScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, Component.translatable("gui.carbonconfig.back"), T -> onClose()));
+		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, new TranslatableComponent("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -110,7 +112,7 @@ public class SelectFileScreen extends ListScreen
 		Navigator nav;
 		
 		public WorldElement(IConfigTarget target, IModConfig config, Screen parent, Component prevName) {
-			super(Component.literal(target.getName()));
+			super(new TextComponent(target.getName()));
 			nav = new Navigator(prevName);
 			nav.setScreenForLayer(parent);
 			this.target = target;
@@ -120,20 +122,20 @@ public class SelectFileScreen extends ListScreen
 		
 		@Override
 		public void init() {
-			button = new CarbonButton(0, 0, 62, 20, Component.translatable("gui.carbonconfig.pick"), this::onPick);
+			button = new CarbonButton(0, 0, 62, 20, new TranslatableComponent("gui.carbonconfig.pick"), this::onPick);
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
 				LevelSummary sum = world.getSummary();
-				loadIcon(sum.getIcon());
-				title = Component.literal(sum.getLevelName());
-				path = Component.literal(sum.getLevelId()).withStyle(ChatFormatting.GRAY);
+				loadIcon(sum.getIcon().toPath());
+				title = new TextComponent(sum.getLevelName());
+				path = new TextComponent(sum.getLevelId()).withStyle(ChatFormatting.GRAY);
 			}
 			else 
 			{
-				title = Component.literal(target.getName());
+				title = new TextComponent(target.getName());
 				Path folder = target.getFolder();
 				int index = folder.getNameCount();
-				path = Component.literal(folder.subpath(index-3, index).toString()).withStyle(ChatFormatting.GRAY);
+				path = new TextComponent(folder.subpath(index-3, index).toString()).withStyle(ChatFormatting.GRAY);
 			}
 		}
 		

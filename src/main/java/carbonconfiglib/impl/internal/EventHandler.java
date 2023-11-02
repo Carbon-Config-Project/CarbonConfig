@@ -31,9 +31,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingIn;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
+import net.minecraftforge.client.ConfigGuiHandler.ConfigGuiFactory;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedInEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
@@ -130,12 +130,12 @@ public class EventHandler implements IConfigChangeListener
 		loadDefaultTypes();
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
-			if(M.getCustomExtension(ConfigScreenFactory.class).isPresent()) return;
+			if(M.getCustomExtension(ConfigGuiFactory.class).isPresent()) return;
 			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
-			ModList.get().forEachModInOrder(T-> {
-				if(T.getCustomExtension(ConfigScreenFactory.class).isEmpty()) {
+			ModList.get().forEachModContainer((K, T)-> {
+				if(T.getCustomExtension(ConfigGuiFactory.class).isEmpty()) {
 					ForgeConfigs configs = new ForgeConfigs(T);
 					if(configs.hasConfigs()) {
 						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
@@ -146,7 +146,7 @@ public class EventHandler implements IConfigChangeListener
 				};
 			});
 		}
-		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
+		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigGuiFactory.class, () -> new ConfigGuiFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -175,12 +175,12 @@ public class EventHandler implements IConfigChangeListener
 	public void onPlayerServerJoinEvent(PlayerLoggedInEvent event) {
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);
 		if(packet == null) return;
-		CarbonConfig.NETWORK.sendToPlayer(packet, event.getEntity());
+		CarbonConfig.NETWORK.sendToPlayer(packet, event.getPlayer());
 	}
 	
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerJoinEvent(LoggingIn event) {
+	public void onPlayerServerJoinEvent(LoggedInEvent event) {
 		if(Minecraft.getInstance().getCurrentServer() != null) loadMPConfigs();
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
 		if(packet == null) return;
@@ -189,7 +189,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerJoinEvent(LoggingOut event) {
+	public void onPlayerServerJoinEvent(LoggedOutEvent event) {
 		if(Minecraft.getInstance().getCurrentServer() != null) {
 			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
 				if(PerWorldProxy.isProxy(handler.getProxy())) {

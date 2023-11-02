@@ -12,7 +12,8 @@ import carbonconfiglib.utils.ParseResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -60,7 +61,7 @@ public class StringElement extends ConfigElement
 			});
 		}
 		else {
-			addChild(new CarbonButton(0, 0, 72, 18, Component.translatable("gui.carbonconfig.edit"), this::onPress));
+			addChild(new CarbonButton(0, 0, 72, 18, new TranslatableComponent("gui.carbonconfig.edit"), this::onPress));
 		}
 	}
 	
@@ -76,7 +77,7 @@ public class StringElement extends ConfigElement
 	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
+			owner.addTooltips(new TextComponent(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
 		}
 	}
 	

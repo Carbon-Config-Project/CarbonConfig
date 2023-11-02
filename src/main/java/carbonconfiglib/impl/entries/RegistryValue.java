@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -41,7 +42,7 @@ import net.minecraftforge.registries.IForgeRegistry;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implements IArrayConfig
+public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionConfigEntry<T, Set<T>> implements IArrayConfig
 {
 	ForgeRegistry<T> registry;
 	Class<T> clz;
@@ -55,7 +56,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		addSuggestionProvider(new RegistrySuggestions<>(this));
 	}
 	
-	public static <E> Builder<E> builder(String key, Class<E> clz) {
+	public static <E extends IForgeRegistryEntry<E>> Builder<E> builder(String key, Class<E> clz) {
 		return new Builder<>(key, clz);
 	}
 	
@@ -178,7 +179,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		return ObjectSets.singleton(value);
 	}
 	
-	public static class RegistrySuggestions<T> implements ISuggestionProvider {
+	public static class RegistrySuggestions<T extends IForgeRegistryEntry<T>> implements ISuggestionProvider {
 		RegistryValue<T> value;
 		
 		public RegistrySuggestions(RegistryValue<T> value) {
@@ -195,7 +196,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		}
 	}
 	
-	public static class Builder<E> {
+	public static class Builder<E extends IForgeRegistryEntry<E>> {
 		Class<E> clz;
 		String key;
 		Set<E> values = new ObjectLinkedOpenHashSet<>();

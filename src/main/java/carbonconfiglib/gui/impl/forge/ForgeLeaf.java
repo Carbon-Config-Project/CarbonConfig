@@ -18,6 +18,7 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
@@ -54,7 +55,7 @@ public class ForgeLeaf implements IConfigNode
 		this.spec = getSpec(spec, data);
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
-			MutableComponent comp = Component.empty();
+			MutableComponent comp = new TextComponent("");
 			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
 			tooltip = comp;
 		}
@@ -155,11 +156,11 @@ public class ForgeLeaf implements IConfigNode
 	
 	@Override
 	public Component getTooltip() {
-		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(Iterables.getLast(data.getPath(), "")).withStyle(ChatFormatting.YELLOW));
+		MutableComponent comp = new TextComponent("");
+		comp.append(new TextComponent(Iterables.getLast(data.getPath(), "")).withStyle(ChatFormatting.YELLOW));
 		if(tooltip != null) comp.append(tooltip);
 		String limit = type.getLimitations(spec);
-		if(limit != null && !Strings.isBlank(limit)) comp.append("\n").append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
+		if(limit != null && !Strings.isBlank(limit)) comp.append("\n").append(new TextComponent(limit).withStyle(ChatFormatting.BLUE));
 		return comp;
 	}
 	

@@ -11,7 +11,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.ScreenUtils;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -50,7 +49,7 @@ public class CarbonIconButton extends AbstractButton
 	@Override
 	public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_93679_) {
         int k = this.getYImage(this.isHoveredOrFocused());
-        ScreenUtils.blitWithBorder(stack, WIDGETS_LOCATION, x, y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+        GuiUtils.drawTextureWithBorder(stack, WIDGETS_LOCATION, x, y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
         if(iconOnly) {
     		int j = getFGColor();
             RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);

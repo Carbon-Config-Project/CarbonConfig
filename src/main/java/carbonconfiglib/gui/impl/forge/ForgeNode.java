@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 
@@ -57,7 +58,7 @@ public class ForgeNode implements IConfigFolderNode
  		if(value == null) return;
 		String[] array = value.split("\n");
 		if(array != null && array.length > 0) {
-			MutableComponent comp = Component.empty();
+			MutableComponent comp = new TextComponent("");
 			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]));
 			tooltip = comp;
 		}
@@ -89,8 +90,8 @@ public class ForgeNode implements IConfigFolderNode
 	
 	@Override
 	public Component getTooltip() {
-		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(Iterables.getLast(paths, "Root")).withStyle(ChatFormatting.YELLOW));
+		MutableComponent comp = new TextComponent("");
+		comp.append(new TextComponent(Iterables.getLast(paths, "Root")).withStyle(ChatFormatting.YELLOW));
 		if(tooltip != null) comp.append(tooltip);
 		return comp;
 	}

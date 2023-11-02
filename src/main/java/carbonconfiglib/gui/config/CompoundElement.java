@@ -8,7 +8,7 @@ import carbonconfiglib.gui.screen.CompoundScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -43,7 +43,7 @@ public class CompoundElement extends ConfigElement
 	@Override
 	public void init() {
 		super.init();
-		textBox = addChild(new CarbonButton(0, 0, isArray() ? 144 : 72, 18, Component.translatable("gui.carbonconfig.edit"), this::onPress));
+		textBox = addChild(new CarbonButton(0, 0, isArray() ? 144 : 72, 18, new TranslatableComponent("gui.carbonconfig.edit"), this::onPress));
 	}
 	
 	private void onPress(Button button) {

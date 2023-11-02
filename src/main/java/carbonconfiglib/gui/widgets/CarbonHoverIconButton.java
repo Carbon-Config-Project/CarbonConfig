@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -31,7 +31,7 @@ public class CarbonHoverIconButton extends AbstractButton
 	IconInfo info;
 	
 	public CarbonHoverIconButton(int x, int y, int width, int height, IconInfo info, Icon basicIcon, Icon hoverIcon, Consumer<CarbonHoverIconButton> listener) {
-		super(x, y, width, height, Component.empty());
+		super(x, y, width, height, new TextComponent(""));
 		this.listener = listener;
 		this.icons = new Icon[2];
 		icons[0] = basicIcon;

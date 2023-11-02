@@ -29,8 +29,8 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -41,6 +41,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -78,7 +79,6 @@ public class CarbonConfig
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
 		if(FMLEnvironment.dist.isClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
@@ -130,7 +130,7 @@ public class CarbonConfig
 	 * @param clz the Class-Type for Config Gui rendering.
 	 * @return a Builder for registry Keys
 	 */
-	public static <E> RegistryKeyValue.Builder<E> createRegistryKeyBuilder(String key, Class<E> clz) {
+	public static <E extends IForgeRegistryEntry<E>> RegistryKeyValue.Builder<E> createRegistryKeyBuilder(String key, Class<E> clz) {
 		return RegistryKeyValue.builder(key, clz);
 	}
 	
@@ -143,7 +143,7 @@ public class CarbonConfig
 	 * @param clz the Class-Type for Config Gui rendering.
 	 * @return a Builder for registry Keys
 	 */
-	public static <E> RegistryValue.Builder<E> createRegistryBuilder(String key, Class<E> clz) {
+	public static <E extends IForgeRegistryEntry<E>> RegistryValue.Builder<E> createRegistryBuilder(String key, Class<E> clz) {
 		return RegistryValue.builder(key, clz);
 	}
 	
@@ -158,17 +158,13 @@ public class CarbonConfig
 	@OnlyIn(Dist.CLIENT)
 	public void onClientLoad(FMLClientSetupEvent event) {
 		EventHandler.INSTANCE.onConfigsLoaded();
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	public void registerKeys(RegisterKeyMappingsEvent event) {
 		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
-		event.register(mapping);
+		ClientRegistry.registerKeyBinding(mapping);
 		MOD_GUI = mapping::isDown;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public void onKeyPressed(InputEvent.Key event) {
+	public void onKeyPressed(KeyInputEvent event) {
 		Minecraft mc = Minecraft.getInstance();
 		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
 			mc.setScreen(new ModListScreen(mc.screen));

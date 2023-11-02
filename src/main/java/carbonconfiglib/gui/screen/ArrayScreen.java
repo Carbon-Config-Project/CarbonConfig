@@ -18,7 +18,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -56,9 +57,9 @@ public class ArrayScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new CarbonButton(x-92, y-27, 80, 20, Component.translatable("gui.carbonconfig.apply"), this::apply));
-		addRenderableWidget(new CarbonButton(x-10, y-27, 20, 20, Component.literal("+"), this::createEntry));
-		addRenderableWidget(new CarbonButton(x+12, y-27, 80, 20, Component.translatable("gui.carbonconfig.back"), this::goBack));
+		addRenderableWidget(new CarbonButton(x-92, y-27, 80, 20, new TranslatableComponent("gui.carbonconfig.apply"), this::apply));
+		addRenderableWidget(new CarbonButton(x-10, y-27, 20, 20, new TextComponent("+"), this::createEntry));
+		addRenderableWidget(new CarbonButton(x+12, y-27, 80, 20, new TranslatableComponent("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override
@@ -87,7 +88,7 @@ public class ArrayScreen extends ListScreen
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				if(T) array.setPrevious();
 				minecraft.setScreen(T ? prev : this);				
-			}, Component.translatable("gui.carbonconfig.warn.changed"), Component.translatable("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
 			return;
 		}
 		array.setPrevious();

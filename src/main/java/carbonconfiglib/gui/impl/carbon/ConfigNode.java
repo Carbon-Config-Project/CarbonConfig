@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -57,8 +58,8 @@ public class ConfigNode implements IConfigFolderNode
 	public Component getName() { return IConfigNode.createLabel(section.getName()); }
 	@Override
 	public Component getTooltip() {
-		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(section.getName()).withStyle(ChatFormatting.YELLOW));
+		MutableComponent comp = new TextComponent("");
+		comp.append(new TextComponent(section.getName()).withStyle(ChatFormatting.YELLOW));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
 			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));

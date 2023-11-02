@@ -6,7 +6,6 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.ScreenUtils;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,7 +35,7 @@ public class CarbonButton extends Button
 	public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		int k = this.getYImage(this.isHovered);
-		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+		GuiUtils.drawTextureWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		this.renderBg(poseStack, mc, mouseX, mouseY);
 		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
 	}
