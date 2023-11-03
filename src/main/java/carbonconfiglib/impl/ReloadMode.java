@@ -2,6 +2,7 @@ package carbonconfiglib.impl;
 
 import carbonconfiglib.api.IReloadMode;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -20,8 +21,8 @@ import net.minecraft.network.chat.Component;
  */
 public enum ReloadMode implements IReloadMode
 {
-	WORLD(Component.translatable("gui.carbonconfig.reload.sync")),
-	GAME(Component.translatable("gui.carbonconfig.restart.sync"));
+	WORLD(new TranslatableComponent("gui.carbonconfig.reload.sync")),
+	GAME(new TranslatableComponent("gui.carbonconfig.restart.sync"));
 	
 	Component message;
 	

@@ -13,6 +13,10 @@ import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -63,7 +67,7 @@ public class CompoundNode implements ICompoundNode, ICompoundProvider
 	
 	@Override
 	public Component getName(int index) {
-		return Component.literal(names[index]);
+		return new TextComponent(names[index]);
 	}
 	
 	@Override

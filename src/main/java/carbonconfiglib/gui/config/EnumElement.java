@@ -12,6 +12,8 @@ import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +50,7 @@ public class EnumElement extends ConfigElement
 				addChild(new CarbonButton(0, 0, 40, 18, Component.translatable("gui.chunk_pregen.config.edit"), this::onSelect), -12);				
 			}
 			else {
-				addChild(new CarbonButton(0, 0, 72, 18, Component.translatable("gui.chunk_pregen.config.edit"), this::onPress));
+				addChild(new CarbonButton(0, 0, 72, 18, new TranslatableComponent("gui.chunk_pregen.config.edit"), this::onPress));
 			}
 		}
 	}
@@ -62,7 +64,7 @@ public class EnumElement extends ConfigElement
 	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		String value = this.value.get();
-		GuiUtils.drawScrollingString(poseStack, font, Component.literal(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
+		GuiUtils.drawScrollingString(poseStack, font, new TextComponent(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
 	}
 	
 	private void onSelect(Button button) {

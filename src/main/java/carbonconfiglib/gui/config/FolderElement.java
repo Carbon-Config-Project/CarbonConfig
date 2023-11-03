@@ -1,13 +1,13 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -26,7 +26,7 @@ import net.minecraft.network.chat.Component;
  */
 public class FolderElement extends ConfigElement
 {
-	Button button = addChild(new CarbonButton(0, 0, 0, 18, Component.empty(), this::onPress));
+	Button button = addChild(new CarbonButton(0, 0, 0, 18, new TextComponent(""), this::onPress));
 	Navigator nav;
 	
 	public FolderElement(IConfigNode node, Navigator prev) {

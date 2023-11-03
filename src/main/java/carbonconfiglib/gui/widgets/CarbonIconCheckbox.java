@@ -1,14 +1,15 @@
 package carbonconfiglib.gui.widgets;
 
+import carbonconfiglib.gui.config.IListOwner;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
-import carbonconfiglib.gui.config.IListOwner;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -37,7 +38,7 @@ public class CarbonIconCheckbox extends AbstractButton
 	IListOwner owner;
 	
 	public CarbonIconCheckbox(int x, int y, int width, int height, Icon selectedIcon, Icon unselectedIcon, boolean selected) {
-		super(x, y, width, height, Component.empty());
+		super(x, y, width, height, new TextComponent(""));
 		this.selectedIcon = selectedIcon;
 		this.unselectedIcon = unselectedIcon;
 		this.selected = selected;
@@ -50,7 +51,7 @@ public class CarbonIconCheckbox extends AbstractButton
 	
 	public CarbonIconCheckbox setTooltip(IListOwner owner, String tooltips) {
 		this.owner = owner;
-		tooltip = Component.translatable(tooltips);
+		tooltip = new TranslatableComponent(tooltips);
 		return this;
 	}
 	
@@ -86,7 +87,7 @@ public class CarbonIconCheckbox extends AbstractButton
 	public void updateNarration(NarrationElementOutput output) {
 		output.add(NarratedElementType.TITLE, this.createNarrationMessage());
 		if(!this.active) return;
-		output.add(NarratedElementType.USAGE, Component.translatable(isFocused() ? "narration.checkbox.usage.hovered" : "narration.checkbox.usage.focused"));		
+		output.add(NarratedElementType.USAGE, new TranslatableComponent(isFocused() ? "narration.checkbox.usage.hovered" : "narration.checkbox.usage.focused"));		
 	}
 
 }

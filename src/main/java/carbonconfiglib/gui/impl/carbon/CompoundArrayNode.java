@@ -18,6 +18,10 @@ import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -275,7 +279,7 @@ public class CompoundArrayNode implements IArrayNode
 		
 		@Override
 		public Component getName(int index) {
-			return Component.literal(names[index]);
+			return new TextComponent(names[index]);
 		}
 
 		@Override

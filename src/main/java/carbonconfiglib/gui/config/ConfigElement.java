@@ -4,6 +4,11 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
+import carbonconfiglib.gui.widgets.CarbonIconButton;
+import carbonconfiglib.gui.widgets.GuiUtils;
+import carbonconfiglib.gui.widgets.IOwnable;
+import carbonconfiglib.gui.widgets.Icon;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
@@ -12,17 +17,19 @@ import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
-import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
-import carbonconfiglib.gui.widgets.CarbonIconButton;
-import carbonconfiglib.gui.widgets.GuiUtils;
-import carbonconfiglib.gui.widgets.IOwnable;
-import carbonconfiglib.gui.widgets.Icon;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -41,12 +48,12 @@ import net.minecraft.network.chat.Component;
  */
 public class ConfigElement extends Element
 {
-	private static final Component DELETE = Component.translatable("gui.carbonconfig.delete");
-	private static final Component REVERT = Component.translatable("gui.carbonconfig.revert");
-	private static final Component DEFAULT = Component.translatable("gui.carbonconfig.default");
-	private static final Component RELOAD = Component.translatable("gui.carbonconfig.reload").withStyle(ChatFormatting.YELLOW);
-	private static final Component RESTART = Component.translatable("gui.carbonconfig.restart").withStyle(ChatFormatting.YELLOW);
-	private static final Component SUGGESTIONS = Component.translatable("gui.carbonconfig.suggestions");
+	private static final Component DELETE = new TranslatableComponent("gui.carbonconfig.delete");
+	private static final Component REVERT = new TranslatableComponent("gui.carbonconfig.revert");
+	private static final Component DEFAULT = new TranslatableComponent("gui.carbonconfig.default");
+	private static final Component RELOAD = new TranslatableComponent("gui.carbonconfig.reload").withStyle(ChatFormatting.YELLOW);
+	private static final Component RESTART = new TranslatableComponent("gui.carbonconfig.restart").withStyle(ChatFormatting.YELLOW);
+	private static final Component SUGGESTIONS = new TranslatableComponent("gui.carbonconfig.suggestions");
 	protected List<GuiEventListener> listeners = new ObjectArrayList<>();
 	protected List<Map.Entry<AbstractWidget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
@@ -108,7 +115,7 @@ public class ConfigElement extends Element
 		super.init();
 		if(createResetButtons(value)) {
 			if(isArray()) {
-				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, Component.empty(), this::onDeleted).setIconOnly(), -31);
+				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, new TextComponent(""), this::onDeleted).setIconOnly(), -31);
 				setReset.active = isReset();
 				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN, Icon.MOVE_DOWN_HOVERED, this::onMoveDown);
 				listeners.add(moveDown);
@@ -116,9 +123,9 @@ public class ConfigElement extends Element
 				listeners.add(moveUp);
 			}
 			else {
-				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, Component.empty(), this::onReset).setIconOnly(), -21);
-				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, Component.empty(), this::onDefault).setIconOnly(), -40);
-				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, Component.empty(), this::onSuggestion).setIconOnly(), -59);
+				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, new TextComponent(""), this::onReset).setIconOnly(), -21);
+				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, new TextComponent(""), this::onDefault).setIconOnly(), -40);
+				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, new TextComponent(""), this::onSuggestion).setIconOnly(), -59);
 				setReset.active = isReset();
 				setDefault.active = !isDefault();
 				suggestion.visible = false;
@@ -189,7 +196,7 @@ public class ConfigElement extends Element
 		}
 		maxX = getMaxX(maxX);
 		if(isArray()) {
-			Component comp = Component.literal(indexOf()+":");
+			Component comp = new TextComponent(indexOf()+":");
 			renderText(poseStack, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {

@@ -1,9 +1,8 @@
 package carbonconfiglib.gui.widgets;
 
+import carbonconfiglib.gui.api.ISuggestionRenderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
-import carbonconfiglib.gui.api.ISuggestionRenderer;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.ChatFormatting;
@@ -15,6 +14,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -55,7 +56,7 @@ public class SuggestionRenderers
 			if(item == Items.AIR || item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(itemStack, x, y);
-			return itemStack.getHoverName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));			
+			return itemStack.getHoverName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));			
 		}
 	}
 	
@@ -73,11 +74,11 @@ public class SuggestionRenderers
 			RenderSystem.setShaderColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
 			GuiComponent.blit(stack, x, y, 0, 18, 18, sprite);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			return getDescription(fluid).withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
+			return getDescription(fluid).withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 		
 		private MutableComponent getDescription(Fluid fluid) {
-			return Component.translatable(Util.makeDescriptionId("fluid", Registry.FLUID.getKey(fluid)));
+			return new TranslatableComponent(Util.makeDescriptionId("fluid", Registry.FLUID.getKey(fluid)));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
@@ -93,7 +94,7 @@ public class SuggestionRenderers
 			Enchantment ench = Registry.ENCHANTMENT.get(id);
 			if(ench == null) return null;
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, ench.getMinLevel())), x, y);
-			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
+			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 	
@@ -108,7 +109,7 @@ public class SuggestionRenderers
 			PotionUtils.setCustomEffects(item, ObjectLists.singleton(new MobEffectInstance(potion)));
 			item.addTagElement("CustomPotionColor", IntTag.valueOf(potion.getColor()));
 			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item, x, y);
-			return potion.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
+			return potion.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append("\n").append(new TextComponent(id.toString()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 	

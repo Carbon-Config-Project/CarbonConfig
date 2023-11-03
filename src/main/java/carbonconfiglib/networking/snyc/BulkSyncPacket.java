@@ -8,6 +8,7 @@ import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.SyncType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
@@ -71,7 +72,7 @@ public class BulkSyncPacket implements ICarbonPacket
 			result = ReloadMode.or(result, packet.processEntry(player));
 		}
 		if(result != null) {
-			player.sendSystemMessage(result.getMessage());
+			player.sendMessage(result.getMessage(), Util.NIL_UUID);
 		}
 	}
 	

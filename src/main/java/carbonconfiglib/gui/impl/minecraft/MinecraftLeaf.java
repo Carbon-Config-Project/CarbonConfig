@@ -12,6 +12,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -96,11 +98,11 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public Component getTooltip() {
 		String id = entry.getDescriptionId();
-		MutableComponent result = Component.empty();
-		result.append(Component.translatable(id).withStyle(ChatFormatting.YELLOW));
+		MutableComponent result = new TextComponent("");
+		result.append(new TranslatableComponent(id).withStyle(ChatFormatting.YELLOW));
 		id += ".description";
 		if(I18n.exists(id)) {
-			result.append("\n").append(Component.translatable(id).withStyle(ChatFormatting.GRAY));
+			result.append("\n").append(new TranslatableComponent(id).withStyle(ChatFormatting.GRAY));
 		}
 		return result;
 	}

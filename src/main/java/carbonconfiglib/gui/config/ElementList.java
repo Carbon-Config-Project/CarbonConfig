@@ -193,14 +193,14 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 		if(customBackground == null || (minecraft.level != null && customBackground.shouldDisableInLevel())) return;
 		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground.getTexture());
 	}
-	
+
 	@Override
-	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.renderList(stack, mouseX, mouseY, partialTicks);
+	protected void renderList(PoseStack stack, int left, int top, int mouseX, int mouseY, float partialTicks) {
+		super.renderList(stack, left, top, mouseX, mouseY, partialTicks);
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}
-	
+
 	public static void renderListOverlay(int x0, int x1, int y0, int y1, int width, int height, BackgroundTexture texture) {
 		Tesselator tes = Tesselator.getInstance();
 		BufferBuilder builder = tes.getBuilder();
