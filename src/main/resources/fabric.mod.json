@@ -7,7 +7,8 @@
   "description": "Carbon Config is IC2Classics Config Implementation made open source",
   "authors": [
     "Meduris",
-    "Speiger"
+    "Speiger",
+    "Trinsdar (1.18.2 port)"
   ],
   "contact": {
     "homepage": "https://github.com/Carbon-Config-Project/CarbonConfig",
@@ -29,9 +30,9 @@
     "mixins.carbonconfig.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.9",
+    "fabricloader": ">=0.12.6",
     "fabric-api": "*",
-    "minecraft": "~1.19.2",
+    "minecraft": "~1.18.2",
     "java": ">=17"
   },
   "suggests": {
