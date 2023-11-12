@@ -8,9 +8,14 @@ import java.util.function.Predicate;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy.IPotentialTarget;
+import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.gui.impl.carbon.ModConfig;
+import carbonconfiglib.gui.impl.forge.ForgeConfigs;
+import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraftforge.fml.ModList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,11 +41,25 @@ public interface IModConfig
 	public ConfigType getConfigType();
 	public IConfigNode getRootNode();
 	public boolean isDefault();
+	public boolean isLocalConfig();
 	public void restoreDefault();
 	public List<IConfigTarget> getPotentialFiles();
 	public IModConfig loadFromFile(Path path);
 	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network);
 	public void save();
+	
+	public static IModConfig carbon(String modId, ConfigHandler handler) {
+		return new ModConfig(modId, handler);
+	}
+	
+	public static IModConfig forge(String modId, ConfigType type) {
+		List<IModConfig> config = new ForgeConfigs(ModList.get().getModContainerById(modId).orElse(null)).getConfigInstances(type);
+		return config == null || config.isEmpty() ? null : config.get(0);
+	}
+	
+	public static IModConfig minecraft() {
+		return new MinecraftConfig();
+	}
 	
 	public static interface IConfigTarget extends IPotentialTarget {
 		public Path getConfigFile();

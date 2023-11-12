@@ -96,6 +96,11 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	@Override
+	public boolean isLocalConfig() {
+		return path == null;
+	}
+	
+	@Override
 	public ConfigType getConfigType() {
 		switch(config.getType()) {
 			case CLIENT: return ConfigType.CLIENT;
@@ -223,5 +228,7 @@ public class ForgeConfig implements IModConfig
 			CarbonConfig.NETWORK.sendToServer(new SaveForgeConfigPacket(config.getType(), config.getModId(), stream.toByteArray()));
 		}
 		
+		@Override
+		public boolean isLocalConfig() { return false; }
 	}
 }

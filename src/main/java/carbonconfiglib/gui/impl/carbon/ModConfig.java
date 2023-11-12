@@ -111,6 +111,11 @@ public class ModConfig implements IModConfig
 	}
 	
 	@Override
+	public boolean isLocalConfig() {
+		return path == handler.getConfigFile();
+	}
+	
+	@Override
 	public ConfigType getConfigType() {
 		return handler.getConfigType();
 	}
@@ -168,5 +173,8 @@ public class ModConfig implements IModConfig
 		public void save() {
 			CarbonConfig.NETWORK.sendToServer(new SaveConfigPacket(handler.getConfigIdentifer(), config.serialize(MultilinePolicy.DISABLED)));
 		}
+		
+		@Override
+		public boolean isLocalConfig() { return false; }
 	}
 }

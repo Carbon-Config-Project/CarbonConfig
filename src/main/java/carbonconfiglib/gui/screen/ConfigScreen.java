@@ -34,6 +34,7 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraftforge.fml.ModList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -66,6 +67,10 @@ public class ConfigScreen extends ListScreen
 	boolean wasChanged = false;
 	Navigator nav;
 	List<Element> cache = null;
+	
+	public ConfigScreen(IModConfig config, Screen parent) {
+		this(Navigator.create(config), config, parent);
+	}
 	
 	public ConfigScreen(Navigator nav, IModConfig config, Screen parent) {
 		this(nav, config, parent, BackgroundTexture.DEFAULT.asHolder());
@@ -106,6 +111,14 @@ public class ConfigScreen extends ListScreen
 			deepSearch = addRenderableWidget(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH_SELECTED, Icon.SEARCH, false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
 			onlyChanged = addRenderableWidget(new CarbonIconCheckbox(x+227, 25, 20, 20, Icon.SET_DEFAULT, Icon.REVERT, false).withListener(this::onChangedButton).setTooltip(this, "gui.carbonconfig.changed_only"));
 			onlyNonDefault = addRenderableWidget(new CarbonIconCheckbox(x+249, 25, 20, 20, Icon.NOT_DEFAULT_SELECTED, Icon.NOT_DEFAULT, false).withListener(this::onDefaultButton).setTooltip(this, "gui.carbonconfig.default_only"));
+		}
+		String walkNode = nav.getWalkNode();
+		if(walkNode != null) {
+			FolderElement element = getElement(walkNode);
+			if(element != null) {
+				element.onPress(null);
+			}
+			nav.consumeWalker();
 		}
 	}
 	
@@ -375,10 +388,23 @@ public class ConfigScreen extends ListScreen
 		return results;
 	}
 	
+	public FolderElement getElement(String name) {
+		for(Element element : allEntries) {
+			if(element instanceof FolderElement) {
+				FolderElement folder = (FolderElement)element;
+				if(folder.getNode() != null && name.equalsIgnoreCase(folder.getNode().getNodeName())) {
+					return folder;
+				}
+			}
+		}
+		return null;
+	}
+	
 	public static class Navigator {
 		private static final Component SPLITTER = Component.literal(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
 		List<Component> layer = new ObjectArrayList<>();
 		List<Screen> screenByIndex = new ObjectArrayList<>();
+		List<String> walker = null;
 		MutableComponent buildCache = null;
 		
 		private Navigator() {}
@@ -387,12 +413,36 @@ public class ConfigScreen extends ListScreen
 			layer.add(base);
 		}
 		
+		public static Navigator create(IModConfig config) {
+			Navigator nav = new Navigator(Component.literal(ModList.get().getModContainerById(config.getModId()).map(T -> T.getModInfo().getDisplayName()).orElse("Unknown")));
+			nav.setScreenForLayer(null);
+			return nav.add(Component.translatable("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase()));
+		}
+		
 		public Navigator add(Component name) {
+			return add(name, null);
+		}
+		
+		public Navigator add(Component name, String walkerEntry) {
 			Navigator nav = new Navigator();
 			nav.layer.addAll(layer);
 			nav.screenByIndex.addAll(screenByIndex);
 			nav.layer.add(name);
+			if(walker != null && walker.size() > 1 && walkerEntry != null && walker.indexOf(walkerEntry.toLowerCase(Locale.ROOT)) == 0) {
+				nav.walker = new ObjectArrayList<>();
+				for(int i = 1;i<walker.size();i++) {
+					nav.walker.add(walker.get(i));
+				}
+			}
 			return nav;
+		}
+		
+		public Navigator withWalker(String...traversePath) {
+			walker = new ObjectArrayList<>();
+			for(String path : traversePath) {
+				walker.add(path.toLowerCase(Locale.ROOT));
+			}
+			return this;
 		}
 		
 		public void setScreenForLayer(Screen owner) {
@@ -409,6 +459,14 @@ public class ConfigScreen extends ListScreen
 				x-=splitterWidth;
 			}
 			return null;
+		}
+		
+		protected void consumeWalker() {
+			walker = null;
+		}
+		
+		protected String getWalkNode() {
+			return walker == null ? null : walker.get(0);
 		}
 		
 		public Component getHeader() {

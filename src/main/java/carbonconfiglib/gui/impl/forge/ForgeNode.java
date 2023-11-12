@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.impl.forge;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
@@ -83,10 +84,9 @@ public class ForgeNode implements IConfigFolderNode
 	}
 	
 	@Override
-	public Component getName() {
-		return IConfigNode.createLabel(Iterables.getLast(paths, "Root"));
-	}
-	
+	public String getNodeName() { return paths.isEmpty() ? null : Iterables.getLast(paths, "Root").toLowerCase(Locale.ROOT); }
+	@Override
+	public Component getName() { return IConfigNode.createLabel(Iterables.getLast(paths, "Root")); }
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();

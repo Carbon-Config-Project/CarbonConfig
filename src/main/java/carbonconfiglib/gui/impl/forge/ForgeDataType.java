@@ -90,7 +90,7 @@ public class ForgeDataType<T>
 		Class<T> clz;
 		
 		EnumDataType(Class<T> clz) {
-			super(clz, DataType.STRING, null, null, null);
+			super(clz, DataType.ENUM, null, null, null);
 			this.clz = clz;
 		}
 		
