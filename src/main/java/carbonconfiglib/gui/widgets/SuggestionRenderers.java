@@ -1,8 +1,9 @@
 package carbonconfiglib.gui.widgets;
 
-import carbonconfiglib.gui.api.ISuggestionRenderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import carbonconfiglib.gui.api.ISuggestionRenderer;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.ChatFormatting;

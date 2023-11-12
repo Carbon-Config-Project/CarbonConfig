@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import carbonconfiglib.gui.api.IConfigFolderNode;
@@ -45,7 +46,8 @@ public class MinecraftFolder implements IConfigFolderNode {
 		}
 		return children;
 	}
-	
+	@Override
+	public String getNodeName() { return cat.name().toLowerCase(Locale.ROOT); }
 	@Override
 	public Component getName() {
 		return new TranslatableComponent(cat.getDescriptionId());

@@ -1,5 +1,13 @@
 package carbonconfiglib.gui.screen;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -15,10 +23,10 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconCheckbox;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -29,12 +37,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -107,6 +109,14 @@ public class ConfigScreen extends ListScreen
 			deepSearch = addRenderableWidget(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH_SELECTED, Icon.SEARCH, false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
 			onlyChanged = addRenderableWidget(new CarbonIconCheckbox(x+227, 25, 20, 20, Icon.SET_DEFAULT, Icon.REVERT, false).withListener(this::onChangedButton).setTooltip(this, "gui.carbonconfig.changed_only"));
 			onlyNonDefault = addRenderableWidget(new CarbonIconCheckbox(x+249, 25, 20, 20, Icon.NOT_DEFAULT_SELECTED, Icon.NOT_DEFAULT, false).withListener(this::onDefaultButton).setTooltip(this, "gui.carbonconfig.default_only"));
+		}
+		String walkNode = nav.getWalkNode();
+		if(walkNode != null) {
+			FolderElement element = getElement(walkNode);
+			if(element != null) {
+				element.onPress(null);
+			}
+			nav.consumeWalker();
 		}
 	}
 	
@@ -373,14 +383,26 @@ public class ConfigScreen extends ListScreen
 			Element element = node.getDataType().get(0).create(node);
 			if(element != null) results.add(element);
 		}
-		
 		return results;
+	}
+	
+	public FolderElement getElement(String name) {
+		for(Element element : allEntries) {
+			if(element instanceof FolderElement) {
+				FolderElement folder = (FolderElement)element;
+				if(folder.getNode() != null && name.equalsIgnoreCase(folder.getNode().getNodeName())) {
+					return folder;
+				}
+			}
+		}
+		return null;
 	}
 	
 	public static class Navigator {
 		private static final Component SPLITTER = new TextComponent(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
 		List<Component> layer = new ObjectArrayList<>();
 		List<Screen> screenByIndex = new ObjectArrayList<>();
+		List<String> walker = null;
 		MutableComponent buildCache = null;
 
 		private Navigator() {}
@@ -389,12 +411,36 @@ public class ConfigScreen extends ListScreen
 			layer.add(base);
 		}
 
+		public static Navigator create(IModConfig config) {
+			Navigator nav = new Navigator(new TextComponent(FabricLoader.getInstance().getModContainer(config.getModId()).map(T -> T.getMetadata().getName()).orElse("Unknown")));
+			nav.setScreenForLayer(null);
+			return nav.add(new TranslatableComponent("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase()));
+		}
+		
 		public Navigator add(Component name) {
+			return add(name, null);
+		}
+		
+		public Navigator add(Component name, String walkerEntry) {
 			Navigator nav = new Navigator();
 			nav.layer.addAll(layer);
 			nav.screenByIndex.addAll(screenByIndex);
 			nav.layer.add(name);
+			if(walker != null && walker.size() > 1 && walkerEntry != null && walker.indexOf(walkerEntry.toLowerCase(Locale.ROOT)) == 0) {
+				nav.walker = new ObjectArrayList<>();
+				for(int i = 1;i<walker.size();i++) {
+					nav.walker.add(walker.get(i));
+				}
+			}
 			return nav;
+		}
+		
+		public Navigator withWalker(String...traversePath) {
+			walker = new ObjectArrayList<>();
+			for(String path : traversePath) {
+				walker.add(path.toLowerCase(Locale.ROOT));
+			}
+			return this;
 		}
 
 		public void setScreenForLayer(Screen owner) {
@@ -412,7 +458,15 @@ public class ConfigScreen extends ListScreen
 			}
 			return null;
 		}
-
+		
+		protected void consumeWalker() {
+			walker = null;
+		}
+		
+		protected String getWalkNode() {
+			return walker == null ? null : walker.get(0);
+		}
+		
 		public Component getHeader() {
 			if(buildCache == null) {
 				buildCache = new TextComponent("");

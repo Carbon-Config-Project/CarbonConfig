@@ -20,9 +20,6 @@ import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
@@ -33,12 +30,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelSummary;
-
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris

@@ -44,6 +44,8 @@ public class ConfigRoot implements IConfigFolderNode
 		return children;
 	}
 	@Override
+	public String getNodeName() { return null; }
+	@Override
 	public Component getName() { return IConfigNode.createLabel(config.getName()); }
 	@Override
 	public boolean isRoot() { return true; }

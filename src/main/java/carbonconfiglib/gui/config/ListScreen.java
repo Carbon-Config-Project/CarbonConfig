@@ -12,7 +12,6 @@ import carbonconfiglib.gui.screen.MultiChoiceScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -23,15 +22,8 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris

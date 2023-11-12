@@ -7,8 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 
-import java.util.List;
-
 /**
  * Copyright 2023 Speiger, Meduris
  * 
@@ -46,6 +44,7 @@ public interface IConfigNode
 	public boolean requiresRestart();
 	public boolean requiresReload();
 	
+	public String getNodeName();
 	public Component getName();
 	public Component getTooltip();
 	

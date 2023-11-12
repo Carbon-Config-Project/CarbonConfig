@@ -8,6 +8,9 @@ import java.util.function.Predicate;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy.IPotentialTarget;
+import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.gui.impl.carbon.ModConfig;
+import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -33,6 +36,7 @@ public interface IModConfig
 	public String getConfigName();
 	public String getModId();
 	public boolean isDynamicConfig();
+	public boolean isLocalConfig();
 	public ConfigType getConfigType();
 	public IConfigNode getRootNode();
 	public boolean isDefault();
@@ -41,6 +45,14 @@ public interface IModConfig
 	public IModConfig loadFromFile(Path path);
 	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network);
 	public void save();
+	
+	public static IModConfig carbon(String modId, ConfigHandler handler) {
+		return new ModConfig(modId, handler);
+	}
+	
+	public static IModConfig minecraft() {
+		return new MinecraftConfig();
+	}
 	
 	public static interface IConfigTarget extends IPotentialTarget {
 		public Path getConfigFile();

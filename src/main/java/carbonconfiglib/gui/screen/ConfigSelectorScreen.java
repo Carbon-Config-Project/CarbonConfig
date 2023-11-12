@@ -1,5 +1,10 @@
 package carbonconfiglib.gui.screen;
 
+import java.util.List;
+import java.util.function.Consumer;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -14,7 +19,6 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
@@ -24,9 +28,6 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris

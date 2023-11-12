@@ -20,9 +20,6 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Copyright 2023 Speiger, Meduris
  * 

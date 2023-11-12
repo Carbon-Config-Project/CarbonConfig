@@ -4,11 +4,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
-import carbonconfiglib.gui.widgets.CarbonIconButton;
-import carbonconfiglib.gui.widgets.GuiUtils;
-import carbonconfiglib.gui.widgets.IOwnable;
-import carbonconfiglib.gui.widgets.Icon;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
@@ -17,8 +12,12 @@ import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
+import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
-import com.mojang.blaze3d.vertex.PoseStack;
+import carbonconfiglib.gui.widgets.CarbonIconButton;
+import carbonconfiglib.gui.widgets.GuiUtils;
+import carbonconfiglib.gui.widgets.IOwnable;
+import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -26,10 +25,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -306,6 +301,10 @@ public class ConfigElement extends Element
 	
 	public boolean isDefault() {
 		return value.isDefault();
+	}
+	
+	public IConfigNode getNode() {
+		return node;
 	}
 	
 	protected void onDeleted(CarbonIconButton button) {

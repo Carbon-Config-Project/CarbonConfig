@@ -22,10 +22,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import org.apache.logging.log4j.util.Strings;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -129,8 +125,9 @@ public class ConfigCompoundLeaf implements IConfigNode
 		}
 	}
 	@Override
+	public String getNodeName() { return null; }
+	@Override
 	public Component getName() { return IConfigNode.createLabel(entry.getKey()); }
-	
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = new TextComponent("");

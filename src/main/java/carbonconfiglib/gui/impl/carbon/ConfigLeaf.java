@@ -18,9 +18,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import org.apache.logging.log4j.util.Strings;
-
-import java.util.List;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -109,8 +106,9 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public boolean requiresReload() { return entry.getReloadState() == ReloadMode.WORLD; }
 	@Override
+	public String getNodeName() { return null; }
+	@Override
 	public Component getName() { return IConfigNode.createLabel(entry.getKey()); }
-	
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = new TextComponent("");

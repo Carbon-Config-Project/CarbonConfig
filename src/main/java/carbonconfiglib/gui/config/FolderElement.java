@@ -1,12 +1,12 @@
 package carbonconfiglib.gui.config;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 /**
@@ -32,10 +32,10 @@ public class FolderElement extends ConfigElement
 	public FolderElement(IConfigNode node, Navigator prev) {
 		super(node);
 		button.setMessage(node.getName());
-		nav = prev.add(node.getName());	
+		nav = prev.add(node.getName(), node.getNodeName());
 	}
 	
-	protected void onPress(Button button) {
+	public void onPress(Button button) {
 		mc.setScreen(new ConfigScreen(nav, node, mc.screen, owner.getCustomTexture()));
 	}
 	

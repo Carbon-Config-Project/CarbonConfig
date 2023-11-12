@@ -15,15 +15,11 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.config.SelectionElement;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris

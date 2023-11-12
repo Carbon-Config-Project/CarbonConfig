@@ -1,12 +1,13 @@
 package carbonconfiglib.gui.widgets;
 
+import java.util.function.Consumer;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.TextComponent;
-
-import java.util.function.Consumer;
 
 /**
  * Copyright 2023 Speiger, Meduris

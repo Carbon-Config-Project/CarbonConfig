@@ -1,5 +1,7 @@
 package carbonconfiglib.gui.config;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
@@ -7,7 +9,6 @@ import carbonconfiglib.gui.screen.EditStringScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;

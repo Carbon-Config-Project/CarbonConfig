@@ -19,10 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 /**
  * Copyright 2023 Speiger, Meduris
  * 
