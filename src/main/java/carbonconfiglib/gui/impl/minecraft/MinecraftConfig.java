@@ -115,6 +115,11 @@ public class MinecraftConfig implements IModConfig
 	}
 	
 	@Override
+	public boolean isLocalConfig() {
+		return EventHandler.getServer() != null;
+	}
+	
+	@Override
 	public ConfigType getConfigType() {
 		return ConfigType.SERVER;
 	}

@@ -88,7 +88,8 @@ public class CarbonNetwork
 	
 	@Environment(EnvType.CLIENT)
 	protected Player getClientPlayer() {
-		return Minecraft.getInstance().player;
+		Minecraft mc = Minecraft.getInstance();
+		return mc == null ? null : mc.player;
 	}
 	
 	protected ResourceLocation toId(ICarbonPacket packet) {
