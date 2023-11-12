@@ -99,6 +99,11 @@ public class ModConfig implements IModConfig
 	}
 	
 	@Override
+	public boolean isLocalConfig() {
+		return path == handler.getConfigFile();
+	}
+	
+	@Override
 	public List<IConfigTarget> getPotentialFiles() {
 		List<IConfigTarget> result = new ObjectArrayList<>();
 		for(IPotentialTarget target : handler.getProxy().getPotentialConfigs()) {
@@ -108,11 +113,6 @@ public class ModConfig implements IModConfig
 			else result.add(new SimpleConfigTarget(target, file));
 		}
 		return result;
-	}
-	
-	@Override
-	public boolean isLocalConfig() {
-		return path == handler.getConfigFile();
 	}
 	
 	@Override
