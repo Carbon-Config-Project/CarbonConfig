@@ -152,8 +152,9 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public boolean requiresReload() { return spec.needsWorldRestart(); }
 	@Override
+	public String getNodeName() { return null; }
+	@Override
 	public Component getName() { return IConfigNode.createLabel(Iterables.getLast(data.getPath(), "")); }
-	
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = new TextComponent("");

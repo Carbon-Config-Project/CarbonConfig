@@ -107,7 +107,8 @@ public class CarbonNetwork
 	
 	@OnlyIn(Dist.CLIENT)
 	protected Player getClientPlayer() {
-		return Minecraft.getInstance().player;
+		Minecraft mc = Minecraft.getInstance();
+		return mc == null ? null : mc.player;
 	}
 	
 	public void sendToServer(ICarbonPacket packet) {

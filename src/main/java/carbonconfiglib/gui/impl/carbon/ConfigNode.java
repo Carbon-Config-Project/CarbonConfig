@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.impl.carbon;
 
 import java.util.List;
+import java.util.Locale;
 
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigSection;
@@ -54,6 +55,8 @@ public class ConfigNode implements IConfigFolderNode
 		}
 		return children;
 	}
+	@Override
+	public String getNodeName() { return section.getName().toLowerCase(Locale.ROOT); }
 	@Override
 	public Component getName() { return IConfigNode.createLabel(section.getName()); }
 	@Override

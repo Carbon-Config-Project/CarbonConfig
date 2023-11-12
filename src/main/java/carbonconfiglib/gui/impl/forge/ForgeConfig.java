@@ -98,6 +98,11 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	@Override
+	public boolean isLocalConfig() {
+		return path == null;
+	}
+	
+	@Override
 	public ConfigType getConfigType() {
 		switch(config.getType()) {
 			case CLIENT: return ConfigType.CLIENT;

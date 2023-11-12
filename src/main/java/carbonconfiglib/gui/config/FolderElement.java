@@ -33,10 +33,10 @@ public class FolderElement extends ConfigElement
 	{
 		super(node);
 		button.setMessage(node.getName());
-		nav = prev.add(node.getName());
+		nav = prev.add(node.getName(), node.getNodeName());
 	}
 	
-	protected void onPress(Button button) {
+	public void onPress(Button button) {
 		mc.setScreen(new ConfigScreen(nav, node, mc.screen, owner.getCustomTexture()));
 	}
 	

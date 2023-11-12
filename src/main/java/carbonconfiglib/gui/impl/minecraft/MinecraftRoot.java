@@ -44,14 +44,10 @@ public class MinecraftRoot implements IConfigFolderNode
 		}
 		return children;
 	}
-	
 	@Override
-	public Component getName() {
-		return new TextComponent("Minecraft");
-	}
-	
+	public String getNodeName() { return null; }
 	@Override
-	public boolean isRoot() {
-		return true;
-	}
+	public Component getName() { return new TextComponent("Minecraft"); }
+	@Override
+	public boolean isRoot() { return true; }
 }

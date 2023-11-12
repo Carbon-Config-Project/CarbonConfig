@@ -294,6 +294,10 @@ public class ConfigElement extends Element
 		return value.isDefault();
 	}
 	
+	public IConfigNode getNode() {
+		return node;
+	}
+	
 	protected void onDeleted(CarbonIconButton button) {
 		if(!isArray()) return;
 		owner.removeEntry(this);

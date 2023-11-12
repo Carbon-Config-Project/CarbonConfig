@@ -44,6 +44,7 @@ public interface IConfigNode
 	public boolean requiresRestart();
 	public boolean requiresReload();
 	
+	public String getNodeName();
 	public Component getName();
 	public Component getTooltip();
 	
