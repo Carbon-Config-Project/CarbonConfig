@@ -61,6 +61,10 @@ public class ForgeDataType<T>
 		return type;
 	}
 	
+	public boolean isEnum() {
+		return false;
+	}
+	
 	public String getLimitations(ValueSpec spec) {
 		if(rangeInfo == null) return "";
 		Object[] data = ForgeHelpers.getRangeInfo(spec);
@@ -95,6 +99,9 @@ public class ForgeDataType<T>
 		}
 		
 		@Override
+		public boolean isEnum() { return true; }
+		
+		@Override
 		public ParseResult<T> parse(String input) {
 			try { return ParseResult.success(Enum.valueOf(clz, input)); }
 			catch (Exception e) { return ParseResult.error(input, e, "Value must be one of the following: "+Arrays.toString(toArray(null))); }
@@ -107,7 +114,7 @@ public class ForgeDataType<T>
 		
 		public List<Suggestion> getSuggestions(ValueSpec spec) {
 			List<Suggestion> result = new ObjectArrayList<>();
-			ISuggestionProvider.enums(clz).provideSuggestions(result::add, spec::test);
+			ISuggestionProvider.enums(clz).provideSuggestions(result::add, T -> spec.test(T.getValue()));
 			return result;
 		}
 		
