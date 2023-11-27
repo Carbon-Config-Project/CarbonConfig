@@ -16,10 +16,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PlayChannelHandler;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -73,13 +76,10 @@ public class CarbonNetwork
 	}
 		
 	
+	@Environment(EnvType.CLIENT)
 	private <T extends ICarbonPacket> void registerClientPacket(String id, Supplier<T> creator) {
-		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("carbonconfig", id), (client, handler, buf, responseSender) -> {
-			T packet = creator.get();
-			packet.read(buf);
-			//Lets hope local players are covered by this, because Fabric MUST SUCK THIS BADLY
-			client.execute(() -> packet.process(client.player));
-		});
+		//Have to use wrapper because fabric doesn't delete subclasses properly...
+		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("carbonconfig", id), new ClientReceiver<>(creator));
 	}
 	
 	public boolean isInWorld() {
@@ -145,5 +145,22 @@ public class CarbonNetwork
 			throw new RuntimeException("Sending a Packet to a Player from client is not allowed");
 		}
 		ServerPlayNetworking.send((ServerPlayer)player, toId(packet), toData(packet));
+	}
+	
+	@Environment(EnvType.CLIENT)
+	private static class ClientReceiver<T extends ICarbonPacket> implements PlayChannelHandler {
+		Supplier<T> creator;
+		
+		public ClientReceiver(Supplier<T> creator) {
+			this.creator = creator;
+		}
+		
+		@Override
+		public void receive(Minecraft client, ClientPacketListener handler, FriendlyByteBuf buf, PacketSender responseSender) {			
+			T packet = creator.get();
+			packet.read(buf);
+			//Lets hope local players are covered by this, because Fabric MUST SUCK THIS BADLY
+			client.execute(() -> packet.process(client.player));
+		}
 	}
 }
