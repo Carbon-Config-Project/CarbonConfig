@@ -18,6 +18,7 @@ import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
+import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.utils.SyncType;
@@ -25,6 +26,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
@@ -37,7 +39,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
@@ -67,7 +69,7 @@ import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
 public class EventHandler implements IConfigChangeListener
 {
 	public static final EventHandler INSTANCE = new EventHandler();
-	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<>();
+	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
@@ -171,17 +173,24 @@ public class EventHandler implements IConfigChangeListener
 		return new ConfigSelectorScreen(configs, screen);
 	}
 	
-	@SubscribeEvent
-	public void onPlayerServerJoinEvent(PlayerLoggedInEvent event) {
+	public void onServerJoinPacket(Player player) {
+		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Dist.DEDICATED_SERVER), player);
+		CarbonConfig.NETWORK.onPlayerJoined(player, true);
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);
 		if(packet == null) return;
-		CarbonConfig.NETWORK.sendToPlayer(packet, event.getPlayer());
+		CarbonConfig.NETWORK.sendToPlayer(packet, player);
+	}
+	
+	@SubscribeEvent
+	public void onServerLeaveEvent(PlayerLoggedOutEvent event) {
+		CarbonConfig.NETWORK.onPlayerLeft(event.getPlayer(), true);		
 	}
 	
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
 	public void onPlayerServerJoinEvent(LoggedInEvent event) {
 		if(Minecraft.getInstance().getCurrentServer() != null) loadMPConfigs();
+		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Dist.CLIENT));
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
 		if(packet == null) return;
 		CarbonConfig.NETWORK.sendToServer(packet);

@@ -123,7 +123,7 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	private boolean isInstalledOnServer() {
-		return CarbonConfig.NETWORK.isInstalledOnServer(minecraft.player);
+		return CarbonConfig.NETWORK.isInstalledOnServer();
 	}
 	
 	private boolean isLanServer() {
