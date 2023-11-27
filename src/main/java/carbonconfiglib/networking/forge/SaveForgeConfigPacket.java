@@ -50,21 +50,21 @@ public class SaveForgeConfigPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeEnum(type);
-		buffer.writeUtf(modId, 32767);
+		buffer.writeEnumValue(type);
+		buffer.writeString(modId, 32767);
 		buffer.writeByteArray(data);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		type = buffer.readEnum(ModConfig.Type.class);
-		modId = buffer.readUtf(32767);
+		type = buffer.readEnumValue(ModConfig.Type.class);
+		modId = buffer.readString(32767);
 		data = buffer.readByteArray();
 	}
 	
 	@Override
 	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
+		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
 			return;
 		}
 		ModConfig config = findConfig();
@@ -82,6 +82,6 @@ public class SaveForgeConfigPacket implements ICarbonPacket
 	
 	private boolean canIgnorePermissionCheck() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
+		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

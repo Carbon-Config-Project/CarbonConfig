@@ -1,12 +1,11 @@
 package carbonconfiglib.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ElementList;
+import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.gui.screen.ConfirmScreen;
@@ -14,7 +13,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -56,11 +54,11 @@ public class EditStringScreen extends Screen
 	protected void init() {
 		super.init();
 		int x = width / 2 - 100;
-		Button apply = addButton(new Button(x+10, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.apply"), this::save));
-		addButton(new Button(x+105, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.cancel"), this::cancel));
-		textBox = new TextFieldWidget(font, x, 113, 200, 18, new StringTextComponent(""));
+		Button apply = addButton(new CarbonButton(x+10, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.apply"), this::save));
+		addButton(new CarbonButton(x+105, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.cancel"), this::cancel));
+		textBox = new TextFieldWidget(font, x, 113, 200, 18, "");
 		addButton(textBox);
-		textBox.setValue(value.get());
+		textBox.setText(value.get());
 		textBox.setResponder(T -> {
 			textBox.setTextColor(0xE0E0E0);
 			valid = true;
@@ -70,42 +68,43 @@ public class EditStringScreen extends Screen
 				valid = false;
 			}
 			apply.active = valid;
-			if(valid) value.set(textBox.getValue());
+			if(valid) value.set(textBox.getText());
 		});
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(int mouseX, int mouseY, float partialTicks) {
 		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
 		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 85, -1);
+		super.render(mouseX, mouseY, partialTicks);
+		String title = this.title.getFormattedText();
+		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderToolTip(stack, new ObjectArrayList<>(font.split(new StringTextComponent(result.getError().getMessage()), Integer.MAX_VALUE)), mouseX, mouseY, font);
+			renderTooltip(new ObjectArrayList<>(font.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY, font);
 		}
 	}
 	
 	@Override
 	public void onClose() {
 		value.setPrevious();
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private void save(Button button) {
 		if(!valid) return;
 		value.apply();
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private void cancel(Button button) {
 		if(value.isChanged()) {
-			minecraft.setScreen(new ConfirmScreen(T -> {
+			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
 				if(T) value.setPrevious();
-				minecraft.setScreen(T ? parent : this);
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
+				minecraft.displayGuiScreen(T ? parent : this);
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
 			return;
 		}
 		value.setPrevious();
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 }

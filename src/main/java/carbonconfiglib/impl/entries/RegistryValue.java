@@ -80,7 +80,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		String[] values = Helpers.splitArray(value, ",");
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		for(int i = 0,m=values.length;i<m;i++) {
-			ResourceLocation location = ResourceLocation.tryParse(values[i]);
+			ResourceLocation location = ResourceLocation.tryCreate(values[i]);
 			if(location == null) continue;
 			T entry = registry.getValue(location);
 			if(entry == null || (filter != null && !filter.test(entry))) continue;
@@ -122,7 +122,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 	public ParseResult<Boolean> canSetArray(List<String> entries) {
 		if(entries == null) return ParseResult.partial(false, NullPointerException::new, "Value isn't allowed to be null");
 		for(int i = 0,m=entries.size();i<m;i++) {
-			T result = registry.getValue(ResourceLocation.tryParse(entries.get(i)));
+			T result = registry.getValue(ResourceLocation.tryCreate(entries.get(i)));
 			if(result == null) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entries.get(i)+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(result)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entries.get(i)+"] isn't allowed");
 		}

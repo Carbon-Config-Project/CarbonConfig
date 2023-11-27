@@ -47,7 +47,7 @@ public class CompoundElement extends ConfigElement
 	}
 	
 	private void onPress(Button button) {
-		mc.setScreen(new CompoundScreen(node, compound, mc.screen, owner.getCustomTexture()));
+		mc.displayGuiScreen(new CompoundScreen(node, compound, mc.currentScreen, owner.getCustomTexture()));
 	}
 	
 	@Override

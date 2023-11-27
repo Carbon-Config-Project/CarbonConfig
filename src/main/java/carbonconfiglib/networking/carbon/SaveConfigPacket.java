@@ -40,19 +40,19 @@ public class SaveConfigPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUtf(identifier, 32767);
-		buffer.writeUtf(data, 262144);
+		buffer.writeString(identifier, 32767);
+		buffer.writeString(data, 262144);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		identifier = buffer.readUtf(32767);
-		data = buffer.readUtf(262144);
+		identifier = buffer.readString(32767);
+		data = buffer.readString(262144);
 	}
 	
 	@Override
 	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
+		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;
 		}
@@ -60,6 +60,7 @@ public class SaveConfigPacket implements ICarbonPacket
 		if(handler == null) return;
 		try {
 			ConfigHandler.load(handler, handler.getConfig(), ObjectArrayList.wrap(data.split("\n")), false);
+			//TODO update
 			handler.onSynced();
 			handler.save();
 			CarbonConfig.LOGGER.info("Saved ["+identifier+"] Config");
@@ -71,7 +72,7 @@ public class SaveConfigPacket implements ICarbonPacket
 	
 	private boolean canIgnorePermissionCheck() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
+		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 	
 }

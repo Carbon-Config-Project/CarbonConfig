@@ -2,8 +2,6 @@ package carbonconfiglib.gui.config;
 
 import java.util.List;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -31,7 +29,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class Element extends AbstractOptionList.Entry<Element> {
 	protected Minecraft mc = Minecraft.getInstance();
-	protected FontRenderer font = mc.font;
+	protected FontRenderer font = mc.fontRenderer;
 	protected ITextComponent name;
 	protected ITextComponent unchanged;
 	protected ITextComponent changed;
@@ -48,8 +46,8 @@ public class Element extends AbstractOptionList.Entry<Element> {
 	
 	public void setName(ITextComponent newName) {
 		this.name = newName;
-		this.unchanged = name.copy().withStyle(TextFormatting.GRAY);
-		this.changed = name.copy().withStyle(TextFormatting.ITALIC);
+		this.unchanged = name.deepCopy().applyTextStyle(TextFormatting.GRAY);
+		this.changed = name.deepCopy().applyTextStyle(TextFormatting.ITALIC);
 	}
 		
 	public void updateValues() {
@@ -70,15 +68,15 @@ public class Element extends AbstractOptionList.Entry<Element> {
 	}
 	
 	@Override
-	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 	}
 	
-	protected void renderName(MatrixStack stack, float x, float y, boolean changed, int width, int height) {
-		GuiUtils.drawScrollingString(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
+	protected void renderName(float x, float y, boolean changed, int width, int height) {
+		GuiUtils.drawScrollingString(font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
-	protected void renderText(MatrixStack stack, ITextComponent text, float x, float y, float width, float height, GuiAlign align, int color) {
-		GuiUtils.drawScrollingString(stack, font, text, x, y, width, height, align, -1, hash);
+	protected void renderText(ITextComponent text, float x, float y, float width, float height, GuiAlign align, int color) {
+		GuiUtils.drawScrollingString(font, text, x, y, width, height, align, -1, hash);
 	}
 	
 	@Override

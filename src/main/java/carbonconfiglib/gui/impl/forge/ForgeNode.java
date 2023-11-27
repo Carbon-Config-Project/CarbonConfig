@@ -61,7 +61,7 @@ public class ForgeNode implements IConfigFolderNode
 		String[] array = value.split("\n");
 		if(array != null && array.length > 0) {
 			TextComponent comp = new StringTextComponent("");
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]));
+			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]));
 			tooltip = comp;
 		}
  	}
@@ -91,8 +91,8 @@ public class ForgeNode implements IConfigFolderNode
 	@Override
 	public ITextComponent getTooltip() {
 		TextComponent comp = new StringTextComponent("");
-		comp.append(new StringTextComponent(Iterables.getLast(paths, "Root")).withStyle(TextFormatting.YELLOW));
-		if(tooltip != null) comp.append(tooltip);
+		comp.appendSibling(new StringTextComponent(Iterables.getLast(paths, "Root")).applyTextStyle(TextFormatting.YELLOW));
+		if(tooltip != null) comp.appendSibling(tooltip);
 		return comp;
 	}
 	

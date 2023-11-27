@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.screen.MultiChoiceScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
@@ -19,7 +17,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -42,7 +39,7 @@ import net.minecraft.util.text.TranslationTextComponent;
  */
 public abstract class ListScreen extends Screen implements IListOwner
 {
-	private static final ITextComponent LOG_INFO = new TranslationTextComponent("gui.carbonconfig.logo.name").withStyle(TextFormatting.GOLD).append("\n").append(new TranslationTextComponent("gui.carbonconfig.logo.page").withStyle(TextFormatting.GRAY));
+	private static final ITextComponent LOG_INFO = new TranslationTextComponent("gui.carbonconfig.logo.name").applyTextStyle(TextFormatting.GOLD).appendText("\n").appendSibling(new TranslationTextComponent("gui.carbonconfig.logo.page").applyTextStyle(TextFormatting.GRAY));
 	protected ElementList visibleList;
 	protected List<Element> allEntries = new ObjectArrayList<>();
 	protected List<ITextComponent> tooltips = new ObjectArrayList<>();
@@ -70,10 +67,9 @@ public abstract class ListScreen extends Screen implements IListOwner
 		visibleList.setScrollPadding(getScrollPadding());
 		collectElements(this::addEntry);
 		visibleList.addElements(sortElements(allEntries));
-		addWidget(visibleList);
 		if(shouldHaveSearch()) {
 			searchBox = new CarbonEditBox(font, width / 2 - 100, 25, 200, 20);
-			searchBox.setSuggestion(I18n.get("gui.carbonconfig.search"));
+			searchBox.setSuggestion(I18n.format("gui.carbonconfig.search"));
 			searchBox.setResponder(T -> onSearchChange(searchBox, T.toLowerCase(Locale.ROOT)));
 			addButton(searchBox);
 		}
@@ -92,26 +88,26 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(stack);
-		visibleList.render(stack, mouseX, mouseY, partialTicks);
-		super.render(stack, mouseX, mouseY, partialTicks);
-		GuiUtils.drawTextureRegion(stack, 5, 5, 40, 40, Icon.LOGO, 400, 400);
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		renderBackground();
+		visibleList.render(mouseX, mouseY, partialTicks);
+		super.render(mouseX, mouseY, partialTicks);
+		GuiUtils.drawTextureRegion(5, 5, 40, 40, Icon.LOGO, 400, 400);
 		if(mouseX >= 5 && mouseX <= 45 && mouseY >= 5 && mouseY <= 40) {
 			addTooltips(LOG_INFO);
 		}
-		handleForground(stack, mouseX, mouseY, partialTicks);
+		handleForground(mouseX, mouseY, partialTicks);
 		if(!tooltips.isEmpty()) {
-			List<IReorderingProcessor> text = new ObjectArrayList<>();
+			List<String> text = new ObjectArrayList<>();
 			for(ITextComponent entry : tooltips) {
-				text.addAll(font.split(entry, Math.max(mouseX, width - mouseX) - 20));
+				text.addAll(font.listFormattedStringToWidth(entry.getFormattedText(), Math.max(mouseX, width - mouseX) - 20));
 			}
-			renderTooltip(stack, text, mouseX, mouseY);
+			renderTooltip(text, mouseX, mouseY);
 			tooltips.clear();
 		}
 	}
 	
-	public void handleForground(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void handleForground(int mouseX, int mouseY, float partialTicks) {
 
 	}
 	
@@ -128,10 +124,10 @@ public abstract class ListScreen extends Screen implements IListOwner
 			MultiChoiceScreen screen = new MultiChoiceScreen(T -> {
 				if(T.isMain()) openURL("https://curseforge.com/minecraft/mc-mods/carbon-config");
 				else if(T.isOther()) openURL("https://modrinth.com/mod/carbon-config");
-				else minecraft.setScreen(this);
-			}, new TranslationTextComponent("gui.carbonconfig.logo.link.title"), new TranslationTextComponent("gui.carbonconfig.logo.link.message").withStyle(TextFormatting.GRAY), 
+				else minecraft.displayGuiScreen(this);
+			}, new TranslationTextComponent("gui.carbonconfig.logo.link.title"), new TranslationTextComponent("gui.carbonconfig.logo.link.message").applyTextStyle(TextFormatting.GRAY), 
 			   new TranslationTextComponent("gui.carbonconfig.logo.link.curseforge"), new TranslationTextComponent("gui.carbonconfig.logo.link.modrinth"), new TranslationTextComponent("gui.carbonconfig.reset_all.cancel"));
-			minecraft.setScreen(screen);
+			minecraft.displayGuiScreen(screen);
 			return true;
 		}
 		boolean result = super.mouseClicked(mouseX, mouseY, button);
@@ -140,9 +136,9 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	private void openURL(String url) {
-		minecraft.setScreen(new ConfirmOpenLinkScreen(T -> {
-            if (T) Util.getPlatform().openUri(url);
-            this.minecraft.setScreen(this);
+		minecraft.displayGuiScreen(new ConfirmOpenLinkScreen(T -> {
+            if (T) Util.getOSType().openURI(url);
+            this.minecraft.displayGuiScreen(this);
          }, url, true));
 	}
 	
@@ -165,7 +161,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 		
 	protected boolean onSearchChange(TextFieldWidget box, String value, List<Element> allEntries) {
 		if(value.isEmpty()) {
-			box.setSuggestion(I18n.get("gui.carbonconfig.search"));
+			box.setSuggestion(I18n.format("gui.carbonconfig.search"));
 			visibleList.updateList(allEntries);
 			visibleList.setScrollAmount(visibleList.getScrollAmount());
 			return true;

@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -114,10 +112,11 @@ public abstract class ListSelectionScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(int mouseX, int mouseY, float partialTicks) {
 		apply.active = value.isChanged();
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 8, -1);
+		super.render(mouseX, mouseY, partialTicks);
+		String title = this.title.getFormattedText();
+		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 8, -1);
 	}
 	
 	@Override
@@ -130,25 +129,25 @@ public abstract class ListSelectionScreen extends ListScreen
 	@Override
 	public void onClose() {
 		abort();
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private void save(Button button) {
 		value.apply();
 		if(successListener != null) successListener.run();
-		else minecraft.setScreen(parent);
+		else minecraft.displayGuiScreen(parent);
 	}
 	
 	private void cancel(Button button) {
 		if(value.isChanged() && !dontWarn) {
-			minecraft.setScreen(new ConfirmScreen(T -> {
+			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
 				if(T) abort();
-				minecraft.setScreen(T ? parent : this);	
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
+				minecraft.displayGuiScreen(T ? parent : this);	
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
 			return;
 		}
 		abort();
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private void abort() {
@@ -233,15 +232,15 @@ public abstract class ListSelectionScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			ISuggestionRenderer renderer = getRenderer();
 			if(renderer != null) {
-				ITextComponent comp = renderer.renderSuggestion(poseStack, suggestion.getValue(), left, top);
+				ITextComponent comp = renderer.renderSuggestion(suggestion.getValue(), left, top);
 				if(comp != null && mouseX >= left && mouseX <= left + 20 && mouseY >= top && mouseY <= top + 20) {
 					owner.addTooltips(comp);
 				}
 			}
-			renderText(poseStack, new StringTextComponent("").withStyle(myList.getSelected() == this ? TextFormatting.YELLOW : TextFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
+			renderText(new StringTextComponent("").applyTextStyle(myList.getSelected() == this ? TextFormatting.YELLOW : TextFormatting.WHITE).appendSibling(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
 		}
 		
 		private ISuggestionRenderer getRenderer() {

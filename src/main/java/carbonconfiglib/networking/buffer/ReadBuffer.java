@@ -80,7 +80,7 @@ public class ReadBuffer implements IReadBuffer
 	
 	@Override
 	public <T extends Enum<T>> T readEnum(Class<T> clz) {
-		return buf.readEnum(clz);
+		return buf.readEnumValue(clz);
 	}
 	
 	@Override
@@ -90,11 +90,11 @@ public class ReadBuffer implements IReadBuffer
 	
 	@Override
 	public String readString() {
-		return buf.readUtf(32767);
+		return buf.readString(32767);
 	}
 	
 	@Override
 	public UUID readUUID() {
-		return buf.readUUID();
+		return buf.readUniqueId();
 	}
 }

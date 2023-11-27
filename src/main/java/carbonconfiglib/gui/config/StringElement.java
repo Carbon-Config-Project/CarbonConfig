@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
@@ -49,7 +47,7 @@ public class StringElement extends ConfigElement
 		super.init();
 		if(this.isArray()) {
 			edit = addChild(new CarbonEditBox(font, 0, 0, 150, 18), GuiAlign.CENTER, 0);
-			edit.setValue(value.get());
+			edit.setText(value.get());
 			edit.setResponder(T -> {
 				edit.setTextColor(0xE0E0E0);
 				result = null;
@@ -74,21 +72,21 @@ public class StringElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
+	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).withStyle(TextFormatting.RED));			
+			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).applyTextStyle(TextFormatting.RED));			
 		}
 	}
 	
 	@Override
 	public void updateValues() {
 		if(edit != null) {
-			edit.setValue(value.get());
+			edit.setText(value.get());
 		}
 	}
 	
 	private void onPress(Button button) {
-		mc.setScreen(new EditStringScreen(mc.screen, name, node, value, owner.getCustomTexture()));
+		mc.displayGuiScreen(new EditStringScreen(mc.currentScreen, name, node, value, owner.getCustomTexture()));
 	}
 }

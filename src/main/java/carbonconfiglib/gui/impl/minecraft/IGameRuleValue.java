@@ -1,8 +1,12 @@
 package carbonconfiglib.gui.impl.minecraft;
 
+import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.context.ParsedArgument;
+
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
+import net.minecraft.command.CommandSource;
 import net.minecraft.world.GameRules.BooleanValue;
 import net.minecraft.world.GameRules.IntegerValue;
 import net.minecraft.world.GameRules.RuleKey;
@@ -57,12 +61,13 @@ public interface IGameRuleValue
 		@Override
 		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getBoolean(key)); }
 		@Override
-		public String getDescriptionId() { return key.getDescriptionId(); }
+		public String getDescriptionId() { return key.getName(); }
 		@Override
 		public DataType getType() { return DataType.BOOLEAN; }
 	}
 	
 	public static class IntegerEntry implements IGameRuleValue {
+		private static final CommandSource SOURCE = new CommandSource(null, null, null, null, 4, "Server", null, null, null);;
 		RuleKey<IntegerValue> key;
 		IntegerValue value;
 		
@@ -75,7 +80,7 @@ public interface IGameRuleValue
 		public void set(String value) {
 			ParseResult<Integer> result = Helpers.parseInt(value);
 			if(result.isValid()) {
-				this.value.tryDeserialize(result.getValue().toString());
+				this.value.updateValue(new CommandContextBuilder<>(null, SOURCE, null, 0).withArgument("value", new ParsedArgument<>(0, 0, result.getValue())).build(""), "value");
 			}
 		}
 		
@@ -90,7 +95,7 @@ public interface IGameRuleValue
 		@Override
 		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getInt(key)); }
 		@Override
-		public String getDescriptionId() { return key.getDescriptionId(); }
+		public String getDescriptionId() { return key.getName(); }
 		@Override
 		public DataType getType() { return DataType.INTEGER; }
 	}

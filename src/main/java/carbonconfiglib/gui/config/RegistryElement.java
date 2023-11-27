@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -55,7 +53,7 @@ public class RegistryElement extends ConfigElement
 		super.init();
 		if(this.isArray()) {
 			edit = addChild(new CarbonEditBox(font, 0, 0, 130, 18), GuiAlign.CENTER, 0);
-			edit.setValue(value.get());
+			edit.setText(value.get());
 			edit.setResponder(T -> {
 				edit.setTextColor(0xE0E0E0);
 				result = null;
@@ -82,16 +80,16 @@ public class RegistryElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
+	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(renderer != null) {
-			ITextComponent result = renderer.renderSuggestion(poseStack, value.get(), left + 20, top);
+			ITextComponent result = renderer.renderSuggestion(value.get(), left + 20, top);
 			if(result != null && mouseX >= left + 20 && mouseX <= left + 40 && mouseY >= top && mouseY <= top + 20) {
 				owner.addTooltips(result);
 			}
 		}
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).withStyle(TextFormatting.RED));			
+			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).applyTextStyle(TextFormatting.RED));			
 		}
 		
 	}
@@ -99,7 +97,7 @@ public class RegistryElement extends ConfigElement
 	@Override
 	public void updateValues() {
 		if(edit != null) {
-			edit.setValue(value.get());
+			edit.setText(value.get());
 		}
 	}
 }

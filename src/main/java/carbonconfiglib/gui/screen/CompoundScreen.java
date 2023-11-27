@@ -3,8 +3,6 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -81,12 +79,12 @@ public class CompoundScreen extends ListScreen
 	@Override
 	public void onClose() {
 		notifyClose();
-		minecraft.setScreen(prev);
+		minecraft.displayGuiScreen(prev);
 	}
 	
 	private void apply(Button button) {
 		compound.apply();
-		minecraft.setScreen(prev);
+		minecraft.displayGuiScreen(prev);
 	}
 	
 	private void notifyClose() {
@@ -97,14 +95,14 @@ public class CompoundScreen extends ListScreen
 	
 	private void goBack(Button button) {
 		if(compound.isChanged()) {
-			minecraft.setScreen(new ConfirmScreen(T -> {
+			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
 				if(T) notifyClose();
-				minecraft.setScreen(T ? prev : this);				
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
+				minecraft.displayGuiScreen(T ? prev : this);				
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
 			return;
 		}
 		notifyClose();
-		minecraft.setScreen(prev);
+		minecraft.displayGuiScreen(prev);
 	}
 	
 	@Override
@@ -124,8 +122,9 @@ public class CompoundScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 8, -1);
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		super.render(mouseX, mouseY, partialTicks);
+		String title = this.title.getFormattedText();
+		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 8, -1);
 	}
 }

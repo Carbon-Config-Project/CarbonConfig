@@ -2,8 +2,6 @@ package carbonconfiglib.gui.api;
 
 import java.util.Map;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.util.text.ITextComponent;
@@ -25,7 +23,7 @@ import net.minecraft.util.text.ITextComponent;
  */
 public interface ISuggestionRenderer
 {
-	public ITextComponent renderSuggestion(MatrixStack stack, String value, int x, int y);
+	public ITextComponent renderSuggestion(String value, int x, int y);
 	
 	public static class Registry {
 		private static final Map<Class<?>, ISuggestionRenderer> REGISTRY = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());

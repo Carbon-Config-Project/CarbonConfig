@@ -39,23 +39,23 @@ public class RequestGameRulesPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUUID(requestId);
+		buffer.writeUniqueId(requestId);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		requestId = buffer.readUUID();
+		requestId = buffer.readUniqueId();
 	}
 	
 	@Override
 	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
+		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
 			return;
 		}
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 		if(server == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeNbt(server.getGameRules().createTag());
+		buf.writeCompoundTag(server.getGameRules().write());
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(requestId, data), player);
@@ -63,6 +63,6 @@ public class RequestGameRulesPacket implements ICarbonPacket
 	
 	private boolean canIgnorePermissionCheck() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
+		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

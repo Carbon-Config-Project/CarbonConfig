@@ -42,25 +42,25 @@ public class ConfigRequestPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUUID(id);
-		buffer.writeUtf(identifier, 32767);
+		buffer.writeUniqueId(id);
+		buffer.writeString(identifier, 32767);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		id = buffer.readUUID();
-		identifier = buffer.readUtf(32767);
+		id = buffer.readUniqueId();
+		identifier = buffer.readString(32767);
 	}
 	
 	@Override
 	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
+		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
 			return;
 		}
 		ConfigHandler handler = CarbonConfig.CONFIGS.getConfig(identifier);
 		if(handler == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeUtf(handler.getConfig().serialize(MultilinePolicy.DISABLED), 262144);
+		buf.writeString(handler.getConfig().serialize(MultilinePolicy.DISABLED), 262144);
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(id, data), player);
@@ -68,6 +68,6 @@ public class ConfigRequestPacket implements ICarbonPacket
 	
 	private boolean canIgnorePermissionCheck() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
+		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

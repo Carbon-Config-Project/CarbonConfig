@@ -49,21 +49,21 @@ public class RequestConfigPacket implements ICarbonPacket
 	
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeEnum(type);
-		buffer.writeUUID(requestId);
-		buffer.writeUtf(modId, 32767);
+		buffer.writeEnumValue(type);
+		buffer.writeUniqueId(requestId);
+		buffer.writeString(modId, 32767);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		type = buffer.readEnum(ModConfig.Type.class);
-		requestId = buffer.readUUID();
-		modId = buffer.readUtf(32767);
+		type = buffer.readEnumValue(ModConfig.Type.class);
+		requestId = buffer.readUniqueId();
+		modId = buffer.readString(32767);
 	}
 	
 	@Override
 	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
+		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
 			return;
 		}
 		ModConfig config = findConfig();
@@ -96,6 +96,6 @@ public class RequestConfigPacket implements ICarbonPacket
 	
 	private boolean canIgnorePermissionCheck() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
+		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.impl.minecraft.MinecraftConfig.Category;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.GameRules.Category;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**

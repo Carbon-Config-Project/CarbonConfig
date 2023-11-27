@@ -6,8 +6,6 @@ import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -141,23 +139,23 @@ public class ConfigScreen extends ListScreen
 	public void tick() {
 		super.tick();
 		if(shouldHaveSearch() && (onlyChanged.selected() || onlyNonDefault.selected() || wasChanged)) {
-			onSearchChange(searchBox, searchBox.getValue().toLowerCase(Locale.ROOT));
+			onSearchChange(searchBox, searchBox.getText().toLowerCase(Locale.ROOT));
 			wasChanged = onlyChanged.selected() || onlyNonDefault.selected();
 		}
 	}
 	
 	@Override
-	public void handleForground(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		GuiUtils.drawScrollingString(stack, font, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
+	public void handleForground(int mouseX, int mouseY, float partialTicks) {
+		GuiUtils.drawScrollingString(font, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
 	}
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if(mouseX >= 50F && mouseX <= width-100 && mouseY >= 6 && mouseY <= 16) {
 			float scroll = GuiUtils.calculateScrollOffset(width-100, font, GuiAlign.CENTER, nav.getHeader(), 0);
-			Screen screen = nav.getScreen(font, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, font.width(nav.getHeader())) - scroll));
+			Screen screen = nav.getScreen(font, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, font.getStringWidth(nav.getHeader().getFormattedText())) - scroll));
 			if(screen instanceof ConfigScreen) {
-				minecraft.setScreen(screen);
+				minecraft.displayGuiScreen(screen);
 				return true;
 			}
 			else if(screen != null) { 
@@ -182,7 +180,7 @@ public class ConfigScreen extends ListScreen
 			parent = ((ConfigScreen)parent).parent;
 		}
 		if(prev != this) {
-			minecraft.setScreen(prev);
+			minecraft.displayGuiScreen(prev);
 		}
 	}
 	
@@ -196,21 +194,21 @@ public class ConfigScreen extends ListScreen
 		if(prev != this) {
 			Screen toOpen = prev.parent;
 			if(node.isRoot() && prev.isChanged()) {
-				minecraft.setScreen(new ConfirmScreen(T -> {
-					minecraft.setScreen(T ? toOpen : this);	
-				}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
+				minecraft.displayGuiScreen(new ConfirmScreen(T -> {
+					minecraft.displayGuiScreen(T ? toOpen : this);	
+				}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
 				return;
 			}
-			minecraft.setScreen(toOpen);
+			minecraft.displayGuiScreen(toOpen);
 		}
 	}
 	
 	private void reset(Button button) {
-		minecraft.setScreen(new MultiChoiceScreen(T -> {
+		minecraft.displayGuiScreen(new MultiChoiceScreen(T -> {
 			if(T.isMain()) processAction(IConfigNode::setDefault);
 			else if(T.isOther()) processAction(IConfigNode::setPrevious);
-			minecraft.setScreen(this);
-		}, new TranslationTextComponent("gui.carbonconfig.reset_all.title"), new TranslationTextComponent("gui.carbonconfig.reset_all.message").withStyle(TextFormatting.GRAY), 
+			minecraft.displayGuiScreen(this);
+		}, new TranslationTextComponent("gui.carbonconfig.reset_all.title"), new TranslationTextComponent("gui.carbonconfig.reset_all.message").applyTextStyle(TextFormatting.GRAY), 
 			new TranslationTextComponent("gui.carbonconfig.reset_all.default"), new TranslationTextComponent("gui.carbonconfig.reset_all.reset"), new TranslationTextComponent("gui.carbonconfig.reset_all.cancel")));
 	}
 	
@@ -219,19 +217,19 @@ public class ConfigScreen extends ListScreen
 		config.save();
 		if(findFirst(IConfigNode::requiresRestart, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
-				minecraft.setScreen(parent);
-			}, new TranslationTextComponent("gui.carbonconfig.restart.title"), new TranslationTextComponent("gui.carbonconfig.restart.message").withStyle(TextFormatting.GRAY), new TranslationTextComponent("gui.carbonconfig.ok"));
-			minecraft.setScreen(choice);
+				minecraft.displayGuiScreen(parent);
+			}, new TranslationTextComponent("gui.carbonconfig.restart.title"), new TranslationTextComponent("gui.carbonconfig.restart.message").applyTextStyle(TextFormatting.GRAY), new TranslationTextComponent("gui.carbonconfig.ok"));
+			minecraft.displayGuiScreen(choice);
 			return;
 		}
-		else if(minecraft.level != null && findFirst(IConfigNode::requiresReload, value)) {
+		else if(minecraft.world != null && findFirst(IConfigNode::requiresReload, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
-				minecraft.setScreen(parent);
-			}, new TranslationTextComponent("gui.carbonconfig.reload.title"), new TranslationTextComponent("gui.carbonconfig.reload.message").withStyle(TextFormatting.GRAY), new TranslationTextComponent("gui.carbonconfig.ok"));
-			minecraft.setScreen(choice);
+				minecraft.displayGuiScreen(parent);
+			}, new TranslationTextComponent("gui.carbonconfig.reload.title"), new TranslationTextComponent("gui.carbonconfig.reload.message").applyTextStyle(TextFormatting.GRAY), new TranslationTextComponent("gui.carbonconfig.ok"));
+			minecraft.displayGuiScreen(choice);
 			return;
 		}
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private <T> boolean findFirst(Predicate<T> filter, List<T> elements) {
@@ -303,12 +301,12 @@ public class ConfigScreen extends ListScreen
 	
 	private void goBack(Button button) {
 		if(node.isRoot() && isChanged()) {
-			minecraft.setScreen(new ConfirmScreen(T -> {
-				minecraft.setScreen(T ? parent : this);	
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
+			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
+				minecraft.displayGuiScreen(T ? parent : this);	
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
 			return;
 		}
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private boolean isChanged() {
@@ -399,7 +397,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public static class Navigator {
-		private static final ITextComponent SPLITTER = new StringTextComponent(" > ").withStyle(TextFormatting.GOLD, TextFormatting.BOLD);
+		private static final ITextComponent SPLITTER = new StringTextComponent(" > ").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD);
 		List<ITextComponent> layer = new ObjectArrayList<>();
 		List<Screen> screenByIndex = new ObjectArrayList<>();
 		List<String> walker = null;
@@ -449,9 +447,9 @@ public class ConfigScreen extends ListScreen
 		}
 		
 		public Screen getScreen(FontRenderer font, int x) {
-			int splitterWidth = font.width(SPLITTER);
+			int splitterWidth = font.getStringWidth(SPLITTER.getFormattedText());
 			for(int i = 0,m=layer.size();i<m;i++) {
-				int width = font.width(layer.get(i));
+				int width = font.getStringWidth(layer.get(i).getFormattedText());
 				if(x >= 0 && x <= width) return screenByIndex.get(i);
 				x-=width;
 				x-=splitterWidth;
@@ -471,9 +469,9 @@ public class ConfigScreen extends ListScreen
 			if(buildCache == null) {
 				buildCache = new StringTextComponent("");
 				for(int i = 0,m=layer.size();i<m;i++) {
-					buildCache.append(layer.get(i));
+					buildCache.appendSibling(layer.get(i));
 					if(i == m-1) continue;
-					buildCache.append(SPLITTER);
+					buildCache.appendSibling(SPLITTER);
 				}
 			}
 			return buildCache;

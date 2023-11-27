@@ -41,13 +41,13 @@ public class ConfigAnswerPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUUID(id);
+		buffer.writeUniqueId(id);
 		buffer.writeByteArray(data);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		id = buffer.readUUID();
+		id = buffer.readUniqueId();
 		data = buffer.readByteArray();
 	}
 	
@@ -58,7 +58,7 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	
 	@OnlyIn(Dist.CLIENT)
 	private void processClient() {
-		Screen screen = Minecraft.getInstance().screen;
+		Screen screen = Minecraft.getInstance().currentScreen;
 		if(screen instanceof IRequestScreen) {
 			((IRequestScreen)screen).receiveConfigData(id, new PacketBuffer(Unpooled.wrappedBuffer(data)));
 		}

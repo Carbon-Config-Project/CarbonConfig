@@ -193,11 +193,11 @@ public class CarbonConfig
 			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
 			return;
 		}
-		else if(!mc.player.hasPermissions(4)) {
+		else if(!mc.player.hasPermissionLevel(4)) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");			
 			return;
 		}
-		mc.setScreen(new RequestScreen(texture.asHolder(), Navigator.create(config).withWalker(path), mc.screen, config));
+		mc.displayGuiScreen(new RequestScreen(texture.asHolder(), Navigator.create(config).withWalker(path), mc.currentScreen, config));
 	}
 	
 	/**
@@ -229,7 +229,7 @@ public class CarbonConfig
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
+		mc.displayGuiScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.currentScreen, texture.asHolder()));
 	}
 	
 	public void onCommonLoad(FMLCommonSetupEvent event) {
@@ -245,14 +245,14 @@ public class CarbonConfig
 		EventHandler.INSTANCE.onConfigsLoaded();
 		KeyBinding mapping = new KeyBinding("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
-		MOD_GUI = mapping::isDown;
+		MOD_GUI = mapping::isKeyDown;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public void onKeyPressed(KeyInputEvent event) {
 		Minecraft mc = Minecraft.getInstance();
 		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
-			mc.setScreen(new ModListScreen(mc.screen));
+			mc.displayGuiScreen(new ModListScreen(mc.currentScreen));
 		}
 	}
 	

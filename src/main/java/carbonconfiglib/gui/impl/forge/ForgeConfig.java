@@ -20,7 +20,6 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
-import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.forge.RequestConfigPacket;
@@ -29,9 +28,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
-import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraft.world.storage.WorldSummary;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -172,7 +169,6 @@ public class ForgeConfig implements IModConfig
 			return;
 		}
 		config.save();
-        config.getSpec().afterReload();
         ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(Reloading.class, config));
 	}
 	
@@ -194,16 +190,16 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	private List<IConfigTarget> getLevels() {
-		SaveFormat storage = Minecraft.getInstance().getLevelSource();
+		SaveFormat storage = Minecraft.getInstance().getSaveLoader();
 		List<IConfigTarget> folders = new ObjectArrayList<>();
 		try {
-			for(WorldSummary sum : storage.getLevelList()) {
-				try(LevelSave access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
-					Path path = access.getLevelPath(PerWorldProxy.SERVERCONFIG);
+			for(WorldSummary sum : storage.getSaveList()) {
+				try {
+					Path path = storage.getFile(sum.getFileName(), "serverconfig").toPath();
 					if(Files.notExists(path)) continue;
 					Path file = path.resolve(config.getFileName());
 					if(Files.notExists(file)) continue;
-					folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(FolderName.ROOT), path), file));
+					folders.add(new WorldConfigTarget(new WorldTarget(sum, storage.getFile(sum.getFileName(), ".").toPath(), path), file));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}

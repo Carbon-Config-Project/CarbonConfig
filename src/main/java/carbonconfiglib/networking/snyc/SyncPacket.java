@@ -18,7 +18,6 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Util;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -71,22 +70,22 @@ public class SyncPacket implements ICarbonPacket
 	
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUtf(identifier);
-		buffer.writeEnum(type);
+		buffer.writeString(identifier);
+		buffer.writeEnumValue(type);
 		buffer.writeVarInt(entries.size());
 		for(Map.Entry<String, byte[]> entry : entries.entrySet()) {
-			buffer.writeUtf(entry.getKey());
+			buffer.writeString(entry.getKey());
 			buffer.writeByteArray(entry.getValue());
 		}
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		identifier = buffer.readUtf(32767);
-		type = buffer.readEnum(SyncType.class);
+		identifier = buffer.readString(32767);
+		type = buffer.readEnumValue(SyncType.class);
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
-			entries.put(buffer.readUtf(32767), buffer.readByteArray());
+			entries.put(buffer.readString(32767), buffer.readByteArray());
 		}
 	}
 	
@@ -94,7 +93,7 @@ public class SyncPacket implements ICarbonPacket
 	public void process(PlayerEntity player) {
 		ReloadMode mode = processEntry(player);
 		if(mode != null) {
-			player.sendMessage(mode.getMessage(), Util.NIL_UUID);
+			player.sendMessage(mode.getMessage());
 		}
 	}
 	
@@ -107,7 +106,7 @@ public class SyncPacket implements ICarbonPacket
 		}
 		Map<String, ConfigEntry<?>> mapped = cfg.getConfig().getSyncedEntries(type);
 		boolean hasChanged = false;
-		UUID owner = player.getUUID();
+		UUID owner = player.getUniqueID();
 		ReloadMode mode = null;
 		for(Entry<String, byte[]> dataEntry : entries.entrySet())
 		{

@@ -3,8 +3,6 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -71,37 +69,38 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, modName, (width/2)-(font.width(modName)/2), 8, -1);
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		super.render(mouseX, mouseY, partialTicks);
+		String modName = this.modName.getFormattedText();
+		font.drawString(modName, (width/2)-(font.getStringWidth(modName)/2), 8, -1);
 	}
 	
 	@Override
 	protected void collectElements(Consumer<Element> elements) {
-		toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.local").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
+		toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.local").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
 		toAdd = null;
-		if(minecraft.level != null) {
-			if(!minecraft.hasSingleplayerServer()) {
+		if(minecraft.world != null) {
+			if(!minecraft.isIntegratedServerRunning()) {
 				if(!isInstalledOnServer()) {
 					return;
 				}
 				if(isLanServer()) {
 					return;
 				}
-				if(!minecraft.player.hasPermissions(4)) {
+				if(!minecraft.player.hasPermissionLevel(4)) {
 					return;
 				}
-				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.multiplayer").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
+				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.multiplayer").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}
 			else  {
-				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
+				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
 			}
 		}
 		else {
-			toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
+			toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
 		}
 		addConfigs(ConfigType.SERVER, true, elements);
 		toAdd = null;
@@ -119,7 +118,7 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	@Override
 	public void onClose() {
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	private boolean isInstalledOnServer() {
@@ -127,8 +126,8 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	private boolean isLanServer() {
-		ServerData data = minecraft.getCurrentServer();
-		return data != null && data.isLan();
+		ServerData data = minecraft.getCurrentServerData();
+		return data != null && data.isOnLAN();
 	}
 	
 	public static class Label extends Element implements IIgnoreSearch {
@@ -142,8 +141,8 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			renderText(poseStack, name, left, top+1, width, height, GuiAlign.CENTER, -1);
+		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			renderText(name, left, top+1, width, height, GuiAlign.CENTER, -1);
 		}
 	}
 	
@@ -185,22 +184,22 @@ public class ConfigSelectorScreen extends ListScreen
 				children.add(reset);
 			}
 			type = new TranslationTextComponent("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
-			fileName = new StringTextComponent(handler.getFileName()).withStyle(TextFormatting.GRAY);
+			fileName = new StringTextComponent(handler.getFileName()).applyTextStyle(TextFormatting.GRAY);
 		}
 		
 		@Override
-		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.x = left+width-82;
 			button.y = top + 2;
-			button.render(poseStack, mouseX, mouseY, partialTicks);
+			button.render(mouseX, mouseY, partialTicks);
 			if(reset != null) {
 				reset.x = left+width-20;
 				reset.y = top + 2;
-				reset.render(poseStack, mouseX, mouseY, partialTicks);
+				reset.render(mouseX, mouseY, partialTicks);
 			}
-			GuiUtils.drawScrollingString(poseStack, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(poseStack, font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawTextureRegion(poseStack, left-20, top, 22, 22, getIcon(), 16, 16);
+			GuiUtils.drawScrollingString(font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawTextureRegion(left-20, top, 22, 22, getIcon(), 16, 16);
 		}
 		
 		@Override
@@ -213,7 +212,7 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		private boolean isInWorldConfig() {
-			return mc.level != null && (handler.getConfigType() == ConfigType.SERVER || (handler.getConfigType() == ConfigType.SHARED && multiplayer));
+			return mc.world != null && (handler.getConfigType() == ConfigType.SERVER || (handler.getConfigType() == ConfigType.SHARED && multiplayer));
 		}
 		
 		private Icon getIcon() {
@@ -221,7 +220,7 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		private void onPick(Button button) {
-			mc.setScreen(new SelectFileScreen(baseName, owner.getCustomTexture(), parent, handler));
+			mc.displayGuiScreen(new SelectFileScreen(baseName, owner.getCustomTexture(), parent, handler));
 		}
 		
 		private void reset(CarbonIconButton button) {
@@ -231,8 +230,8 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		private void onEdit(Button button) {
-			if(isInWorldConfig() && !mc.hasSingleplayerServer()) mc.setScreen(new RequestScreen(owner.getCustomTexture(), nav.add(type), parent, handler));
-			else mc.setScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
+			if(isInWorldConfig() && !mc.isIntegratedServerRunning()) mc.displayGuiScreen(new RequestScreen(owner.getCustomTexture(), nav.add(type), parent, handler));
+			else mc.displayGuiScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
 		}
 	}
 }

@@ -10,7 +10,6 @@ import carbonconfiglib.utils.SyncType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Util;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -72,7 +71,7 @@ public class BulkSyncPacket implements ICarbonPacket
 			result = ReloadMode.or(result, packet.processEntry(player));
 		}
 		if(result != null) {
-			player.sendMessage(result.getMessage(), Util.NIL_UUID);
+			player.sendMessage(result.getMessage());
 		}
 	}
 	

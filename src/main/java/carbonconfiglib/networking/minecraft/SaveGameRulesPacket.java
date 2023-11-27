@@ -1,15 +1,22 @@
 package carbonconfiglib.networking.minecraft;
 
-import com.mojang.serialization.Dynamic;
+import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.context.ParsedArgument;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.networking.ICarbonPacket;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.GameRules.BooleanValue;
+import net.minecraft.world.GameRules.IRuleEntryVisitor;
+import net.minecraft.world.GameRules.IntegerValue;
+import net.minecraft.world.GameRules.RuleKey;
+import net.minecraft.world.GameRules.RuleType;
+import net.minecraft.world.GameRules.RuleValue;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
@@ -38,27 +45,44 @@ public class SaveGameRulesPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeNbt(rules.createTag());
+		buffer.writeCompoundTag(rules.write());
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		rules = new GameRules(new Dynamic<>(NBTDynamicOps.INSTANCE, buffer.readNbt()));
+		rules = new GameRules();
+		rules.read(buffer.readCompoundTag());
 	}
 	
 	@Override
 	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
+		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;
 		}
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 		if(server == null) return;
-		server.getGameRules().assignFrom(rules, server);
+		GameRules rule = server.getGameRules();
+		rule.read(rules.write());
+		CommandSource source = server.getCommandSource();
+		GameRules.visitAll(new IRuleEntryVisitor() {
+			@Override
+			public <T extends RuleValue<T>> void visit(RuleKey<T> key, RuleType<T> type) {
+				RuleValue<T> value = rule.get(key);
+				CommandContextBuilder<CommandSource> command = new CommandContextBuilder<>(null, source, null, 0);
+				if(value instanceof IntegerValue) {
+					command.withArgument("value", new ParsedArgument<>(0, 0, ((IntegerValue)value).get()));
+				}
+				else if(value instanceof BooleanValue) {
+					command.withArgument("value", new ParsedArgument<>(0, 0, ((BooleanValue)value).get()));
+				}
+				value.updateValue(command.build(""), "value");
+			}
+		});
 	}
 	
 	private boolean canIgnorePermissionCheck() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).isPublished() : false);
+		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

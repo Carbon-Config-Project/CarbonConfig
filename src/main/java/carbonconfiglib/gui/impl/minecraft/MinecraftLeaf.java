@@ -93,17 +93,17 @@ public class MinecraftLeaf implements IConfigNode
 	public String getNodeName() { return null; }
 	@Override
 	public ITextComponent getName() {
-		return IConfigNode.createLabel(I18n.get(entry.getDescriptionId()));
+		return IConfigNode.createLabel(I18n.format(entry.getDescriptionId()));
 	}
 	
 	@Override
 	public ITextComponent getTooltip() {
 		String id = entry.getDescriptionId();
 		TextComponent result = new StringTextComponent("");
-		result.append(new TranslationTextComponent(id).withStyle(TextFormatting.YELLOW));
+		result.appendSibling(new TranslationTextComponent(id).applyTextStyle(TextFormatting.YELLOW));
 		id += ".description";
-		if(I18n.exists(id)) {
-			result.append("\n").append(new TranslationTextComponent(id).withStyle(TextFormatting.GRAY));
+		if(I18n.hasKey(id)) {
+			result.appendText("\n").appendSibling(new TranslationTextComponent(id).applyTextStyle(TextFormatting.GRAY));
 		}
 		return result;
 	}

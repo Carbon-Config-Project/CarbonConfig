@@ -1,11 +1,8 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.config.IListOwner;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.text.StringTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -29,7 +26,7 @@ public class CarbonEditBox extends TextFieldWidget implements IOwnable
 	int innerDiff = 8;
 	
 	public CarbonEditBox(FontRenderer font, int x, int y, int width, int height) {
-		super(font, x, y, width, height, new StringTextComponent(""));
+		super(font, x, y, width, height, "");
 	}
 	
 	public CarbonEditBox setInnerDiff(int innerDiff) {
@@ -42,29 +39,29 @@ public class CarbonEditBox extends TextFieldWidget implements IOwnable
 	}
 	
 	@Override
-	public void setFocus(boolean focus) {
-		super.setFocus(focus);
+	public void setFocused(boolean focus) {
+		super.setFocused(focus);
 		if(focus && owner != null) {
 			owner.setActiveWidget(this);
 		}
 	}
 	
 	@Override
-	public int getInnerWidth() {
+	public int getAdjustedWidth() {
 		return bordered ? this.width - innerDiff : this.width;
 	}
 	
 	@Override
-	public void setBordered(boolean value) {
-		super.setBordered(value);
+	public void setEnableBackgroundDrawing(boolean value) {
+		super.setEnableBackgroundDrawing(value);
 		this.bordered = value;
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(int mouseX, int mouseY, float partialTicks) {
 		if(this.isFocused() && owner != null && !owner.isActiveWidget(this)) {
-			setFocus(false);
+			setFocused(false);
 		}
-		super.render(stack, mouseX, mouseY, partialTicks);
+		super.render(mouseX, mouseY, partialTicks);
 	}
 }

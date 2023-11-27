@@ -4,8 +4,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -47,8 +45,8 @@ public class ConfigElement extends Element
 	private static final ITextComponent REVERT = new TranslationTextComponent("gui.carbonconfig.revert");
 	private static final ITextComponent DEFAULT = new TranslationTextComponent("gui.carbonconfig.default");
 	private static final ITextComponent SUGGESTIONS = new TranslationTextComponent("gui.carbonconfig.suggestions");
-	private static final ITextComponent RELOAD = new TranslationTextComponent("gui.carbonconfig.reload").withStyle(TextFormatting.YELLOW);
-	private static final ITextComponent RESTART = new TranslationTextComponent("gui.carbonconfig.restart").withStyle(TextFormatting.YELLOW);
+	private static final ITextComponent RELOAD = new TranslationTextComponent("gui.carbonconfig.reload").applyTextStyle(TextFormatting.YELLOW);
+	private static final ITextComponent RESTART = new TranslationTextComponent("gui.carbonconfig.restart").applyTextStyle(TextFormatting.YELLOW);
 	protected List<IGuiEventListener> listeners = new ObjectArrayList<>();
 	protected List<Map.Entry<Widget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
@@ -147,18 +145,18 @@ public class ConfigElement extends Element
 	}
 	
 	@Override
-	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		if(renderName() && !isArray()) {
-			renderName(poseStack, left, top, isChanged(), isCompound() ? 80 : 200, height);
+			renderName(left, top, isChanged(), isCompound() ? 80 : 200, height);
 			if(!isCompound()) {
 				if(node.requiresReload()) {
-					GuiUtils.drawTextureRegion(poseStack, left-16, top+(height/2)-6, 12, 12, Icon.RELOAD, 16, 16);
+					GuiUtils.drawTextureRegion(left-16, top+(height/2)-6, 12, 12, Icon.RELOAD, 16, 16);
 					if(mouseX >= left-16 && mouseX <= left-4 && mouseY >= top && mouseY <= top+height && owner.isInsideList(mouseX, mouseY)) {
 						owner.addTooltips(RELOAD);
 					}
 				}
 				if(node.requiresRestart()) {
-					GuiUtils.drawTextureRegion(poseStack, left-16, top+(height/2)-6, 12, 12, Icon.RESTART, 16, 16);
+					GuiUtils.drawTextureRegion(left-16, top+(height/2)-6, 12, 12, Icon.RESTART, 16, 16);
 					if(mouseX >= left-16 && mouseX <= left-4 && mouseY >= top && mouseY <= top+height && owner.isInsideList(mouseX, mouseY)) {
 						owner.addTooltips(RESTART);
 					}
@@ -171,11 +169,11 @@ public class ConfigElement extends Element
 				moveUp.x = left + width - 16;
 				moveUp.y = top;
 				moveUp.visible = canMoveUp();
-				moveUp.render(poseStack, mouseX, mouseY, partialTicks);
+				moveUp.render(mouseX, mouseY, partialTicks);
 				moveDown.x = left + width - 16;
 				moveDown.y = top + 10;
 				moveDown.visible = canMoveDown();
-				moveDown.render(poseStack, mouseX, mouseY, partialTicks);
+				moveDown.render(mouseX, mouseY, partialTicks);
 				if(moveDown.visible || moveUp.visible) {
 					left -= 8;
 				}
@@ -185,14 +183,14 @@ public class ConfigElement extends Element
 				AlignOffset offset = entry.getValue();
 				widget.x = offset.align.align(left, width, widget.getWidth()) + offset.offset;
 				widget.y = top;
-				widget.render(poseStack, mouseX, mouseY, partialTicks);
+				widget.render(mouseX, mouseY, partialTicks);
 				maxX = Math.min(maxX, widget.x);
 			}
 		}
 		maxX = getMaxX(maxX);
 		if(isArray()) {
 			ITextComponent comp = new StringTextComponent(indexOf()+":");
-			renderText(poseStack, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
+			renderText(comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
 			owner.addTooltips(node.getTooltip());
@@ -317,10 +315,10 @@ public class ConfigElement extends Element
 	protected void onSuggestion(CarbonIconButton button) {
 		if(value == null) return;
 		if(isCompound()) {
-			mc.setScreen(ListSelectionScreen.ofCompoundValue(mc.screen, node, value, compound, compoundIndex, owner.getCustomTexture()));
+			mc.displayGuiScreen(ListSelectionScreen.ofCompoundValue(mc.currentScreen, node, value, compound, compoundIndex, owner.getCustomTexture()));
 			return;
 		}
-		mc.setScreen(ListSelectionScreen.ofValue(mc.screen, node, value, owner.getCustomTexture()));
+		mc.displayGuiScreen(ListSelectionScreen.ofValue(mc.currentScreen, node, value, owner.getCustomTexture()));
 	}
 	
 	@Override

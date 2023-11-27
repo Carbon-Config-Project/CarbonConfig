@@ -35,6 +35,6 @@ public class SelectionElement extends ConfigElement
 	}
 	
 	private void onPress(Button button) {
-		mc.setScreen(ListSelectionScreen.ofValue(mc.screen, node, value, owner.getCustomTexture()));
+		mc.displayGuiScreen(ListSelectionScreen.ofValue(mc.currentScreen, node, value, owner.getCustomTexture()));
 	}
 }

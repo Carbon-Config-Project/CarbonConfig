@@ -35,7 +35,7 @@ public class ArrayElement extends ConfigElement
 	}
 	
 	private void onPress(Button button) {
-		mc.setScreen(new ArrayScreen(node, mc.screen, owner.getCustomTexture()));
+		mc.displayGuiScreen(new ArrayScreen(node, mc.currentScreen, owner.getCustomTexture()));
 	}
 	
 	@Override

@@ -125,12 +125,12 @@ public class CarbonNetwork
 	}
 	
 	public void onPlayerJoined(PlayerEntity player, boolean server) {
-		if(server) clientInstalledPlayers.add(player.getUUID());
+		if(server) clientInstalledPlayers.add(player.getUniqueID());
 		else serverInstalled = true;
 	}
 	
 	public void onPlayerLeft(PlayerEntity player, boolean server) {
-		if(server) clientInstalledPlayers.remove(player.getUUID());
+		if(server) clientInstalledPlayers.remove(player.getUniqueID());
 		else serverInstalled = false;
 	}
 	
@@ -138,7 +138,7 @@ public class CarbonNetwork
 		List<NetworkManager> players = new ObjectArrayList<>();
 		for(ServerPlayerEntity player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
 			if(isInstalledOnClient(player)) 
-				players.add(player.connection.getConnection());
+				players.add(player.connection.getNetworkManager());
 		}
 		return players;
 	}
@@ -148,7 +148,7 @@ public class CarbonNetwork
 	}
 	
 	public boolean isInstalledOnClient(ServerPlayerEntity player) {
-		return clientInstalledPlayers.contains(player.getUUID());
+		return clientInstalledPlayers.contains(player.getUniqueID());
 	}
 		
 	public boolean isInstalledOnServer() {

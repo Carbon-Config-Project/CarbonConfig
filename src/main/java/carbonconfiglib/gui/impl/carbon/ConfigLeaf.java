@@ -112,13 +112,13 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public ITextComponent getTooltip() {
 		TextComponent comp = new StringTextComponent("");
-		comp.append(new StringTextComponent(entry.getKey()).withStyle(TextFormatting.YELLOW));
+		comp.appendSibling(new StringTextComponent(entry.getKey()).applyTextStyle(TextFormatting.YELLOW));
 		String[] array = entry.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(TextFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).applyTextStyle(TextFormatting.GRAY));
 		}
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) comp.append("\n").append(new StringTextComponent(limit).withStyle(TextFormatting.BLUE));
+		if(!Strings.isBlank(limit)) comp.appendText("\n").appendSibling(new StringTextComponent(limit).applyTextStyle(TextFormatting.BLUE));
 		return comp;
 	}
 }

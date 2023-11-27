@@ -4,8 +4,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IRequestScreen;
@@ -38,11 +36,11 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 {
 	static final ITextComponent REQUEST = new TranslationTextComponent("gui.carbonconfig.requesting_config");
 	static final ITextComponent[] ANIMATION = new ITextComponent[] {
-			new StringTextComponent("Ooooo").withStyle(TextFormatting.GRAY),
-			new StringTextComponent("oOooo").withStyle(TextFormatting.GRAY),
-			new StringTextComponent("ooOoo").withStyle(TextFormatting.GRAY),
-			new StringTextComponent("oooOo").withStyle(TextFormatting.GRAY),
-			new StringTextComponent("ooooO").withStyle(TextFormatting.GRAY),
+			new StringTextComponent("Ooooo").applyTextStyle(TextFormatting.GRAY),
+			new StringTextComponent("oOooo").applyTextStyle(TextFormatting.GRAY),
+			new StringTextComponent("ooOoo").applyTextStyle(TextFormatting.GRAY),
+			new StringTextComponent("oooOo").applyTextStyle(TextFormatting.GRAY),
+			new StringTextComponent("ooooO").applyTextStyle(TextFormatting.GRAY),
 	};
 	Screen parent;
 	IModConfig config;
@@ -67,30 +65,33 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
-			minecraft.setScreen(new ConfigScreen(nav, config, parent, getCustomTexture()));
+			minecraft.displayGuiScreen(new ConfigScreen(nav, config, parent, getCustomTexture()));
 			return;
 		}
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	@Override
 	public void tick() {
 		super.tick();
 		tick++;
-		if(tick > 400) minecraft.setScreen(parent);
+		if(tick > 400) minecraft.displayGuiScreen(parent);
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, REQUEST, width / 2 - font.width(REQUEST) / 2, height / 2 - 12, -1);
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		super.render(mouseX, mouseY, partialTicks);
+		String request = REQUEST.getFormattedText();
+		font.drawString(request, width / 2 - font.getStringWidth(request) / 2, height / 2 - 12, -1);
 		int index = (tick / 5) % 8;
 		if(index >= 5) index = 8-index;
-		font.draw(stack, ANIMATION[index], width / 2 - font.width(ANIMATION[index]) / 2, height / 2, -1);
+		String animation = ANIMATION[index].getFormattedText();
+		font.drawString(animation, width / 2 - font.getStringWidth(animation) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
-			ITextComponent draw = new TranslationTextComponent("gui.carbonconfig.timeout", timeout).withStyle(TextFormatting.RED);
-			font.draw(stack, draw, width / 2 - font.width(draw) / 2, height / 2 + 12, -1);
+			ITextComponent draw = new TranslationTextComponent("gui.carbonconfig.timeout", timeout).applyTextStyle(TextFormatting.RED);
+			String drawing = draw.getFormattedText();
+			font.drawString(drawing, width / 2 - font.getStringWidth(drawing) / 2, height / 2 + 12, -1);
 		}
 	}
 	

@@ -1,11 +1,9 @@
 package carbonconfiglib.gui.screen;
 
+import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.IBidiRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -28,10 +26,10 @@ import net.minecraft.util.text.ITextComponent;
 public class MultiChoiceScreen extends Screen
 {
 	private final ITextComponent message;
-	private IBidiRenderer multilineMessage = IBidiRenderer.EMPTY;
 	protected ITextComponent mainButton;
 	protected ITextComponent otherButton;
 	protected ITextComponent cancelButton;
+	protected List<String> output;
 	protected final Consumer<Result> callback;
 
 	public MultiChoiceScreen(Consumer<Result> callback, ITextComponent title, ITextComponent message, ITextComponent mainButton) {
@@ -50,7 +48,7 @@ public class MultiChoiceScreen extends Screen
 	@Override
 	protected void init() {
 		super.init();
-		this.multilineMessage = IBidiRenderer.create(this.font, this.message, this.width - 50);
+		output = font.listFormattedStringToWidth(message.getFormattedText(), width-50);
 		this.addButtons(MathHelper.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
 	}
 	
@@ -63,11 +61,15 @@ public class MultiChoiceScreen extends Screen
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks){
-		this.renderBackground(stack);
-		drawCenteredString(stack, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
-		this.multilineMessage.renderCentered(stack, this.width / 2, this.messageTop());
-		super.render(stack, mouseX, mouseY, partialTicks);
+	public void render(int mouseX, int mouseY, float partialTicks){
+		this.renderBackground();
+		drawCenteredString(this.font, this.title.getFormattedText(), this.width / 2, this.titleTop(), 16777215);
+		int yOffset = messageTop();
+		for(String s : output) {
+			drawCenteredString(this.font, s, this.width / 2, yOffset, 16777215);
+			yOffset += 9;
+		}
+		super.render(mouseX, mouseY, partialTicks);
 	}
 	
 	private int titleTop() {
@@ -80,7 +82,7 @@ public class MultiChoiceScreen extends Screen
 	}
 	
 	private int messageHeight() {
-		return this.multilineMessage.getLineCount() * 9;
+		return output.size() * 9;
 	}
 	
 	@Override

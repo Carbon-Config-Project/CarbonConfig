@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import org.lwjgl.opengl.GL11;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -144,6 +143,10 @@ public class ElementList extends AbstractOptionList<Element>
 		if(force) this.value.forceFinish();
 	}
 	
+	public int getMaxScroll() {
+		return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
+	}
+	
 	@Override
 	public double getScrollAmount() {
 		return isScrolling ? value.getTarget() : value.getValue();
@@ -174,50 +177,52 @@ public class ElementList extends AbstractOptionList<Element>
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(int mouseX, int mouseY, float partialTicks) {
 		value.update(partialTicks);
 		super.setScrollAmount(value.getValue());
-		super.render(stack, mouseX, mouseY, partialTicks);
+		int k = this.getRowLeft();
+		int l = this.y0 + 4 - (int)this.getScrollAmount();
+		renderBackground();
+		renderList(k, l, mouseX, mouseY, partialTicks);
 	}
 	
 	public void setCustomBackground(BackgroundHolder customBackground) {
 		this.customBackground = customBackground;
-		setRenderBackground(this.customBackground == null);
-		setRenderTopAndBottom(this.customBackground == null);
 	}
 	
 	@Override
-	protected void renderBackground(MatrixStack stack) {
-		if(customBackground == null || (minecraft.level != null && customBackground.shouldDisableInLevel())) return;
+	protected void renderBackground() {
+		if(customBackground == null || (minecraft.world != null && customBackground.shouldDisableInLevel())) return;
 		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground.getTexture());
 	}
-	
+		
 	@Override
-	protected void renderList(MatrixStack stack, int left, int top, int mouseX, int mouseY, float partialTicks) {
-		super.renderList(stack, left, top, mouseX, mouseY, partialTicks);
+	protected void renderList(int left, int top, int mouseX, int mouseY, float partialTicks) {
+		super.renderList(left, top, mouseX, mouseY, partialTicks);
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void renderListOverlay(int x0, int x1, int y0, int y1, int width, int height, BackgroundTexture texture) {
+		
+		
 		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder builder = tes.getBuilder();
-		Minecraft.getInstance().getTextureManager().bind(texture.getForegroundTexture());
+		BufferBuilder builder = tes.getBuffer();
+		Minecraft.getInstance().getTextureManager().bindTexture(texture.getForegroundTexture());
 		RenderSystem.enableTexture();
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthFunc(519);
 		int color = texture.getForegroundBrightness();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		builder.vertex(x0, y0, -100D).uv(0, y0 / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0 + width, y0, -100D).uv(width / 32F, y0 / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0 + width, 0D, -100D).uv(width / 32F, 0F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0, 0D, -100D).uv(0F, 0F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0, height, -100D).uv(0F, height / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0 + width, height, -100D).uv(width / 32F, height / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0 + width, y1, -100D).uv(width / 32F, y1 / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0, y1, -100D).uv(0F, y1 / 32F).color(color, color, color, 255).endVertex();
-		tes.end();
+		builder.pos(x0, y0, -100D).tex(0, y0 / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x0 + width, y0, -100D).tex(width / 32F, y0 / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x0 + width, 0D, -100D).tex(width / 32F, 0F).color(color, color, color, 255).endVertex();
+		builder.pos(x0, 0D, -100D).tex(0F, 0F).color(color, color, color, 255).endVertex();
+		builder.pos(x0, height, -100D).tex(0F, height / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x0 + width, height, -100D).tex(width / 32F, height / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x0 + width, y1, -100D).tex(width / 32F, y1 / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x0, y1, -100D).tex(0F, y1 / 32F).color(color, color, color, 255).endVertex();
+		tes.draw();
 		RenderSystem.depthFunc(515);
 		RenderSystem.disableDepthTest();
         RenderSystem.enableBlend();
@@ -226,31 +231,30 @@ public class ElementList extends AbstractOptionList<Element>
         RenderSystem.shadeModel(7425);
 		RenderSystem.disableTexture();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		builder.vertex(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
-		builder.vertex(x1, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
-		builder.vertex(x1, y0, 0D).color(0, 0, 0, 255).endVertex();
-		builder.vertex(x0, y0, 0D).color(0, 0, 0, 255).endVertex();
-		builder.vertex(x0, y1, 0D).color(0, 0, 0, 255).endVertex();
-		builder.vertex(x1, y1, 0D).color(0, 0, 0, 255).endVertex();
-		builder.vertex(x1, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
-		builder.vertex(x0, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
-		tes.end();
+		builder.pos(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
+		builder.pos(x1, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
+		builder.pos(x1, y0, 0D).color(0, 0, 0, 255).endVertex();
+		builder.pos(x0, y0, 0D).color(0, 0, 0, 255).endVertex();
+		builder.pos(x0, y1, 0D).color(0, 0, 0, 255).endVertex();
+		builder.pos(x1, y1, 0D).color(0, 0, 0, 255).endVertex();
+		builder.pos(x1, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
+		builder.pos(x0, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
+		tes.draw();
 		RenderSystem.enableAlphaTest();
 		RenderSystem.disableBlend();
 		RenderSystem.enableTexture();
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void renderBackground(int x0, int x1, int y0, int y1, float scroll, BackgroundTexture texture) {
 		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder builder = tes.getBuilder();
-		Minecraft.getInstance().getTextureManager().bind(texture.getBackgroundTexture());
+		BufferBuilder builder = tes.getBuffer();
+		Minecraft.getInstance().getTextureManager().bindTexture(texture.getBackgroundTexture());
 		int color = texture.getBackgroundBrightness();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-		builder.vertex(x0, y1, 0D).uv(x0 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x1, y1, 0D).uv(x1 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x1, y0, 0D).uv(x1 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0, y0, 0D).uv(x0 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		tes.end();
+		builder.pos(x0, y1, 0D).tex(x0 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x1, y1, 0D).tex(x1 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x1, y0, 0D).tex(x1 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.pos(x0, y0, 0D).tex(x0 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
+		tes.draw();
 	}
 }

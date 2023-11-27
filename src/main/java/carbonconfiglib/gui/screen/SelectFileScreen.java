@@ -6,8 +6,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfig.IConfigTarget;
@@ -19,6 +17,7 @@ import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
@@ -79,13 +78,14 @@ public class SelectFileScreen extends ListScreen
 	
 	@Override
 	public void onClose() {
-		minecraft.setScreen(parent);
+		minecraft.displayGuiScreen(parent);
 	}
 	
 	@Override
-	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, TEXT, (width/2)-(font.width(TEXT)/2), 8, -1);
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		super.render(mouseX, mouseY, partialTicks);
+		String text = TEXT.getFormattedText();
+		font.drawString(text, (width/2)-(font.getStringWidth(text)/2), 8, -1);
 	}
 	
 	@Override
@@ -125,29 +125,29 @@ public class SelectFileScreen extends ListScreen
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
 				WorldSummary sum = world.getSummary();
-				loadIcon(sum.getIcon().toPath());
-				title = new StringTextComponent(sum.getLevelName());
-				path = new StringTextComponent(sum.getLevelId()).withStyle(TextFormatting.GRAY);
+				loadIcon(Minecraft.getInstance().getSaveLoader().getFile(sum.getFileName(), "icon.png").toPath());
+				title = new StringTextComponent(sum.getDisplayName());
+				path = new StringTextComponent(sum.getFileName()).applyTextStyle(TextFormatting.GRAY);
 			}
 			else 
 			{
 				title = new StringTextComponent(target.getName());
 				Path folder = target.getFolder();
 				int index = folder.getNameCount();
-				path = new StringTextComponent(folder.subpath(index-3, index).toString()).withStyle(TextFormatting.GRAY);
+				path = new StringTextComponent(folder.subpath(index-3, index).toString()).applyTextStyle(TextFormatting.GRAY);
 			}
 		}
 		
 		@Override
-		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.x = left+width-62;
 			button.y = top + 2;
-			button.render(poseStack, mouseX, mouseY, partialTicks);
-			GuiUtils.drawScrollingString(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
+			button.render(mouseX, mouseY, partialTicks);
+			GuiUtils.drawScrollingString(font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
 			if(texture != null) {
-				texture.bind();
-				GuiUtils.drawTextureRegion(poseStack, left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
+				texture.bindTexture();
+				GuiUtils.drawTextureRegion(left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
 			}
 		}
 		
@@ -156,7 +156,7 @@ public class SelectFileScreen extends ListScreen
 				NativeImage image = NativeImage.read(stream);
 				if(image == null || image.getWidth() != 64 || image.getHeight() != 64) return;
 				texture = new DynamicTexture(image);
-				texture.upload();
+				texture.updateDynamicTexture();
 			}
 			catch(Exception e) { e.printStackTrace(); }
 		}
@@ -169,10 +169,10 @@ public class SelectFileScreen extends ListScreen
 		private void onPick(Button button) {
 			IModConfig config = this.config.loadFromFile(target.getConfigFile());
 			if(config == null) {
-				mc.setScreen(parent);
+				mc.displayGuiScreen(parent);
 				return;
 			}
-			mc.setScreen(new ConfigScreen(nav.add(path.copy().withStyle(TextFormatting.WHITE)), config, parent, owner.getCustomTexture()));
+			mc.displayGuiScreen(new ConfigScreen(nav.add(path.deepCopy().applyTextStyle(TextFormatting.WHITE)), config, parent, owner.getCustomTexture()));
 		}
 		
 		private void cleanup() {

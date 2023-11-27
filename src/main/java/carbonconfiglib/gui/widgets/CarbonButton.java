@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
@@ -25,18 +23,20 @@ import net.minecraft.util.text.ITextComponent;
 public class CarbonButton extends Button
 {
 	int hash;
+	ITextComponent displayString;
 	
 	public CarbonButton(int xPos, int yPos, int width, int height, ITextComponent displayString, IPressable handler) {
-		super(xPos, yPos, width, height, displayString, handler);
+		super(xPos, yPos, width, height, displayString.getFormattedText(), handler);
 		hash = displayString.getString().hashCode();
+		this.displayString = displayString;
 	}
 	
 	@Override
-	public void renderButton(MatrixStack poseStack, int mouseX, int mouseY, float partialTick) {
+	public void renderButton(int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		int k = this.getYImage(this.isHovered);
-		GuiUtils.drawTextureWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
-		this.renderBg(poseStack, mc, mouseX, mouseY);
-		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawTextureWithBorder(WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+		this.renderBg(mc, mouseX, mouseY);
+		GuiUtils.drawScrollingShadowString(mc.fontRenderer, displayString, x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
 	}
 }

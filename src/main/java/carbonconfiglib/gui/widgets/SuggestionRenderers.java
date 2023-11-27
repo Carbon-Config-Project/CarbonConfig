@@ -1,6 +1,5 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import carbonconfiglib.gui.api.ISuggestionRenderer;
@@ -47,73 +46,72 @@ public class SuggestionRenderers
 {
 	public static class ItemEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(MatrixStack stack, String value, int x, int y) {
-			ResourceLocation id = ResourceLocation.tryParse(value);
+		public ITextComponent renderSuggestion(String value, int x, int y) {
+			ResourceLocation id = ResourceLocation.tryCreate(value);
 			if(id == null) return null;
 			Item item = ForgeRegistries.ITEMS.getValue(id);
 			if(item == Items.AIR || item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(itemStack, x, y);
-			return itemStack.getHoverName().copy().withStyle(TextFormatting.YELLOW).append("\n").append(new StringTextComponent(id.toString()).withStyle(TextFormatting.GRAY));			
+			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(itemStack, x, y);
+			return itemStack.getDisplayName().deepCopy().applyTextStyle(TextFormatting.YELLOW).appendText("\n").appendSibling(new StringTextComponent(id.toString()).applyTextStyle(TextFormatting.GRAY));			
 		}
 	}
 	
 	public static class FluidEntry implements ISuggestionRenderer {
 		@Override
-		@SuppressWarnings("deprecation")
-		public ITextComponent renderSuggestion(MatrixStack stack, String value, int x, int y) {
-			ResourceLocation id = ResourceLocation.tryParse(value);
+		public ITextComponent renderSuggestion(String value, int x, int y) {
+			ResourceLocation id = ResourceLocation.tryCreate(value);
 			if(id == null) return null;
 			Fluid fluid = ForgeRegistries.FLUIDS.getValue(id);
 			if(fluid == Fluids.EMPTY || fluid == null) return null;
 			TextureAtlasSprite sprite = getSprite(fluid);
 			if(sprite == null) return null;
-			Minecraft.getInstance().getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
+			Minecraft.getInstance().getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
 			int color = fluid.getAttributes().getColor();
 			RenderSystem.color4f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
-			AbstractGui.blit(stack, x, y, 0, 18, 18, sprite);
+			AbstractGui.blit(x, y, 0, 18, 18, sprite);
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
-			return fluid.getAttributes().getDisplayName(new FluidStack(fluid, 1)).copy().withStyle(TextFormatting.YELLOW).append("\n").append(new StringTextComponent(id.toString()).withStyle(TextFormatting.GRAY));
+			return fluid.getAttributes().getDisplayName(new FluidStack(fluid, 1)).deepCopy().applyTextStyle(TextFormatting.YELLOW).appendText("\n").appendSibling(new StringTextComponent(id.toString()).applyTextStyle(TextFormatting.GRAY));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
-			return Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(fluid.getAttributes().getStillTexture());
+			return Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(fluid.getAttributes().getStillTexture());
 		}
 	}
 	
 	public static class EnchantmentEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(MatrixStack stack, String value, int x, int y) {
-			ResourceLocation id = ResourceLocation.tryParse(value);
+		public ITextComponent renderSuggestion(String value, int x, int y) {
+			ResourceLocation id = ResourceLocation.tryCreate(value);
 			if(id == null) return null;
 			Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(id);
 			if(ench == null) return null;
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(EnchantedBookItem.createForEnchantment(new EnchantmentData(ench, ench.getMinLevel())), x, y);
-			return ench.getFullname(ench.getMinLevel()).copy().withStyle(TextFormatting.YELLOW).append("\n").append(new StringTextComponent(id.toString()).withStyle(TextFormatting.GRAY));
+			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(EnchantedBookItem.getEnchantedItemStack(new EnchantmentData(ench, ench.getMinLevel())), x, y);
+			return ench.getDisplayName(ench.getMinLevel()).deepCopy().applyTextStyle(TextFormatting.YELLOW).appendText("\n").appendSibling(new StringTextComponent(id.toString()).applyTextStyle(TextFormatting.GRAY));
 		}
 	}
 	
 	public static class PotionEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(MatrixStack stack, String value, int x, int y) {
-			ResourceLocation id = ResourceLocation.tryParse(value);
+		public ITextComponent renderSuggestion(String value, int x, int y) {
+			ResourceLocation id = ResourceLocation.tryCreate(value);
 			if(id == null) return null;
 			Effect potion = ForgeRegistries.POTIONS.getValue(id);
 			if(potion == null) return null;
 			ItemStack item = new ItemStack(Items.POTION);
-			PotionUtils.setCustomEffects(item, ObjectLists.singleton(new EffectInstance(potion)));
-			item.addTagElement("CustomPotionColor", IntNBT.valueOf(potion.getColor()));
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(item, x, y);
-			return potion.getDisplayName().copy().withStyle(TextFormatting.YELLOW).append("\n").append(new StringTextComponent(id.toString()).withStyle(TextFormatting.GRAY));
+			PotionUtils.appendEffects(item, ObjectLists.singleton(new EffectInstance(potion)));
+			item.getOrCreateTag().put("CustomPotionColor", IntNBT.valueOf(potion.getLiquidColor()));
+			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(item, x, y);
+			return potion.getDisplayName().deepCopy().applyTextStyle(TextFormatting.YELLOW).appendText("\n").appendSibling(new StringTextComponent(id.toString()).applyTextStyle(TextFormatting.GRAY));
 		}
 	}
 	
 	public static class ColorEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(MatrixStack stack, String value, int x, int y) {
+		public ITextComponent renderSuggestion(String value, int x, int y) {
 			try {
-				AbstractGui.fill(stack, x+1, y+1, x+18, y+19, 0xFFA0A0A0);
-				AbstractGui.fill(stack, x+2, y+2, x+17, y+18, Long.decode(value).intValue() | 0xFF000000);
+				AbstractGui.fill(x+1, y+1, x+18, y+19, 0xFFA0A0A0);
+				AbstractGui.fill(x+2, y+2, x+17, y+18, Long.decode(value).intValue() | 0xFF000000);
 			}
 			catch(Exception e) {
 			}

@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
@@ -32,19 +30,19 @@ public class FolderElement extends ConfigElement
 	public FolderElement(IConfigNode node, Navigator prev)
 	{
 		super(node);
-		button.setMessage(node.getName());
+		button.setMessage(node.getName().getFormattedText());
 		nav = prev.add(node.getName(), node.getNodeName());
 	}
 	
 	public void onPress(Button button) {
-		mc.setScreen(new ConfigScreen(nav, node, mc.screen, owner.getCustomTexture()));
+		mc.displayGuiScreen(new ConfigScreen(nav, node, mc.currentScreen, owner.getCustomTexture()));
 	}
 	
 	@Override
-	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.x = left;
 		button.y = top;
 		button.setWidth(width);
-		button.render(poseStack, mouseX, mouseY, partialTicks);
+		button.render(mouseX, mouseY, partialTicks);
 	}
 }

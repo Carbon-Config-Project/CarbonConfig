@@ -53,7 +53,7 @@ public interface IConfigNode
 		TextComponent comp = new StringTextComponent("");
 		for(String s : name.split("\\-|\\_|(?<!^)(?=[A-Z][a-z])|(?<!(^|[A-Z]))(?=[A-Z])")) {
 			String first = Character.toString(s.charAt(0));
-			comp.append(s.replaceFirst(first, first.toUpperCase())).append(" ");
+			comp.appendText(s.replaceFirst(first, first.toUpperCase())).appendText(" ");
 		}
 		return comp;
 	}

@@ -80,12 +80,12 @@ public class WriteBuffer implements IWriteBuffer
 	
 	@Override
 	public void writeEnum(Enum<?> value) {
-		buf.writeEnum(value);
+		buf.writeEnumValue(value);
 	}
 	
 	@Override
 	public void writeString(String value) {
-		buf.writeUtf(value, 32767);
+		buf.writeString(value, 32767);
 	}
 	
 	@Override
@@ -95,7 +95,7 @@ public class WriteBuffer implements IWriteBuffer
 	
 	@Override
 	public void writeUUID(UUID value) {
-		buf.writeUUID(value);
+		buf.writeUniqueId(value);
 	}
 	
 }

@@ -10,7 +10,7 @@ import com.electronwill.nightconfig.toml.TomlFormat;
 import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.world.storage.FolderName;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -36,11 +36,13 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
  * limitations under the License.
  */
 public class ForgeHelpers
-{
-    private static final FolderName SERVERCONFIG = new FolderName("serverconfig");
-    
+{    
 	public static Path getConfigFolder(ModConfig.Type type) {
-		return type == Type.SERVER ? ServerLifecycleHooks.getCurrentServer().getWorldPath(SERVERCONFIG) : FMLPaths.CONFIGDIR.get();
+		if(type == Type.SERVER) {
+			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+			return server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath();
+		}
+		return FMLPaths.CONFIGDIR.get();
 	}
     
 	public static void saveConfig(Path path, CommentedConfig data) {

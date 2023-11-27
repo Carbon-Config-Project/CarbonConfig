@@ -1,73 +1,40 @@
-plugins {
-    id 'eclipse'
-    id 'java-library'
-    id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '5.1.+'
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    }
 }
 
+apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'java'
 apply plugin: 'eclipse'
-jarJar.enable()
+apply plugin: 'maven-publish'
 
 version = MC_VERSION + '-' + MOD_VERSION
 group = 'carbonconfiglib'
 archivesBaseName = 'Carbon Config'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-sourceSets {
-    main {
-        java {
- 			srcDir "carbonconfig/src/main/java"
- 			srcDir "src/main/java"
- 		}
-    }
-}
+
 
 minecraft {
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'snapshot', version: '20200514-1.15.1'
     runs {
         client {
             workingDirectory project.file('run')
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
         }
 
         server {
             workingDirectory project.file('run')
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
-        }
-        gameTestServer {
-            workingDirectory project.file('run')
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
         }
     }
 }
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
@@ -79,11 +46,17 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.11'
-    minecraftLibrary ':Primitive Collections-0.8.9'
-    jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
-	 	jarJar.pin(it, "0.8.9")
-	}
+    minecraft 'net.minecraftforge:forge:1.15.2-31.2.57'
+    compile ':Primitive Collections-0.8.9'
+}
+
+sourceSets {
+    main {
+        java {
+ 			srcDir "carbonconfig/src/main/java"
+ 			srcDir "src/main/java"
+ 		}
+    }
 }
 
 jar {
@@ -93,27 +66,18 @@ jar {
                 "Specification-Vendor"    : "examplemodsareus",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Version"  : "${version}",
                 "Implementation-Vendor"   : "examplemodsareus",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+    	from {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+		configurations.runtimeClasspath.findAll { it.name.contains('speiger.src.collections') }.collect { zipTree(it) }	
+	}
 }
 
 jar.finalizedBy('reobfJar')
-reobf {
-    jarJar { }
-}
-tasks.jarJar.finalizedBy('reobfJarJar')
-
-task deobfJar(type: Jar) {
-    archiveClassifier.set("deobf")
-    from sourceSets.main.output
-}
-
-artifacts {
-    archives deobfJar
-}
 
 publishing {
     publications {

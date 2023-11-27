@@ -12,9 +12,7 @@ import carbonconfiglib.config.ConfigSettings;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
-import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraft.world.storage.WorldSummary;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -39,7 +37,6 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
  */
 public final class PerWorldProxy implements IConfigProxy
 {
-	public static final FolderName SERVERCONFIG = new FolderName("serverconfig");
 	public static final IConfigProxy INSTANCE = new PerWorldProxy(FMLPaths.GAMEDIR.get().resolve("multiplayerconfigs"), FMLPaths.GAMEDIR.get().resolve("defaultconfigs"), FMLPaths.GAMEDIR.get().resolve("saves"));
 	Path baseClientPath;
 	Path baseServerPath;
@@ -63,7 +60,7 @@ public final class PerWorldProxy implements IConfigProxy
 	public List<Path> getBasePaths() {
 		List<Path> paths = new ObjectArrayList<>();
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		if(server != null) paths.add(server.getWorldPath(SERVERCONFIG));
+		if(server != null) paths.add(server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath());
 		else if(FMLEnvironment.dist.isClient()) paths.add(baseClientPath);
 		paths.add(baseServerPath);
 		return paths;
@@ -72,22 +69,24 @@ public final class PerWorldProxy implements IConfigProxy
 	@Override
 	public List<? extends IPotentialTarget> getPotentialConfigs() {
 		if(FMLEnvironment.dist.isClient()) return getLevels();
-		else return Collections.singletonList(new SimpleTarget(ServerLifecycleHooks.getCurrentServer().getWorldPath(SERVERCONFIG), "server"));
+		else {
+			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+			return Collections.singletonList(new SimpleTarget(server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath(), "server"));
+		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	private List<IPotentialTarget> getLevels() {
-		SaveFormat storage = Minecraft.getInstance().getLevelSource();
+		SaveFormat storage = Minecraft.getInstance().getSaveLoader();
 		List<IPotentialTarget> folders = new ObjectArrayList<>();
 		if(Files.exists(baseServerPath)) {
 			folders.add(new SimpleTarget(baseServerPath, "Default Config"));
 		}
 		try {
-			for(WorldSummary sum : storage.getLevelList()) {
-				try(LevelSave access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
-				{
-					Path path = access.getLevelPath(SERVERCONFIG);
-					if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(FolderName.ROOT), path));
+			for(WorldSummary sum : storage.getSaveList()) {
+				try {
+					Path path = storage.getFile(sum.getFileName(), "serverconfig").toPath();
+					if(Files.exists(path)) folders.add(new WorldTarget(sum, storage.getFile(sum.getFileName(), ".").toPath(), path));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}
@@ -119,7 +118,7 @@ public final class PerWorldProxy implements IConfigProxy
 
 		@Override
 		public String getName() {
-			return summary.getLevelName();
+			return summary.getDisplayName();
 		}
 		
 		public Path getWorldFile() {

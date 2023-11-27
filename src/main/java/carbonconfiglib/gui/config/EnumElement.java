@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
@@ -60,17 +58,17 @@ public class EnumElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
+	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		String value = this.value.get();
-		GuiUtils.drawScrollingString(poseStack, font, new StringTextComponent(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
+		GuiUtils.drawScrollingString(font, new StringTextComponent(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
 	}
 	
 	private void onSelect(Button button) {
-		mc.setScreen(ListSelectionScreen.ofValue(mc.screen, node, value, owner.getCustomTexture()));
+		mc.displayGuiScreen(ListSelectionScreen.ofValue(mc.currentScreen, node, value, owner.getCustomTexture()));
 	}
 	
 	private void onPress(Button button) {
-		mc.setScreen(new EditStringScreen(mc.screen, name, node, value, owner.getCustomTexture()));
+		mc.displayGuiScreen(new EditStringScreen(mc.currentScreen, name, node, value, owner.getCustomTexture()));
 	}
 }
