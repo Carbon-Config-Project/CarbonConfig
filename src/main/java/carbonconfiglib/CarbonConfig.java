@@ -255,6 +255,7 @@ public class CarbonConfig implements ModInitializer
 		}
 	}
 	
+	@Environment(EnvType.CLIENT)
 	public void onClientLoad() {
 		onCommonLoad();
 		EventHandler.INSTANCE.onConfigsLoaded();
