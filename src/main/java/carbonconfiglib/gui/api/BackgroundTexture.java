@@ -4,7 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.utils.Helpers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * Copyright 2023 Speiger, Meduris

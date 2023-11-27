@@ -1,7 +1,7 @@
 package carbonconfiglib.networking;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -20,8 +20,8 @@ import net.minecraft.world.entity.player.Player;
  */
 public interface ICarbonPacket
 {
-	public void write(FriendlyByteBuf buffer);
-	public void read(FriendlyByteBuf buffer);
+	public void write(PacketBuffer buffer);
+	public void read(PacketBuffer buffer);
 	
-	public void process(Player player);
+	public void process(PlayerEntity player);
 }

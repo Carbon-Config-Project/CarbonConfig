@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -18,13 +18,13 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -79,8 +79,8 @@ public abstract class ListSelectionScreen extends ListScreen
 		visibleList.setCallback(T -> setValue(((SelectionElement)T).getSuggestion().getValue()));
 		int x = width / 2 - 100;
 		int y = height;
-		apply = addRenderableWidget(new CarbonButton(x+10, y-27, 85, 20, new TranslatableComponent("gui.carbonconfig.pick"), this::save));
-		addRenderableWidget(new CarbonButton(x+105, y-27, 85, 20, new TranslatableComponent("gui.carbonconfig.cancel"), this::cancel));
+		apply = addButton(new CarbonButton(x+10, y-27, 85, 20, new TranslationTextComponent("gui.carbonconfig.pick"), this::save));
+		addButton(new CarbonButton(x+105, y-27, 85, 20, new TranslationTextComponent("gui.carbonconfig.cancel"), this::cancel));
 	}
 	
 	public ListSelectionScreen withListener(Runnable success, Runnable abort) {
@@ -114,7 +114,7 @@ public abstract class ListSelectionScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		apply.active = value.isChanged();
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, title, (width/2)-(font.width(title)/2), 8, -1);
@@ -144,7 +144,7 @@ public abstract class ListSelectionScreen extends ListScreen
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				if(T) abort();
 				minecraft.setScreen(T ? parent : this);	
-			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
 			return;
 		}
 		abort();
@@ -227,21 +227,21 @@ public abstract class ListSelectionScreen extends ListScreen
 		
 		
 		public SelectionElement(Suggestion suggestion, ElementList list) {
-			super(new TranslatableComponent(suggestion.getName()));
+			super(new TranslationTextComponent(suggestion.getName()));
 			this.suggestion = suggestion;
 			this.myList = list;
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			ISuggestionRenderer renderer = getRenderer();
 			if(renderer != null) {
-				Component comp = renderer.renderSuggestion(poseStack, suggestion.getValue(), left, top);
+				ITextComponent comp = renderer.renderSuggestion(poseStack, suggestion.getValue(), left, top);
 				if(comp != null && mouseX >= left && mouseX <= left + 20 && mouseY >= top && mouseY <= top + 20) {
 					owner.addTooltips(comp);
 				}
 			}
-			renderText(poseStack, new TextComponent("").withStyle(myList.getSelected() == this ? ChatFormatting.YELLOW : ChatFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
+			renderText(poseStack, new StringTextComponent("").withStyle(myList.getSelected() == this ? TextFormatting.YELLOW : TextFormatting.WHITE).append(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
 		}
 		
 		private ISuggestionRenderer getRenderer() {

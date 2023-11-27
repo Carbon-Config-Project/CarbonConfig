@@ -4,8 +4,8 @@ package carbonconfiglib.networking.carbon;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.ICarbonPacket;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.api.distmarker.Dist;
 
 /**
@@ -33,17 +33,17 @@ public class StateSyncPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeBoolean(source.isClient());
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		source = buffer.readBoolean() ? Dist.CLIENT : Dist.DEDICATED_SERVER;
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		if(source.isDedicatedServer()) CarbonConfig.NETWORK.onPlayerJoined(player, false);
 		else EventHandler.INSTANCE.onServerJoinPacket(player);
 	}

@@ -4,17 +4,18 @@ import java.nio.file.Files;
 import java.util.UUID;
 
 import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -47,21 +48,21 @@ public class RequestConfigPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeEnum(type);
 		buffer.writeUUID(requestId);
 		buffer.writeUtf(modId, 32767);
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		type = buffer.readEnum(ModConfig.Type.class);
 		requestId = buffer.readUUID();
 		modId = buffer.readUtf(32767);
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
 			return;
 		}
@@ -69,7 +70,7 @@ public class RequestConfigPacket implements ICarbonPacket
 		if(config == null) return;
 		byte[] result = getData(config);
 		if(result == null) return;
-		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
 		buf.writeByteArray(result);
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
@@ -87,7 +88,7 @@ public class RequestConfigPacket implements ICarbonPacket
 	}
 	
 	private ModConfig findConfig() {
-		for(ModConfig config : ConfigTracker.INSTANCE.configSets().get(type)) {
+		for(ModConfig config : Reflects.getConfigs(ConfigTracker.INSTANCE).get(type)) {
 			if(modId.equalsIgnoreCase(config.getModId())) return config;
 		}
 		return null;

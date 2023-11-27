@@ -6,8 +6,8 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ArrayScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -26,7 +26,7 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class ArrayElement extends ConfigElement
 {
-	Button textBox = addChild(new CarbonButton(0, 0, 72, 18, new TranslatableComponent("gui.carbonconfig.edit"), this::onPress));
+	Button textBox = addChild(new CarbonButton(0, 0, 72, 18, new TranslationTextComponent("gui.carbonconfig.edit"), this::onPress));
 	IArrayNode array;
 	
 	public ArrayElement(IConfigNode node) {

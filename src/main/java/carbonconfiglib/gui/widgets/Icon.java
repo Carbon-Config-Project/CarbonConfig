@@ -3,7 +3,7 @@ package carbonconfiglib.gui.widgets;
 import java.util.EnumMap;
 
 import carbonconfiglib.api.ConfigType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * Copyright 2023 Speiger, Meduris

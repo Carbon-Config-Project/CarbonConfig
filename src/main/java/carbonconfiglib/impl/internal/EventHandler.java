@@ -22,18 +22,17 @@ import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.utils.SyncType;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
+import net.minecraft.potion.Effect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ConfigGuiHandler.ConfigGuiFactory;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedInEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -41,12 +40,13 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.mclanguageprovider.MinecraftModLanguageProvider.MinecraftModContainer;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
@@ -132,12 +132,12 @@ public class EventHandler implements IConfigChangeListener
 		loadDefaultTypes();
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
-			if(M.getCustomExtension(ConfigGuiFactory.class).isPresent()) return;
+			if(M.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) return;
 			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
 			ModList.get().forEachModContainer((K, T)-> {
-				if(T.getCustomExtension(ConfigGuiFactory.class).isEmpty()) {
+				if(T.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isEmpty()) {
 					ForgeConfigs configs = new ForgeConfigs(T);
 					if(configs.hasConfigs()) {
 						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
@@ -148,7 +148,7 @@ public class EventHandler implements IConfigChangeListener
 				};
 			});
 		}
-		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigGuiFactory.class, () -> new ConfigGuiFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
+		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (E, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C))));
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -158,13 +158,13 @@ public class EventHandler implements IConfigChangeListener
 		ISuggestionRenderer.Registry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
 		ISuggestionRenderer.Registry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
 		ISuggestionRenderer.Registry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
-		ISuggestionRenderer.Registry.register(MobEffect.class, new SuggestionRenderers.PotionEntry());
+		ISuggestionRenderer.Registry.register(Effect.class, new SuggestionRenderers.PotionEntry());
 		
 		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
 		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
 		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:empty"));
 		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
-		DataType.registerType(MobEffect.class, RegistryElement.createForType(MobEffect.class, "minecraft:luck"));
+		DataType.registerType(Effect.class, RegistryElement.createForType(Effect.class, "minecraft:luck"));
 		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new));
 	}
 	
@@ -173,7 +173,7 @@ public class EventHandler implements IConfigChangeListener
 		return new ConfigSelectorScreen(configs, screen);
 	}
 	
-	public void onServerJoinPacket(Player player) {
+	public void onServerJoinPacket(PlayerEntity player) {
 		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Dist.DEDICATED_SERVER), player);
 		CarbonConfig.NETWORK.onPlayerJoined(player, true);
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);

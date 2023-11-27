@@ -8,12 +8,12 @@ import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -92,18 +92,18 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public Component getName() {
+	public ITextComponent getName() {
 		return IConfigNode.createLabel(I18n.get(entry.getDescriptionId()));
 	}
 	
 	@Override
-	public Component getTooltip() {
+	public ITextComponent getTooltip() {
 		String id = entry.getDescriptionId();
-		MutableComponent result = new TextComponent("");
-		result.append(new TranslatableComponent(id).withStyle(ChatFormatting.YELLOW));
+		TextComponent result = new StringTextComponent("");
+		result.append(new TranslationTextComponent(id).withStyle(TextFormatting.YELLOW));
 		id += ".description";
 		if(I18n.exists(id)) {
-			result.append("\n").append(new TranslatableComponent(id).withStyle(ChatFormatting.GRAY));
+			result.append("\n").append(new TranslationTextComponent(id).withStyle(TextFormatting.GRAY));
 		}
 		return result;
 	}

@@ -6,11 +6,11 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -38,23 +38,23 @@ public class RequestGameRulesPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeUUID(requestId);
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		requestId = buffer.readUUID();
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
 			return;
 		}
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 		if(server == null) return;
-		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
 		buf.writeNbt(server.getGameRules().createTag());
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);

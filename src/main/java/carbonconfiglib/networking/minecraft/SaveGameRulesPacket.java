@@ -4,13 +4,13 @@ import com.mojang.serialization.Dynamic;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.networking.ICarbonPacket;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.world.GameRules;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -37,17 +37,17 @@ public class SaveGameRulesPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeNbt(rules.createTag());
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
-		rules = new GameRules(new Dynamic<>(NbtOps.INSTANCE, buffer.readNbt()));
+	public void read(PacketBuffer buffer) {
+		rules = new GameRules(new Dynamic<>(NBTDynamicOps.INSTANCE, buffer.readNbt()));
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;

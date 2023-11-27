@@ -6,16 +6,17 @@ import com.electronwill.nightconfig.toml.TomlFormat;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.impl.forge.ForgeHelpers;
+import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.Helpers;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,21 +49,21 @@ public class SaveForgeConfigPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeEnum(type);
 		buffer.writeUtf(modId, 32767);
 		buffer.writeByteArray(data);
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		type = buffer.readEnum(ModConfig.Type.class);
 		modId = buffer.readUtf(32767);
 		data = buffer.readByteArray();
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
 			return;
 		}
@@ -73,7 +74,7 @@ public class SaveForgeConfigPacket implements ICarbonPacket
 	}
 	
 	private ModConfig findConfig() {
-		for(ModConfig config : ConfigTracker.INSTANCE.configSets().get(type)) {
+		for(ModConfig config : Reflects.getConfigs(ConfigTracker.INSTANCE).get(type)) {
 			if(modId.equalsIgnoreCase(config.getModId())) return config;
 		}
 		return null;

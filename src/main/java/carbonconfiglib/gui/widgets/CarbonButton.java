@@ -1,11 +1,11 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -26,13 +26,13 @@ public class CarbonButton extends Button
 {
 	int hash;
 	
-	public CarbonButton(int xPos, int yPos, int width, int height, Component displayString, OnPress handler) {
+	public CarbonButton(int xPos, int yPos, int width, int height, ITextComponent displayString, IPressable handler) {
 		super(xPos, yPos, width, height, displayString, handler);
 		hash = displayString.getString().hashCode();
 	}
 	
 	@Override
-	public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+	public void renderButton(MatrixStack poseStack, int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		int k = this.getYImage(this.isHovered);
 		GuiUtils.drawTextureWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());

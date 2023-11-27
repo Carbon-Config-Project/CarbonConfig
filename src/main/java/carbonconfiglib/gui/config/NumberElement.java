@@ -1,14 +1,14 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -58,11 +58,11 @@ public class NumberElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks)
+	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks)
 	{
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new TextComponent(result.getError().getMessage()).withStyle(ChatFormatting.RED));
+			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).withStyle(TextFormatting.RED));
 		}
 	}
 	

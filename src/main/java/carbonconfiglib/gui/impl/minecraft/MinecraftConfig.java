@@ -19,22 +19,23 @@ import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameRules.BooleanValue;
-import net.minecraft.world.level.GameRules.Category;
-import net.minecraft.world.level.GameRules.GameRuleTypeVisitor;
-import net.minecraft.world.level.GameRules.IntegerValue;
-import net.minecraft.world.level.GameRules.Key;
-import net.minecraft.world.level.GameRules.Type;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.GameRules.BooleanValue;
+import net.minecraft.world.GameRules.Category;
+import net.minecraft.world.GameRules.IRuleEntryVisitor;
+import net.minecraft.world.GameRules.IntegerValue;
+import net.minecraft.world.GameRules.RuleKey;
+import net.minecraft.world.GameRules.RuleType;
+import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.SaveFormat.LevelSave;
+import net.minecraft.world.storage.WorldSummary;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 
@@ -76,20 +77,20 @@ public class MinecraftConfig implements IModConfig
 	}
 	
 	private void collect() {
-		GameRules.visitGameRuleTypes(new GameRuleTypeVisitor() {
+		GameRules.visitGameRuleTypes(new IRuleEntryVisitor() {
 			@Override
-			public void visitBoolean(Key<BooleanValue> key, Type<BooleanValue> type) {
+			public void visitBoolean(RuleKey<BooleanValue> key, RuleType<BooleanValue> type) {
 				add(key, IGameRuleValue.bool(key, current.getRule(key)));
 			}
 			
 			@Override
-			public void visitInteger(Key<IntegerValue> key, Type<IntegerValue> type) {
+			public void visitInteger(RuleKey<IntegerValue> key, RuleType<IntegerValue> type) {
 				add(key, IGameRuleValue.ints(key, current.getRule(key)));
 			}
 		});
 	}
 	
-	private void add(Key<?> key, IGameRuleValue value) {
+	private void add(RuleKey<?> key, IGameRuleValue value) {
 		keys.computeIfAbsent(key.getCategory(), T -> new ObjectArrayList<>()).add(value);
 		values.add(value);
 	}
@@ -146,14 +147,14 @@ public class MinecraftConfig implements IModConfig
 	
 	@Override
 	public List<IConfigTarget> getPotentialFiles() {
-		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
+		SaveFormat storage = Minecraft.getInstance().getLevelSource();
 		List<IConfigTarget> folders = new ObjectArrayList<>();
 		try {
-			for(LevelSummary sum : storage.getLevelList()) {
-				try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
-					Path path = access.getLevelPath(LevelResource.LEVEL_DATA_FILE);
+			for(WorldSummary sum : storage.getLevelList()) {
+				try(LevelSave access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
+					Path path = access.getLevelPath(FolderName.LEVEL_DATA_FILE);
 					if(Files.notExists(path)) continue;
-					folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path), path));
+					folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(FolderName.ROOT), path), path));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}
@@ -165,13 +166,13 @@ public class MinecraftConfig implements IModConfig
 	@Override
 	public IModConfig loadFromFile(Path path) {
 		if(Files.notExists(path)) return null;
-		try { return new FileConfig(path, NbtIo.readCompressed(path.toFile())); }
+		try { return new FileConfig(path, CompressedStreamTools.readCompressed(path.toFile())); }
 		catch(Exception e) { e.printStackTrace(); }
 		return null;
 	}
 	
 	@Override
-	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network) {
+	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<PacketBuffer>> network) {
 		NetworkConfig config = new NetworkConfig();
 		network.accept(config);
 		CarbonConfig.NETWORK.sendToServer(new RequestGameRulesPacket(requestId));
@@ -186,10 +187,10 @@ public class MinecraftConfig implements IModConfig
 	
 	public static class FileConfig extends MinecraftConfig {
 		Path file;
-		CompoundTag tag;
+		CompoundNBT tag;
 		
-		public FileConfig(Path file, CompoundTag tag) { 
-			super(new GameRules(new Dynamic<>(NbtOps.INSTANCE, tag.getCompound("Data").getCompound("GameRules"))));
+		public FileConfig(Path file, CompoundNBT tag) { 
+			super(new GameRules(new Dynamic<>(NBTDynamicOps.INSTANCE, tag.getCompound("Data").getCompound("GameRules"))));
 			this.file = file;
 			this.tag = tag;
 		}
@@ -198,7 +199,7 @@ public class MinecraftConfig implements IModConfig
 		public void save() {
 			tag.getCompound("Data").put("GameRules", current.createTag());
 			try {
-				NbtIo.writeCompressed(tag, file.toFile());
+				CompressedStreamTools.writeCompressed(tag, file.toFile());
 			}
 			catch(Exception e) {
 				e.printStackTrace();
@@ -206,7 +207,7 @@ public class MinecraftConfig implements IModConfig
 		}
 	}
 	
-	public static class NetworkConfig extends MinecraftConfig implements Predicate<FriendlyByteBuf> {
+	public static class NetworkConfig extends MinecraftConfig implements Predicate<PacketBuffer> {
 		@Override
 		public void save() {
 			if(current == null) return;
@@ -214,8 +215,8 @@ public class MinecraftConfig implements IModConfig
 		}
 		
 		@Override
-		public boolean test(FriendlyByteBuf buffer) {
-			setRules(new GameRules(new Dynamic<>(NbtOps.INSTANCE, buffer.readNbt())));
+		public boolean test(PacketBuffer buffer) {
+			setRules(new GameRules(new Dynamic<>(NBTDynamicOps.INSTANCE, buffer.readNbt())));
 			return true;
 		}
 	}

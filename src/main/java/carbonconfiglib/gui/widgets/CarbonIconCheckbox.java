@@ -1,17 +1,16 @@
 package carbonconfiglib.gui.widgets;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.config.IListOwner;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.narration.NarratedElementType;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -35,11 +34,11 @@ public class CarbonIconCheckbox extends AbstractButton
 	Icon selectedIcon;
 	Icon unselectedIcon;
 	Runnable listener;
-	Component tooltip;
+	ITextComponent tooltip;
 	IListOwner owner;
 	
 	public CarbonIconCheckbox(int x, int y, int width, int height, Icon selectedIcon, Icon unselectedIcon, boolean selected) {
-		super(x, y, width, height, new TextComponent(""));
+		super(x, y, width, height, new StringTextComponent(""));
 		this.selectedIcon = selectedIcon;
 		this.unselectedIcon = unselectedIcon;
 		this.selected = selected;
@@ -52,7 +51,7 @@ public class CarbonIconCheckbox extends AbstractButton
 	
 	public CarbonIconCheckbox setTooltip(IListOwner owner, String tooltips) {
 		this.owner = owner;
-		tooltip = new TranslatableComponent(tooltips);
+		tooltip = new TranslationTextComponent(tooltips);
 		return this;
 	}
 	
@@ -69,26 +68,21 @@ public class CarbonIconCheckbox extends AbstractButton
 		return this.selected;
 	}
 	
-	public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		RenderSystem.setShaderTexture(0, TEXTURE);
+	@Override
+	@SuppressWarnings("deprecation")
+	public void renderButton(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+		Minecraft.getInstance().getTextureManager().bind(TEXTURE);
 		RenderSystem.enableDepthTest();
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
-		GuiUtils.drawTextureRegion(stack, x, y, isHoveredOrFocused() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		GuiUtils.drawTextureRegion(stack, x, y, isHovered() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
 		GuiUtils.drawTextureRegion(stack, x+2, y+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
 		if(owner != null && isMouseOver(mouseX, mouseY)) {
 			owner.addTooltips(tooltip);
 		}
-	}
-
-	@Override
-	public void updateNarration(NarrationElementOutput output) {
-		output.add(NarratedElementType.TITLE, this.createNarrationMessage());
-		if(!this.active) return;
-		output.add(NarratedElementType.USAGE, new TranslatableComponent(isFocused() ? "narration.checkbox.usage.hovered" : "narration.checkbox.usage.focused"));		
 	}
 
 }

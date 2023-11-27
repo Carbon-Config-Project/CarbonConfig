@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
@@ -12,12 +12,12 @@ import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,23 +36,23 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class RequestScreen extends ListScreen implements IRequestScreen
 {
-	static final Component REQUEST = new TranslatableComponent("gui.carbonconfig.requesting_config");
-	static final Component[] ANIMATION = new Component[] {
-			new TextComponent("Ooooo").withStyle(ChatFormatting.GRAY),
-			new TextComponent("oOooo").withStyle(ChatFormatting.GRAY),
-			new TextComponent("ooOoo").withStyle(ChatFormatting.GRAY),
-			new TextComponent("oooOo").withStyle(ChatFormatting.GRAY),
-			new TextComponent("ooooO").withStyle(ChatFormatting.GRAY),
+	static final ITextComponent REQUEST = new TranslationTextComponent("gui.carbonconfig.requesting_config");
+	static final ITextComponent[] ANIMATION = new ITextComponent[] {
+			new StringTextComponent("Ooooo").withStyle(TextFormatting.GRAY),
+			new StringTextComponent("oOooo").withStyle(TextFormatting.GRAY),
+			new StringTextComponent("ooOoo").withStyle(TextFormatting.GRAY),
+			new StringTextComponent("oooOo").withStyle(TextFormatting.GRAY),
+			new StringTextComponent("ooooO").withStyle(TextFormatting.GRAY),
 	};
 	Screen parent;
 	IModConfig config;
 	UUID requestId;
-	Predicate<FriendlyByteBuf> result;
+	Predicate<PacketBuffer> result;
 	Navigator nav;
 	int tick = 0;
 	
 	public RequestScreen(BackgroundHolder customTexture, Navigator nav, Screen parent, IModConfig config) {
-		super(new TextComponent("Request Screen"), customTexture);
+		super(new StringTextComponent("Request Screen"), customTexture);
 		this.parent = parent;
 		this.nav = nav;
 		requestId = UUID.randomUUID();
@@ -63,7 +63,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	protected void collectElements(Consumer<Element> elements) {}
 	
 	@Override
-	public void receiveConfigData(UUID requestId, FriendlyByteBuf buf) {
+	public void receiveConfigData(UUID requestId, PacketBuffer buf) {
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
@@ -81,7 +81,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, REQUEST, width / 2 - font.width(REQUEST) / 2, height / 2 - 12, -1);
 		int index = (tick / 5) % 8;
@@ -89,7 +89,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		font.draw(stack, ANIMATION[index], width / 2 - font.width(ANIMATION[index]) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
-			Component draw = new TranslatableComponent("gui.carbonconfig.timeout", timeout).withStyle(ChatFormatting.RED);
+			ITextComponent draw = new TranslationTextComponent("gui.carbonconfig.timeout", timeout).withStyle(TextFormatting.RED);
 			font.draw(stack, draw, width / 2 - font.width(draw) / 2, height / 2 + 12, -1);
 		}
 	}

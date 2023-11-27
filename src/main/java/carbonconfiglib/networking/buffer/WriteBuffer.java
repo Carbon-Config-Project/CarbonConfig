@@ -3,7 +3,7 @@ package carbonconfiglib.networking.buffer;
 import java.util.UUID;
 
 import carbonconfiglib.api.buffer.IWriteBuffer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -22,9 +22,9 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class WriteBuffer implements IWriteBuffer
 {
-	FriendlyByteBuf buf;
+	PacketBuffer buf;
 	
-	public WriteBuffer(FriendlyByteBuf buf) {
+	public WriteBuffer(PacketBuffer buf) {
 		this.buf = buf;
 	}
 

@@ -2,12 +2,11 @@ package carbonconfiglib.gui.widgets;
 
 import java.util.function.Consumer;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.util.text.StringTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -31,7 +30,7 @@ public class CarbonHoverIconButton extends AbstractButton
 	IconInfo info;
 	
 	public CarbonHoverIconButton(int x, int y, int width, int height, IconInfo info, Icon basicIcon, Icon hoverIcon, Consumer<CarbonHoverIconButton> listener) {
-		super(x, y, width, height, new TextComponent(""));
+		super(x, y, width, height, new StringTextComponent(""));
 		this.listener = listener;
 		this.icons = new Icon[2];
 		icons[0] = basicIcon;
@@ -44,22 +43,18 @@ public class CarbonHoverIconButton extends AbstractButton
 	}
 	
 	@Override
-	public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_93679_) {
+	@SuppressWarnings("deprecation")
+	public void renderButton(MatrixStack stack, int mouseX, int mouseY, float p_93679_) {
 		int j = getFGColor();
-        RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(stack, x + info.xOff, y + info.yOff, info.width, info.height, icons[isHoveredOrFocused() ? 1 : 0], 16, 16);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+        RenderSystem.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+		GuiUtils.drawTextureRegion(stack, x + info.xOff, y + info.yOff, info.width, info.height, icons[isHovered() ? 1 : 0], 16, 16);
+		RenderSystem.color4f(1F, 1F, 1F, 1F);
 	}
 	
 	@Override
 	public void onPress() {
 		if(listener == null) return;
 		listener.accept(this);
-	}
-	
-	@Override
-	public void updateNarration(NarrationElementOutput output) {
-		defaultButtonNarrationText(output);
 	}
 	
 	public static class IconInfo {

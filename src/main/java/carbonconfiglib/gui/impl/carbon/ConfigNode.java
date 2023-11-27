@@ -8,10 +8,10 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -58,14 +58,14 @@ public class ConfigNode implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return section.getName().toLowerCase(Locale.ROOT); }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(section.getName()); }
+	public ITextComponent getName() { return IConfigNode.createLabel(section.getName()); }
 	@Override
-	public Component getTooltip() {
-		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(section.getName()).withStyle(ChatFormatting.YELLOW));
+	public ITextComponent getTooltip() {
+		TextComponent comp = new StringTextComponent("");
+		comp.append(new StringTextComponent(section.getName()).withStyle(TextFormatting.YELLOW));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(TextFormatting.GRAY));
 		}
 		return comp;
 	}

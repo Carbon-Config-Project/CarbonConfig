@@ -4,7 +4,8 @@ import java.util.List;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.minecraftforge.fml.IExtensionPoint;
+import carbonconfiglib.impl.Reflects;
+import net.minecraftforge.fml.ExtensionPoint;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -27,5 +28,6 @@ public interface IModConfigs
 	public List<IModConfig> getConfigInstances(ConfigType type);
 	public BackgroundHolder getBackground();
 	
-	public static record Background(BackgroundTexture texture) implements IExtensionPoint<Background> {}
+	
+	public static final ExtensionPoint<BackgroundTexture> BACKGROUND = Reflects.createExtension();
 }

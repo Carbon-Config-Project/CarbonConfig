@@ -2,14 +2,13 @@ package carbonconfiglib.gui.screen;
 
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import net.minecraft.client.gui.IBidiRenderer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -28,18 +27,18 @@ import net.minecraft.util.Mth;
  */
 public class MultiChoiceScreen extends Screen
 {
-	private final Component message;
-	private MultiLineLabel multilineMessage = MultiLineLabel.EMPTY;
-	protected Component mainButton;
-	protected Component otherButton;
-	protected Component cancelButton;
+	private final ITextComponent message;
+	private IBidiRenderer multilineMessage = IBidiRenderer.EMPTY;
+	protected ITextComponent mainButton;
+	protected ITextComponent otherButton;
+	protected ITextComponent cancelButton;
 	protected final Consumer<Result> callback;
 
-	public MultiChoiceScreen(Consumer<Result> callback, Component title, Component message, Component mainButton) {
+	public MultiChoiceScreen(Consumer<Result> callback, ITextComponent title, ITextComponent message, ITextComponent mainButton) {
 		this(callback, title, message, mainButton, null, null);
 	}
 	
-	public MultiChoiceScreen(Consumer<Result> callback, Component title, Component message, Component mainButton, Component otherButton, Component cancelButton) {
+	public MultiChoiceScreen(Consumer<Result> callback, ITextComponent title, ITextComponent message, ITextComponent mainButton, ITextComponent otherButton, ITextComponent cancelButton) {
 	      super(title);
 	      this.callback = callback;
 	      this.message = message;
@@ -49,27 +48,22 @@ public class MultiChoiceScreen extends Screen
 	}
 	
 	@Override
-	public Component getNarrationMessage() {
-		return CommonComponents.joinForNarration(super.getNarrationMessage(), this.message);
-	}
-	
-	@Override
 	protected void init() {
 		super.init();
-		this.multilineMessage = MultiLineLabel.create(this.font, this.message, this.width - 50);
-		this.addButtons(Mth.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
+		this.multilineMessage = IBidiRenderer.create(this.font, this.message, this.width - 50);
+		this.addButtons(MathHelper.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
 	}
 	
 	protected void addButtons(int y) {
 		boolean singleOption = otherButton == null && cancelButton == null;
-		addRenderableWidget(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton, T -> callback.accept(Result.MAIN)));
+		addButton(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton, T -> callback.accept(Result.MAIN)));
 		if(singleOption) return;
-		addRenderableWidget(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton, T -> callback.accept(Result.OTHER)));
-		addRenderableWidget(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton, T -> callback.accept(Result.CANCEL)));
+		addButton(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton, T -> callback.accept(Result.OTHER)));
+		addButton(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton, T -> callback.accept(Result.CANCEL)));
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks){
 		this.renderBackground(stack);
 		drawCenteredString(stack, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
 		this.multilineMessage.renderCentered(stack, this.width / 2, this.messageTop());
@@ -78,7 +72,7 @@ public class MultiChoiceScreen extends Screen
 	
 	private int titleTop() {
 		int i = (this.height - this.messageHeight()) / 2;
-		return Mth.clamp(i - 20 - 9, 10, 80);
+		return MathHelper.clamp(i - 20 - 9, 10, 80);
 	}
 	
 	private int messageTop() {

@@ -3,7 +3,7 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
@@ -20,14 +20,14 @@ import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +48,7 @@ public class ConfigSelectorScreen extends ListScreen
 {
 	IModConfigs configs;
 	Screen parent;
-	Component modName;
+	ITextComponent modName;
 	Label toAdd;
 	
 	public ConfigSelectorScreen(IModConfigs configs, Screen parent) {
@@ -56,10 +56,10 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	public ConfigSelectorScreen(IModConfigs configs, BackgroundHolder customTexture, Screen parent) {
-		super(new TranslatableComponent("gui.carbonconfig.select_config"), customTexture);
+		super(new TranslationTextComponent("gui.carbonconfig.select_config"), customTexture);
 		this.configs = configs;
 		this.parent = parent;
-		modName = new TextComponent(configs.getModName());
+		modName = new StringTextComponent(configs.getModName());
 	}
 	
 	@Override
@@ -67,18 +67,18 @@ public class ConfigSelectorScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, new TranslatableComponent("gui.carbonconfig.back"), T -> onClose()));
+		addButton(new CarbonButton(x-80, y-27, 160, 20, new TranslationTextComponent("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, modName, (width/2)-(font.width(modName)/2), 8, -1);
 	}
 	
 	@Override
 	protected void collectElements(Consumer<Element> elements) {
-		toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.local").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+		toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.local").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
 		toAdd = null;
@@ -93,15 +93,15 @@ public class ConfigSelectorScreen extends ListScreen
 				if(!minecraft.player.hasPermissions(4)) {
 					return;
 				}
-				toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.multiplayer").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.multiplayer").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}
 			else  {
-				toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
 			}
 		}
 		else {
-			toAdd = new Label(new TranslatableComponent("gui.carbonconfig.configs.world").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+			toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").withStyle(TextFormatting.GOLD, TextFormatting.BOLD));
 		}
 		addConfigs(ConfigType.SERVER, true, elements);
 		toAdd = null;
@@ -132,7 +132,7 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	public static class Label extends Element implements IIgnoreSearch {
-		public Label(Component name) {
+		public Label(ITextComponent name) {
 			super(name);
 		}
 
@@ -142,13 +142,13 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			renderText(poseStack, name, left, top+1, width, height, GuiAlign.CENTER, -1);
 		}
 	}
 	
 	public static class DirectConfig extends Element {
-		List<GuiEventListener> children = new ObjectArrayList<>();
+		List<IGuiEventListener> children = new ObjectArrayList<>();
 		Screen parent;
 		IModConfig handler;
 		Button button;
@@ -156,12 +156,12 @@ public class ConfigSelectorScreen extends ListScreen
 		boolean multi;
 		boolean multiplayer;
 		Navigator nav;
-		Component type;
-		Component fileName;
-		Component baseName;
+		ITextComponent type;
+		ITextComponent fileName;
+		ITextComponent baseName;
 		
-		public DirectConfig(IModConfig handler, Component baseName, Screen parent, boolean multiplayer) {
-			super(new TextComponent(handler.getFileName()));
+		public DirectConfig(IModConfig handler, ITextComponent baseName, Screen parent, boolean multiplayer) {
+			super(new StringTextComponent(handler.getFileName()));
 			nav = new Navigator(baseName);
 			nav.setScreenForLayer(parent);
 			this.handler = handler;
@@ -174,22 +174,22 @@ public class ConfigSelectorScreen extends ListScreen
 		public void init() {
 			multi = shouldCreatePick();
 			if(multi) {
-				button = new CarbonButton(0, 0, 82, 20, new TranslatableComponent("gui.carbonconfig.pick_file"), this::onPick);
+				button = new CarbonButton(0, 0, 82, 20, new TranslationTextComponent("gui.carbonconfig.pick_file"), this::onPick);
 				children.add(button);
 			}
 			else {
-				button = new CarbonButton(0, 0, 60, 20, new TranslatableComponent("gui.carbonconfig.modify"), this::onEdit);
-				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, new TextComponent(""), this::reset).setIconOnly();
+				button = new CarbonButton(0, 0, 60, 20, new TranslationTextComponent("gui.carbonconfig.modify"), this::onEdit);
+				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, new StringTextComponent(""), this::reset).setIconOnly();
 				reset.active = !handler.isDefault() && !isInWorldConfig();
 				children.add(button);
 				children.add(reset);
 			}
-			type = new TranslatableComponent("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
-			fileName = new TextComponent(handler.getFileName()).withStyle(ChatFormatting.GRAY);
+			type = new TranslationTextComponent("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
+			fileName = new StringTextComponent(handler.getFileName()).withStyle(TextFormatting.GRAY);
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.x = left+width-82;
 			button.y = top + 2;
 			button.render(poseStack, mouseX, mouseY, partialTicks);
@@ -204,7 +204,7 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public List<? extends GuiEventListener> children() {
+		public List<? extends IGuiEventListener> children() {
 			return children;
 		}
 		

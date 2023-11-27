@@ -21,7 +21,7 @@ import carbonconfiglib.networking.carbon.ConfigRequestPacket;
 import carbonconfiglib.networking.carbon.SaveConfigPacket;
 import carbonconfiglib.utils.MultilinePolicy;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -71,7 +71,7 @@ public class ModConfig implements IModConfig
 	}
 	
 	@Override
-	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network) {
+	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<PacketBuffer>> network) {
 		NetworkModConfig config = new NetworkModConfig(modId, handler, this.config.copy());
 		CarbonConfig.NETWORK.sendToServer(new ConfigRequestPacket(requestId, handler.getConfigIdentifer()));
 		network.accept(config);
@@ -150,14 +150,14 @@ public class ModConfig implements IModConfig
 		}
 	}
 	
-	private static class NetworkModConfig extends ModConfig implements Predicate<FriendlyByteBuf> {
+	private static class NetworkModConfig extends ModConfig implements Predicate<PacketBuffer> {
 		
 		public NetworkModConfig(String modId, ConfigHandler handler, Config config) {
 			super(modId, handler, config, null);
 		}
 
 		@Override
-		public boolean test(FriendlyByteBuf t) {
+		public boolean test(PacketBuffer t) {
 			List<String> lines = ObjectArrayList.wrap(t.readUtf(262144).split("\n"));
 			try {
 				ConfigHandler.load(handler, config, lines, false);

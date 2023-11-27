@@ -1,8 +1,8 @@
 package carbonconfiglib.gui.config;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,12 +21,12 @@ import net.minecraft.network.chat.Component;
  */
 public interface IListOwner
 {
-	public void addTooltips(Component tooltip);
+	public void addTooltips(ITextComponent tooltip);
 	public boolean isInsideList(double mouseX, double mouseY);
 	public BackgroundHolder getCustomTexture();
 	
-	public boolean isActiveWidget(AbstractWidget widget);
-	public void setActiveWidget(AbstractWidget widget);
+	public boolean isActiveWidget(Widget widget);
+	public void setActiveWidget(Widget widget);
 	
 	public void updateInformation();
 	public void removeEntry(Element element);

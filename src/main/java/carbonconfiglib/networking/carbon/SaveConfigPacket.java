@@ -4,11 +4,11 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.networking.ICarbonPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -39,19 +39,19 @@ public class SaveConfigPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeUtf(identifier, 32767);
 		buffer.writeUtf(data, 262144);
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		identifier = buffer.readUtf(32767);
 		data = buffer.readUtf(262144);
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		if(!canIgnorePermissionCheck() && !player.hasPermissions(4)) {
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;

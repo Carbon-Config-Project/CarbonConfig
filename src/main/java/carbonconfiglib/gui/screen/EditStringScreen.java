@@ -1,25 +1,22 @@
 package carbonconfiglib.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ElementList;
-import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -41,12 +38,12 @@ public class EditStringScreen extends Screen
 	Screen parent;
 	IConfigNode node;
 	IValueNode value;
-	EditBox textBox;
+	TextFieldWidget textBox;
 	boolean valid = true;
 	BackgroundHolder texture;
 	ParseResult<Boolean> result;
 
-	public EditStringScreen(Screen parent, Component name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
+	public EditStringScreen(Screen parent, ITextComponent name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
 		super(name);
 		this.parent = parent;
 		this.node = node;
@@ -59,10 +56,10 @@ public class EditStringScreen extends Screen
 	protected void init() {
 		super.init();
 		int x = width / 2 - 100;
-		Button apply = addRenderableWidget(new CarbonButton(x+10, 160, 85, 20, new TranslatableComponent("gui.carbonconfig.apply"), this::save));
-		addRenderableWidget(new CarbonButton(x+105, 160, 85, 20, new TranslatableComponent("gui.carbonconfig.cancel"), this::cancel));
-		textBox = new EditBox(font, x, 113, 200, 18, new TextComponent(""));
-		addRenderableWidget(textBox);
+		Button apply = addButton(new Button(x+10, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.apply"), this::save));
+		addButton(new Button(x+105, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.cancel"), this::cancel));
+		textBox = new TextFieldWidget(font, x, 113, 200, 18, new StringTextComponent(""));
+		addButton(textBox);
 		textBox.setValue(value.get());
 		textBox.setResponder(T -> {
 			textBox.setTextColor(0xE0E0E0);
@@ -78,13 +75,13 @@ public class EditStringScreen extends Screen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
 		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, title, (width/2)-(font.width(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderComponentTooltip(stack, new ObjectArrayList<>(font.getSplitter().splitLines(new TextComponent(result.getError().getMessage()), Integer.MAX_VALUE, Style.EMPTY)), mouseX, mouseY, ItemStack.EMPTY);
+			renderToolTip(stack, new ObjectArrayList<>(font.split(new StringTextComponent(result.getError().getMessage()), Integer.MAX_VALUE)), mouseX, mouseY, font);
 		}
 	}
 	
@@ -105,7 +102,7 @@ public class EditStringScreen extends Screen
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				if(T) value.setPrevious();
 				minecraft.setScreen(T ? parent : this);
-			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
 			return;
 		}
 		value.setPrevious();

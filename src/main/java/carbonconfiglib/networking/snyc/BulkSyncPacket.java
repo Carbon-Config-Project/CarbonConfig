@@ -8,9 +8,9 @@ import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.SyncType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.Util;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Util;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +48,7 @@ public class BulkSyncPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeVarInt(packets.size());
 		for(SyncPacket packet : packets) {
 			packet.write(buffer);
@@ -56,7 +56,7 @@ public class BulkSyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
 			SyncPacket packet = new SyncPacket();
@@ -66,7 +66,7 @@ public class BulkSyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		ReloadMode result = null;
 		for(SyncPacket packet : packets) {
 			result = ReloadMode.or(result, packet.processEntry(player));

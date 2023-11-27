@@ -6,9 +6,9 @@ import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.networking.ICarbonPacket;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -40,19 +40,19 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeUUID(id);
 		buffer.writeByteArray(data);
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		id = buffer.readUUID();
 		data = buffer.readByteArray();
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		processClient();
 	}
 	
@@ -60,7 +60,7 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	private void processClient() {
 		Screen screen = Minecraft.getInstance().screen;
 		if(screen instanceof IRequestScreen) {
-			((IRequestScreen)screen).receiveConfigData(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
+			((IRequestScreen)screen).receiveConfigData(id, new PacketBuffer(Unpooled.wrappedBuffer(data)));
 		}
 	}
 }

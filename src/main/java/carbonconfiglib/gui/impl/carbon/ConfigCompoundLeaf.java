@@ -18,10 +18,10 @@ import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.IEntryDataType.EntryDataType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -127,11 +127,11 @@ public class ConfigCompoundLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(entry.getKey()); }
+	public ITextComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
 	@Override
-	public Component getTooltip() {
-		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(entry.getKey()).withStyle(ChatFormatting.YELLOW));
+	public ITextComponent getTooltip() {
+		TextComponent comp = new StringTextComponent("");
+		comp.append(new StringTextComponent(entry.getKey()).withStyle(TextFormatting.YELLOW));
 		String[] array = entry.getComment();
 		if(array != null && array.length > 0) {
 			comp.append("\n");
@@ -140,7 +140,7 @@ public class ConfigCompoundLeaf implements IConfigNode
 		String limit = entry.getLimitations();
 		if(!Strings.isBlank(limit)) {
 			String[] split = Helpers.splitArray(limit, ",");
-			for(int i = 0,m=split.length;i<m;comp.append("\n").append(new TextComponent(split[i++]).withStyle(ChatFormatting.GRAY)));
+			for(int i = 0,m=split.length;i<m;comp.append("\n").append(new StringTextComponent(split[i++]).withStyle(TextFormatting.GRAY)));
 		}
 		return comp;
 	}

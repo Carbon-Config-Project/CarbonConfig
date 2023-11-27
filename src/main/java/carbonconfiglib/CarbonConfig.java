@@ -2,10 +2,9 @@ package carbonconfiglib;
 
 import java.util.function.BooleanSupplier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
-import org.slf4j.Logger;
-
-import com.mojang.logging.LogUtils;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.Config;
@@ -30,25 +29,25 @@ import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
-import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.fml.client.gui.screen.ModListScreen;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -68,7 +67,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 @Mod("carbonconfig")
 public class CarbonConfig
 {
-	public static final Logger LOGGER = LogUtils.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger();
 	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	public static BooleanSupplier MOD_GUI = () -> false;
@@ -244,7 +243,7 @@ public class CarbonConfig
 	@OnlyIn(Dist.CLIENT)
 	public void onClientLoad(FMLClientSetupEvent event) {
 		EventHandler.INSTANCE.onConfigsLoaded();
-		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
+		KeyBinding mapping = new KeyBinding("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
 		MOD_GUI = mapping::isDown;
 	}
@@ -257,7 +256,7 @@ public class CarbonConfig
 		}
 	}
 	
-	public void load(ServerAboutToStartEvent event) {
+	public void load(FMLServerAboutToStartEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.load();
@@ -265,7 +264,7 @@ public class CarbonConfig
 		}
 	}
 	
-	public void unload(ServerStoppingEvent event) {
+	public void unload(FMLServerStoppingEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.unload();

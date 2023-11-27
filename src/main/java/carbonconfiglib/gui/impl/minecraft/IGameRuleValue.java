@@ -3,9 +3,9 @@ package carbonconfiglib.gui.impl.minecraft;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.world.level.GameRules.BooleanValue;
-import net.minecraft.world.level.GameRules.IntegerValue;
-import net.minecraft.world.level.GameRules.Key;
+import net.minecraft.world.GameRules.BooleanValue;
+import net.minecraft.world.GameRules.IntegerValue;
+import net.minecraft.world.GameRules.RuleKey;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -31,19 +31,19 @@ public interface IGameRuleValue
 	public String getDescriptionId();
 	public DataType getType();
 	
-	public static IGameRuleValue bool(Key<BooleanValue> key, BooleanValue value) {
+	public static IGameRuleValue bool(RuleKey<BooleanValue> key, BooleanValue value) {
 		return new BooleanEntry(key, value);
 	}
 	
-	public static IGameRuleValue ints(Key<IntegerValue> key, IntegerValue value) {
+	public static IGameRuleValue ints(RuleKey<IntegerValue> key, IntegerValue value) {
 		return new IntegerEntry(key, value);
 	}
 	
 	public static class BooleanEntry implements IGameRuleValue {
-		Key<BooleanValue> key;
+		RuleKey<BooleanValue> key;
 		BooleanValue value;
 		
-		private BooleanEntry(Key<BooleanValue> key, BooleanValue value) {
+		private BooleanEntry(RuleKey<BooleanValue> key, BooleanValue value) {
 			this.key = key;
 			this.value = value;
 		}
@@ -63,10 +63,10 @@ public interface IGameRuleValue
 	}
 	
 	public static class IntegerEntry implements IGameRuleValue {
-		Key<IntegerValue> key;
+		RuleKey<IntegerValue> key;
 		IntegerValue value;
 		
-		private IntegerEntry(Key<IntegerValue> key, IntegerValue value) {
+		private IntegerEntry(RuleKey<IntegerValue> key, IntegerValue value) {
 			this.key = key;
 			this.value = value;
 		}
@@ -75,7 +75,7 @@ public interface IGameRuleValue
 		public void set(String value) {
 			ParseResult<Integer> result = Helpers.parseInt(value);
 			if(result.isValid()) {
-				this.value.set(result.getValue(), null);
+				this.value.tryDeserialize(result.getValue().toString());
 			}
 		}
 		

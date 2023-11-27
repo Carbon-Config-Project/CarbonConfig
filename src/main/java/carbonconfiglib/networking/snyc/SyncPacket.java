@@ -16,9 +16,9 @@ import carbonconfiglib.utils.SyncType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.Util;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Util;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -54,7 +54,7 @@ public class SyncPacket implements ICarbonPacket
 		if(!handler.isLoaded()) return null;
 		Map<String, byte[]> data = new Object2ObjectLinkedOpenHashMap<>();
 		ByteBuf buf = Unpooled.buffer();
-		IWriteBuffer buffer = new WriteBuffer(new FriendlyByteBuf(buf));
+		IWriteBuffer buffer = new WriteBuffer(new PacketBuffer(buf));
 		for(Map.Entry<String, ConfigEntry<?>> entry : handler.getConfig().getSyncedEntries(type).entrySet()) {
 			ConfigEntry<?> value = entry.getValue();
 			if(forceSync || value.hasChanged()) {
@@ -70,7 +70,7 @@ public class SyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void write(FriendlyByteBuf buffer) {
+	public void write(PacketBuffer buffer) {
 		buffer.writeUtf(identifier);
 		buffer.writeEnum(type);
 		buffer.writeVarInt(entries.size());
@@ -81,7 +81,7 @@ public class SyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void read(FriendlyByteBuf buffer) {
+	public void read(PacketBuffer buffer) {
 		identifier = buffer.readUtf(32767);
 		type = buffer.readEnum(SyncType.class);
 		int size = buffer.readVarInt();
@@ -91,14 +91,14 @@ public class SyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(Player player) {
+	public void process(PlayerEntity player) {
 		ReloadMode mode = processEntry(player);
 		if(mode != null) {
 			player.sendMessage(mode.getMessage(), Util.NIL_UUID);
 		}
 	}
 	
-	public ReloadMode processEntry(Player player) {
+	public ReloadMode processEntry(PlayerEntity player) {
 		if(entries.isEmpty()) return null;
 		ConfigHandler cfg = CarbonConfig.CONFIGS.getConfig(identifier);
 		if(cfg == null) {
@@ -114,7 +114,7 @@ public class SyncPacket implements ICarbonPacket
 			ConfigEntry<?> entry = mapped.get(dataEntry.getKey());
 			if(entry != null)
 			{
-				entry.deserialize(new ReadBuffer(new FriendlyByteBuf(Unpooled.wrappedBuffer(dataEntry.getValue()))), owner);
+				entry.deserialize(new ReadBuffer(new PacketBuffer(Unpooled.wrappedBuffer(dataEntry.getValue()))), owner);
 				if(entry.hasChanged()) {
 					hasChanged = true;
 					mode = ReloadMode.or(mode, entry.getReloadState());

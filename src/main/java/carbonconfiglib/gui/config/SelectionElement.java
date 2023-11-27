@@ -4,8 +4,8 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,7 +24,7 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class SelectionElement extends ConfigElement
 {
-	Button textBox = addChild(new CarbonButton(0, 0, 72, 18, new TranslatableComponent("gui.carbonconfig.edit"), this::onPress));
+	Button textBox = addChild(new CarbonButton(0, 0, 72, 18, new TranslationTextComponent("gui.carbonconfig.edit"), this::onPress));
 	
 	public SelectionElement(IConfigNode node) {
 		super(node);

@@ -16,8 +16,8 @@ import carbonconfiglib.config.SyncedConfig;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.utils.AutomationType;
 import carbonconfiglib.utils.MultilinePolicy;
-import net.minecraft.ChatFormatting;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public class SimpleConfigExample
@@ -34,7 +34,7 @@ public class SimpleConfigExample
 	public ArrayValue stringArrayExample;
 	public HashSetCache<String> cache;
 	public DoubleValue percentageExample;
-	public EnumValue<ChatFormatting> enumExample;
+	public EnumValue<TextFormatting> enumExample;
 	public ColorValue colorExample;
 	
 	public ConfigHandler handler;
@@ -51,7 +51,7 @@ public class SimpleConfigExample
 		ConfigSection subSection = section.addSubSection("Subsection"); // Sections can be cascaded as many times you want, but a section is requried!
 		percentageExample = subSection.addDouble("FloatingPoint Example", 0.25); //NOTE Double.MIN_VALUE IS NOT THE NEGATIVE LIMIT BUT THE SMALLEST POSSIBLE VALUE POSSIBLE! IF you want the biggest negative value just do: -Double.MAX_VALUE;
 		
-		enumExample = subSection.addEnum("Enum Example", ChatFormatting.AQUA, ChatFormatting.class); //Enum Value allows to select a enum. If you need a Enum Array there is other ways to deal with that.
+		enumExample = subSection.addEnum("Enum Example", TextFormatting.AQUA, TextFormatting.class); //Enum Value allows to select a enum. If you need a Enum Array there is other ways to deal with that.
 		
 		ConfigSection synced = config.add("Synced Section");
 		serverSyncedExample = synced.addInt("Server Synced Value", 0).setServerSynced(); //Syncs the config from the server to the client!
@@ -75,8 +75,8 @@ public class SimpleConfigExample
 		}
 	}
 	
-	public int getClientValue(Player player) {
-		return clientSyncedValue.get(player.getUUID()).get(); // Gets the Player Specific value from the config automatically. If no value is provided the server side config applies! NOTE: THIS requires AutomationType.AUTO_SYNC to be set (default) otherwise no SYNC
+	public int getClientValue(PlayerEntity player) {
+		return clientSyncedValue.get(player.getUUID()).get(); // Gets the PlayerEntity Specific value from the config automatically. If no value is provided the server side config applies! NOTE: THIS requires AutomationType.AUTO_SYNC to be set (default) otherwise no SYNC
 	}
 	
 	public boolean getBooleanExample() {

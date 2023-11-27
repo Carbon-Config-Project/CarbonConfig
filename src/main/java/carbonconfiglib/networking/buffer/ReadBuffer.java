@@ -3,7 +3,7 @@ package carbonconfiglib.networking.buffer;
 import java.util.UUID;
 
 import carbonconfiglib.api.buffer.IReadBuffer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -22,9 +22,9 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class ReadBuffer implements IReadBuffer
 {
-	FriendlyByteBuf buf;
+	PacketBuffer buf;
 	
-	public ReadBuffer(FriendlyByteBuf buf) {
+	public ReadBuffer(PacketBuffer buf) {
 		this.buf = buf;
 	}
 

@@ -5,16 +5,20 @@ import java.nio.file.Path;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
+import com.electronwill.nightconfig.toml.TomlFormat;
 
+import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.config.ModConfig.Reloading;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -33,7 +37,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
  */
 public class ForgeHelpers
 {
-    private static final LevelResource SERVERCONFIG = new LevelResource("serverconfig");
+    private static final FolderName SERVERCONFIG = new FolderName("serverconfig");
     
 	public static Path getConfigFolder(ModConfig.Type type) {
 		return type == Type.SERVER ? ServerLifecycleHooks.getCurrentServer().getWorldPath(SERVERCONFIG) : FMLPaths.CONFIGDIR.get();
@@ -48,7 +52,10 @@ public class ForgeHelpers
 		Path path = getConfigFolder(config.getType()).resolve(config.getFileName());
 		Helpers.ensureFolder(path.getParent());
 		data.configFormat().createWriter().write(data, path, WritingMode.REPLACE);
-		try { config.acceptSyncedConfig(Files.readAllBytes(path)); }
+		try {
+			Reflects.setConfigData(config, TomlFormat.instance().createParser().parse(Files.newInputStream(path)));
+	        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(Reloading.class, config));
+		}
 		catch(Exception e) { e.printStackTrace(); }
 	}
 	

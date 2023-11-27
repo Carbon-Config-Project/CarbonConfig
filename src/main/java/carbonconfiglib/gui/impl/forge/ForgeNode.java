@@ -10,11 +10,12 @@ import com.google.common.collect.Iterables;
 
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.impl.Reflects;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 
@@ -40,7 +41,7 @@ public class ForgeNode implements IConfigFolderNode
 	ForgeConfigSpec spec;
 	UnmodifiableConfig specConfig;
 	List<IConfigNode> children;
-	Component tooltip;
+	ITextComponent tooltip;
 	
 	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec) {
 		this(paths, config, spec, spec.getValues());
@@ -55,11 +56,11 @@ public class ForgeNode implements IConfigFolderNode
 	}
  	
  	private void loadComment() {
- 		String value = spec.getLevelComment(paths);
+ 		String value = Reflects.getComment(spec).get(paths);
  		if(value == null) return;
 		String[] array = value.split("\n");
 		if(array != null && array.length > 0) {
-			MutableComponent comp = new TextComponent("");
+			TextComponent comp = new StringTextComponent("");
 			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]));
 			tooltip = comp;
 		}
@@ -86,11 +87,11 @@ public class ForgeNode implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return paths.isEmpty() ? null : Iterables.getLast(paths, "Root").toLowerCase(Locale.ROOT); }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(Iterables.getLast(paths, "Root")); }
+	public ITextComponent getName() { return IConfigNode.createLabel(Iterables.getLast(paths, "Root")); }
 	@Override
-	public Component getTooltip() {
-		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(Iterables.getLast(paths, "Root")).withStyle(ChatFormatting.YELLOW));
+	public ITextComponent getTooltip() {
+		TextComponent comp = new StringTextComponent("");
+		comp.append(new StringTextComponent(Iterables.getLast(paths, "Root")).withStyle(TextFormatting.YELLOW));
 		if(tooltip != null) comp.append(tooltip);
 		return comp;
 	}

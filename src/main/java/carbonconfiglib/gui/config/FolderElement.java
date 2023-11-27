@@ -1,13 +1,13 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -26,7 +26,7 @@ import net.minecraft.network.chat.TextComponent;
  */
 public class FolderElement extends ConfigElement
 {
-	Button button = addChild(new CarbonButton(0, 0, 0, 18, new TextComponent(""), this::onPress));
+	Button button = addChild(new CarbonButton(0, 0, 0, 18, new StringTextComponent(""), this::onPress));
 	Navigator nav;
 	
 	public FolderElement(IConfigNode node, Navigator prev)
@@ -41,7 +41,7 @@ public class FolderElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.x = left;
 		button.y = top;
 		button.setWidth(width);

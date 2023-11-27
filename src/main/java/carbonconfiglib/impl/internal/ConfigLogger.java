@@ -2,7 +2,7 @@ package carbonconfiglib.impl.internal;
 
 import java.util.Objects;
 
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import carbonconfiglib.api.ILogger;
 

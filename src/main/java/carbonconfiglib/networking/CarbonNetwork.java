@@ -17,19 +17,19 @@ import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.Connection;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkEvent.Context;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.sets.ObjectOpenHashSet;
 
 /**
@@ -76,12 +76,12 @@ public class CarbonNetwork
 		channel.registerMessage(index, packet, this::writePacket, (K) -> readPacket(K, creator), this::handlePacket);
 	}
 	
-	protected void writePacket(ICarbonPacket packet, FriendlyByteBuf buffer) {
+	protected void writePacket(ICarbonPacket packet, PacketBuffer buffer) {
 		try { packet.write(buffer); }
 		catch(Exception e) { e.printStackTrace(); }
 	}
 	
-	protected <T extends ICarbonPacket> T readPacket(FriendlyByteBuf buffer, Supplier<T> values) {
+	protected <T extends ICarbonPacket> T readPacket(PacketBuffer buffer, Supplier<T> values) {
 		try {
 			T packet = values.get();
 			packet.read(buffer);
@@ -94,7 +94,7 @@ public class CarbonNetwork
 	protected void handlePacket(ICarbonPacket packet, Supplier<NetworkEvent.Context> provider) {
 		try {
 			Context context = provider.get();
-			Player player = getPlayer(context);
+			PlayerEntity player = getPlayer(context);
 			context.enqueueWork(() -> packet.process(player));
 			context.setPacketHandled(true);
 		}
@@ -105,13 +105,13 @@ public class CarbonNetwork
 		return getClientPlayer() != null;
 	}
 	
-	protected Player getPlayer(Context cont) {
-		Player entity = cont.getSender();
+	protected PlayerEntity getPlayer(Context cont) {
+		PlayerEntity entity = cont.getSender();
 		return entity != null ? entity : getClientPlayer();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	protected Player getClientPlayer() {
+	protected PlayerEntity getClientPlayer() {
 		Minecraft mc = Minecraft.getInstance();
 		return mc == null ? null : mc.player;
 	}
@@ -124,30 +124,30 @@ public class CarbonNetwork
 		channel.send(PacketDistributor.NMLIST.with(this::getAllPlayers), packet);
 	}
 	
-	public void onPlayerJoined(Player player, boolean server) {
+	public void onPlayerJoined(PlayerEntity player, boolean server) {
 		if(server) clientInstalledPlayers.add(player.getUUID());
 		else serverInstalled = true;
 	}
 	
-	public void onPlayerLeft(Player player, boolean server) {
+	public void onPlayerLeft(PlayerEntity player, boolean server) {
 		if(server) clientInstalledPlayers.remove(player.getUUID());
 		else serverInstalled = false;
 	}
 	
-	private List<Connection> getAllPlayers() {
-		List<Connection> players = new ObjectArrayList<>();
-		for(ServerPlayer player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
+	private List<NetworkManager> getAllPlayers() {
+		List<NetworkManager> players = new ObjectArrayList<>();
+		for(ServerPlayerEntity player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
 			if(isInstalledOnClient(player)) 
 				players.add(player.connection.getConnection());
 		}
 		return players;
 	}
 	
-	public boolean isInstalled(Player player) {
-		return player instanceof ServerPlayer ? isInstalledOnClient((ServerPlayer)player) : isInstalledOnServer();
+	public boolean isInstalled(PlayerEntity player) {
+		return player instanceof ServerPlayerEntity ? isInstalledOnClient((ServerPlayerEntity)player) : isInstalledOnServer();
 	}
 	
-	public boolean isInstalledOnClient(ServerPlayer player) {
+	public boolean isInstalledOnClient(ServerPlayerEntity player) {
 		return clientInstalledPlayers.contains(player.getUUID());
 	}
 		
@@ -155,10 +155,10 @@ public class CarbonNetwork
 		return serverInstalled;
 	}
 	
-	public void sendToPlayer(ICarbonPacket packet, Player player) {
-		if(!(player instanceof ServerPlayer)) {
-			throw new RuntimeException("Sending a Packet to a Player from client is not allowed");
+	public void sendToPlayer(ICarbonPacket packet, PlayerEntity player) {
+		if(!(player instanceof ServerPlayerEntity)) {
+			throw new RuntimeException("Sending a Packet to a PlayerEntity from client is not allowed");
 		}
-		channel.send(PacketDistributor.PLAYER.with(() -> ((ServerPlayer)player)), packet);
+		channel.send(PacketDistributor.PLAYER.with(() -> ((ServerPlayerEntity)player)), packet);
 	}
 }

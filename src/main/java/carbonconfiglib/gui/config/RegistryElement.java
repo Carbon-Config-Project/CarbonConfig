@@ -1,6 +1,6 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
@@ -9,10 +9,10 @@ import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -31,7 +31,7 @@ import net.minecraft.network.chat.TextComponent;
  */
 public class RegistryElement extends ConfigElement
 {
-	EditBox edit;
+	TextFieldWidget edit;
 	ParseResult<Boolean> result;
 	ISuggestionRenderer renderer;
 	
@@ -82,16 +82,16 @@ public class RegistryElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(renderer != null) {
-			Component result = renderer.renderSuggestion(poseStack, value.get(), left + 20, top);
+			ITextComponent result = renderer.renderSuggestion(poseStack, value.get(), left + 20, top);
 			if(result != null && mouseX >= left + 20 && mouseX <= left + 40 && mouseY >= top && mouseY <= top + 20) {
 				owner.addTooltips(result);
 			}
 		}
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new TextComponent(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
+			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).withStyle(TextFormatting.RED));			
 		}
 		
 	}

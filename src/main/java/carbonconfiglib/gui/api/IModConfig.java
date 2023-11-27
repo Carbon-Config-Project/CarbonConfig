@@ -13,8 +13,8 @@ import carbonconfiglib.gui.impl.carbon.ModConfig;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.storage.WorldSummary;
 import net.minecraftforge.fml.ModList;
 
 /**
@@ -45,7 +45,7 @@ public interface IModConfig
 	public void restoreDefault();
 	public List<IConfigTarget> getPotentialFiles();
 	public IModConfig loadFromFile(Path path);
-	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network);
+	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<PacketBuffer>> network);
 	public void save();
 	
 	public static IModConfig carbon(String modId, ConfigHandler handler) {
@@ -97,7 +97,7 @@ public interface IModConfig
 	}
 	
 	public static class WorldConfigTarget implements IConfigTarget {
-		LevelSummary summary;
+		WorldSummary summary;
 		Path folder;
 		Path file;
 		String name;
@@ -106,7 +106,7 @@ public interface IModConfig
 			this(target.getSummary(), target.getFolder(), file, target.getName());
 		}
 		
-		public WorldConfigTarget(LevelSummary summary, Path folder, Path file, String name) {
+		public WorldConfigTarget(WorldSummary summary, Path folder, Path file, String name) {
 			this.summary = summary;
 			this.folder = folder;
 			this.file = file;
@@ -128,7 +128,7 @@ public interface IModConfig
 			return file;
 		}
 		
-		public LevelSummary getSummary() {
+		public WorldSummary getSummary() {
 			return summary;
 		}
 		

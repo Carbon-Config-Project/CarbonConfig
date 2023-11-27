@@ -6,9 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
@@ -21,15 +19,16 @@ import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.storage.WorldSummary;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,11 +47,11 @@ import net.minecraft.world.level.storage.LevelSummary;
  */
 public class SelectFileScreen extends ListScreen
 {
-	private static final Component TEXT = new TranslatableComponent("gui.carbonconfig.select_world");
+	private static final ITextComponent TEXT = new TranslationTextComponent("gui.carbonconfig.select_world");
 	IModConfig config;
 	Screen parent;
 	
-	public SelectFileScreen(Component name, BackgroundHolder customTexture, Screen parent, IModConfig config) {
+	public SelectFileScreen(ITextComponent name, BackgroundHolder customTexture, Screen parent, IModConfig config) {
 		super(name, customTexture);
 		this.config = config;
 		this.parent = parent;
@@ -70,7 +69,7 @@ public class SelectFileScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addRenderableWidget(new CarbonButton(x-80, y-27, 160, 20, new TranslatableComponent("gui.carbonconfig.back"), T -> onClose()));
+		addButton(new CarbonButton(x-80, y-27, 160, 20, new TranslationTextComponent("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -84,7 +83,7 @@ public class SelectFileScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, TEXT, (width/2)-(font.width(TEXT)/2), 8, -1);
 	}
@@ -106,13 +105,13 @@ public class SelectFileScreen extends ListScreen
 		IConfigTarget target;
 		Screen parent;
 		Button button;
-		Component title;
-		Component path;
+		ITextComponent title;
+		ITextComponent path;
 		DynamicTexture texture;
 		Navigator nav;
 		
-		public WorldElement(IConfigTarget target, IModConfig config, Screen parent, Component prevName) {
-			super(new TextComponent(target.getName()));
+		public WorldElement(IConfigTarget target, IModConfig config, Screen parent, ITextComponent prevName) {
+			super(new StringTextComponent(target.getName()));
 			nav = new Navigator(prevName);
 			nav.setScreenForLayer(parent);
 			this.target = target;
@@ -122,33 +121,32 @@ public class SelectFileScreen extends ListScreen
 		
 		@Override
 		public void init() {
-			button = new CarbonButton(0, 0, 62, 20, new TranslatableComponent("gui.carbonconfig.pick"), this::onPick);
+			button = new CarbonButton(0, 0, 62, 20, new TranslationTextComponent("gui.carbonconfig.pick"), this::onPick);
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
-				LevelSummary sum = world.getSummary();
+				WorldSummary sum = world.getSummary();
 				loadIcon(sum.getIcon().toPath());
-				title = new TextComponent(sum.getLevelName());
-				path = new TextComponent(sum.getLevelId()).withStyle(ChatFormatting.GRAY);
+				title = new StringTextComponent(sum.getLevelName());
+				path = new StringTextComponent(sum.getLevelId()).withStyle(TextFormatting.GRAY);
 			}
 			else 
 			{
-				title = new TextComponent(target.getName());
+				title = new StringTextComponent(target.getName());
 				Path folder = target.getFolder();
 				int index = folder.getNameCount();
-				path = new TextComponent(folder.subpath(index-3, index).toString()).withStyle(ChatFormatting.GRAY);
+				path = new StringTextComponent(folder.subpath(index-3, index).toString()).withStyle(TextFormatting.GRAY);
 			}
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.x = left+width-62;
 			button.y = top + 2;
 			button.render(poseStack, mouseX, mouseY, partialTicks);
 			GuiUtils.drawScrollingString(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawScrollingString(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
 			if(texture != null) {
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				RenderSystem.setShaderTexture(0, texture.getId());
+				texture.bind();
 				GuiUtils.drawTextureRegion(poseStack, left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
 			}
 		}
@@ -164,7 +162,7 @@ public class SelectFileScreen extends ListScreen
 		}
 		
 		@Override
-		public List<? extends GuiEventListener> children() {
+		public List<? extends IGuiEventListener> children() {
 			return ObjectLists.singleton(button);
 		}
 		
@@ -174,7 +172,7 @@ public class SelectFileScreen extends ListScreen
 				mc.setScreen(parent);
 				return;
 			}
-			mc.setScreen(new ConfigScreen(nav.add(path.copy().withStyle(ChatFormatting.WHITE)), config, parent, owner.getCustomTexture()));
+			mc.setScreen(new ConfigScreen(nav.add(path.copy().withStyle(TextFormatting.WHITE)), config, parent, owner.getCustomTexture()));
 		}
 		
 		private void cleanup() {

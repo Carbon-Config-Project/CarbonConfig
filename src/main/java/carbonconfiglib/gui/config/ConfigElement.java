@@ -4,7 +4,7 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IArrayNode;
@@ -19,12 +19,12 @@ import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.IOwnable;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -43,14 +43,14 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class ConfigElement extends Element
 {
-	private static final Component DELETE = new TranslatableComponent("gui.carbonconfig.delete");
-	private static final Component REVERT = new TranslatableComponent("gui.carbonconfig.revert");
-	private static final Component DEFAULT = new TranslatableComponent("gui.carbonconfig.default");
-	private static final Component SUGGESTIONS = new TranslatableComponent("gui.carbonconfig.suggestions");
-	private static final Component RELOAD = new TranslatableComponent("gui.carbonconfig.reload").withStyle(ChatFormatting.YELLOW);
-	private static final Component RESTART = new TranslatableComponent("gui.carbonconfig.restart").withStyle(ChatFormatting.YELLOW);
-	protected List<GuiEventListener> listeners = new ObjectArrayList<>();
-	protected List<Map.Entry<AbstractWidget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
+	private static final ITextComponent DELETE = new TranslationTextComponent("gui.carbonconfig.delete");
+	private static final ITextComponent REVERT = new TranslationTextComponent("gui.carbonconfig.revert");
+	private static final ITextComponent DEFAULT = new TranslationTextComponent("gui.carbonconfig.default");
+	private static final ITextComponent SUGGESTIONS = new TranslationTextComponent("gui.carbonconfig.suggestions");
+	private static final ITextComponent RELOAD = new TranslationTextComponent("gui.carbonconfig.reload").withStyle(TextFormatting.YELLOW);
+	private static final ITextComponent RESTART = new TranslationTextComponent("gui.carbonconfig.restart").withStyle(TextFormatting.YELLOW);
+	protected List<IGuiEventListener> listeners = new ObjectArrayList<>();
+	protected List<Map.Entry<Widget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
 	protected IValueNode value;
 	protected IArrayNode array;
@@ -88,15 +88,15 @@ public class ConfigElement extends Element
 		this.value = array.asValue(index);
 	}
 	
-	protected <T extends AbstractWidget> T addChild(T element) {
+	protected <T extends Widget> T addChild(T element) {
 		return addChild(element, GuiAlign.RIGHT, 0);
 	}
 	
-	protected <T extends AbstractWidget> T addChild(T element, int xOffset) {
+	protected <T extends Widget> T addChild(T element, int xOffset) {
 		return addChild(element, GuiAlign.RIGHT, xOffset);
 	}
 	
-	protected <T extends AbstractWidget> T addChild(T element, GuiAlign align, int xOffset) {
+	protected <T extends Widget> T addChild(T element, GuiAlign align, int xOffset) {
 		listeners.add(element);
 		mappedListeners.add(new AbstractMap.SimpleEntry<>(element, new AlignOffset(align, -xOffset - 19)));
 		if(owner != null && element instanceof IOwnable) {
@@ -110,7 +110,7 @@ public class ConfigElement extends Element
 		super.init();
 		if(createResetButtons(value)) {
 			if(isArray()) {
-				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, new TextComponent	(""), this::onDeleted).setIconOnly(), -31);
+				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, new StringTextComponent	(""), this::onDeleted).setIconOnly(), -31);
 				setReset.active = isReset();
 				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN, Icon.MOVE_DOWN_HOVERED, this::onMoveDown);
 				listeners.add(moveDown);
@@ -118,16 +118,16 @@ public class ConfigElement extends Element
 				listeners.add(moveUp);
 			}
 			else {
-				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, new TextComponent(""), this::onReset).setIconOnly(), -21);
-				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, new TextComponent(""), this::onDefault).setIconOnly(), -40);
-				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, new TextComponent(""), this::onSuggestion).setIconOnly(), -59);
+				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, new StringTextComponent(""), this::onReset).setIconOnly(), -21);
+				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, new StringTextComponent(""), this::onDefault).setIconOnly(), -40);
+				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, new StringTextComponent(""), this::onSuggestion).setIconOnly(), -59);
 				setReset.active = isReset();
 				setDefault.active = !isDefault();
 				suggestion.visible = false;
 			}
 		}
 		if(owner != null) {
-			for(GuiEventListener entry : listeners) {
+			for(IGuiEventListener entry : listeners) {
 				if(entry instanceof IOwnable) {
 					((IOwnable)entry).setOwner(owner);
 				}
@@ -147,7 +147,7 @@ public class ConfigElement extends Element
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		if(renderName() && !isArray()) {
 			renderName(poseStack, left, top, isChanged(), isCompound() ? 80 : 200, height);
 			if(!isCompound()) {
@@ -180,8 +180,8 @@ public class ConfigElement extends Element
 					left -= 8;
 				}
 			}
-			for(Map.Entry<AbstractWidget, AlignOffset> entry : mappedListeners) {
-				AbstractWidget widget = entry.getKey();
+			for(Map.Entry<Widget, AlignOffset> entry : mappedListeners) {
+				Widget widget = entry.getKey();
 				AlignOffset offset = entry.getValue();
 				widget.x = offset.align.align(left, width, widget.getWidth()) + offset.offset;
 				widget.y = top;
@@ -191,26 +191,26 @@ public class ConfigElement extends Element
 		}
 		maxX = getMaxX(maxX);
 		if(isArray()) {
-			Component comp = new TextComponent(indexOf()+":");
+			ITextComponent comp = new StringTextComponent(indexOf()+":");
 			renderText(poseStack, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
 			owner.addTooltips(node.getTooltip());
 		}
 		if(isArray()) {
-			if(setReset.isHoveredOrFocused() && owner.isInsideList(mouseX, mouseY)) {
+			if(setReset.isHovered() && owner.isInsideList(mouseX, mouseY)) {
 				owner.addTooltips(DELETE);
 			}
 		}
 		else {
-			if(setReset.isHoveredOrFocused() && owner.isInsideList(mouseX, mouseY)) {
+			if(setReset.isHovered() && owner.isInsideList(mouseX, mouseY)) {
 				owner.addTooltips(REVERT);
 			}
-			if(setDefault.isHoveredOrFocused() && owner.isInsideList(mouseX, mouseY)) {
+			if(setDefault.isHovered() && owner.isInsideList(mouseX, mouseY)) {
 				owner.addTooltips(DEFAULT);
 			}
 			suggestion.visible = hasSuggestions();
-			if(suggestion.visible && suggestion.isHoveredOrFocused() & owner.isInsideList(mouseX, mouseY)) {
+			if(suggestion.visible && suggestion.isHovered() & owner.isInsideList(mouseX, mouseY)) {
 				owner.addTooltips(SUGGESTIONS);
 			}
 		}
@@ -328,7 +328,7 @@ public class ConfigElement extends Element
 	}
 	
 	@Override
-	public List<? extends GuiEventListener> children() {
+	public List<? extends IGuiEventListener> children() {
 		return listeners;
 	}
 	

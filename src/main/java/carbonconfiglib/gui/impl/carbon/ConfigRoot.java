@@ -7,7 +7,7 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -46,7 +46,7 @@ public class ConfigRoot implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(config.getName()); }
+	public ITextComponent getName() { return IConfigNode.createLabel(config.getName()); }
 	@Override
 	public boolean isRoot() { return true; }
 }

@@ -15,10 +15,10 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.impl.forge.ForgeDataType.EnumDataType;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
@@ -47,7 +47,7 @@ public class ForgeLeaf implements IConfigNode
 	boolean isArray;
 	ForgeValue value;
 	ForgeArrayValue array;
-	Component tooltip;
+	ITextComponent tooltip;
 	
 	public ForgeLeaf(ForgeConfigSpec spec, ConfigValue<?> data, CommentedConfig config) {
 		this.data = data;
@@ -55,8 +55,8 @@ public class ForgeLeaf implements IConfigNode
 		this.spec = getSpec(spec, data);
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
-			MutableComponent comp = new TextComponent("");
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			TextComponent comp = new StringTextComponent("");
+			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(TextFormatting.GRAY));
 			tooltip = comp;
 		}
 		guessDataType();
@@ -154,14 +154,14 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(Iterables.getLast(data.getPath(), "")); }
+	public ITextComponent getName() { return IConfigNode.createLabel(Iterables.getLast(data.getPath(), "")); }
 	@Override
-	public Component getTooltip() {
-		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(Iterables.getLast(data.getPath(), "")).withStyle(ChatFormatting.YELLOW));
+	public ITextComponent getTooltip() {
+		TextComponent comp = new StringTextComponent("");
+		comp.append(new StringTextComponent(Iterables.getLast(data.getPath(), "")).withStyle(TextFormatting.YELLOW));
 		if(tooltip != null) comp.append(tooltip);
 		String limit = type.getLimitations(spec);
-		if(limit != null && !Strings.isBlank(limit)) comp.append("\n").append(new TextComponent(limit).withStyle(ChatFormatting.BLUE));
+		if(limit != null && !Strings.isBlank(limit)) comp.append("\n").append(new StringTextComponent(limit).withStyle(TextFormatting.BLUE));
 		return comp;
 	}
 	

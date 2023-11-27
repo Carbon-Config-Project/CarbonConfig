@@ -2,20 +2,17 @@ package carbonconfiglib.gui.config;
 
 import java.util.List;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarratedElementType;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.widget.list.AbstractOptionList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -32,16 +29,16 @@ import net.minecraft.network.chat.Component;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Element extends ContainerObjectSelectionList.Entry<Element> {
+public class Element extends AbstractOptionList.Entry<Element> {
 	protected Minecraft mc = Minecraft.getInstance();
-	protected Font font = mc.font;
-	protected Component name;
-	protected Component unchanged;
-	protected Component changed;
+	protected FontRenderer font = mc.font;
+	protected ITextComponent name;
+	protected ITextComponent unchanged;
+	protected ITextComponent changed;
 	protected IListOwner owner;
 	protected int hash = hashCode();
 	
-	public Element(Component name) {
+	public Element(ITextComponent name) {
 		setName(name);
 	}
 	
@@ -49,10 +46,10 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 		return name.getString();
 	}
 	
-	public void setName(Component newName) {
+	public void setName(ITextComponent newName) {
 		this.name = newName;
-		this.unchanged = name.copy().withStyle(ChatFormatting.GRAY);
-		this.changed = name.copy().withStyle(ChatFormatting.ITALIC);
+		this.unchanged = name.copy().withStyle(TextFormatting.GRAY);
+		this.changed = name.copy().withStyle(TextFormatting.ITALIC);
 	}
 		
 	public void updateValues() {
@@ -73,34 +70,19 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 	}
 	
-	protected void renderName(PoseStack stack, float x, float y, boolean changed, int width, int height) {
+	protected void renderName(MatrixStack stack, float x, float y, boolean changed, int width, int height) {
 		GuiUtils.drawScrollingString(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
-	protected void renderText(PoseStack stack, Component text, float x, float y, float width, float height, GuiAlign align, int color) {
+	protected void renderText(MatrixStack stack, ITextComponent text, float x, float y, float width, float height, GuiAlign align, int color) {
 		GuiUtils.drawScrollingString(stack, font, text, x, y, width, height, align, -1, hash);
 	}
 	
 	@Override
-	public List<? extends GuiEventListener> children() {
+	public List<? extends IGuiEventListener> children() {
 		return ObjectLists.emptyList();
-	}
-	
-	@Override
-	public List<? extends NarratableEntry> narratables() {
-		return ObjectLists.singleton(new NarratableEntry() {
-			@Override
-			public NarrationPriority narrationPriority() {
-                return NarrationPriority.HOVERED;
-            }
-			
-            @Override
-            public void updateNarration(NarrationElementOutput output) {
-                output.add(NarratedElementType.TITLE, name);
-            }
-        });
 	}
 }

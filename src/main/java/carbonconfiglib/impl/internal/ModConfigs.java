@@ -73,8 +73,8 @@ public class ModConfigs implements IModConfigs
 
 	@Override
 	public BackgroundHolder getBackground() {
-		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
-		if(texture.isPresent()) return texture.get().texture().asHolder();
+		Optional<BackgroundTexture> texture = container.getCustomExtension(IModConfigs.BACKGROUND);
+		if(texture.isPresent()) return texture.get().asHolder();
 		return computeTexture(container).orElse(BackgroundTexture.DEFAULT).asHolder();
 	}
 	

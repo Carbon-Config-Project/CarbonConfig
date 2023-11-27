@@ -1,6 +1,6 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -9,11 +9,11 @@ import carbonconfiglib.gui.screen.EditStringScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -32,7 +32,7 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class StringElement extends ConfigElement
 {
-	EditBox edit;
+	TextFieldWidget edit;
 	ParseResult<Boolean> result;
 	
 	public StringElement(IConfigNode node, IValueNode value) {
@@ -61,7 +61,7 @@ public class StringElement extends ConfigElement
 			});
 		}
 		else {
-			addChild(new CarbonButton(0, 0, 72, 18, new TranslatableComponent("gui.carbonconfig.edit"), this::onPress));
+			addChild(new CarbonButton(0, 0, 72, 18, new TranslationTextComponent("gui.carbonconfig.edit"), this::onPress));
 		}
 	}
 	
@@ -74,10 +74,10 @@ public class StringElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(MatrixStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new TextComponent(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
+			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).withStyle(TextFormatting.RED));			
 		}
 	}
 	

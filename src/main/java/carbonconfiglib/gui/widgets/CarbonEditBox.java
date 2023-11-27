@@ -1,11 +1,11 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.config.IListOwner;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.text.StringTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -22,14 +22,14 @@ import net.minecraft.network.chat.TextComponent;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonEditBox extends EditBox implements IOwnable
+public class CarbonEditBox extends TextFieldWidget implements IOwnable
 {
 	IListOwner owner;
 	boolean bordered = true;
 	int innerDiff = 8;
 	
-	public CarbonEditBox(Font font, int x, int y, int width, int height) {
-		super(font, x, y, width, height, new TextComponent(""));
+	public CarbonEditBox(FontRenderer font, int x, int y, int width, int height) {
+		super(font, x, y, width, height, new StringTextComponent(""));
 	}
 	
 	public CarbonEditBox setInnerDiff(int innerDiff) {
@@ -61,7 +61,7 @@ public class CarbonEditBox extends EditBox implements IOwnable
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		if(this.isFocused() && owner != null && !owner.isActiveWidget(this)) {
 			setFocus(false);
 		}

@@ -14,10 +14,10 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.impl.ReloadMode;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -108,17 +108,17 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(entry.getKey()); }
+	public ITextComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
 	@Override
-	public Component getTooltip() {
-		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(entry.getKey()).withStyle(ChatFormatting.YELLOW));
+	public ITextComponent getTooltip() {
+		TextComponent comp = new StringTextComponent("");
+		comp.append(new StringTextComponent(entry.getKey()).withStyle(TextFormatting.YELLOW));
 		String[] array = entry.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(TextFormatting.GRAY));
 		}
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) comp.append("\n").append(new TextComponent(limit).withStyle(ChatFormatting.BLUE));
+		if(!Strings.isBlank(limit)) comp.append("\n").append(new StringTextComponent(limit).withStyle(TextFormatting.BLUE));
 		return comp;
 	}
 }

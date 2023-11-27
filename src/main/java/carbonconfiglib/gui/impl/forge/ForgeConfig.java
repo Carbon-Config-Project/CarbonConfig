@@ -22,22 +22,24 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
+import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.forge.RequestConfigPacket;
 import carbonconfiglib.networking.forge.SaveForgeConfigPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.SaveFormat.LevelSave;
+import net.minecraft.world.storage.WorldSummary;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.config.ModConfig.Reloading;
 import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -156,7 +158,7 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	@Override
-	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network) {
+	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<PacketBuffer>> network) {
 		NetworkForgeConfig config = new NetworkForgeConfig(this.config);
 		CarbonConfig.NETWORK.sendToServer(new RequestConfigPacket(this.config.getType(), requestId, this.config.getModId()));
 		network.accept(config);
@@ -171,7 +173,7 @@ public class ForgeConfig implements IModConfig
 		}
 		config.save();
         config.getSpec().afterReload();
-        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(new ModConfigEvent.Reloading(this.config));
+        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(Reloading.class, config));
 	}
 	
 	private List<ConfigValue<?>> collect() {
@@ -192,16 +194,16 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	private List<IConfigTarget> getLevels() {
-		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
+		SaveFormat storage = Minecraft.getInstance().getLevelSource();
 		List<IConfigTarget> folders = new ObjectArrayList<>();
 		try {
-			for(LevelSummary sum : storage.getLevelList()) {
-				try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
+			for(WorldSummary sum : storage.getLevelList()) {
+				try(LevelSave access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId())) {
 					Path path = access.getLevelPath(PerWorldProxy.SERVERCONFIG);
 					if(Files.notExists(path)) continue;
 					Path file = path.resolve(config.getFileName());
 					if(Files.notExists(file)) continue;
-					folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path), file));
+					folders.add(new WorldConfigTarget(new WorldTarget(sum, access.getLevelPath(FolderName.ROOT), path), file));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}
@@ -221,14 +223,14 @@ public class ForgeConfig implements IModConfig
 		return null;
 	}
 	
-	public static class NetworkForgeConfig extends ForgeConfig implements Predicate<FriendlyByteBuf> {
+	public static class NetworkForgeConfig extends ForgeConfig implements Predicate<PacketBuffer> {
 
 		public NetworkForgeConfig(ModConfig config) {
 			super(config, null, null);
 		}
 
 		@Override
-		public boolean test(FriendlyByteBuf t) {
+		public boolean test(PacketBuffer t) {
 			try {
 				this.data = TomlFormat.instance().createParser().parse(new ByteArrayInputStream(t.readByteArray()));
 				return true;

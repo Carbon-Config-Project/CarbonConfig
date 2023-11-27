@@ -3,7 +3,7 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.DataType;
@@ -15,11 +15,11 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.config.SelectionElement;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -59,8 +59,8 @@ public class CompoundScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		applyValue = addRenderableWidget(new CarbonButton(x-82, y-27, 80, 20, new TranslatableComponent("gui.carbonconfig.apply"), this::apply));
-		addRenderableWidget(new CarbonButton(x+2, y-27, 80, 20, new TranslatableComponent("gui.carbonconfig.back"), this::goBack));
+		applyValue = addButton(new CarbonButton(x-82, y-27, 80, 20, new TranslationTextComponent("gui.carbonconfig.apply"), this::apply));
+		addButton(new CarbonButton(x+2, y-27, 80, 20, new TranslationTextComponent("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override
@@ -100,7 +100,7 @@ public class CompoundScreen extends ListScreen
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				if(T) notifyClose();
 				minecraft.setScreen(T ? prev : this);				
-			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
 			return;
 		}
 		notifyClose();
@@ -124,7 +124,7 @@ public class CompoundScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
 		font.draw(stack, title, (width/2)-(font.width(title)/2), 8, -1);
 	}

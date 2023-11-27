@@ -2,7 +2,7 @@ package carbonconfiglib.gui.api;
 
 import java.util.UUID;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,5 +21,5 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public interface IRequestScreen
 {
-	public void receiveConfigData(UUID requestId, FriendlyByteBuf buf);
+	public void receiveConfigData(UUID requestId, PacketBuffer buf);
 }

@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -26,16 +26,16 @@ import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.ModList;
 
 /**
@@ -75,7 +75,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public ConfigScreen(Navigator nav, IModConfig config, Screen parent, BackgroundHolder customTexture) {
-		super(new TextComponent(""), customTexture);
+		super(new StringTextComponent(""), customTexture);
 		this.nav = nav;
 		this.config = config;
 		this.node = config.getRootNode();
@@ -84,7 +84,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public ConfigScreen(Navigator nav, IConfigNode node, Screen parent, BackgroundHolder customTexture) {
-		super(new TextComponent(""), customTexture);
+		super(new StringTextComponent(""), customTexture);
 		this.nav = nav;
 		this.node = node;
 		this.parent = parent;
@@ -97,18 +97,18 @@ public class ConfigScreen extends ListScreen
 		int x = width / 2 - 100;
 		int y = height;
 		if(node.isRoot()) {
-			addRenderableWidget(new CarbonButton(x-51, y-27, 100, 20, new TranslatableComponent("gui.carbonconfig.save"), this::save));
-			addRenderableWidget(new CarbonButton(x+51, y-27, 100, 20, new TranslatableComponent("gui.carbonconfig.reset"), this::reset));
-			addRenderableWidget(new CarbonButton(x+153, y-27, 100, 20, new TranslatableComponent("gui.carbonconfig.back"), this::goBack));
+			addButton(new CarbonButton(x-51, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.save"), this::save));
+			addButton(new CarbonButton(x+51, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.reset"), this::reset));
+			addButton(new CarbonButton(x+153, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.back"), this::goBack));
 		}
 		else {
-			addRenderableWidget(new CarbonButton(x+101, y-27, 100, 20, new TranslatableComponent("gui.carbonconfig.back"), this::goBack));
-			addRenderableWidget(new CarbonButton(x-1, y-27, 100, 20, new TranslatableComponent("gui.carbonconfig.home"), this::goToRoot));
+			addButton(new CarbonButton(x+101, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.back"), this::goBack));
+			addButton(new CarbonButton(x-1, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.home"), this::goToRoot));
 		}
 		if(shouldHaveSearch()) {
-			deepSearch = addRenderableWidget(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH_SELECTED, Icon.SEARCH, false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
-			onlyChanged = addRenderableWidget(new CarbonIconCheckbox(x+227, 25, 20, 20, Icon.SET_DEFAULT, Icon.REVERT, false).withListener(this::onChangedButton).setTooltip(this, "gui.carbonconfig.changed_only"));
-			onlyNonDefault = addRenderableWidget(new CarbonIconCheckbox(x+249, 25, 20, 20, Icon.NOT_DEFAULT_SELECTED, Icon.NOT_DEFAULT, false).withListener(this::onDefaultButton).setTooltip(this, "gui.carbonconfig.default_only"));
+			deepSearch = addButton(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH_SELECTED, Icon.SEARCH, false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
+			onlyChanged = addButton(new CarbonIconCheckbox(x+227, 25, 20, 20, Icon.SET_DEFAULT, Icon.REVERT, false).withListener(this::onChangedButton).setTooltip(this, "gui.carbonconfig.changed_only"));
+			onlyNonDefault = addButton(new CarbonIconCheckbox(x+249, 25, 20, 20, Icon.NOT_DEFAULT_SELECTED, Icon.NOT_DEFAULT, false).withListener(this::onDefaultButton).setTooltip(this, "gui.carbonconfig.default_only"));
 		}
 		String walkNode = nav.getWalkNode();
 		if(walkNode != null) {
@@ -147,7 +147,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	@Override
-	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void handleForground(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
 		GuiUtils.drawScrollingString(stack, font, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
 	}
 	
@@ -198,7 +198,7 @@ public class ConfigScreen extends ListScreen
 			if(node.isRoot() && prev.isChanged()) {
 				minecraft.setScreen(new ConfirmScreen(T -> {
 					minecraft.setScreen(T ? toOpen : this);	
-				}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+				}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
 				return;
 			}
 			minecraft.setScreen(toOpen);
@@ -210,8 +210,8 @@ public class ConfigScreen extends ListScreen
 			if(T.isMain()) processAction(IConfigNode::setDefault);
 			else if(T.isOther()) processAction(IConfigNode::setPrevious);
 			minecraft.setScreen(this);
-		}, new TranslatableComponent("gui.carbonconfig.reset_all.title"), new TranslatableComponent("gui.carbonconfig.reset_all.message").withStyle(ChatFormatting.GRAY), 
-			new TranslatableComponent("gui.carbonconfig.reset_all.default"), new TranslatableComponent("gui.carbonconfig.reset_all.reset"), new TranslatableComponent("gui.carbonconfig.reset_all.cancel")));
+		}, new TranslationTextComponent("gui.carbonconfig.reset_all.title"), new TranslationTextComponent("gui.carbonconfig.reset_all.message").withStyle(TextFormatting.GRAY), 
+			new TranslationTextComponent("gui.carbonconfig.reset_all.default"), new TranslationTextComponent("gui.carbonconfig.reset_all.reset"), new TranslationTextComponent("gui.carbonconfig.reset_all.cancel")));
 	}
 	
 	private void save(Button button) {
@@ -220,14 +220,14 @@ public class ConfigScreen extends ListScreen
 		if(findFirst(IConfigNode::requiresRestart, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
 				minecraft.setScreen(parent);
-			}, new TranslatableComponent("gui.carbonconfig.restart.title"), new TranslatableComponent("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), new TranslatableComponent("gui.carbonconfig.ok"));
+			}, new TranslationTextComponent("gui.carbonconfig.restart.title"), new TranslationTextComponent("gui.carbonconfig.restart.message").withStyle(TextFormatting.GRAY), new TranslationTextComponent("gui.carbonconfig.ok"));
 			minecraft.setScreen(choice);
 			return;
 		}
 		else if(minecraft.level != null && findFirst(IConfigNode::requiresReload, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
 				minecraft.setScreen(parent);
-			}, new TranslatableComponent("gui.carbonconfig.reload.title"), new TranslatableComponent("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), new TranslatableComponent("gui.carbonconfig.ok"));
+			}, new TranslationTextComponent("gui.carbonconfig.reload.title"), new TranslationTextComponent("gui.carbonconfig.reload.message").withStyle(TextFormatting.GRAY), new TranslationTextComponent("gui.carbonconfig.ok"));
 			minecraft.setScreen(choice);
 			return;
 		}
@@ -273,7 +273,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	@Override
-	protected void onSearchChange(EditBox box, String value) {
+	protected void onSearchChange(TextFieldWidget box, String value) {
 		if((!deepSearch.selected() || value.isEmpty()) && !onlyChanged.selected() && !onlyNonDefault.selected()) {
 			super.onSearchChange(box, value);
 			return;
@@ -305,7 +305,7 @@ public class ConfigScreen extends ListScreen
 		if(node.isRoot() && isChanged()) {
 			minecraft.setScreen(new ConfirmScreen(T -> {
 				minecraft.setScreen(T ? parent : this);	
-			}, new TranslatableComponent("gui.carbonconfig.warn.changed"), new TranslatableComponent("gui.carbonconfig.warn.changed.desc").withStyle(ChatFormatting.GRAY)));
+			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").withStyle(TextFormatting.GRAY)));
 			return;
 		}
 		minecraft.setScreen(parent);
@@ -399,29 +399,29 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public static class Navigator {
-		private static final Component SPLITTER = new TextComponent(" > ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-		List<Component> layer = new ObjectArrayList<>();
+		private static final ITextComponent SPLITTER = new StringTextComponent(" > ").withStyle(TextFormatting.GOLD, TextFormatting.BOLD);
+		List<ITextComponent> layer = new ObjectArrayList<>();
 		List<Screen> screenByIndex = new ObjectArrayList<>();
 		List<String> walker = null;
-		MutableComponent buildCache = null;
+		TextComponent buildCache = null;
 		
 		private Navigator() {}
 		
-		public Navigator(Component base) {
+		public Navigator(ITextComponent base) {
 			layer.add(base);
 		}
 		
 		public static Navigator create(IModConfig config) {
-			Navigator nav = new Navigator(new TextComponent(ModList.get().getModContainerById(config.getModId()).map(T -> T.getModInfo().getDisplayName()).orElse("Unknown")));
+			Navigator nav = new Navigator(new StringTextComponent(ModList.get().getModContainerById(config.getModId()).map(T -> T.getModInfo().getDisplayName()).orElse("Unknown")));
 			nav.setScreenForLayer(null);
-			return nav.add(new TranslatableComponent("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase()));
+			return nav.add(new TranslationTextComponent("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase()));
 		}
 		
-		public Navigator add(Component name) {
+		public Navigator add(ITextComponent name) {
 			return add(name, null);
 		}
 		
-		public Navigator add(Component name, String walkerEntry) {
+		public Navigator add(ITextComponent name, String walkerEntry) {
 			Navigator nav = new Navigator();
 			nav.layer.addAll(layer);
 			nav.screenByIndex.addAll(screenByIndex);
@@ -448,7 +448,7 @@ public class ConfigScreen extends ListScreen
 			else screenByIndex.set(layer.size()-1, owner);
 		}
 		
-		public Screen getScreen(Font font, int x) {
+		public Screen getScreen(FontRenderer font, int x) {
 			int splitterWidth = font.width(SPLITTER);
 			for(int i = 0,m=layer.size();i<m;i++) {
 				int width = font.width(layer.get(i));
@@ -467,9 +467,9 @@ public class ConfigScreen extends ListScreen
 			return walker == null ? null : walker.get(0);
 		}
 		
-		public Component getHeader() {
+		public ITextComponent getHeader() {
 			if(buildCache == null) {
-				buildCache = new TextComponent("");
+				buildCache = new StringTextComponent("");
 				for(int i = 0,m=layer.size();i<m;i++) {
 					buildCache.append(layer.get(i));
 					if(i == m-1) continue;

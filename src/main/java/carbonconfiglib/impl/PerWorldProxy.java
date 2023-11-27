@@ -12,14 +12,15 @@ import carbonconfiglib.config.ConfigSettings;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.SaveFormat.LevelSave;
+import net.minecraft.world.storage.WorldSummary;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -38,7 +39,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
  */
 public final class PerWorldProxy implements IConfigProxy
 {
-	public static final LevelResource SERVERCONFIG = new LevelResource("serverconfig");
+	public static final FolderName SERVERCONFIG = new FolderName("serverconfig");
 	public static final IConfigProxy INSTANCE = new PerWorldProxy(FMLPaths.GAMEDIR.get().resolve("multiplayerconfigs"), FMLPaths.GAMEDIR.get().resolve("defaultconfigs"), FMLPaths.GAMEDIR.get().resolve("saves"));
 	Path baseClientPath;
 	Path baseServerPath;
@@ -76,17 +77,17 @@ public final class PerWorldProxy implements IConfigProxy
 	
 	@OnlyIn(Dist.CLIENT)
 	private List<IPotentialTarget> getLevels() {
-		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
+		SaveFormat storage = Minecraft.getInstance().getLevelSource();
 		List<IPotentialTarget> folders = new ObjectArrayList<>();
 		if(Files.exists(baseServerPath)) {
 			folders.add(new SimpleTarget(baseServerPath, "Default Config"));
 		}
 		try {
-			for(LevelSummary sum : storage.getLevelList()) {
-				try(LevelStorageSource.LevelStorageAccess access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
+			for(WorldSummary sum : storage.getLevelList()) {
+				try(LevelSave access = Minecraft.getInstance().getLevelSource().createAccess(sum.getLevelId()))
 				{
 					Path path = access.getLevelPath(SERVERCONFIG);
-					if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(LevelResource.ROOT), path));
+					if(Files.exists(path)) folders.add(new WorldTarget(sum, access.getLevelPath(FolderName.ROOT), path));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}
@@ -101,11 +102,11 @@ public final class PerWorldProxy implements IConfigProxy
 	}
 	
 	public static class WorldTarget implements IPotentialTarget {
-		LevelSummary summary;
+		WorldSummary summary;
 		Path worldFile;
 		Path folder;
 		
-		public WorldTarget(LevelSummary summary, Path worldFile, Path folder) {
+		public WorldTarget(WorldSummary summary, Path worldFile, Path folder) {
 			this.summary = summary;
 			this.worldFile = worldFile;
 			this.folder = folder;
@@ -125,7 +126,7 @@ public final class PerWorldProxy implements IConfigProxy
 			return worldFile;
 		}
 		
-		public LevelSummary getSummary() {
+		public WorldSummary getSummary() {
 			return summary;
 		}
 	}

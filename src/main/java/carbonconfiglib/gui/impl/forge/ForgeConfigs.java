@@ -12,9 +12,9 @@ import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.impl.internal.ModConfigs;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.forgespi.language.IModInfo;
 
 /**
@@ -59,8 +59,8 @@ public class ForgeConfigs implements IModConfigs
 	
 	@Override
 	public BackgroundHolder getBackground() {
-		Optional<Background> texture = container.getCustomExtension(IModConfigs.Background.class);
-		if(texture.isPresent()) return texture.get().texture().asHolder();
+		Optional<BackgroundTexture> texture = container.getCustomExtension(IModConfigs.BACKGROUND);
+		if(texture.isPresent()) return texture.get().asHolder();
 		Optional<BackgroundTexture> carbon_Texture = ModConfigs.computeTexture(container);
 		if(carbon_Texture.isPresent()) return carbon_Texture.get().asHolder();
 		return getBackgroundTexture(container.getModInfo()).asHolder();
