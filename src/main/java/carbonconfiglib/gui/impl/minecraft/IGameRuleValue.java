@@ -61,7 +61,7 @@ public interface IGameRuleValue
 		@Override
 		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getBoolean(key)); }
 		@Override
-		public String getDescriptionId() { return key.getName(); }
+		public String getDescriptionId() { return "gamerule."+key.getName(); }
 		@Override
 		public DataType getType() { return DataType.BOOLEAN; }
 	}
@@ -95,7 +95,7 @@ public interface IGameRuleValue
 		@Override
 		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getInt(key)); }
 		@Override
-		public String getDescriptionId() { return key.getName(); }
+		public String getDescriptionId() { return "gamerule."+key.getName(); }
 		@Override
 		public DataType getType() { return DataType.INTEGER; }
 	}

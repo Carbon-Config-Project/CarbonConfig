@@ -184,6 +184,7 @@ public class ElementList extends AbstractOptionList<Element>
 		int l = this.y0 + 4 - (int)this.getScrollAmount();
 		renderBackground();
 		renderList(k, l, mouseX, mouseY, partialTicks);
+		renderScrollbar();
 	}
 	
 	public void setCustomBackground(BackgroundHolder customBackground) {
@@ -203,9 +204,50 @@ public class ElementList extends AbstractOptionList<Element>
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}
 	
+	@SuppressWarnings("deprecation")
+	protected void renderScrollbar() {
+		int j1 = this.getMaxScroll();
+		if (j1 > 0) {
+			int k1 = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+			k1 = MathHelper.clamp(k1, 32, this.y1 - this.y0 - 8);
+			int l1 = (int)this.getScrollAmount() * (this.y1 - this.y0 - k1) / j1 + this.y0;
+			if (l1 < this.y0) {
+				l1 = this.y0;
+			}
+			int i = this.getScrollbarPosition();
+			int j = i + 6;
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+			RenderSystem.disableAlphaTest();
+			RenderSystem.shadeModel(7425);
+			RenderSystem.disableTexture();
+			
+			Tessellator tes = Tessellator.getInstance();
+			BufferBuilder builder = tes.getBuffer();
+			
+			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+			builder.pos((double)i, (double)this.y1, 0.0D).tex(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+			builder.pos((double)j, (double)this.y1, 0.0D).tex(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+			builder.pos((double)j, (double)this.y0, 0.0D).tex(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+			builder.pos((double)i, (double)this.y0, 0.0D).tex(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+			tes.draw();
+			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+			builder.pos((double)i, (double)(l1 + k1), 0.0D).tex(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+			builder.pos((double)j, (double)(l1 + k1), 0.0D).tex(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+			builder.pos((double)j, (double)l1, 0.0D).tex(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+			builder.pos((double)i, (double)l1, 0.0D).tex(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+			tes.draw();
+			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+			builder.pos((double)i, (double)(l1 + k1 - 1), 0.0D).tex(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+			builder.pos((double)(j - 1), (double)(l1 + k1 - 1), 0.0D).tex(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+			builder.pos((double)(j - 1), (double)l1, 0.0D).tex(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			builder.pos((double)i, (double)l1, 0.0D).tex(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			tes.draw();
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
 	public static void renderListOverlay(int x0, int x1, int y0, int y1, int width, int height, BackgroundTexture texture) {
-		
-		
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder builder = tes.getBuffer();
 		Minecraft.getInstance().getTextureManager().bindTexture(texture.getForegroundTexture());
@@ -245,6 +287,7 @@ public class ElementList extends AbstractOptionList<Element>
 		RenderSystem.enableTexture();
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void renderBackground(int x0, int x1, int y0, int y1, float scroll, BackgroundTexture texture) {
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder builder = tes.getBuffer();

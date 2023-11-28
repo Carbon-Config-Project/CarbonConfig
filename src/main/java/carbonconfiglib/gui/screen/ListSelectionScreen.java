@@ -19,6 +19,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -77,8 +78,8 @@ public abstract class ListSelectionScreen extends ListScreen
 		visibleList.setCallback(T -> setValue(((SelectionElement)T).getSuggestion().getValue()));
 		int x = width / 2 - 100;
 		int y = height;
-		apply = addButton(new CarbonButton(x+10, y-27, 85, 20, new TranslationTextComponent("gui.carbonconfig.pick"), this::save));
-		addButton(new CarbonButton(x+105, y-27, 85, 20, new TranslationTextComponent("gui.carbonconfig.cancel"), this::cancel));
+		apply = addButton(new CarbonButton(x+10, y-27, 85, 20, I18n.format("gui.carbonconfig.pick"), this::save));
+		addButton(new CarbonButton(x+105, y-27, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
 	}
 	
 	public ListSelectionScreen withListener(Runnable success, Runnable abort) {

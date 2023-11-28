@@ -5,7 +5,6 @@ import carbonconfiglib.gui.screen.ConfigScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.StringTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,7 +23,7 @@ import net.minecraft.util.text.StringTextComponent;
  */
 public class FolderElement extends ConfigElement
 {
-	Button button = addChild(new CarbonButton(0, 0, 0, 18, new StringTextComponent(""), this::onPress));
+	Button button = addChild(new CarbonButton(0, 0, 0, 18, "", this::onPress));
 	Navigator nav;
 	
 	public FolderElement(IConfigNode node, Navigator prev)

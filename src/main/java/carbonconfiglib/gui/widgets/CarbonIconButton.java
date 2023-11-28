@@ -8,7 +8,6 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.AbstractButton;
-import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -28,17 +27,15 @@ import net.minecraft.util.text.ITextComponent;
 public class CarbonIconButton extends AbstractButton
 {
 	Consumer<CarbonIconButton> listener;
-	ITextComponent name;
 	Icon icon;
 	boolean iconOnly = false;
 	int hash;
 	
-	public CarbonIconButton(int x, int y, int width, int height, Icon icon, ITextComponent name, Consumer<CarbonIconButton> listener) {
-		super(x, y, width, height, name.getFormattedText());
-		this.name = name;
+	public CarbonIconButton(int x, int y, int width, int height, Icon icon, String name, Consumer<CarbonIconButton> listener) {
+		super(x, y, width, height, name);
 		this.listener = listener;
 		this.icon = icon;
-		this.hash = name.getString().hashCode();
+		this.hash = name.hashCode();
 	}
 	
 	public CarbonIconButton setIconOnly() {
@@ -60,13 +57,13 @@ public class CarbonIconButton extends AbstractButton
         
 		Minecraft minecraft = Minecraft.getInstance();
 		FontRenderer font = minecraft.fontRenderer;
-		int width = font.getStringWidth(name.getFormattedText()) + 21;
+		int width = font.getStringWidth(getMessage()) + 21;
 		float minX = x + 4 + (this.width / 2) - (width / 2);
 		int j = getFGColor();
         RenderSystem.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
 		GuiUtils.drawTextureRegion(minX, y+(height-8)/2, 11, 11, icon, 16, 16);
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
-		GuiUtils.drawScrollingShadowString(font, name, minX+15, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowString(font, getMessage(), minX+15, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
 
 	}
 	

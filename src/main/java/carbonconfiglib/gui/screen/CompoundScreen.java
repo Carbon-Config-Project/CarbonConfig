@@ -16,6 +16,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -57,8 +58,8 @@ public class CompoundScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		applyValue = addButton(new CarbonButton(x-82, y-27, 80, 20, new TranslationTextComponent("gui.carbonconfig.apply"), this::apply));
-		addButton(new CarbonButton(x+2, y-27, 80, 20, new TranslationTextComponent("gui.carbonconfig.back"), this::goBack));
+		applyValue = addButton(new CarbonButton(x-82, y-27, 80, 20, I18n.format("gui.carbonconfig.apply"), this::apply));
+		addButton(new CarbonButton(x+2, y-27, 80, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override

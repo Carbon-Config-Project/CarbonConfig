@@ -65,6 +65,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 		visibleList.setCustomBackground(customTexture);
 		visibleList.setListWidth(getListWidth());
 		visibleList.setScrollPadding(getScrollPadding());
+		children.add(visibleList);
 		collectElements(this::addEntry);
 		visibleList.addElements(sortElements(allEntries));
 		if(shouldHaveSearch()) {

@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -40,8 +39,7 @@ public class GuiUtils
 	private static final float V_SCALE = 1F / 0x100;
 	private static final ScissorsStack STACK = new ScissorsStack();
 	
-	public static float calculateScrollOffset(float width, FontRenderer font, GuiAlign align, ITextComponent comp, int seed) {
-		String text = comp.getFormattedText();
+	public static float calculateScrollOffset(float width, FontRenderer font, GuiAlign align, String text, int seed) {
 		int textWidth = font.getStringWidth(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -53,8 +51,7 @@ public class GuiUtils
 		return 0;
 	}
 	
-	public static void drawScrollingString(FontRenderer font, ITextComponent comp, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
-		String text = comp.getFormattedText();
+	public static void drawScrollingString(FontRenderer font, String text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.getStringWidth(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -70,8 +67,7 @@ public class GuiUtils
 		font.drawString(text, x - align.align(width) + offset, y + (height / 2) - (font.FONT_HEIGHT / 3), color);
 	}
 	
-	public static void drawScrollingShadowString(FontRenderer font, ITextComponent comp, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
-		String text = comp.getFormattedText();
+	public static void drawScrollingShadowString(FontRenderer font, String text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.getStringWidth(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;

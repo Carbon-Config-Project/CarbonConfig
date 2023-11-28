@@ -29,9 +29,9 @@ import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.ModList;
@@ -95,13 +95,13 @@ public class ConfigScreen extends ListScreen
 		int x = width / 2 - 100;
 		int y = height;
 		if(node.isRoot()) {
-			addButton(new CarbonButton(x-51, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.save"), this::save));
-			addButton(new CarbonButton(x+51, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.reset"), this::reset));
-			addButton(new CarbonButton(x+153, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.back"), this::goBack));
+			addButton(new CarbonButton(x-51, y-27, 100, 20, I18n.format("gui.carbonconfig.save"), this::save));
+			addButton(new CarbonButton(x+51, y-27, 100, 20, I18n.format("gui.carbonconfig.reset"), this::reset));
+			addButton(new CarbonButton(x+153, y-27, 100, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
 		}
 		else {
-			addButton(new CarbonButton(x+101, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.back"), this::goBack));
-			addButton(new CarbonButton(x-1, y-27, 100, 20, new TranslationTextComponent("gui.carbonconfig.home"), this::goToRoot));
+			addButton(new CarbonButton(x+101, y-27, 100, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
+			addButton(new CarbonButton(x-1, y-27, 100, 20, I18n.format("gui.carbonconfig.home"), this::goToRoot));
 		}
 		if(shouldHaveSearch()) {
 			deepSearch = addButton(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH_SELECTED, Icon.SEARCH, false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
@@ -153,7 +153,7 @@ public class ConfigScreen extends ListScreen
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if(mouseX >= 50F && mouseX <= width-100 && mouseY >= 6 && mouseY <= 16) {
 			float scroll = GuiUtils.calculateScrollOffset(width-100, font, GuiAlign.CENTER, nav.getHeader(), 0);
-			Screen screen = nav.getScreen(font, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, font.getStringWidth(nav.getHeader().getFormattedText())) - scroll));
+			Screen screen = nav.getScreen(font, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, font.getStringWidth(nav.getHeader())) - scroll));
 			if(screen instanceof ConfigScreen) {
 				minecraft.displayGuiScreen(screen);
 				return true;
@@ -398,15 +398,15 @@ public class ConfigScreen extends ListScreen
 	
 	public static class Navigator {
 		private static final ITextComponent SPLITTER = new StringTextComponent(" > ").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD);
-		List<ITextComponent> layer = new ObjectArrayList<>();
+		List<String> layer = new ObjectArrayList<>();
 		List<Screen> screenByIndex = new ObjectArrayList<>();
 		List<String> walker = null;
-		TextComponent buildCache = null;
+		String buildCache = null;
 		
 		private Navigator() {}
 		
 		public Navigator(ITextComponent base) {
-			layer.add(base);
+			layer.add(base.getFormattedText());
 		}
 		
 		public static Navigator create(IModConfig config) {
@@ -423,7 +423,7 @@ public class ConfigScreen extends ListScreen
 			Navigator nav = new Navigator();
 			nav.layer.addAll(layer);
 			nav.screenByIndex.addAll(screenByIndex);
-			nav.layer.add(name);
+			nav.layer.add(name.getFormattedText());
 			if(walker != null && walker.size() > 1 && walkerEntry != null && walker.indexOf(walkerEntry.toLowerCase(Locale.ROOT)) == 0) {
 				nav.walker = new ObjectArrayList<>();
 				for(int i = 1;i<walker.size();i++) {
@@ -449,7 +449,7 @@ public class ConfigScreen extends ListScreen
 		public Screen getScreen(FontRenderer font, int x) {
 			int splitterWidth = font.getStringWidth(SPLITTER.getFormattedText());
 			for(int i = 0,m=layer.size();i<m;i++) {
-				int width = font.getStringWidth(layer.get(i).getFormattedText());
+				int width = font.getStringWidth(layer.get(i));
 				if(x >= 0 && x <= width) return screenByIndex.get(i);
 				x-=width;
 				x-=splitterWidth;
@@ -465,14 +465,16 @@ public class ConfigScreen extends ListScreen
 			return walker == null ? null : walker.get(0);
 		}
 		
-		public ITextComponent getHeader() {
+		public String getHeader() {
 			if(buildCache == null) {
-				buildCache = new StringTextComponent("");
+				StringBuilder builder = new StringBuilder();
+				String splitter = SPLITTER.getFormattedText();
 				for(int i = 0,m=layer.size();i<m;i++) {
-					buildCache.appendSibling(layer.get(i));
+					builder.append(layer.get(i));
 					if(i == m-1) continue;
-					buildCache.appendSibling(SPLITTER);
+					builder.append(splitter);
 				}
+				buildCache = builder.toString();
 			}
 			return buildCache;
 		}

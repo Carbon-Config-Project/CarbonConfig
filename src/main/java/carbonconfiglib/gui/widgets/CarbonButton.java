@@ -3,7 +3,6 @@ package carbonconfiglib.gui.widgets;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.ITextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -23,12 +22,10 @@ import net.minecraft.util.text.ITextComponent;
 public class CarbonButton extends Button
 {
 	int hash;
-	ITextComponent displayString;
 	
-	public CarbonButton(int xPos, int yPos, int width, int height, ITextComponent displayString, IPressable handler) {
-		super(xPos, yPos, width, height, displayString.getFormattedText(), handler);
-		hash = displayString.getString().hashCode();
-		this.displayString = displayString;
+	public CarbonButton(int xPos, int yPos, int width, int height, String displayString, IPressable handler) {
+		super(xPos, yPos, width, height, displayString, handler);
+		hash = displayString.hashCode();
 	}
 	
 	@Override
@@ -37,6 +34,6 @@ public class CarbonButton extends Button
 		int k = this.getYImage(this.isHovered);
 		GuiUtils.drawTextureWithBorder(WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		this.renderBg(mc, mouseX, mouseY);
-		GuiUtils.drawScrollingShadowString(mc.fontRenderer, displayString, x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowString(mc.fontRenderer, getMessage(), x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
 	}
 }

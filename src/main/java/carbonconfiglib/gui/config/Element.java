@@ -72,11 +72,11 @@ public class Element extends AbstractOptionList.Entry<Element> {
 	}
 	
 	protected void renderName(float x, float y, boolean changed, int width, int height) {
-		GuiUtils.drawScrollingString(font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
+		GuiUtils.drawScrollingString(font, (changed ? this.changed : unchanged).getFormattedText(), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
 	protected void renderText(ITextComponent text, float x, float y, float width, float height, GuiAlign align, int color) {
-		GuiUtils.drawScrollingString(font, text, x, y, width, height, align, -1, hash);
+		GuiUtils.drawScrollingString(font, text.getFormattedText(), x, y, width, height, align, -1, hash);
 	}
 	
 	@Override

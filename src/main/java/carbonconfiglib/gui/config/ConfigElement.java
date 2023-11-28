@@ -108,7 +108,7 @@ public class ConfigElement extends Element
 		super.init();
 		if(createResetButtons(value)) {
 			if(isArray()) {
-				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, new StringTextComponent	(""), this::onDeleted).setIconOnly(), -31);
+				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, "", this::onDeleted).setIconOnly(), -31);
 				setReset.active = isReset();
 				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN, Icon.MOVE_DOWN_HOVERED, this::onMoveDown);
 				listeners.add(moveDown);
@@ -116,9 +116,9 @@ public class ConfigElement extends Element
 				listeners.add(moveUp);
 			}
 			else {
-				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, new StringTextComponent(""), this::onReset).setIconOnly(), -21);
-				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, new StringTextComponent(""), this::onDefault).setIconOnly(), -40);
-				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, new StringTextComponent(""), this::onSuggestion).setIconOnly(), -59);
+				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, "", this::onReset).setIconOnly(), -21);
+				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, "", this::onDefault).setIconOnly(), -40);
+				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, "", this::onSuggestion).setIconOnly(), -59);
 				setReset.active = isReset();
 				setDefault.active = !isDefault();
 				suggestion.visible = false;

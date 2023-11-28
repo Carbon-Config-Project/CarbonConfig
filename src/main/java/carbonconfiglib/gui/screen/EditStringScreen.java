@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -54,8 +55,8 @@ public class EditStringScreen extends Screen
 	protected void init() {
 		super.init();
 		int x = width / 2 - 100;
-		Button apply = addButton(new CarbonButton(x+10, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.apply"), this::save));
-		addButton(new CarbonButton(x+105, 160, 85, 20, new TranslationTextComponent("gui.carbonconfig.cancel"), this::cancel));
+		Button apply = addButton(new CarbonButton(x+10, 160, 85, 20, I18n.format("gui.carbonconfig.apply"), this::save));
+		addButton(new CarbonButton(x+105, 160, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
 		textBox = new TextFieldWidget(font, x, 113, 200, 18, "");
 		addButton(textBox);
 		textBox.setText(value.get());

@@ -54,10 +54,10 @@ public class MultiChoiceScreen extends Screen
 	
 	protected void addButtons(int y) {
 		boolean singleOption = otherButton == null && cancelButton == null;
-		addButton(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton, T -> callback.accept(Result.MAIN)));
+		addButton(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton.getFormattedText(), T -> callback.accept(Result.MAIN)));
 		if(singleOption) return;
-		addButton(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton, T -> callback.accept(Result.OTHER)));
-		addButton(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton, T -> callback.accept(Result.CANCEL)));
+		addButton(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton.getFormattedText(), T -> callback.accept(Result.OTHER)));
+		addButton(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton.getFormattedText(), T -> callback.accept(Result.CANCEL)));
 	}
 	
 	@Override

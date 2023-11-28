@@ -137,7 +137,7 @@ public class EventHandler implements IConfigChangeListener
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
 			ModList.get().forEachModContainer((K, T)-> {
-				if(T.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isEmpty()) {
+				if(!T.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) {
 					ForgeConfigs configs = new ForgeConfigs(T);
 					if(configs.hasConfigs()) {
 						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						

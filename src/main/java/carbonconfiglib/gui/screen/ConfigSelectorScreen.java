@@ -22,6 +22,7 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -65,7 +66,7 @@ public class ConfigSelectorScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addButton(new CarbonButton(x-80, y-27, 160, 20, new TranslationTextComponent("gui.carbonconfig.back"), T -> onClose()));
+		addButton(new CarbonButton(x-80, y-27, 160, 20, I18n.format("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -173,12 +174,12 @@ public class ConfigSelectorScreen extends ListScreen
 		public void init() {
 			multi = shouldCreatePick();
 			if(multi) {
-				button = new CarbonButton(0, 0, 82, 20, new TranslationTextComponent("gui.carbonconfig.pick_file"), this::onPick);
+				button = new CarbonButton(0, 0, 82, 20, I18n.format("gui.carbonconfig.pick_file"), this::onPick);
 				children.add(button);
 			}
 			else {
-				button = new CarbonButton(0, 0, 60, 20, new TranslationTextComponent("gui.carbonconfig.modify"), this::onEdit);
-				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, new StringTextComponent(""), this::reset).setIconOnly();
+				button = new CarbonButton(0, 0, 60, 20, I18n.format("gui.carbonconfig.modify"), this::onEdit);
+				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, "", this::reset).setIconOnly();
 				reset.active = !handler.isDefault() && !isInWorldConfig();
 				children.add(button);
 				children.add(reset);
@@ -197,8 +198,8 @@ public class ConfigSelectorScreen extends ListScreen
 				reset.y = top + 2;
 				reset.render(mouseX, mouseY, partialTicks);
 			}
-			GuiUtils.drawScrollingString(font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(font, type.getFormattedText(), left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(font, fileName.getFormattedText(), left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawTextureRegion(left-20, top, 22, 22, getIcon(), 16, 16);
 		}
 		

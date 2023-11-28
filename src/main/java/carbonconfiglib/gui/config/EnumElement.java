@@ -9,8 +9,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.I18n;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,10 +43,10 @@ public class EnumElement extends ConfigElement
 		super.init();
 		if(!hasSuggestions() || isArray()) {
 			if(this.isArray()) {
-				addChild(new CarbonButton(0, 0, 40, 18, new TranslationTextComponent("gui.chunk_pregen.config.edit"), this::onSelect), -12);				
+				addChild(new CarbonButton(0, 0, 40, 18, I18n.format("gui.chunk_pregen.config.edit"), this::onSelect), -12);				
 			}
 			else {
-				addChild(new CarbonButton(0, 0, 72, 18, new TranslationTextComponent("gui.chunk_pregen.config.edit"), this::onPress));
+				addChild(new CarbonButton(0, 0, 72, 18, I18n.format("gui.chunk_pregen.config.edit"), this::onPress));
 			}
 		}
 	}
@@ -60,8 +59,7 @@ public class EnumElement extends ConfigElement
 	@Override
 	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
-		String value = this.value.get();
-		GuiUtils.drawScrollingString(font, new StringTextComponent(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
+		GuiUtils.drawScrollingString(font, value.get(), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
 	}
 	
 	private void onSelect(Button button) {

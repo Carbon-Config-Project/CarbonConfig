@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -68,7 +69,7 @@ public class SelectFileScreen extends ListScreen
 		super.init();
 		int x = width / 2;
 		int y = height;
-		addButton(new CarbonButton(x-80, y-27, 160, 20, new TranslationTextComponent("gui.carbonconfig.back"), T -> onClose()));
+		addButton(new CarbonButton(x-80, y-27, 160, 20, I18n.format("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
@@ -121,7 +122,7 @@ public class SelectFileScreen extends ListScreen
 		
 		@Override
 		public void init() {
-			button = new CarbonButton(0, 0, 62, 20, new TranslationTextComponent("gui.carbonconfig.pick"), this::onPick);
+			button = new CarbonButton(0, 0, 62, 20, I18n.format("gui.carbonconfig.pick"), this::onPick);
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
 				WorldSummary sum = world.getSummary();
@@ -143,8 +144,8 @@ public class SelectFileScreen extends ListScreen
 			button.x = left+width-62;
 			button.y = top + 2;
 			button.render(mouseX, mouseY, partialTicks);
-			GuiUtils.drawScrollingString(font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(font, title.getFormattedText(), left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(font, path.getFormattedText(), left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
 			if(texture != null) {
 				texture.bindTexture();
 				GuiUtils.drawTextureRegion(left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
