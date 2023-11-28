@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
 
 /**
@@ -66,17 +65,7 @@ public class ForgeConfigs implements IModConfigs
 		return getBackgroundTexture(container.getModInfo()).asHolder();
 	}
 	
-	private static BackgroundTexture getBackgroundTexture(final IModInfo info) {
-		String configBackground = (String)info.getModProperties().get("configuredBackground");
-		if (configBackground != null) {
-			return BackgroundTexture.of(configBackground).build();
-		}
-		if (info instanceof ModInfo) {
-			Optional<String> optional = ((ModInfo)info).getConfigElement(new String[] {"configBackground"});
-			if (optional.isPresent()) {
-				return BackgroundTexture.of(optional.get()).build();
-			}
-		}
+	private static BackgroundTexture getBackgroundTexture(IModInfo info) {
 		return BackgroundTexture.DEFAULT;
 	}
 	

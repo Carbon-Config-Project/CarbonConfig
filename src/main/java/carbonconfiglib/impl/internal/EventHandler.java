@@ -77,7 +77,6 @@ public class EventHandler implements IConfigChangeListener
 		if(FMLEnvironment.dist.isDedicatedServer()) return;
 		ModLoadingContext context = ModLoadingContext.get();
 		if("minecraft".equals(context.getActiveNamespace())) {
-			if(FMLEnvironment.production) return;
 			throw new IllegalStateException("Mod Configs Must be created (not loaded) during a Mod Loading Phase");
 		}
 		configs.computeIfAbsent(context.getActiveContainer(), ModConfigs::new).addConfig(config);

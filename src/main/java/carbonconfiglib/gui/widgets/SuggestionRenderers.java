@@ -1,17 +1,17 @@
 package carbonconfiglib.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import carbonconfiglib.gui.api.ISuggestionRenderer;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -66,16 +66,16 @@ public class SuggestionRenderers
 			if(fluid == Fluids.EMPTY || fluid == null) return null;
 			TextureAtlasSprite sprite = getSprite(fluid);
 			if(sprite == null) return null;
-			Minecraft.getInstance().getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
+			Minecraft.getInstance().getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
 			int color = fluid.getAttributes().getColor();
-			RenderSystem.color4f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
+			GlStateManager.color4f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
 			AbstractGui.blit(x, y, 0, 18, 18, sprite);
-			RenderSystem.color4f(1F, 1F, 1F, 1F);
+			GlStateManager.color4f(1F, 1F, 1F, 1F);
 			return fluid.getAttributes().getDisplayName(new FluidStack(fluid, 1)).deepCopy().applyTextStyle(TextFormatting.YELLOW).appendText("\n").appendSibling(new StringTextComponent(id.toString()).applyTextStyle(TextFormatting.GRAY));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
-			return Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(fluid.getAttributes().getStillTexture());
+			return Minecraft.getInstance().getTextureMap().getSprite(fluid.getAttributes().getStillTexture());
 		}
 	}
 	
@@ -100,7 +100,7 @@ public class SuggestionRenderers
 			if(potion == null) return null;
 			ItemStack item = new ItemStack(Items.POTION);
 			PotionUtils.appendEffects(item, ObjectLists.singleton(new EffectInstance(potion)));
-			item.getOrCreateTag().put("CustomPotionColor", IntNBT.valueOf(potion.getLiquidColor()));
+			item.getOrCreateTag().put("CustomPotionColor", new IntNBT(potion.getLiquidColor()));
 			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(item, x, y);
 			return potion.getDisplayName().deepCopy().applyTextStyle(TextFormatting.YELLOW).appendText("\n").appendSibling(new StringTextComponent(id.toString()).applyTextStyle(TextFormatting.GRAY));
 		}

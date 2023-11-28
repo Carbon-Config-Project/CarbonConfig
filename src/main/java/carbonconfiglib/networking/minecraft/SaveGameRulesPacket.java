@@ -4,6 +4,7 @@ import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 
 import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.ICarbonPacket;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -64,19 +65,19 @@ public class SaveGameRulesPacket implements ICarbonPacket
 		if(server == null) return;
 		GameRules rule = server.getGameRules();
 		rule.read(rules.write());
-		CommandSource source = server.getCommandSource();
-		GameRules.visitAll(new IRuleEntryVisitor() {
+		GameRules.func_223590_a(new IRuleEntryVisitor() {
 			@Override
-			public <T extends RuleValue<T>> void visit(RuleKey<T> key, RuleType<T> type) {
+			public <T extends RuleValue<T>> void func_223481_a(RuleKey<T> key, RuleType<T> type) {
 				RuleValue<T> value = rule.get(key);
-				CommandContextBuilder<CommandSource> command = new CommandContextBuilder<>(null, source, null, 0);
+				CommandContextBuilder<CommandSource> command = new CommandContextBuilder<>(null, server.getCommandSource(), null, 0);
 				if(value instanceof IntegerValue) {
 					command.withArgument("value", new ParsedArgument<>(0, 0, ((IntegerValue)value).get()));
+					Reflects.updateRule(IntegerValue.class, (IntegerValue)value, command.build(""), "value");
 				}
 				else if(value instanceof BooleanValue) {
 					command.withArgument("value", new ParsedArgument<>(0, 0, ((BooleanValue)value).get()));
+					Reflects.updateRule(BooleanValue.class, (BooleanValue)value, command.build(""), "value");
 				}
-				value.updateValue(command.build(""), "value");
 			}
 		});
 	}

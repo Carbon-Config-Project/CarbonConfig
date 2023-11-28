@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -204,7 +203,6 @@ public class ElementList extends AbstractOptionList<Element>
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}
 	
-	@SuppressWarnings("deprecation")
 	protected void renderScrollbar() {
 		int j1 = this.getMaxScroll();
 		if (j1 > 0) {
@@ -216,11 +214,11 @@ public class ElementList extends AbstractOptionList<Element>
 			}
 			int i = this.getScrollbarPosition();
 			int j = i + 6;
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-			RenderSystem.disableAlphaTest();
-			RenderSystem.shadeModel(7425);
-			RenderSystem.disableTexture();
+			GlStateManager.enableBlend();
+			GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+			GlStateManager.disableAlphaTest();
+			GlStateManager.shadeModel(7425);
+			GlStateManager.disableTexture();
 			
 			Tessellator tes = Tessellator.getInstance();
 			BufferBuilder builder = tes.getBuffer();
@@ -243,17 +241,17 @@ public class ElementList extends AbstractOptionList<Element>
 			builder.pos((double)(j - 1), (double)l1, 0.0D).tex(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
 			builder.pos((double)i, (double)l1, 0.0D).tex(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
 			tes.draw();
+			GlStateManager.enableTexture();
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void renderListOverlay(int x0, int x1, int y0, int y1, int width, int height, BackgroundTexture texture) {
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder builder = tes.getBuffer();
 		Minecraft.getInstance().getTextureManager().bindTexture(texture.getForegroundTexture());
-		RenderSystem.enableTexture();
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthFunc(519);
+		GlStateManager.enableTexture();
+		GlStateManager.enableDepthTest();
+		GlStateManager.depthFunc(519);
 		int color = texture.getForegroundBrightness();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 		builder.pos(x0, y0, -100D).tex(0, y0 / 32F).color(color, color, color, 255).endVertex();
@@ -265,13 +263,13 @@ public class ElementList extends AbstractOptionList<Element>
 		builder.pos(x0 + width, y1, -100D).tex(width / 32F, y1 / 32F).color(color, color, color, 255).endVertex();
 		builder.pos(x0, y1, -100D).tex(0F, y1 / 32F).color(color, color, color, 255).endVertex();
 		tes.draw();
-		RenderSystem.depthFunc(515);
-		RenderSystem.disableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-        RenderSystem.disableAlphaTest();
-        RenderSystem.shadeModel(7425);
-		RenderSystem.disableTexture();
+		GlStateManager.depthFunc(515);
+		GlStateManager.disableDepthTest();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+        GlStateManager.disableAlphaTest();
+        GlStateManager.shadeModel(7425);
+		GlStateManager.disableTexture();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		builder.pos(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
 		builder.pos(x1, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
@@ -282,12 +280,11 @@ public class ElementList extends AbstractOptionList<Element>
 		builder.pos(x1, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
 		builder.pos(x0, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
 		tes.draw();
-		RenderSystem.enableAlphaTest();
-		RenderSystem.disableBlend();
-		RenderSystem.enableTexture();
+		GlStateManager.enableAlphaTest();
+		GlStateManager.disableBlend();
+		GlStateManager.enableTexture();
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void renderBackground(int x0, int x1, int y0, int y1, float scroll, BackgroundTexture texture) {
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder builder = tes.getBuffer();

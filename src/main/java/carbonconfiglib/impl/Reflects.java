@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
+import com.mojang.brigadier.context.CommandContext;
 
+import net.minecraft.command.CommandSource;
+import net.minecraft.world.GameRules.RuleValue;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -86,5 +89,23 @@ public class Reflects
 		}
 	}
 	
+	public static <T extends RuleValue<T>> void setRuleValue(Class<T> clz, T obj, String value) {
+		try {
+			Method method = ObfuscationReflectionHelper.findMethod(clz, "func_223553_a", String.class);
+			method.setAccessible(true);
+			method.invoke(obj, value);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
+	public static <T extends RuleValue<T>> void updateRule(Class<T> clz, T obj, CommandContext<CommandSource> source, String value) {
+		try {
+			Method method = ObfuscationReflectionHelper.findMethod(clz, "func_223555_a", CommandContext.class, String.class);
+			method.setAccessible(true);
+			method.invoke(obj, source, value);			
+		}
+		catch(Exception e) { e.printStackTrace(); }
+	}
 }

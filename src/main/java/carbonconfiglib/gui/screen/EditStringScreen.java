@@ -60,7 +60,7 @@ public class EditStringScreen extends Screen
 		textBox = new TextFieldWidget(font, x, 113, 200, 18, "");
 		addButton(textBox);
 		textBox.setText(value.get());
-		textBox.setResponder(T -> {
+		textBox.func_212954_a(T -> {
 			textBox.setTextColor(0xE0E0E0);
 			valid = true;
 			result = value.isValid(T);

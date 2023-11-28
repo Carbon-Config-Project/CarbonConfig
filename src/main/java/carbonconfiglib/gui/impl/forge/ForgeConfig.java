@@ -35,7 +35,7 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.Reloading;
+import net.minecraftforge.fml.config.ModConfig.ConfigReloading;
 import net.minecraftforge.fml.config.ModConfig.Type;
 
 /**
@@ -169,7 +169,7 @@ public class ForgeConfig implements IModConfig
 			return;
 		}
 		config.save();
-        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(Reloading.class, config));
+        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(ConfigReloading.class, config));
 	}
 	
 	private List<ConfigValue<?>> collect() {

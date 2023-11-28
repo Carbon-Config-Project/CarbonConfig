@@ -71,7 +71,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 		if(shouldHaveSearch()) {
 			searchBox = new CarbonEditBox(font, width / 2 - 100, 25, 200, 20);
 			searchBox.setSuggestion(I18n.format("gui.carbonconfig.search"));
-			searchBox.setResponder(T -> onSearchChange(searchBox, T.toLowerCase(Locale.ROOT)));
+			searchBox.func_212954_a(T -> onSearchChange(searchBox, T.toLowerCase(Locale.ROOT)));
 			addButton(searchBox);
 		}
 		if(lastScroll >= 0D) visibleList.setScrollAmount(lastScroll);

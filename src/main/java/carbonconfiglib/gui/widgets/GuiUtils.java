@@ -5,7 +5,7 @@ import java.util.Deque;
 
 import org.lwjgl.opengl.GL11;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.MainWindow;
@@ -101,7 +101,7 @@ public class GuiUtils
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			return;
 		}
-		MainWindow window = Minecraft.getInstance().getMainWindow();
+		MainWindow window = Minecraft.getInstance().mainWindow;
 		int bottom = rect.maxY;
 		double scaledHeight = (double)window.getHeight() / (double)window.getScaledHeight();
 		double scaledWidth = (double)window.getWidth() / (double)window.getScaledWidth();
@@ -118,8 +118,8 @@ public class GuiUtils
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder builder = tessellator.getBuffer();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
+		GlStateManager.enableBlend();
+		GlStateManager.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		
 		int fillerWidth = textureWidth - leftBorder - rightBorder;
 		int fillerHeight = textureHeight - topBorder - bottomBorder;
@@ -182,10 +182,10 @@ public class GuiUtils
 		bufferbuilder.pos(maxX, y, 0).tex(t_maxX, t_minY).endVertex();
 		bufferbuilder.pos(x, y, 0).tex(t_minX, t_minY).endVertex();
 		
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+        GlStateManager.enableBlend();
+        GlStateManager.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		tessellator.draw();
-		RenderSystem.disableBlend();
+		GlStateManager.disableBlend();
 	}
 	
 	public static class Rect {

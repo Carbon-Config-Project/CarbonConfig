@@ -15,7 +15,7 @@ import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.Reloading;
+import net.minecraftforge.fml.config.ModConfig.ConfigReloading;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -56,7 +56,7 @@ public class ForgeHelpers
 		data.configFormat().createWriter().write(data, path, WritingMode.REPLACE);
 		try {
 			Reflects.setConfigData(config, TomlFormat.instance().createParser().parse(Files.newInputStream(path)));
-	        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(Reloading.class, config));
+	        ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(Reflects.createEvent(ConfigReloading.class, config));
 		}
 		catch(Exception e) { e.printStackTrace(); }
 	}

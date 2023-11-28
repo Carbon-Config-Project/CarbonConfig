@@ -2,7 +2,7 @@ package carbonconfiglib.gui.widgets;
 
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.gui.widget.button.AbstractButton;
 
@@ -43,9 +43,9 @@ public class CarbonHoverIconButton extends AbstractButton
 	@Override
 	public void renderButton(int mouseX, int mouseY, float p_93679_) {
 		int j = getFGColor();
-        RenderSystem.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+        GlStateManager.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
 		GuiUtils.drawTextureRegion(x + info.xOff, y + info.yOff, info.width, info.height, icons[isHovered() ? 1 : 0], 16, 16);
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
 	}
 	
 	@Override

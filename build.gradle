@@ -24,7 +24,7 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 
 
 minecraft {
-    mappings channel: 'snapshot', version: '20200514-1.15.1'
+    mappings channel: 'snapshot', version: '20190719-1.14.3'
     runs {
         client {
             workingDirectory project.file('run')
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.57'
+    minecraft 'net.minecraftforge:forge:1.14.4-28.2.26'
     compile ':Primitive Collections-0.8.9'
 }
 

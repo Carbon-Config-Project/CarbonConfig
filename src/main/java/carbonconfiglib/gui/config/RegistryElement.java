@@ -54,7 +54,7 @@ public class RegistryElement extends ConfigElement
 		if(this.isArray()) {
 			edit = addChild(new CarbonEditBox(font, 0, 0, 130, 18), GuiAlign.CENTER, 0);
 			edit.setText(value.get());
-			edit.setResponder(T -> {
+			edit.func_212954_a(T -> {
 				edit.setTextColor(0xE0E0E0);
 				result = null;
 				if(!T.isEmpty() && !(result = value.isValid(T)).getValue()) {

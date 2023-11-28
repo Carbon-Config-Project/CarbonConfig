@@ -39,8 +39,8 @@ public class CarbonEditBox extends TextFieldWidget implements IOwnable
 	}
 	
 	@Override
-	public void setFocused(boolean focus) {
-		super.setFocused(focus);
+	public void setFocused2(boolean focus) {
+		super.setFocused2(focus);
 		if(focus && owner != null) {
 			owner.setActiveWidget(this);
 		}

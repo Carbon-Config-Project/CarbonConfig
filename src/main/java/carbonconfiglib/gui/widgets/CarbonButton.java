@@ -1,5 +1,7 @@
 package carbonconfiglib.gui.widgets;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
@@ -32,7 +34,8 @@ public class CarbonButton extends Button
 	public void renderButton(int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		int k = this.getYImage(this.isHovered);
-		GuiUtils.drawTextureWithBorder(WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1F);
+		GuiUtils.drawTextureWithBorder(WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, blitOffset);
 		this.renderBg(mc, mouseX, mouseY);
 		GuiUtils.drawScrollingShadowString(mc.fontRenderer, getMessage(), x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
 	}

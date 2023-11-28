@@ -79,10 +79,10 @@ public class MinecraftConfig implements IModConfig
 	
 	
 	private void collect() {
-		GameRules.visitAll(new IRuleEntryVisitor() {
+		GameRules.func_223590_a(new IRuleEntryVisitor() {
 			@Override
 			@SuppressWarnings("unchecked")
-			public <T extends RuleValue<T>> void visit(RuleKey<T> key, RuleType<T> type) {
+			public <T extends RuleValue<T>> void func_223481_a(RuleKey<T> key, RuleType<T> type) {
 				T value = current.get(key);
 				if(value instanceof BooleanValue) {
 					add(key, IGameRuleValue.bool((RuleKey<BooleanValue>)key, (BooleanValue)value));
@@ -195,8 +195,8 @@ public class MinecraftConfig implements IModConfig
 		keys.put(Category.DROPS, new RuleKey[]{ GameRules.DO_TILE_DROPS, GameRules.DO_ENTITY_DROPS, GameRules.DO_MOB_LOOT });
 		keys.put(Category.MISC, new RuleKey[]{ GameRules.MAX_COMMAND_CHAIN_LENGTH, GameRules.REDUCED_DEBUG_INFO });
 		keys.put(Category.MOBS, new RuleKey[]{ GameRules.MOB_GRIEFING, GameRules.DISABLE_RAIDS, GameRules.MAX_ENTITY_CRAMMING });
-		keys.put(Category.PLAYER, new RuleKey[]{ GameRules.SPECTATORS_GENERATE_CHUNKS, GameRules.DROWNING_DAMAGE, GameRules.FALL_DAMAGE, GameRules.FIRE_DAMAGE, GameRules.DISABLE_ELYTRA_MOVEMENT_CHECK, GameRules.KEEP_INVENTORY, GameRules.NATURAL_REGENERATION, GameRules.DO_IMMEDIATE_RESPAWN, GameRules.SPAWN_RADIUS });
-		keys.put(Category.SPAWNING, new RuleKey[]{ GameRules.DO_MOB_SPAWNING, GameRules.field_230127_D_, GameRules.field_230128_E_ });
+		keys.put(Category.PLAYER, new RuleKey[]{ GameRules.SPECTATORS_GENERATE_CHUNKS, GameRules.DISABLE_ELYTRA_MOVEMENT_CHECK, GameRules.KEEP_INVENTORY, GameRules.NATURAL_REGENERATION, GameRules.SPAWN_RADIUS });
+		keys.put(Category.SPAWNING, new RuleKey[]{ GameRules.DO_MOB_SPAWNING});
 		keys.put(Category.WORLD, new RuleKey[]{ GameRules.DO_DAYLIGHT_CYCLE, GameRules.RANDOM_TICK_SPEED, GameRules.DO_FIRE_TICK, GameRules.DO_WEATHER_CYCLE });
 		Map<RuleKey<?>, Category> result = new Object2ObjectOpenHashMap<>();
 		for(Entry<Category, RuleKey<?>[]> entry : keys.entrySet()) {

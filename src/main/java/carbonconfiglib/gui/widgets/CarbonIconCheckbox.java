@@ -1,7 +1,6 @@
 package carbonconfiglib.gui.widgets;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import carbonconfiglib.gui.config.IListOwner;
 import net.minecraft.client.Minecraft;
@@ -69,11 +68,10 @@ public class CarbonIconCheckbox extends AbstractButton
 	@Override
 	public void renderButton(int mouseX, int mouseY, float partialTicks) {
 		Minecraft.getInstance().getTextureManager().bindTexture(TEXTURE);
-		RenderSystem.enableDepthTest();
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		GlStateManager.enableDepthTest();
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		GlStateManager.enableBlend();
+		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
 		GuiUtils.drawTextureRegion(x, y, isHovered() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
 		GuiUtils.drawTextureRegion(x+2, y+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);

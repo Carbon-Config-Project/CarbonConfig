@@ -36,7 +36,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.gui.screen.ModListScreen;
+import net.minecraftforge.fml.client.gui.GuiModList;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -252,7 +252,7 @@ public class CarbonConfig
 	public void onKeyPressed(KeyInputEvent event) {
 		Minecraft mc = Minecraft.getInstance();
 		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
-			mc.displayGuiScreen(new ModListScreen(mc.currentScreen));
+			mc.displayGuiScreen(new GuiModList(mc.currentScreen));
 		}
 	}
 	

@@ -42,7 +42,7 @@ public class ColorElement extends ConfigElement
 		super.init();
 		textBox = addChild(new CarbonEditBox(font, 0, 0, isArray() ? 130 : 52, 18).setInnerDiff(4), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, 1);
 		textBox.setText(value.get());
-		textBox.setResponder(T -> {
+		textBox.func_212954_a(T -> {
 			textBox.setTextColor(0xE0E0E0);
 			result = null;
 			if(!T.isEmpty()) {
