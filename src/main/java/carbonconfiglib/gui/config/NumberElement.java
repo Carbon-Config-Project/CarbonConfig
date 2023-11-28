@@ -56,6 +56,12 @@ public class NumberElement extends ConfigElement
 	}
 	
 	@Override
+	public void tick() {
+		super.tick();
+		textBox.tick();
+	}
+	
+	@Override
 	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks)
 	{
 		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);

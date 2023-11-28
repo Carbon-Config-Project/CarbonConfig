@@ -86,6 +86,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 		currentTick++;
 		super.tick();
 		visibleList.tick();
+		searchBox.tick();
 	}
 	
 	@Override
