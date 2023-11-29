@@ -2,12 +2,12 @@ package carbonconfiglib.gui.widgets;
 
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
+import carbonconfiglib.gui.widgets.screen.IWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,7 +24,7 @@ import net.minecraft.client.gui.widget.button.AbstractButton;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonIconButton extends AbstractButton
+public class CarbonIconButton extends GuiButton implements IWidget
 {
 	Consumer<CarbonIconButton> listener;
 	Icon icon;
@@ -32,7 +32,7 @@ public class CarbonIconButton extends AbstractButton
 	int hash;
 	
 	public CarbonIconButton(int x, int y, int width, int height, Icon icon, String name, Consumer<CarbonIconButton> listener) {
-		super(x, y, width, height, name);
+		super(0, x, y, width, height, name);
 		this.listener = listener;
 		this.icon = icon;
 		this.hash = name.hashCode();
@@ -44,32 +44,50 @@ public class CarbonIconButton extends AbstractButton
 	}
 	
 	@Override
-	public void renderButton(int mouseX, int mouseY, float p_93679_) {
-        int k = this.getYImage(this.isHovered());
-        GuiUtils.drawTextureWithBorder(WIDGETS_LOCATION, x, y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, blitOffset);
-        if(iconOnly) {
-    		int j = getFGColor();
-            GlStateManager.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-    		GuiUtils.drawTextureRegion(x + (width / 2) - 5.5F, y+height/2-5.5F, 11, 11, icon, 16, 16);
-    		GlStateManager.color4f(1F, 1F, 1F, 1F);
-        	return;
-        }
-        
-		Minecraft minecraft = Minecraft.getInstance();
-		FontRenderer font = minecraft.fontRenderer;
-		int width = font.getStringWidth(getMessage()) + 21;
-		float minX = x + 4 + (this.width / 2) - (width / 2);
-		int j = getFGColor();
-		GlStateManager.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(minX, y+(height-8)/2, 11, 11, icon, 16, 16);
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
-		GuiUtils.drawScrollingShadowString(font, getMessage(), minX+15, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
-
+	public boolean mouseClick(double mouseX, double mouseY, int button) {
+		if(this.enabled && this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
+			playPressSound(Minecraft.getMinecraft().getSoundHandler());
+			if(listener != null) listener.accept(this);
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
-	public void onPress() {
-		if(listener == null) return;
-		listener.accept(this);
+	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		this.hovered = mousePressed(mc, mouseX, mouseY);
+        int k = this.getHoverState(this.hovered);
+        GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, x, y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
+        if(iconOnly) {
+    		int j = this.enabled ? 16777215 : 10526880;
+            GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+    		GuiUtils.drawTextureRegion(x + (width / 2) - 5.5F, y+height/2-5.5F, 11, 11, icon, 16, 16);
+    		GlStateManager.color(1F, 1F, 1F, 1F);
+        	return;
+        }
+        
+		FontRenderer font = mc.fontRenderer;
+		int width = font.getStringWidth(displayString) + 21;
+		float minX = x + 4 + (this.width / 2) - (width / 2);
+		int j = this.enabled ? 16777215 : 10526880;
+		GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+		GuiUtils.drawTextureRegion(minX, y+(height-8)/2, 11, 11, icon, 16, 16);
+		GlStateManager.color(1F, 1F, 1F, 1F);
+		GuiUtils.drawScrollingShadowString(font, displayString, minX+15, y, width, height-2, GuiAlign.CENTER, j, hash);
 	}
+	
+	@Override
+	public void setX(int x) { this.x = x; }
+	@Override
+	public void setY(int y) { this.y = y; }
+	@Override
+	public int getX() { return x; }
+	@Override
+	public int getY() { return y; }
+	@Override
+	public int getWidgetWidth() { return width; }
+	@Override
+	public int getWidgetHeight() { return height; }
+	@Override
+	public boolean isHovered() { return hovered; }
 }

@@ -9,8 +9,9 @@ import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -61,11 +62,11 @@ public class ConfigNode implements IConfigFolderNode
 	public ITextComponent getName() { return IConfigNode.createLabel(section.getName()); }
 	@Override
 	public ITextComponent getTooltip() {
-		TextComponent comp = new StringTextComponent("");
-		comp.appendSibling(new StringTextComponent(section.getName()).applyTextStyle(TextFormatting.YELLOW));
+		TextComponentBase comp = new TextComponentString("");
+		comp.appendSibling(new TextComponentString(section.getName()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).applyTextStyle(TextFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
 		}
 		return comp;
 	}

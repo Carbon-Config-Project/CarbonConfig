@@ -13,12 +13,13 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.config.SelectionElement;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -37,14 +38,14 @@ import net.minecraft.util.text.TranslationTextComponent;
  */
 public class CompoundScreen extends ListScreen
 {
-	Screen prev;
+	GuiScreen prev;
 	IConfigNode entry;
 	ICompoundNode compound;
 	List<DataType> type;
-	Button applyValue;
+	GuiButton applyValue;
 	Runnable closeListener = null;
 	
-	public CompoundScreen(IConfigNode entry, ICompoundNode node, Screen prev, BackgroundHolder customTexture) {
+	public CompoundScreen(IConfigNode entry, ICompoundNode node, GuiScreen prev, BackgroundHolder customTexture) {
 		super(entry.getName(), customTexture);
 		this.prev = prev;
 		this.entry = entry;
@@ -54,12 +55,12 @@ public class CompoundScreen extends ListScreen
 	}
 	
 	@Override
-	protected void init() {
-		super.init();
+	public void initGui() {
+		super.initGui();
 		int x = width / 2;
 		int y = height;
-		applyValue = addButton(new CarbonButton(x-82, y-27, 80, 20, I18n.format("gui.carbonconfig.apply"), this::apply));
-		addButton(new CarbonButton(x+2, y-27, 80, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
+		applyValue = addWidget(new CarbonButton(x-82, y-27, 80, 20, I18n.format("gui.carbonconfig.apply"), this::apply));
+		addWidget(new CarbonButton(x+2, y-27, 80, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override
@@ -74,18 +75,18 @@ public class CompoundScreen extends ListScreen
 	@Override
 	public void tick() {
 		super.tick();
-		applyValue.active = compound.isValid();
+		applyValue.enabled = compound.isValid();
 	}
 	
 	@Override
 	public void onClose() {
 		notifyClose();
-		minecraft.displayGuiScreen(prev);
+		mc.displayGuiScreen(prev);
 	}
 	
-	private void apply(Button button) {
+	private void apply(GuiButton button) {
 		compound.apply();
-		minecraft.displayGuiScreen(prev);
+		mc.displayGuiScreen(prev);
 	}
 	
 	private void notifyClose() {
@@ -94,16 +95,16 @@ public class CompoundScreen extends ListScreen
 		closeListener.run();
 	}
 	
-	private void goBack(Button button) {
+	private void goBack(GuiButton button) {
 		if(compound.isChanged()) {
-			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
+			mc.displayGuiScreen(new GuiYesNo((T, K) -> {
 				if(T) notifyClose();
-				minecraft.displayGuiScreen(T ? prev : this);				
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
+				mc.displayGuiScreen(T ? prev : this);				
+			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		notifyClose();
-		minecraft.displayGuiScreen(prev);
+		mc.displayGuiScreen(prev);
 	}
 	
 	@Override
@@ -123,9 +124,9 @@ public class CompoundScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		super.render(mouseX, mouseY, partialTicks);
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 8, -1);
+		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 8, -1);
 	}
 }

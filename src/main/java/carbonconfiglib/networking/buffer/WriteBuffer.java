@@ -85,7 +85,7 @@ public class WriteBuffer implements IWriteBuffer
 	
 	@Override
 	public void writeString(String value) {
-		buf.writeString(value, 32767);
+		buf.writeString(value);
 	}
 	
 	@Override

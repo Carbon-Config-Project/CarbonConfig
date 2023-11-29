@@ -1,14 +1,14 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = "http://files.minecraftforge.net/maven" }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
@@ -24,16 +24,9 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 
 
 minecraft {
-    mappings channel: 'snapshot', version: '20190719-1.14.3'
-    runs {
-        client {
-            workingDirectory project.file('run')
-        }
-
-        server {
-            workingDirectory project.file('run')
-        }
-    }
+    version = "1.12.2-14.23.0.2491"
+    runDir = "run"
+    mappings = "snapshot_20171003"
 }
 
 repositories {
@@ -46,8 +39,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.14.4-28.2.26'
-    compile ':Primitive Collections-0.8.9'
+//    compile ':Primitive Collections-0.8.9'
 }
 
 sourceSets {

@@ -4,7 +4,7 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -24,7 +24,7 @@ import net.minecraft.client.resources.I18n;
  */
 public class SelectionElement extends ConfigElement
 {
-	Button textBox = addChild(new CarbonButton(0, 0, 72, 18, I18n.format("gui.carbonconfig.edit"), this::onPress));
+	CarbonButton textBox = addChild(new CarbonButton(0, 0, 72, 18, I18n.format("gui.carbonconfig.edit"), this::onPress));
 	
 	public SelectionElement(IConfigNode node) {
 		super(node);
@@ -34,7 +34,7 @@ public class SelectionElement extends ConfigElement
 		super(node, value);
 	}
 	
-	private void onPress(Button button) {
+	private void onPress(GuiButton button) {
 		mc.displayGuiScreen(ListSelectionScreen.ofValue(mc.currentScreen, node, value, owner.getCustomTexture()));
 	}
 }

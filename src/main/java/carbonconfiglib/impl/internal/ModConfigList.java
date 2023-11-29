@@ -7,7 +7,7 @@ import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
-import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.common.ModContainer;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 public class ModConfigList implements IModConfigs
@@ -26,7 +26,7 @@ public class ModConfigList implements IModConfigs
 	
 	@Override
 	public String getModName() {
-		return container.getModInfo().getDisplayName();
+		return container.getName();
 	}
 	
 	@Override

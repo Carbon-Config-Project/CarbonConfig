@@ -6,16 +6,18 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.widgets.CarbonButton;
+import carbonconfiglib.gui.widgets.CarbonEditBox;
+import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -32,18 +34,19 @@ import net.minecraft.util.text.TranslationTextComponent;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class EditStringScreen extends Screen
+public class EditStringScreen extends CarbonScreen
 {
-	Screen parent;
+	ITextComponent title;
+	GuiScreen parent;
 	IConfigNode node;
 	IValueNode value;
-	TextFieldWidget textBox;
+	CarbonEditBox textBox;
 	boolean valid = true;
 	BackgroundHolder texture;
 	ParseResult<Boolean> result;
 
-	public EditStringScreen(Screen parent, ITextComponent name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
-		super(name);
+	public EditStringScreen(GuiScreen parent, ITextComponent name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
+		this.title = name;
 		this.parent = parent;
 		this.node = node;
 		this.value = value;
@@ -52,15 +55,15 @@ public class EditStringScreen extends Screen
 	}
 	
 	@Override
-	protected void init() {
-		super.init();
+	public void initGui() {
+		super.initGui();
 		int x = width / 2 - 100;
-		Button apply = addButton(new CarbonButton(x+10, 160, 85, 20, I18n.format("gui.carbonconfig.apply"), this::save));
-		addButton(new CarbonButton(x+105, 160, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
-		textBox = new TextFieldWidget(font, x, 113, 200, 18, "");
-		addButton(textBox);
+		GuiButton apply = addWidget(new CarbonButton(x+10, 160, 85, 20, I18n.format("gui.carbonconfig.apply"), this::save));
+		addWidget(new CarbonButton(x+105, 160, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
+		textBox = new CarbonEditBox(fontRenderer, x, 113, 200, 18);
+		addWidget(textBox);
 		textBox.setText(value.get());
-		textBox.func_212954_a(T -> {
+		textBox.setListener(T -> {
 			textBox.setTextColor(0xE0E0E0);
 			valid = true;
 			result = value.isValid(T);
@@ -68,44 +71,44 @@ public class EditStringScreen extends Screen
 				textBox.setTextColor(0xFF0000);
 				valid = false;
 			}
-			apply.active = valid;
+			apply.enabled = valid;
 			if(valid) value.set(textBox.getText());
 		});
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
 		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
-		super.render(mouseX, mouseY, partialTicks);
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 85, -1);
+		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderTooltip(new ObjectArrayList<>(font.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY, font);
+			drawHoveringText(new ObjectArrayList<>(fontRenderer.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY);
 		}
 	}
 	
 	@Override
 	public void onClose() {
 		value.setPrevious();
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 	
-	private void save(Button button) {
+	private void save(GuiButton button) {
 		if(!valid) return;
 		value.apply();
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 	
-	private void cancel(Button button) {
+	private void cancel(GuiButton button) {
 		if(value.isChanged()) {
-			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
+			mc.displayGuiScreen(new GuiYesNo((T, k) -> {
 				if(T) value.setPrevious();
-				minecraft.displayGuiScreen(T ? parent : this);
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
+				mc.displayGuiScreen(T ? parent : this);
+			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		value.setPrevious();
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 }

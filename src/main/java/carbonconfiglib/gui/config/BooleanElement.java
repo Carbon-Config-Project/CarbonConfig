@@ -4,7 +4,7 @@ import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -24,8 +24,8 @@ import net.minecraft.client.resources.I18n;
  */
 public class BooleanElement extends ConfigElement
 {
-	private Button trueButton;
-	private Button falseButton;
+	private CarbonButton trueButton;
+	private CarbonButton falseButton;
 	
 	public BooleanElement(IConfigNode node, IValueNode value) {
 		super(node, value);
@@ -46,8 +46,8 @@ public class BooleanElement extends ConfigElement
 	
 	private void updateData() {
 		boolean isTrue = Boolean.parseBoolean(value.get());
-		trueButton.active = !isTrue;
-		falseButton.active = isTrue;		
+		trueButton.enabled = !isTrue;
+		falseButton.enabled = isTrue;		
 	}
 	
 	@Override
@@ -56,11 +56,11 @@ public class BooleanElement extends ConfigElement
 		updateData();
 	}
 	
-	protected void onTrue(Button button) {
+	protected void onTrue(GuiButton button) {
 		value.set("true");
 	}
 	
-	protected void onFalse(Button button) {
+	protected void onFalse(GuiButton button) {
 		value.set("false");
 	}
 }

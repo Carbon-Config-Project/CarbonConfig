@@ -6,11 +6,11 @@ import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.networking.ICarbonPacket;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -52,13 +52,13 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
+	public void process(EntityPlayer player) {
 		processClient();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	private void processClient() {
-		Screen screen = Minecraft.getInstance().currentScreen;
+		GuiScreen screen = Minecraft.getMinecraft().currentScreen;
 		if(screen instanceof IRequestScreen) {
 			((IRequestScreen)screen).receiveConfigData(id, new PacketBuffer(Unpooled.wrappedBuffer(data)));
 		}

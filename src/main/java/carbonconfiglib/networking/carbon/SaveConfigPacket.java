@@ -4,11 +4,11 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.networking.ICarbonPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -40,8 +40,8 @@ public class SaveConfigPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeString(identifier, 32767);
-		buffer.writeString(data, 262144);
+		buffer.writeString(identifier);
+		buffer.writeString(data);
 	}
 	
 	@Override
@@ -51,8 +51,8 @@ public class SaveConfigPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
+	public void process(EntityPlayer player) {
+		if(!canIgnorePermissionCheck() && !hasPermissions(player, 4)) {
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;
 		}
@@ -70,8 +70,14 @@ public class SaveConfigPacket implements ICarbonPacket
 		}
 	}
 	
+	private boolean hasPermissions(EntityPlayer player, int value) {
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		return server.getPlayerList().getOppedPlayers().getPermissionLevel(player.getGameProfile()) >= value;
+	}
+	
+	
 	private boolean canIgnorePermissionCheck() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 	

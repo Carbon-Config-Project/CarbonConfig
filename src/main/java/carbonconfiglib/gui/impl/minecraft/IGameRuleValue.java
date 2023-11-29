@@ -1,12 +1,9 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.world.GameRules.BooleanValue;
-import net.minecraft.world.GameRules.IntegerValue;
-import net.minecraft.world.GameRules.RuleKey;
+import net.minecraft.world.GameRules;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -32,51 +29,59 @@ public interface IGameRuleValue
 	public String getDescriptionId();
 	public DataType getType();
 	
-	public static IGameRuleValue bool(RuleKey<BooleanValue> key, BooleanValue value) {
-		return new BooleanEntry(key, value);
+	public static IGameRuleValue bool(String key, GameRules rules) {
+		return new BooleanEntry(key, rules);
 	}
 	
-	public static IGameRuleValue ints(RuleKey<IntegerValue> key, IntegerValue value) {
-		return new IntegerEntry(key, value);
+	public static IGameRuleValue ints(String key, GameRules rules) {
+		return new IntegerEntry(key, rules);
 	}
 	
 	public static class BooleanEntry implements IGameRuleValue {
-		RuleKey<BooleanValue> key;
-		BooleanValue value;
+		String key;
+		boolean value;
+		GameRules rules;
 		
-		private BooleanEntry(RuleKey<BooleanValue> key, BooleanValue value) {
+		private BooleanEntry(String key, GameRules rules) {
 			this.key = key;
-			this.value = value;
+			this.value = rules.getBoolean(key);
+			this.rules = rules;
 		}
 		
 		@Override
-		public void set(String value) { this.value.set(Boolean.valueOf(value), null); }
+		public void set(String value) {
+			this.value = Boolean.parseBoolean(value);
+			this.rules.setOrCreateGameRule(key, Boolean.toString(this.value));
+		}
 		@Override
 		public ParseResult<Boolean> isValid(String value) { return ParseResult.success(true); }
 		@Override
-		public String get() { return String.valueOf(value.get()); }
+		public String get() { return Boolean.toString(this.value); }
 		@Override
 		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getBoolean(key)); }
 		@Override
-		public String getDescriptionId() { return "gamerule."+key.func_223576_a(); }
+		public String getDescriptionId() { return "gamerule."+key; }
 		@Override
 		public DataType getType() { return DataType.BOOLEAN; }
 	}
 	
 	public static class IntegerEntry implements IGameRuleValue {
-		RuleKey<IntegerValue> key;
-		IntegerValue value;
+		String key;
+		int value;
+		GameRules rules;
 		
-		private IntegerEntry(RuleKey<IntegerValue> key, IntegerValue value) {
+		private IntegerEntry(String key, GameRules rules) {
 			this.key = key;
-			this.value = value;
+			this.value = rules.getInt(key);
+			this.rules = rules;
 		}
 		
 		@Override
 		public void set(String value) {
 			ParseResult<Integer> result = Helpers.parseInt(value);
 			if(result.isValid()) {
-				Reflects.setRuleValue(IntegerValue.class, this.value, result.getValue().toString());
+				this.value = result.getValue();
+				rules.setOrCreateGameRule(key, Integer.toString(this.value));
 			}
 		}
 		
@@ -87,11 +92,11 @@ public interface IGameRuleValue
 		}
 		
 		@Override
-		public String get() { return String.valueOf(value.get()); }
+		public String get() { return Integer.toString(this.value); }
 		@Override
 		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getInt(key)); }
 		@Override
-		public String getDescriptionId() { return "gamerule."+key.func_223576_a(); }
+		public String getDescriptionId() { return "gamerule."+key; }
 		@Override
 		public DataType getType() { return DataType.INTEGER; }
 	}

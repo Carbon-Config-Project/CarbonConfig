@@ -1,6 +1,6 @@
 package carbonconfiglib.networking;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 
 /**
@@ -23,5 +23,5 @@ public interface ICarbonPacket
 	public void write(PacketBuffer buffer);
 	public void read(PacketBuffer buffer);
 	
-	public void process(PlayerEntity player);
+	public void process(EntityPlayer player);
 }

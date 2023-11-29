@@ -4,12 +4,13 @@ import java.util.List;
 
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.GuiUtils;
+import carbonconfiglib.gui.widgets.screen.AbstractScrollList;
+import carbonconfiglib.gui.widgets.screen.IInteractable;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.widget.list.AbstractOptionList;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -27,8 +28,8 @@ import net.minecraft.util.text.TextFormatting;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Element extends AbstractOptionList.Entry<Element> {
-	protected Minecraft mc = Minecraft.getInstance();
+public class Element extends AbstractScrollList.ContainerEntry<Element> {
+	protected Minecraft mc = Minecraft.getMinecraft();
 	protected FontRenderer font = mc.fontRenderer;
 	protected ITextComponent name;
 	protected ITextComponent unchanged;
@@ -41,13 +42,13 @@ public class Element extends AbstractOptionList.Entry<Element> {
 	}
 	
 	public String getName() {
-		return name.getString();
+		return name.getFormattedText();
 	}
 	
 	public void setName(ITextComponent newName) {
 		this.name = newName;
-		this.unchanged = name.deepCopy().applyTextStyle(TextFormatting.GRAY);
-		this.changed = name.deepCopy().applyTextStyle(TextFormatting.ITALIC);
+		this.unchanged = name.createCopy().setStyle(new Style().setColor(TextFormatting.GRAY));
+		this.changed = name.createCopy().setStyle(new Style().setColor(TextFormatting.ITALIC));
 	}
 		
 	public void updateValues() {
@@ -80,7 +81,7 @@ public class Element extends AbstractOptionList.Entry<Element> {
 	}
 	
 	@Override
-	public List<? extends IGuiEventListener> children() {
+	public List<? extends IInteractable> children() {
 		return ObjectLists.emptyList();
 	}
 }

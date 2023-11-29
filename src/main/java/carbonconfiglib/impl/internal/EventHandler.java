@@ -1,6 +1,5 @@
 package carbonconfiglib.impl.internal;
 
-import java.util.List;
 import java.util.Map;
 
 import carbonconfiglib.CarbonConfig;
@@ -11,11 +10,9 @@ import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.config.ColorElement;
 import carbonconfiglib.gui.config.RegistryElement;
-import carbonconfiglib.gui.impl.forge.ForgeConfigs;
-import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screen.ConfigSelectorScreen;
 import carbonconfiglib.gui.widgets.SuggestionRenderers;
-import carbonconfiglib.impl.PerWorldProxy;
+import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
@@ -24,32 +21,24 @@ import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.utils.SyncType;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.potion.Effect;
+import net.minecraft.potion.Potion;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedInEvent;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.ServerTickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ExtensionPoint;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.mclanguageprovider.MinecraftModLanguageProvider.MinecraftModContainer;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import speiger.src.collections.objects.lists.ObjectArrayList;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
-import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -74,12 +63,12 @@ public class EventHandler implements IConfigChangeListener
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
 		initMinecraftDataTypes(config);
-		if(FMLEnvironment.dist.isDedicatedServer()) return;
-		ModLoadingContext context = ModLoadingContext.get();
-		if("minecraft".equals(context.getActiveNamespace())) {
+		if(FMLCommonHandler.instance().getSide() == Side.SERVER) return;
+		ModContainer container = Loader.instance().activeModContainer();
+		if(container == null) {
 			throw new IllegalStateException("Mod Configs Must be created (not loaded) during a Mod Loading Phase");
 		}
-		configs.computeIfAbsent(context.getActiveContainer(), ModConfigs::new).addConfig(config);
+		configs.computeIfAbsent(container, ModConfigs::new).addConfig(config);
 	}
 	
 	public void initMinecraftDataTypes(ConfigHandler config) {
@@ -94,12 +83,12 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Override
 	public void onConfigChanged(ConfigHandler config) {
-		if(FMLEnvironment.dist.isDedicatedServer()) {
+		if(FMLCommonHandler.instance().getSide() == Side.SERVER) {
 			SyncPacket packet = SyncPacket.create(config, SyncType.SERVER_TO_CLIENT, false);
 			if(packet != null) CarbonConfig.NETWORK.sendToAllPlayers(packet);
 			return;
 		}
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server != null) {
 			SyncPacket packet = SyncPacket.create(config, SyncType.SERVER_TO_CLIENT, false);
 			if(packet != null) CarbonConfig.NETWORK.sendToAllPlayers(packet);
@@ -115,65 +104,74 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	@SubscribeEvent
-	@OnlyIn(Dist.DEDICATED_SERVER)
+	@SideOnly(Side.CLIENT)
 	public void onServerTickEvent(ServerTickEvent event) {
 		if(event.phase == Phase.END) processEvents();
 	}
 	
 	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public void onClientTickEvent(ClientTickEvent event) {
-		if(event.phase == Phase.END) processEvents();		
+		if(event.phase == Phase.END) processEvents();
+		else {
+			GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+			if(screen instanceof CarbonScreen) {
+				((CarbonScreen)screen).tick();
+			}
+		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public void onConfigsLoaded() {
 		loadDefaultTypes();
-		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
-		configs.forEach((M, C) -> {
-			if(M.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) return;
-			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
-		});
-		if(CarbonConfig.FORGE_SUPPORT.get()) {
-			ModList.get().forEachModContainer((K, T)-> {
-				if(!T.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) {
-					ForgeConfigs configs = new ForgeConfigs(T);
-					if(configs.hasConfigs()) {
-						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
-					}
-					else if(T instanceof MinecraftModContainer) {
-						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
-					}
-				};
-			});
-		}
-		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (E, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C))));
+//		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
+//		configs.forEach((M, C) -> {
+//			if(M.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) return;
+//			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
+//		});
+//		if(CarbonConfig.FORGE_SUPPORT.get()) {
+//			for(ModContainer container : Loader.instance().getModList()) {
+//				
+//			}
+//			ModList.get().forEachModContainer((K, T)-> {
+//				if(!T.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) {
+//					ForgeConfigs configs = new ForgeConfigs(T);
+//					if(configs.hasConfigs()) {
+//						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
+//					}
+//					else if(T instanceof MinecraftModContainer) {
+//						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
+//					}
+//				};
+//			});
+//		}
+//		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (E, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C))));
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	private void loadDefaultTypes() {
 		ISuggestionRenderer.Registry.register(Item.class, new SuggestionRenderers.ItemEntry());
 		ISuggestionRenderer.Registry.register(Block.class, new SuggestionRenderers.ItemEntry());
 		ISuggestionRenderer.Registry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
 		ISuggestionRenderer.Registry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
 		ISuggestionRenderer.Registry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
-		ISuggestionRenderer.Registry.register(Effect.class, new SuggestionRenderers.PotionEntry());
+		ISuggestionRenderer.Registry.register(Potion.class, new SuggestionRenderers.PotionEntry());
 		
 		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
 		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
-		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:empty"));
+		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:water"));
 		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
-		DataType.registerType(Effect.class, RegistryElement.createForType(Effect.class, "minecraft:luck"));
+		DataType.registerType(Potion.class, RegistryElement.createForType(Potion.class, "minecraft:luck"));
 		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new));
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	private Screen create(Screen screen, IModConfigs configs) {	
+	@SideOnly(Side.CLIENT)
+	private GuiScreen create(GuiScreen screen, IModConfigs configs) {	
 		return new ConfigSelectorScreen(configs, screen);
 	}
 	
-	public void onServerJoinPacket(PlayerEntity player) {
-		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Dist.DEDICATED_SERVER), player);
+	public void onServerJoinPacket(EntityPlayer player) {
+		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Side.SERVER), player);
 		CarbonConfig.NETWORK.onPlayerJoined(player, true);
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);
 		if(packet == null) return;
@@ -182,38 +180,38 @@ public class EventHandler implements IConfigChangeListener
 	
 	@SubscribeEvent
 	public void onServerLeaveEvent(PlayerLoggedOutEvent event) {
-		CarbonConfig.NETWORK.onPlayerLeft(event.getPlayer(), true);		
+		CarbonConfig.NETWORK.onPlayerLeft(event.player, true);		
 	}
 	
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerJoinEvent(LoggedInEvent event) {
-		if(Minecraft.getInstance().getIntegratedServer() != null) loadMPConfigs();
-		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Dist.CLIENT));
-		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
-		if(packet == null) return;
-		CarbonConfig.NETWORK.sendToServer(packet);
-	}
-	
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerJoinEvent(LoggedOutEvent event) {
-		if(Minecraft.getInstance().getIntegratedServer() != null) {
-			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
-				if(PerWorldProxy.isProxy(handler.getProxy())) {
-					handler.unload();
-				}
-			}
-		}
-	}
-	
-	private void loadMPConfigs() {
-		for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
-			if(PerWorldProxy.isProxy(handler.getProxy())) {
-				handler.load();
-			}
-		}
-	}
+//	@SubscribeEvent
+//	@SideOnly(Side.CLIENT)
+//	public void onPlayerServerJoinEvent(LoggedInEvent event) {
+//		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
+//		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Side.CLIENT));
+//		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
+//		if(packet == null) return;
+//		CarbonConfig.NETWORK.sendToServer(packet);
+//	}
+//	
+//	@SubscribeEvent
+//	@SideOnly(Side.CLIENT)
+//	public void onPlayerServerJoinEvent(LoggedOutEvent event) {
+//		if(Minecraft.getMinecraft().getIntegratedServer() != null) {
+//			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
+//				if(PerWorldProxy.isProxy(handler.getProxy())) {
+//					handler.unload();
+//				}
+//			}
+//		}
+//	}
+//	
+//	private void loadMPConfigs() {
+//		for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
+//			if(PerWorldProxy.isProxy(handler.getProxy())) {
+//				handler.load();
+//			}
+//		}
+//	}
 	
 	private void processEvents() {
 		CarbonConfig.CONFIGS.processFileSystemEvents();

@@ -2,7 +2,7 @@ package carbonconfiglib.impl;
 
 import carbonconfiglib.api.IReloadMode;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,8 +21,8 @@ import net.minecraft.util.text.TranslationTextComponent;
  */
 public enum ReloadMode implements IReloadMode
 {
-	WORLD(new TranslationTextComponent("gui.carbonconfig.reload.sync")),
-	GAME(new TranslationTextComponent("gui.carbonconfig.restart.sync"));
+	WORLD(new TextComponentTranslation("gui.carbonconfig.reload.sync")),
+	GAME(new TextComponentTranslation("gui.carbonconfig.restart.sync"));
 	
 	ITextComponent message;
 	
@@ -30,7 +30,7 @@ public enum ReloadMode implements IReloadMode
 		this.message = message;
 	}
 	
-	public ITextComponent getMessage() {
+	public ITextComponent getName() {
 		return message;
 	}
 	

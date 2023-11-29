@@ -6,7 +6,7 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ArrayScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -26,7 +26,7 @@ import net.minecraft.client.resources.I18n;
  */
 public class ArrayElement extends ConfigElement
 {
-	Button textBox = addChild(new CarbonButton(0, 0, 72, 18, I18n.format("gui.carbonconfig.edit"), this::onPress));
+	GuiButton textBox = addChild(new CarbonButton(0, 0, 72, 18, I18n.format("gui.carbonconfig.edit"), this::onPress));
 	IArrayNode array;
 	
 	public ArrayElement(IConfigNode node) {
@@ -34,7 +34,7 @@ public class ArrayElement extends ConfigElement
 		array = node.asArray();
 	}
 	
-	private void onPress(Button button) {
+	private void onPress(GuiButton button) {
 		mc.displayGuiScreen(new ArrayScreen(node, mc.currentScreen, owner.getCustomTexture()));
 	}
 	

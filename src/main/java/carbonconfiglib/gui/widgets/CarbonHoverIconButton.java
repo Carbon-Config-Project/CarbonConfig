@@ -2,9 +2,10 @@ package carbonconfiglib.gui.widgets;
 
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
-import net.minecraft.client.gui.widget.button.AbstractButton;
+import carbonconfiglib.gui.widgets.screen.IWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,14 +22,14 @@ import net.minecraft.client.gui.widget.button.AbstractButton;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonHoverIconButton extends AbstractButton
+public class CarbonHoverIconButton extends GuiButton implements IWidget
 {
 	Consumer<CarbonHoverIconButton> listener;
 	Icon[] icons;
 	IconInfo info;
 	
 	public CarbonHoverIconButton(int x, int y, int width, int height, IconInfo info, Icon basicIcon, Icon hoverIcon, Consumer<CarbonHoverIconButton> listener) {
-		super(x, y, width, height, "");
+		super(0, x, y, width, height, "");	
 		this.listener = listener;
 		this.icons = new Icon[2];
 		icons[0] = basicIcon;
@@ -39,20 +40,40 @@ public class CarbonHoverIconButton extends AbstractButton
 	public CarbonHoverIconButton setIconOnly() {
 		return this;
 	}
-	
+		
 	@Override
-	public void renderButton(int mouseX, int mouseY, float p_93679_) {
-		int j = getFGColor();
-        GlStateManager.color4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(x + info.xOff, y + info.yOff, info.width, info.height, icons[isHovered() ? 1 : 0], 16, 16);
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
+	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		this.hovered = mousePressed(mc, mouseX, mouseY);
+		int j = this.enabled ? 16777215 : 10526880;
+        GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+		GuiUtils.drawTextureRegion(x + info.xOff, y + info.yOff, info.width, info.height, icons[hovered ? 1 : 0], 16, 16);
+		GlStateManager.color(1F, 1F, 1F, 1F);
 	}
 	
 	@Override
-	public void onPress() {
-		if(listener == null) return;
-		listener.accept(this);
+	public boolean mouseClick(double mouseX, double mouseY, int button) {
+		if(this.enabled && this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
+			playPressSound(Minecraft.getMinecraft().getSoundHandler());
+			if(listener != null) listener.accept(this);
+			return true;
+		}
+		return false;
 	}
+	
+	@Override
+	public void setX(int x) { this.x = x; }
+	@Override
+	public void setY(int y) { this.y = y; }
+	@Override
+	public int getX() { return x; }
+	@Override
+	public int getY() { return y; }
+	@Override
+	public int getWidgetWidth() { return width; }
+	@Override
+	public int getWidgetHeight() { return height; }
+	@Override
+	public boolean isHovered() { return hovered; }
 	
 	public static class IconInfo {
 		int xOff;

@@ -8,7 +8,7 @@ import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.SyncType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 
 /**
@@ -65,13 +65,13 @@ public class BulkSyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
+	public void process(EntityPlayer player) {
 		ReloadMode result = null;
 		for(SyncPacket packet : packets) {
 			result = ReloadMode.or(result, packet.processEntry(player));
 		}
 		if(result != null) {
-			player.sendMessage(result.getMessage());
+			player.sendMessage(result.getName());
 		}
 	}
 	

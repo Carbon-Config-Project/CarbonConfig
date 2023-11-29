@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.impl.minecraft;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -21,20 +22,15 @@ import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.GameRules.BooleanValue;
-import net.minecraft.world.GameRules.IRuleEntryVisitor;
-import net.minecraft.world.GameRules.IntegerValue;
-import net.minecraft.world.GameRules.RuleKey;
-import net.minecraft.world.GameRules.RuleType;
-import net.minecraft.world.GameRules.RuleValue;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.GameRules.ValueType;
+import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldSummary;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
@@ -57,15 +53,15 @@ import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 public class MinecraftConfig implements IModConfig
 {
 	public static final GameRules DEFAULTS = new GameRules();
-	private static final Map<RuleKey<?>, Category> CATEOGIRES = createCategories();
+	private static final Map<String, Category> CATEOGIRES = createCategories();
 	protected GameRules current;
 	List<IGameRuleValue> values = new ObjectArrayList<>();
 	Map<Category, List<IGameRuleValue>> keys = new Object2ObjectLinkedOpenHashMap<>();
 	
 	public MinecraftConfig() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
-		setRules(server.getGameRules());
+		setRules(server.getWorld(0).getWorldInfo().getGameRulesInstance());
 	}
 	
 	protected MinecraftConfig(GameRules current) {
@@ -79,22 +75,17 @@ public class MinecraftConfig implements IModConfig
 	
 	
 	private void collect() {
-		GameRules.func_223590_a(new IRuleEntryVisitor() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public <T extends RuleValue<T>> void func_223481_a(RuleKey<T> key, RuleType<T> type) {
-				T value = current.get(key);
-				if(value instanceof BooleanValue) {
-					add(key, IGameRuleValue.bool((RuleKey<BooleanValue>)key, (BooleanValue)value));
-				}
-				else if(value instanceof IntegerValue) {
-					add(key, IGameRuleValue.ints((RuleKey<IntegerValue>)key, (IntegerValue)value));
-				}
+		for(String key : current.getRules()) {
+			if(current.areSameType(key, ValueType.BOOLEAN_VALUE)) {
+				add(key, IGameRuleValue.bool(key, current));
 			}
-		});
+			else if(current.areSameType(key, ValueType.NUMERICAL_VALUE)) {
+				add(key, IGameRuleValue.ints(key, current));				
+			}
+		}
 	}
 	
-	private void add(RuleKey<?> key, IGameRuleValue value) {
+	private void add(String key, IGameRuleValue value) {
 		keys.computeIfAbsent(CATEOGIRES.getOrDefault(key, Category.MODDED), T -> new ObjectArrayList<>()).add(value);
 		values.add(value);
 	}
@@ -121,7 +112,7 @@ public class MinecraftConfig implements IModConfig
 	
 	@Override
 	public boolean isLocalConfig() {
-		return ServerLifecycleHooks.getCurrentServer() != null;
+		return FMLCommonHandler.instance().getMinecraftServerInstance() != null;
 	}
 	
 	@Override
@@ -151,7 +142,7 @@ public class MinecraftConfig implements IModConfig
 	
 	@Override
 	public List<IConfigTarget> getPotentialFiles() {
-		SaveFormat storage = Minecraft.getInstance().getSaveLoader();
+		ISaveFormat storage = Minecraft.getMinecraft().getSaveLoader();
 		List<IConfigTarget> folders = new ObjectArrayList<>();
 		try {
 			for(WorldSummary sum : storage.getSaveList()) {
@@ -186,22 +177,22 @@ public class MinecraftConfig implements IModConfig
 	@Override
 	public void save() {
 		if(current == null) return;
-		current.read(current.write());
+		current.readFromNBT(current.writeToNBT());
 	}
 	
-	public static Map<RuleKey<?>, Category> createCategories() {
-		EnumMap<Category, RuleKey<?>[]> keys = new EnumMap<>(Category.class);
-		keys.put(Category.CHAT, new RuleKey[]{ GameRules.ANNOUNCE_ADVANCEMENTS, GameRules.LOG_ADMIN_COMMANDS, GameRules.COMMAND_BLOCK_OUTPUT, GameRules.SEND_COMMAND_FEEDBACK, GameRules.SHOW_DEATH_MESSAGES });
-		keys.put(Category.DROPS, new RuleKey[]{ GameRules.DO_TILE_DROPS, GameRules.DO_ENTITY_DROPS, GameRules.DO_MOB_LOOT });
-		keys.put(Category.MISC, new RuleKey[]{ GameRules.MAX_COMMAND_CHAIN_LENGTH, GameRules.REDUCED_DEBUG_INFO });
-		keys.put(Category.MOBS, new RuleKey[]{ GameRules.MOB_GRIEFING, GameRules.DISABLE_RAIDS, GameRules.MAX_ENTITY_CRAMMING });
-		keys.put(Category.PLAYER, new RuleKey[]{ GameRules.SPECTATORS_GENERATE_CHUNKS, GameRules.DISABLE_ELYTRA_MOVEMENT_CHECK, GameRules.KEEP_INVENTORY, GameRules.NATURAL_REGENERATION, GameRules.SPAWN_RADIUS });
-		keys.put(Category.SPAWNING, new RuleKey[]{ GameRules.DO_MOB_SPAWNING});
-		keys.put(Category.WORLD, new RuleKey[]{ GameRules.DO_DAYLIGHT_CYCLE, GameRules.RANDOM_TICK_SPEED, GameRules.DO_FIRE_TICK, GameRules.DO_WEATHER_CYCLE });
-		Map<RuleKey<?>, Category> result = new Object2ObjectOpenHashMap<>();
-		for(Entry<Category, RuleKey<?>[]> entry : keys.entrySet()) {
+	public static Map<String, Category> createCategories() {
+		EnumMap<Category, String[]> keys = new EnumMap<>(Category.class);
+		keys.put(Category.CHAT, new String[]{ "announceAdvancements", "logAdminCommands", "commandBlockOutput", "sendCommandFeedback", "showDeathMessages" });
+		keys.put(Category.DROPS, new String[]{ "doTileDrops", "doEntityDrops", "doMobLoot" });
+		keys.put(Category.MISC, new String[]{ "maxCommandChainLength", "reducedDebugInfo" });
+		keys.put(Category.MOBS, new String[]{ "mobGriefing", "maxEntityCramming" });
+		keys.put(Category.PLAYER, new String[]{ "spectatorsGenerateChunks", "disableElytraMovementCheck", "keepInventory", "naturalRegeneration", "spawnRadius", "doLimitedCrafting" });
+		keys.put(Category.SPAWNING, new String[]{ "doMobSpawning" });
+		keys.put(Category.WORLD, new String[]{ "doDaylightCycle", "randomTickSpeed", "doFireTick", "doWeatherCycle" });
+		Map<String, Category> result = new Object2ObjectOpenHashMap<>();
+		for(Entry<Category, String[]> entry : keys.entrySet()) {
 			Category key = entry.getKey();
-			for(RuleKey<?> value : entry.getValue()) {
+			for(String value : entry.getValue()) {
 				result.put(value, key);
 			}
 		}
@@ -231,23 +222,23 @@ public class MinecraftConfig implements IModConfig
 	
 	public static class FileConfig extends MinecraftConfig {
 		Path file;
-		CompoundNBT tag;
+		NBTTagCompound tag;
 		
-		public FileConfig(Path file, CompoundNBT tag) { 
-			super(parse(tag.getCompound("Data").getCompound("GameRules")));
+		public FileConfig(Path file, NBTTagCompound tag) { 
+			super(parse(tag.getCompoundTag("Data").getCompoundTag("GameRules")));
 			this.file = file;
 			this.tag = tag;
 		}
 		
-		private static GameRules parse(CompoundNBT tag) {
+		private static GameRules parse(NBTTagCompound tag) {
 			GameRules rules = new GameRules();
-			rules.read(tag);;
+			rules.readFromNBT(tag);;
 			return rules;
 		}
 		
 		@Override
 		public void save() {
-			tag.getCompound("Data").put("GameRules", current.write());
+			tag.getCompoundTag("Data").setTag("GameRules", current.writeToNBT());
 			try(OutputStream stream = Files.newOutputStream(file)) {
 				CompressedStreamTools.writeCompressed(tag, stream);
 			}
@@ -266,8 +257,14 @@ public class MinecraftConfig implements IModConfig
 		
 		@Override
 		public boolean test(PacketBuffer buffer) {
-			setRules(FileConfig.parse(buffer.readCompoundTag()));
-			return true;
+			try {
+				setRules(FileConfig.parse(buffer.readCompoundTag()));
+				return true;
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+				return false;
+			}
 		}
 	}
 }

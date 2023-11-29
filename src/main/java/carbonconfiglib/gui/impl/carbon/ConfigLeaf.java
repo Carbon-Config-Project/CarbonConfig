@@ -15,8 +15,9 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.impl.ReloadMode;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -111,14 +112,14 @@ public class ConfigLeaf implements IConfigNode
 	public ITextComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
 	@Override
 	public ITextComponent getTooltip() {
-		TextComponent comp = new StringTextComponent("");
-		comp.appendSibling(new StringTextComponent(entry.getKey()).applyTextStyle(TextFormatting.YELLOW));
+		TextComponentBase comp = new TextComponentString("");
+		comp.appendSibling(new TextComponentString(entry.getKey()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 		String[] array = entry.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).applyTextStyle(TextFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
 		}
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) comp.appendText("\n").appendSibling(new StringTextComponent(limit).applyTextStyle(TextFormatting.BLUE));
+		if(!Strings.isBlank(limit)) comp.appendText("\n").appendSibling(new TextComponentString(limit).setStyle(new Style().setColor(TextFormatting.BLUE)));
 		return comp;
 	}
 }

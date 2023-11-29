@@ -7,10 +7,10 @@ import carbonconfiglib.gui.screen.EditStringScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -30,7 +30,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class StringElement extends ConfigElement
 {
-	TextFieldWidget edit;
+	CarbonEditBox edit;
 	ParseResult<Boolean> result;
 	
 	public StringElement(IConfigNode node, IValueNode value) {
@@ -48,7 +48,7 @@ public class StringElement extends ConfigElement
 		if(this.isArray()) {
 			edit = addChild(new CarbonEditBox(font, 0, 0, 150, 18), GuiAlign.CENTER, 0);
 			edit.setText(value.get());
-			edit.func_212954_a(T -> {
+			edit.setListener(T -> {
 				edit.setTextColor(0xE0E0E0);
 				result = null;
 				if(!T.isEmpty() && !(result = value.isValid(T)).getValue()) {
@@ -75,7 +75,7 @@ public class StringElement extends ConfigElement
 	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).applyTextStyle(TextFormatting.RED));			
+			owner.addTooltips(new TextComponentString(result.getError().getMessage()).setStyle(new Style().setColor(TextFormatting.RED)));			
 		}
 	}
 	
@@ -86,7 +86,7 @@ public class StringElement extends ConfigElement
 		}
 	}
 	
-	private void onPress(Button button) {
+	private void onPress(GuiButton button) {
 		mc.displayGuiScreen(new EditStringScreen(mc.currentScreen, name, node, value, owner.getCustomTexture()));
 	}
 }

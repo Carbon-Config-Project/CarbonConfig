@@ -4,7 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.input.Keyboard;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.Config;
@@ -32,21 +32,20 @@ import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.gui.GuiModList;
+import net.minecraftforge.fml.client.GuiModList;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
@@ -64,11 +63,11 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod("carbonconfig")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.12]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();
-	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
+	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), Loader.instance().getConfigDir().toPath(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	public static BooleanSupplier MOD_GUI = () -> false;
 	ConfigHandler handler;
@@ -77,16 +76,12 @@ public class CarbonConfig
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
 	
-	public CarbonConfig()
+	public void onPreInit(FMLPreInitializationEvent event)
 	{
 		NETWORK.init();
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonLoad);
-		MinecraftForge.EVENT_BUS.addListener(this::load);
-		MinecraftForge.EVENT_BUS.addListener(this::unload);
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
-		if(FMLEnvironment.dist.isClient()) {
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
-			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
+		if(FMLCommonHandler.instance().getSide().isClient()) {
+			MinecraftForge.EVENT_BUS.register(this);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
@@ -163,7 +158,7 @@ public class CarbonConfig
 	 * @param path of the folders that should be traversed
 	 * @implNote you can't go into CompoundObjects
 	 */
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public static void openRemoteConfigFolder(IModConfig config, String...path) {
 		openRemoteConfigFolder(config, BackgroundTexture.DEFAULT, path);
 	}
@@ -177,9 +172,9 @@ public class CarbonConfig
 	 * @param path of the folders that should be traversed
 	 * @implNote you can't go into CompoundObjects
 	 */
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public static void openRemoteConfigFolder(IModConfig config, BackgroundTexture texture, String...path) {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server != null) {
 			openLocalConfigFolder(config, texture, path);
 			return;
@@ -188,12 +183,12 @@ public class CarbonConfig
 			CarbonConfig.LOGGER.info("Tried to open a local config in the Remote Opener");
 			return;
 		}
-		Minecraft mc = Minecraft.getInstance();
+		Minecraft mc = Minecraft.getMinecraft();
 		if(mc.player == null) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
 			return;
 		}
-		else if(!mc.player.hasPermissionLevel(4)) {
+		else if(mc.player.getPermissionLevel() < 4) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");			
 			return;
 		}
@@ -208,7 +203,7 @@ public class CarbonConfig
 	 * @param path of the folders that should be traversed
 	 * @implNote you can't go into CompoundObjects
 	 */
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public static void openLocalConfigFolder(IModConfig config, String...path) {
 		openLocalConfigFolder(config, BackgroundTexture.DEFAULT, path);
 	}
@@ -222,40 +217,46 @@ public class CarbonConfig
 	 * @param path of the folders that should be traversed
 	 * @implNote you can't go into CompoundObjects
 	 */
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public static void openLocalConfigFolder(IModConfig config, BackgroundTexture texture, String...path) {
 		if(!config.isLocalConfig()) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config in the Local Opener");
 			return;
 		}
-		Minecraft mc = Minecraft.getInstance();
+		Minecraft mc = Minecraft.getMinecraft();
 		mc.displayGuiScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.currentScreen, texture.asHolder()));
 	}
 	
-	public void onCommonLoad(FMLCommonSetupEvent event) {
+	@net.minecraftforge.fml.common.Mod.EventHandler
+	public void onCommonLoad(FMLPostInitializationEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.createDefaultConfig();
 			}
 		}
+		if(FMLCommonHandler.instance().getSide().isClient()) {
+			onClientLoad();
+		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void onClientLoad(FMLClientSetupEvent event) {
+	@SideOnly(Side.CLIENT)
+	public void onClientLoad() {
 		EventHandler.INSTANCE.onConfigsLoaded();
-		KeyBinding mapping = new KeyBinding("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
+		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPADENTER, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
 		MOD_GUI = mapping::isKeyDown;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void onKeyPressed(KeyInputEvent event) {
-		Minecraft mc = Minecraft.getInstance();
-		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
+		Minecraft mc = Minecraft.getMinecraft();
+		if(mc.player != null && MOD_GUI.getAsBoolean()) {
 			mc.displayGuiScreen(new GuiModList(mc.currentScreen));
 		}
 	}
 	
+	@net.minecraftforge.fml.common.Mod.EventHandler
 	public void load(FMLServerAboutToStartEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
@@ -264,6 +265,7 @@ public class CarbonConfig
 		}
 	}
 	
+	@net.minecraftforge.fml.common.Mod.EventHandler
 	public void unload(FMLServerStoppingEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {

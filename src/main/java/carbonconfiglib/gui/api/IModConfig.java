@@ -10,12 +10,10 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy.IPotentialTarget;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.impl.carbon.ModConfig;
-import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.storage.WorldSummary;
-import net.minecraftforge.fml.ModList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -50,11 +48,6 @@ public interface IModConfig
 	
 	public static IModConfig carbon(String modId, ConfigHandler handler) {
 		return new ModConfig(modId, handler);
-	}
-	
-	public static IModConfig forge(String modId, ConfigType type) {
-		List<IModConfig> config = new ForgeConfigs(ModList.get().getModContainerById(modId).orElse(null)).getConfigInstances(type);
-		return config == null || config.isEmpty() ? null : config.get(0);
 	}
 	
 	public static IModConfig minecraft() {

@@ -16,13 +16,14 @@ import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.IOwnable;
 import carbonconfiglib.gui.widgets.Icon;
+import carbonconfiglib.gui.widgets.screen.IInteractable;
+import carbonconfiglib.gui.widgets.screen.IWidget;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -41,14 +42,14 @@ import net.minecraft.util.text.TranslationTextComponent;
  */
 public class ConfigElement extends Element
 {
-	private static final ITextComponent DELETE = new TranslationTextComponent("gui.carbonconfig.delete");
-	private static final ITextComponent REVERT = new TranslationTextComponent("gui.carbonconfig.revert");
-	private static final ITextComponent DEFAULT = new TranslationTextComponent("gui.carbonconfig.default");
-	private static final ITextComponent SUGGESTIONS = new TranslationTextComponent("gui.carbonconfig.suggestions");
-	private static final ITextComponent RELOAD = new TranslationTextComponent("gui.carbonconfig.reload").applyTextStyle(TextFormatting.YELLOW);
-	private static final ITextComponent RESTART = new TranslationTextComponent("gui.carbonconfig.restart").applyTextStyle(TextFormatting.YELLOW);
-	protected List<IGuiEventListener> listeners = new ObjectArrayList<>();
-	protected List<Map.Entry<Widget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
+	private static final ITextComponent DELETE = new TextComponentTranslation("gui.carbonconfig.delete");
+	private static final ITextComponent REVERT = new TextComponentTranslation("gui.carbonconfig.revert");
+	private static final ITextComponent DEFAULT = new TextComponentTranslation("gui.carbonconfig.default");
+	private static final ITextComponent SUGGESTIONS = new TextComponentTranslation("gui.carbonconfig.suggestions");
+	private static final ITextComponent RELOAD = new TextComponentTranslation("gui.carbonconfig.reload").setStyle(new Style().setColor(TextFormatting.YELLOW));
+	private static final ITextComponent RESTART = new TextComponentTranslation("gui.carbonconfig.restart").setStyle(new Style().setColor(TextFormatting.YELLOW));
+	protected List<IInteractable> listeners = new ObjectArrayList<>();
+	protected List<Map.Entry<IWidget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
 	protected IValueNode value;
 	protected IArrayNode array;
@@ -86,15 +87,15 @@ public class ConfigElement extends Element
 		this.value = array.asValue(index);
 	}
 	
-	protected <T extends Widget> T addChild(T element) {
+	protected <T extends IWidget> T addChild(T element) {
 		return addChild(element, GuiAlign.RIGHT, 0);
 	}
 	
-	protected <T extends Widget> T addChild(T element, int xOffset) {
+	protected <T extends IWidget> T addChild(T element, int xOffset) {
 		return addChild(element, GuiAlign.RIGHT, xOffset);
 	}
 	
-	protected <T extends Widget> T addChild(T element, GuiAlign align, int xOffset) {
+	protected <T extends IWidget> T addChild(T element, GuiAlign align, int xOffset) {
 		listeners.add(element);
 		mappedListeners.add(new AbstractMap.SimpleEntry<>(element, new AlignOffset(align, -xOffset - 19)));
 		if(owner != null && element instanceof IOwnable) {
@@ -109,7 +110,7 @@ public class ConfigElement extends Element
 		if(createResetButtons(value)) {
 			if(isArray()) {
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, "", this::onDeleted).setIconOnly(), -31);
-				setReset.active = isReset();
+				setReset.enabled = isReset();
 				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN, Icon.MOVE_DOWN_HOVERED, this::onMoveDown);
 				listeners.add(moveDown);
 				moveUp = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_UP, Icon.MOVE_UP_HOVERED, this::onMoveUp);
@@ -119,13 +120,13 @@ public class ConfigElement extends Element
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.REVERT, "", this::onReset).setIconOnly(), -21);
 				setDefault = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SET_DEFAULT, "", this::onDefault).setIconOnly(), -40);
 				suggestion = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.SUGGESTIONS, "", this::onSuggestion).setIconOnly(), -59);
-				setReset.active = isReset();
-				setDefault.active = !isDefault();
+				setReset.enabled = isReset();
+				setDefault.enabled = !isDefault();
 				suggestion.visible = false;
 			}
 		}
 		if(owner != null) {
-			for(IGuiEventListener entry : listeners) {
+			for(IInteractable entry : listeners) {
 				if(entry instanceof IOwnable) {
 					((IOwnable)entry).setOwner(owner);
 				}
@@ -137,10 +138,10 @@ public class ConfigElement extends Element
 	public void tick() {
 		super.tick();
 		if(setReset != null) {
-			setReset.active = isReset();
+			setReset.enabled = isReset();
 		}
 		if(setDefault != null) {
-			setDefault.active = !isDefault();
+			setDefault.enabled = !isDefault();
 		}
 	}
 	
@@ -169,27 +170,27 @@ public class ConfigElement extends Element
 				moveUp.x = left + width - 16;
 				moveUp.y = top;
 				moveUp.visible = canMoveUp();
-				moveUp.render(mouseX, mouseY, partialTicks);
+				moveUp.render(mc, mouseX, mouseY, partialTicks);
 				moveDown.x = left + width - 16;
 				moveDown.y = top + 10;
 				moveDown.visible = canMoveDown();
-				moveDown.render(mouseX, mouseY, partialTicks);
+				moveDown.render(mc, mouseX, mouseY, partialTicks);
 				if(moveDown.visible || moveUp.visible) {
 					left -= 8;
 				}
 			}
-			for(Map.Entry<Widget, AlignOffset> entry : mappedListeners) {
-				Widget widget = entry.getKey();
+			for(Map.Entry<IWidget, AlignOffset> entry : mappedListeners) {
+				IWidget widget = entry.getKey();
 				AlignOffset offset = entry.getValue();
-				widget.x = offset.align.align(left, width, widget.getWidth()) + offset.offset;
-				widget.y = top;
-				widget.render(mouseX, mouseY, partialTicks);
-				maxX = Math.min(maxX, widget.x);
+				widget.setX(offset.align.align(left, width, widget.getWidgetWidth()) + offset.offset);
+				widget.setY(top);
+				widget.render(mc, mouseX, mouseY, partialTicks);
+				maxX = Math.min(maxX, widget.getX());
 			}
 		}
 		maxX = getMaxX(maxX);
 		if(isArray()) {
-			ITextComponent comp = new StringTextComponent(indexOf()+":");
+			ITextComponent comp = new TextComponentString(indexOf()+":");
 			renderText(comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
@@ -326,7 +327,7 @@ public class ConfigElement extends Element
 	}
 	
 	@Override
-	public List<? extends IGuiEventListener> children() {
+	public List<? extends IInteractable> children() {
 		return listeners;
 	}
 	

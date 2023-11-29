@@ -5,7 +5,8 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -41,7 +42,7 @@ public class NumberElement extends ConfigElement
 		super.init();
 		textBox = addChild(new CarbonEditBox(font, 0, 0, isArray() ? 150 : 70, 18), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, 1);
 		textBox.setText(value.get());
-		textBox.func_212954_a(T -> {
+		textBox.setListener(T -> {
 			textBox.setTextColor(0xE0E0E0);
 			result = null;
 			if(!T.isEmpty()) {
@@ -66,7 +67,7 @@ public class NumberElement extends ConfigElement
 	{
 		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).applyTextStyle(TextFormatting.RED));
+			owner.addTooltips(new TextComponentString(result.getError().getMessage()).setStyle(new Style().setColor(TextFormatting.RED)));
 		}
 	}
 	

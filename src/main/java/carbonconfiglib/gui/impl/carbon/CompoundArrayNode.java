@@ -18,7 +18,7 @@ import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponentString;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -276,7 +276,7 @@ public class CompoundArrayNode implements IArrayNode
 		
 		@Override
 		public ITextComponent getName(int index) {
-			return new StringTextComponent(names[index]);
+			return new TextComponentString(names[index]);
 		}
 
 		@Override

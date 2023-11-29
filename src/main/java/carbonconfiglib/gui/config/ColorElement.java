@@ -5,8 +5,9 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -42,7 +43,7 @@ public class ColorElement extends ConfigElement
 		super.init();
 		textBox = addChild(new CarbonEditBox(font, 0, 0, isArray() ? 130 : 52, 18).setInnerDiff(4), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, 1);
 		textBox.setText(value.get());
-		textBox.func_212954_a(T -> {
+		textBox.setListener(T -> {
 			textBox.setTextColor(0xE0E0E0);
 			result = null;
 			if(!T.isEmpty()) {
@@ -67,16 +68,16 @@ public class ColorElement extends ConfigElement
 	{
 		super.render(x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(isArray()) {
-			AbstractGui.fill(left+186, top-1, left+203, top+19, 0xFFA0A0A0);
-			AbstractGui.fill(left+187, top, left+202, top+18, Integer.decode(value.get()) | 0xFF000000);
+			Gui.drawRect(left+186, top-1, left+203, top+19, 0xFFA0A0A0);
+			Gui.drawRect(left+187, top, left+202, top+18, Integer.decode(value.get()) | 0xFF000000);
 		}
 		else {
 			int xOff = isCompound() ? 106 : 186;
-			AbstractGui.fill(left+xOff, top-1, left+xOff+17, top+19, 0xFFA0A0A0);
-			AbstractGui.fill(left+xOff+1, top, left+xOff+16, top+18, Integer.decode(value.get()) | 0xFF000000);
+			Gui.drawRect(left+xOff, top-1, left+xOff+17, top+19, 0xFFA0A0A0);
+			Gui.drawRect(left+xOff+1, top, left+xOff+16, top+18, Integer.decode(value.get()) | 0xFF000000);
 		}
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).applyTextStyle(TextFormatting.RED));
+			owner.addTooltips(new TextComponentString(result.getError().getMessage()).setStyle(new Style().setColor(TextFormatting.RED)));
 		}
 	}
 	

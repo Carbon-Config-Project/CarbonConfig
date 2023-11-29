@@ -1,7 +1,7 @@
 package carbonconfiglib.gui.config;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.minecraft.client.gui.widget.Widget;
+import carbonconfiglib.gui.widgets.CarbonEditBox;
 import net.minecraft.util.text.ITextComponent;
 
 /**
@@ -25,8 +25,8 @@ public interface IListOwner
 	public boolean isInsideList(double mouseX, double mouseY);
 	public BackgroundHolder getCustomTexture();
 	
-	public boolean isActiveWidget(Widget widget);
-	public void setActiveWidget(Widget widget);
+	public boolean isActiveWidget(CarbonEditBox widget);
+	public void setActiveWidget(CarbonEditBox widget);
 	
 	public void updateInformation();
 	public void removeEntry(Element element);

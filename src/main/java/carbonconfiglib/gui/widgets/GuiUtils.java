@@ -5,18 +5,15 @@ import java.util.Deque;
 
 import org.lwjgl.opengl.GL11;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
-import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -43,10 +40,10 @@ public class GuiUtils
 		int textWidth = font.getStringWidth(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
-			double timer = (Util.milliTime() + seed) / 1000D;
+			double timer = (milliTime() + seed) / 1000D;
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
-			return (float)MathHelper.lerp(offset, 0D, diff);
+			return (float)lerp(offset, 0D, diff);
 		}
 		return 0;
 	}
@@ -55,32 +52,40 @@ public class GuiUtils
 		int textWidth = font.getStringWidth(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
-			double timer = (Util.milliTime() + seed) / 1000D;
+			double timer = (milliTime() + seed) / 1000D;
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.drawString(text, x - align.align(width) + align.align(textWidth) + (float)MathHelper.lerp(offset, 0D, diff), y + (height / 2) - (font.FONT_HEIGHT / 3), color);
+			font.drawString(text, x - align.align(width) + align.align(textWidth) + (float)lerp(offset, 0D, diff), y + (height / 2) - (font.FONT_HEIGHT / 3), color, false);
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.drawString(text, x - align.align(width) + offset, y + (height / 2) - (font.FONT_HEIGHT / 3), color);
+		font.drawString(text, x - align.align(width) + offset, y + (height / 2) - (font.FONT_HEIGHT / 3), color, false);
 	}
 	
 	public static void drawScrollingShadowString(FontRenderer font, String text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.getStringWidth(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
-			double timer = (Util.milliTime() + seed) / 1000D;
+			double timer = (milliTime() + seed) / 1000D;
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.drawStringWithShadow(text, x - align.align(width) + align.align(textWidth) + (float)MathHelper.lerp(offset, 0D, diff), y + (height / 2) - (font.FONT_HEIGHT / 3), color);
+			font.drawStringWithShadow(text, x - align.align(width) + align.align(textWidth) + (float)lerp(offset, 0D, diff), y + (height / 2) - (font.FONT_HEIGHT / 3), color);
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
 		font.drawStringWithShadow(text, x - align.align(width) + offset, y + (height / 2) - (font.FONT_HEIGHT / 3), color);
+	}
+	
+	private static long milliTime() {
+		return System.nanoTime() / 1000000L;
+	}
+	
+	private static double lerp(double value, double min, double max) {
+		return min + value * (max - min);
 	}
 	
 	public static void pushScissors(int x, int y, int width, int height) {
@@ -101,16 +106,17 @@ public class GuiUtils
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			return;
 		}
-		MainWindow window = Minecraft.getInstance().mainWindow;
+		Minecraft mc = Minecraft.getMinecraft();
+		ScaledResolution res = new ScaledResolution(mc);
 		int bottom = rect.maxY;
-		double scaledHeight = (double)window.getHeight() / (double)window.getScaledHeight();
-		double scaledWidth = (double)window.getWidth() / (double)window.getScaledWidth();
+		double scaledHeight = (double)mc.displayHeight / (double)res.getScaledHeight_double();
+		double scaledWidth = (double)mc.displayWidth / (double)res.getScaledWidth_double();
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
-		GL11.glScissor((int)(rect.getX() * scaledWidth), (int)(window.getHeight() - bottom * scaledHeight), (int)(rect.getWidth() * scaledWidth), (int)(rect.getHeigth() * scaledHeight));
+		GL11.glScissor((int)(rect.getX() * scaledWidth), (int)(mc.displayHeight - bottom * scaledHeight), (int)(rect.getWidth() * scaledWidth), (int)(rect.getHeigth() * scaledHeight));
 	}
 	
 	public static void drawTextureWithBorder(ResourceLocation res, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel) {
-		Minecraft.getInstance().getTextureManager().bindTexture(res);
+		Minecraft.getMinecraft().getTextureManager().bindTexture(res);
 		drawTexture(x, y, u, v, width, height, textureWidth, textureHeight, topBorder, bottomBorder, leftBorder, rightBorder, zLevel);
 	}
 	
@@ -119,7 +125,7 @@ public class GuiUtils
 		BufferBuilder builder = tessellator.getBuffer();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		
 		int fillerWidth = textureWidth - leftBorder - rightBorder;
 		int fillerHeight = textureHeight - topBorder - bottomBorder;
@@ -157,12 +163,12 @@ public class GuiUtils
 	}
 	
 	public static void drawTextureRegion(float x, float y, float width, float height, Icon icon, float texWidth, float texHeight) {
-		Minecraft.getInstance().getTextureManager().bindTexture(icon.getTexture());
+		Minecraft.getMinecraft().getTextureManager().bindTexture(icon.getTexture());
 		drawTextureRegion(x, y, icon.getX(), icon.getY(), width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
 	}
 	
 	public static void drawTextureRegion(float x, float y, int xOff, int yOff, float width, float height, Icon icon, float texWidth, float texHeight) {
-		Minecraft.getInstance().getTextureManager().bindTexture(icon.getTexture());
+		Minecraft.getMinecraft().getTextureManager().bindTexture(icon.getTexture());
 		drawTextureRegion(x, y, icon.getX() + xOff, icon.getY() + yOff, width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
 	}
     
@@ -183,7 +189,7 @@ public class GuiUtils
 		bufferbuilder.pos(x, y, 0).tex(t_minX, t_minY).endVertex();
 		
         GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		tessellator.draw();
 		GlStateManager.disableBlend();
 	}

@@ -2,9 +2,8 @@ package carbonconfiglib.impl.internal;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import com.electronwill.nightconfig.core.UnmodifiableConfig;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.ConfigHandler;
@@ -14,9 +13,10 @@ import carbonconfiglib.gui.api.BackgroundTexture.Builder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.impl.carbon.ModConfig;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -43,18 +43,18 @@ public class ModConfigs implements IModConfigs
 	}
 	
 	public static ModConfigs of() {
-		return new ModConfigs(ModLoadingContext.get().getActiveContainer());
+		return new ModConfigs(Loader.instance().activeModContainer());
 	}
 	
 	public static ModConfigs of(ConfigHandler handler) {
-		ModConfigs configs = new ModConfigs(ModLoadingContext.get().getActiveContainer());
+		ModConfigs configs = new ModConfigs(Loader.instance().activeModContainer());
 		configs.addConfig(handler);
 		return configs;
 	}
 	
 	@Override
 	public String getModName() {
-		return container.getModInfo().getDisplayName();
+		return container.getName();
 	}
 	
 	public void addConfig(ConfigHandler config) {
@@ -73,30 +73,30 @@ public class ModConfigs implements IModConfigs
 
 	@Override
 	public BackgroundHolder getBackground() {
-		Optional<BackgroundTexture> texture = container.getCustomExtension(IModConfigs.BACKGROUND);
-		if(texture.isPresent()) return texture.get().asHolder();
+		BackgroundTexture texture = IModConfigs.TEXTURE_REGISTRY.get(container);
+		if(texture != null) return texture.asHolder();
 		return computeTexture(container).orElse(BackgroundTexture.DEFAULT).asHolder();
 	}
 	
 	public static Optional<BackgroundTexture> computeTexture(ModContainer container) {
-		Object obj = container.getModInfo().getModProperties().get("guiconfig");;
-		if(obj instanceof UnmodifiableConfig) {
-			UnmodifiableConfig config = (UnmodifiableConfig)obj;
-			if(config != null) {
-				if(config.contains("texture")) {
-					Builder builder = BackgroundTexture.of((String)config.get("texture"));
-					if(config.contains("brightness")) builder.withBrightness(Integer.parseInt(config.get("brightness")));
-					return Optional.of(builder.build());
-				}
-				if(config.contains("background")) {
-					Builder builder = BackgroundTexture.of((String)config.get("background"));
-					if(config.contains("foreground")) builder.withForeground((String)config.get("foreground"));
-					if(config.contains("brightness")) builder.withBrightness(Integer.parseInt(config.get("brightness")));
-					if(config.contains("background_brightness")) builder.withBackground(Integer.parseInt(config.get("background_brightness")));
-					if(config.contains("foreground_brightness")) builder.withForeground(Integer.parseInt(config.get("foreground_brightness")));
-					return Optional.of(builder.build());
-				}
-			}
+		String[] values = container.getCustomModProperties().get("guiconfig").split(";");
+		if(values.length < 2) return Optional.empty();
+		Map<String, String> arguments = new Object2ObjectOpenHashMap<>();
+		for(int i = 0,m=values.length;i+1<m;i+=2) {
+			arguments.put(values[i], values[i+1]);
+		}
+		if(arguments.containsKey("texture")) {
+			Builder builder = BackgroundTexture.of(arguments.get("texture"));
+			if(arguments.containsKey("brightness")) builder.withBrightness(Integer.parseInt(arguments.get("brightness")));
+			return Optional.of(builder.build());
+		}
+		if(arguments.containsKey("background")) {
+			Builder builder = BackgroundTexture.of(arguments.get("background"));
+			if(arguments.containsKey("foreground")) builder.withForeground(arguments.get("foreground"));
+			if(arguments.containsKey("brightness")) builder.withBrightness(Integer.parseInt(arguments.get("brightness")));
+			if(arguments.containsKey("background_brightness")) builder.withBackground(Integer.parseInt(arguments.get("background_brightness")));
+			if(arguments.containsKey("foreground_brightness")) builder.withForeground(Integer.parseInt(arguments.get("foreground_brightness")));
+			return Optional.of(builder.build());
 		}
 		return Optional.empty();
 	}

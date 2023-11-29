@@ -4,7 +4,7 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.screen.ConfigScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -23,17 +23,17 @@ import net.minecraft.client.gui.widget.button.Button;
  */
 public class FolderElement extends ConfigElement
 {
-	Button button = addChild(new CarbonButton(0, 0, 0, 18, "", this::onPress));
+	CarbonButton button = addChild(new CarbonButton(0, 0, 0, 18, "", this::onPress));
 	Navigator nav;
 	
 	public FolderElement(IConfigNode node, Navigator prev)
 	{
 		super(node);
-		button.setMessage(node.getName().getFormattedText());
+		button.displayString = node.getName().getFormattedText();
 		nav = prev.add(node.getName(), node.getNodeName());
 	}
 	
-	public void onPress(Button button) {
+	public void onPress(GuiButton button) {
 		mc.displayGuiScreen(new ConfigScreen(nav, node, mc.currentScreen, owner.getCustomTexture()));
 	}
 	
@@ -42,6 +42,6 @@ public class FolderElement extends ConfigElement
 		button.x = left;
 		button.y = top;
 		button.setWidth(width);
-		button.render(mouseX, mouseY, partialTicks);
+		button.render(mc, mouseX, mouseY, partialTicks);
 	}
 }

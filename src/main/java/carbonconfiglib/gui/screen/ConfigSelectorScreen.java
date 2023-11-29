@@ -17,16 +17,17 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
+import carbonconfiglib.gui.widgets.screen.IInteractable;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -46,62 +47,62 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class ConfigSelectorScreen extends ListScreen
 {
 	IModConfigs configs;
-	Screen parent;
+	GuiScreen parent;
 	ITextComponent modName;
 	Label toAdd;
 	
-	public ConfigSelectorScreen(IModConfigs configs, Screen parent) {
+	public ConfigSelectorScreen(IModConfigs configs, GuiScreen parent) {
 		this(configs, configs.getBackground(), parent);
 	}
 	
-	public ConfigSelectorScreen(IModConfigs configs, BackgroundHolder customTexture, Screen parent) {
-		super(new TranslationTextComponent("gui.carbonconfig.select_config"), customTexture);
+	public ConfigSelectorScreen(IModConfigs configs, BackgroundHolder customTexture, GuiScreen parent) {
+		super(new TextComponentTranslation("gui.carbonconfig.select_config"), customTexture);
 		this.configs = configs;
 		this.parent = parent;
-		modName = new StringTextComponent(configs.getModName());
+		modName = new TextComponentString(configs.getModName());
 	}
 	
 	@Override
-	protected void init() {
-		super.init();
+	public void initGui() {
+		super.initGui();
 		int x = width / 2;
 		int y = height;
-		addButton(new CarbonButton(x-80, y-27, 160, 20, I18n.format("gui.carbonconfig.back"), T -> onClose()));
+		addWidget(new CarbonButton(x-80, y-27, 160, 20, I18n.format("gui.carbonconfig.back"), T -> onClose()));
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		super.render(mouseX, mouseY, partialTicks);
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		String modName = this.modName.getFormattedText();
-		font.drawString(modName, (width/2)-(font.getStringWidth(modName)/2), 8, -1);
+		fontRenderer.drawString(modName, (width/2)-(fontRenderer.getStringWidth(modName)/2), 8, -1);
 	}
 	
 	@Override
 	protected void collectElements(Consumer<Element> elements) {
-		toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.local").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
+		toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.local").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
 		toAdd = null;
-		if(minecraft.world != null) {
-			if(!minecraft.isIntegratedServerRunning()) {
+		if(mc.world != null) {
+			if(!mc.isIntegratedServerRunning()) {
 				if(!isInstalledOnServer()) {
 					return;
 				}
 				if(isLanServer()) {
 					return;
 				}
-				if(!minecraft.player.hasPermissionLevel(4)) {
+				if(mc.player.getPermissionLevel() < 4) {
 					return;
 				}
-				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.multiplayer").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
+				toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.multiplayer").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}
 			else  {
-				toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
+				toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.world").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
 			}
 		}
 		else {
-			toAdd = new Label(new TranslationTextComponent("gui.carbonconfig.configs.world").applyTextStyles(TextFormatting.GOLD, TextFormatting.BOLD));
+			toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.world").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
 		}
 		addConfigs(ConfigType.SERVER, true, elements);
 		toAdd = null;
@@ -119,7 +120,7 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	@Override
 	public void onClose() {
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 	
 	private boolean isInstalledOnServer() {
@@ -127,7 +128,7 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	private boolean isLanServer() {
-		ServerData data = minecraft.getCurrentServerData();
+		ServerData data = mc.getCurrentServerData();
 		return data != null && data.isOnLAN();
 	}
 	
@@ -148,10 +149,10 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	public static class DirectConfig extends Element {
-		List<IGuiEventListener> children = new ObjectArrayList<>();
-		Screen parent;
+		List<IInteractable> children = new ObjectArrayList<>();
+		GuiScreen parent;
 		IModConfig handler;
-		Button button;
+		CarbonButton button;
 		CarbonIconButton reset;
 		boolean multi;
 		boolean multiplayer;
@@ -160,8 +161,8 @@ public class ConfigSelectorScreen extends ListScreen
 		ITextComponent fileName;
 		ITextComponent baseName;
 		
-		public DirectConfig(IModConfig handler, ITextComponent baseName, Screen parent, boolean multiplayer) {
-			super(new StringTextComponent(handler.getFileName()));
+		public DirectConfig(IModConfig handler, ITextComponent baseName, GuiScreen parent, boolean multiplayer) {
+			super(new TextComponentString(handler.getFileName()));
 			nav = new Navigator(baseName);
 			nav.setScreenForLayer(parent);
 			this.handler = handler;
@@ -180,23 +181,23 @@ public class ConfigSelectorScreen extends ListScreen
 			else {
 				button = new CarbonButton(0, 0, 60, 20, I18n.format("gui.carbonconfig.modify"), this::onEdit);
 				reset = new CarbonIconButton(0, 0, 20, 20, Icon.REVERT, "", this::reset).setIconOnly();
-				reset.active = !handler.isDefault() && !isInWorldConfig();
+				reset.enabled = !handler.isDefault() && !isInWorldConfig();
 				children.add(button);
 				children.add(reset);
 			}
-			type = new TranslationTextComponent("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
-			fileName = new StringTextComponent(handler.getFileName()).applyTextStyle(TextFormatting.GRAY);
+			type = new TextComponentTranslation("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
+			fileName = new TextComponentString(handler.getFileName()).setStyle(new Style().setColor(TextFormatting.GRAY));
 		}
 		
 		@Override
 		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.x = left+width-82;
 			button.y = top + 2;
-			button.render(mouseX, mouseY, partialTicks);
+			button.render(mc, mouseX, mouseY, partialTicks);
 			if(reset != null) {
 				reset.x = left+width-20;
 				reset.y = top + 2;
-				reset.render(mouseX, mouseY, partialTicks);
+				reset.render(mc, mouseX, mouseY, partialTicks);
 			}
 			GuiUtils.drawScrollingString(font, type.getFormattedText(), left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawScrollingString(font, fileName.getFormattedText(), left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
@@ -204,7 +205,7 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public List<? extends IGuiEventListener> children() {
+		public List<? extends IInteractable> children() {
 			return children;
 		}
 		
@@ -220,17 +221,17 @@ public class ConfigSelectorScreen extends ListScreen
 			return (multi ? Icon.MULTITYPE_ICON : Icon.TYPE_ICON).get(handler.getConfigType());
 		}
 		
-		private void onPick(Button button) {
+		private void onPick(GuiButton button) {
 			mc.displayGuiScreen(new SelectFileScreen(baseName, owner.getCustomTexture(), parent, handler));
 		}
 		
 		private void reset(CarbonIconButton button) {
 			handler.restoreDefault();
 			handler.save();
-			reset.active = !handler.isDefault();
+			reset.enabled = !handler.isDefault();
 		}
 		
-		private void onEdit(Button button) {
+		private void onEdit(GuiButton button) {
 			if(isInWorldConfig() && !mc.isIntegratedServerRunning()) mc.displayGuiScreen(new RequestScreen(owner.getCustomTexture(), nav.add(type), parent, handler));
 			else mc.displayGuiScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
 		}

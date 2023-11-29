@@ -13,7 +13,7 @@ import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponentString;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -64,7 +64,7 @@ public class CompoundNode implements ICompoundNode, ICompoundProvider
 	
 	@Override
 	public ITextComponent getName(int index) {
-		return new StringTextComponent(names[index]);
+		return new TextComponentString(names[index]);
 	}
 	
 	@Override

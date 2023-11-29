@@ -80,7 +80,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		String[] values = Helpers.splitArray(value, ",");
 		Set<ResourceLocation> result = new ObjectLinkedOpenHashSet<>();
 		for(int i = 0,m=values.length;i<m;i++) {
-			ResourceLocation location = ResourceLocation.tryCreate(values[i]);
+			ResourceLocation location = new ResourceLocation(values[i]);
 			if(location == null || (filter != null && !filter.test(location))) continue;
 			result.add(location);
 		}
@@ -120,7 +120,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	public ParseResult<Boolean> canSetArray(List<String> entries) {
 		if(entries == null) return ParseResult.partial(false, NullPointerException::new, "Value isn't allowed to be null");
 		for(int i = 0,m=entries.size();i<m;i++) {
-			ResourceLocation result = ResourceLocation.tryCreate(entries.get(i));
+			ResourceLocation result = new ResourceLocation(entries.get(i));
 			if(result == null || !registry.containsKey(result)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entries.get(i)+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(result)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entries.get(i)+"] isn't allowed");
 		}
@@ -165,7 +165,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		Set<ResourceLocation> result = new ObjectLinkedOpenHashSet<>();
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
-			ResourceLocation entry = ResourceLocation.tryCreate(buffer.readString());
+			ResourceLocation entry = new ResourceLocation(buffer.readString());
 			if(entry != null) {
 				result.add(entry);
 			}

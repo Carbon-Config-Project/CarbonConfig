@@ -1,8 +1,13 @@
 package carbonconfiglib.gui.widgets;
 
+import java.util.function.Consumer;
+
 import carbonconfiglib.gui.config.IListOwner;
+import carbonconfiglib.gui.widgets.screen.IWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
+import net.minecraft.client.gui.GuiTextField;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -19,18 +24,30 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonEditBox extends TextFieldWidget implements IOwnable
+public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponder, IWidget
 {
 	IListOwner owner;
 	boolean bordered = true;
 	int innerDiff = 8;
+	Consumer<String> listener;
+	boolean hovered;
 	
 	public CarbonEditBox(FontRenderer font, int x, int y, int width, int height) {
-		super(font, x, y, width, height, "");
+		super(0, font, x, y, width, height);
 	}
 	
 	public CarbonEditBox setInnerDiff(int innerDiff) {
 		this.innerDiff = innerDiff;
+		return this;
+	}
+	
+	public CarbonEditBox setListener(Consumer<String> listener) {
+		this.listener = listener;
+		return this;
+	}
+	
+	public CarbonEditBox setSuggestion(String value) {
+		//TODO implement me?
 		return this;
 	}
 	
@@ -39,15 +56,15 @@ public class CarbonEditBox extends TextFieldWidget implements IOwnable
 	}
 	
 	@Override
-	public void setFocused2(boolean focus) {
-		super.setFocused2(focus);
+	public void setFocused(boolean focus) {
+		super.setFocused(focus);
 		if(focus && owner != null) {
 			owner.setActiveWidget(this);
 		}
 	}
 	
 	@Override
-	public int getAdjustedWidth() {
+	public int getWidth() {
 		return bordered ? this.width - innerDiff : this.width;
 	}
 	
@@ -58,10 +75,56 @@ public class CarbonEditBox extends TextFieldWidget implements IOwnable
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
+	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		hovered = this.getVisible() && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+		drawTextBox();
+	}
+	
+	@Override
+	public void drawTextBox() {
 		if(this.isFocused() && owner != null && !owner.isActiveWidget(this)) {
 			setFocused(false);
 		}
-		super.render(mouseX, mouseY, partialTicks);
+		super.drawTextBox();
 	}
+	
+	public void tick() {
+		updateCursorCounter();
+	}
+	
+	@Override
+	public boolean mouseClick(double mouseX, double mouseY, int button) {
+		return mouseClicked((int)mouseX, (int)mouseY, button);
+	}
+	
+	@Override
+	public boolean charTyped(char character, int keyCode) {
+		return textboxKeyTyped(character, keyCode);
+	}
+	
+	@Override
+	public void setEntryValue(int id, boolean value) {}
+	@Override
+	public void setEntryValue(int id, float value) {}
+	@Override
+	public void setEntryValue(int id, String value) {
+		if(listener != null) {
+			listener.accept(value);
+		}
+	}
+	
+	@Override
+	public void setX(int x) { this.x = x; }
+	@Override
+	public void setY(int y) { this.y = y; }
+	@Override
+	public int getX() { return x; }
+	@Override
+	public int getY() { return y; }
+	@Override
+	public int getWidgetWidth() { return width; }
+	@Override
+	public int getWidgetHeight() { return height; }
+	@Override
+	public boolean isHovered() { return hovered; }
 }

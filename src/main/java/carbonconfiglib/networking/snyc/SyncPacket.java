@@ -16,7 +16,7 @@ import carbonconfiglib.utils.SyncType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 
 /**
@@ -90,14 +90,14 @@ public class SyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
+	public void process(EntityPlayer player) {
 		ReloadMode mode = processEntry(player);
 		if(mode != null) {
-			player.sendMessage(mode.getMessage());
+			player.sendMessage(mode.getName());
 		}
 	}
 	
-	public ReloadMode processEntry(PlayerEntity player) {
+	public ReloadMode processEntry(EntityPlayer player) {
 		if(entries.isEmpty()) return null;
 		ConfigHandler cfg = CarbonConfig.CONFIGS.getConfig(identifier);
 		if(cfg == null) {

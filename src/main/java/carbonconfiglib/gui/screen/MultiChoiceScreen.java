@@ -3,8 +3,10 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.lwjgl.input.Keyboard;
+
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.screen.Screen;
+import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 
@@ -23,8 +25,9 @@ import net.minecraft.util.text.ITextComponent;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class MultiChoiceScreen extends Screen
+public class MultiChoiceScreen extends CarbonScreen
 {
+	protected ITextComponent title;
 	private final ITextComponent message;
 	protected ITextComponent mainButton;
 	protected ITextComponent otherButton;
@@ -37,7 +40,7 @@ public class MultiChoiceScreen extends Screen
 	}
 	
 	public MultiChoiceScreen(Consumer<Result> callback, ITextComponent title, ITextComponent message, ITextComponent mainButton, ITextComponent otherButton, ITextComponent cancelButton) {
-	      super(title);
+	      this.title = title;
 	      this.callback = callback;
 	      this.message = message;
 	      this.mainButton = mainButton;
@@ -46,30 +49,30 @@ public class MultiChoiceScreen extends Screen
 	}
 	
 	@Override
-	protected void init() {
-		super.init();
-		output = font.listFormattedStringToWidth(message.getFormattedText(), width-50);
+	public void initGui() {
+		super.initGui();
+		output = fontRenderer.listFormattedStringToWidth(message.getFormattedText(), width-50);
 		this.addButtons(MathHelper.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
 	}
 	
 	protected void addButtons(int y) {
 		boolean singleOption = otherButton == null && cancelButton == null;
-		addButton(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton.getFormattedText(), T -> callback.accept(Result.MAIN)));
+		addWidget(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton.getFormattedText(), T -> callback.accept(Result.MAIN)));
 		if(singleOption) return;
-		addButton(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton.getFormattedText(), T -> callback.accept(Result.OTHER)));
-		addButton(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton.getFormattedText(), T -> callback.accept(Result.CANCEL)));
+		addWidget(new CarbonButton(this.width / 2 - 50, y, 100, 20, this.otherButton.getFormattedText(), T -> callback.accept(Result.OTHER)));
+		addWidget(new CarbonButton(this.width / 2 - 50 + 105, y, 100, 20, this.cancelButton.getFormattedText(), T -> callback.accept(Result.CANCEL)));
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
-		this.renderBackground();
-		drawCenteredString(this.font, this.title.getFormattedText(), this.width / 2, this.titleTop(), 16777215);
+	public void drawScreen(int mouseX, int mouseY, float partialTicks){
+		drawDefaultBackground();
+		drawCenteredString(this.fontRenderer, this.title.getFormattedText(), this.width / 2, this.titleTop(), 16777215);
 		int yOffset = messageTop();
 		for(String s : output) {
-			drawCenteredString(this.font, s, this.width / 2, yOffset, 16777215);
+			drawCenteredString(this.fontRenderer, s, this.width / 2, yOffset, 16777215);
 			yOffset += 9;
 		}
-		super.render(mouseX, mouseY, partialTicks);
+		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 	
 	private int titleTop() {
@@ -85,18 +88,12 @@ public class MultiChoiceScreen extends Screen
 		return output.size() * 9;
 	}
 	
-	@Override
-	public boolean shouldCloseOnEsc() {
-		return false;
-	}
-	
-	@Override
-	public boolean keyPressed(int mouseButton, int mouseX, int mouseY){
-		if(mouseButton == 256) {
+	public boolean charTyped(char character, int keyCode) {
+		if(keyCode == Keyboard.KEY_ESCAPE) {
 			this.callback.accept(Result.CANCEL);
-			return true;
+			return true;			
 		}
-		return super.keyPressed(mouseButton, mouseX, mouseY);
+		return super.charTyped(character, keyCode);
 	}
 	
 	public static enum Result {

@@ -7,9 +7,9 @@ import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -29,7 +29,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class RegistryElement extends ConfigElement
 {
-	TextFieldWidget edit;
+	CarbonEditBox edit;
 	ParseResult<Boolean> result;
 	ISuggestionRenderer renderer;
 	
@@ -54,7 +54,7 @@ public class RegistryElement extends ConfigElement
 		if(this.isArray()) {
 			edit = addChild(new CarbonEditBox(font, 0, 0, 130, 18), GuiAlign.CENTER, 0);
 			edit.setText(value.get());
-			edit.func_212954_a(T -> {
+			edit.setListener(T -> {
 				edit.setTextColor(0xE0E0E0);
 				result = null;
 				if(!T.isEmpty() && !(result = value.isValid(T)).getValue()) {
@@ -89,7 +89,7 @@ public class RegistryElement extends ConfigElement
 			}
 		}
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new StringTextComponent(result.getError().getMessage()).applyTextStyle(TextFormatting.RED));			
+			owner.addTooltips(new TextComponentString(result.getError().getMessage()).setStyle(new Style().setColor(TextFormatting.RED)));			
 		}
 		
 	}

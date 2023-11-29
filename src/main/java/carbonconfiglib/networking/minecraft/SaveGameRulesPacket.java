@@ -1,24 +1,15 @@
 package carbonconfiglib.networking.minecraft;
 
-import com.mojang.brigadier.context.CommandContextBuilder;
-import com.mojang.brigadier.context.ParsedArgument;
+import java.io.IOException;
 
 import carbonconfiglib.CarbonConfig;
-import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.ICarbonPacket;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.GameRules.BooleanValue;
-import net.minecraft.world.GameRules.IRuleEntryVisitor;
-import net.minecraft.world.GameRules.IntegerValue;
-import net.minecraft.world.GameRules.RuleKey;
-import net.minecraft.world.GameRules.RuleType;
-import net.minecraft.world.GameRules.RuleValue;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -46,44 +37,35 @@ public class SaveGameRulesPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeCompoundTag(rules.write());
+		buffer.writeCompoundTag(rules.writeToNBT());
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
 		rules = new GameRules();
-		rules.read(buffer.readCompoundTag());
+		try { rules.readFromNBT(buffer.readCompoundTag()); }
+		catch(IOException e) { e.printStackTrace(); }
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
+	public void process(EntityPlayer player) {
+		if(!canIgnorePermissionCheck() && !hasPermissions(player, 4)) {
 			CarbonConfig.LOGGER.warn("Don't have Permission to Change configs");
 			return;
 		}
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
-		GameRules rule = server.getGameRules();
-		rule.read(rules.write());
-		GameRules.func_223590_a(new IRuleEntryVisitor() {
-			@Override
-			public <T extends RuleValue<T>> void func_223481_a(RuleKey<T> key, RuleType<T> type) {
-				RuleValue<T> value = rule.get(key);
-				CommandContextBuilder<CommandSource> command = new CommandContextBuilder<>(null, server.getCommandSource(), null, 0);
-				if(value instanceof IntegerValue) {
-					command.withArgument("value", new ParsedArgument<>(0, 0, ((IntegerValue)value).get()));
-					Reflects.updateRule(IntegerValue.class, (IntegerValue)value, command.build(""), "value");
-				}
-				else if(value instanceof BooleanValue) {
-					command.withArgument("value", new ParsedArgument<>(0, 0, ((BooleanValue)value).get()));
-					Reflects.updateRule(BooleanValue.class, (BooleanValue)value, command.build(""), "value");
-				}
-			}
-		});
+		GameRules rule = server.getWorld(0).getGameRules();
+		rule.readFromNBT(rules.writeToNBT());
+	}
+	
+	private boolean hasPermissions(EntityPlayer player, int value) {
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		return server.getPlayerList().getOppedPlayers().getPermissionLevel(player.getGameProfile()) >= value;
 	}
 	
 	private boolean canIgnorePermissionCheck() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

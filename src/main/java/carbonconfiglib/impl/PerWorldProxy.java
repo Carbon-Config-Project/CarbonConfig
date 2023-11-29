@@ -12,13 +12,12 @@ import carbonconfiglib.config.ConfigSettings;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldSummary;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -37,7 +36,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
  */
 public final class PerWorldProxy implements IConfigProxy
 {
-	public static final IConfigProxy INSTANCE = new PerWorldProxy(FMLPaths.GAMEDIR.get().resolve("multiplayerconfigs"), FMLPaths.GAMEDIR.get().resolve("defaultconfigs"), FMLPaths.GAMEDIR.get().resolve("saves"));
+	public static final IConfigProxy INSTANCE = new PerWorldProxy(getGameDirectory().resolve("multiplayerconfigs"), getGameDirectory().resolve("defaultconfigs"), getGameDirectory().resolve("saves"));
 	Path baseClientPath;
 	Path baseServerPath;
 	Path saveFolders;
@@ -46,6 +45,10 @@ public final class PerWorldProxy implements IConfigProxy
 		this.baseClientPath = baseClientPath;
 		this.baseServerPath = baseServerPath;
 		this.saveFolders = saveFolders;
+	}
+	
+	private static Path getGameDirectory() {
+		return Loader.instance().getConfigDir().toPath().getParent();
 	}
 	
 	public static boolean isProxy(IConfigProxy proxy) {
@@ -59,25 +62,25 @@ public final class PerWorldProxy implements IConfigProxy
 	@Override
 	public List<Path> getBasePaths() {
 		List<Path> paths = new ObjectArrayList<>();
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server != null) paths.add(server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath());
-		else if(FMLEnvironment.dist.isClient()) paths.add(baseClientPath);
+		else if(FMLCommonHandler.instance().getSide().isClient()) paths.add(baseClientPath);
 		paths.add(baseServerPath);
 		return paths;
 	}
 	
 	@Override
 	public List<? extends IPotentialTarget> getPotentialConfigs() {
-		if(FMLEnvironment.dist.isClient()) return getLevels();
+		if(FMLCommonHandler.instance().getSide().isClient()) return getLevels();
 		else {
-			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 			return Collections.singletonList(new SimpleTarget(server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath(), "server"));
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@SideOnly(Side.CLIENT)
 	private List<IPotentialTarget> getLevels() {
-		SaveFormat storage = Minecraft.getInstance().getSaveLoader();
+		ISaveFormat storage = Minecraft.getMinecraft().getSaveLoader();
 		List<IPotentialTarget> folders = new ObjectArrayList<>();
 		if(Files.exists(baseServerPath)) {
 			folders.add(new SimpleTarget(baseServerPath, "Default Config"));

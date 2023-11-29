@@ -7,11 +7,11 @@ import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.MultilinePolicy;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -43,7 +43,7 @@ public class ConfigRequestPacket implements ICarbonPacket
 	@Override
 	public void write(PacketBuffer buffer) {
 		buffer.writeUniqueId(id);
-		buffer.writeString(identifier, 32767);
+		buffer.writeString(identifier);
 	}
 	
 	@Override
@@ -53,21 +53,26 @@ public class ConfigRequestPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
-		if(!canIgnorePermissionCheck() && !player.hasPermissionLevel(4)) {
+	public void process(EntityPlayer player) {
+		if(!canIgnorePermissionCheck() && !hasPermissions(player, 4)) {
 			return;
 		}
 		ConfigHandler handler = CarbonConfig.CONFIGS.getConfig(identifier);
 		if(handler == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeString(handler.getConfig().serialize(MultilinePolicy.DISABLED), 262144);
+		buf.writeString(handler.getConfig().serialize(MultilinePolicy.DISABLED));
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(id, data), player);
 	}
 	
+	private boolean hasPermissions(EntityPlayer player, int value) {
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		return server.getPlayerList().getOppedPlayers().getPermissionLevel(player.getGameProfile()) >= value;
+	}
+	
 	private boolean canIgnorePermissionCheck() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		return !server.isDedicatedServer() && (server instanceof IntegratedServer ? ((IntegratedServer)server).getPublic() : false);
 	}
 }

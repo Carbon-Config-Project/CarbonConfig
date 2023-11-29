@@ -4,8 +4,8 @@ import java.util.List;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentBase;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -49,8 +49,8 @@ public interface IConfigNode
 	public ITextComponent getTooltip();
 	
 	
-	public static TextComponent createLabel(String name) {
-		TextComponent comp = new StringTextComponent("");
+	public static TextComponentBase createLabel(String name) {
+		TextComponentBase comp = new TextComponentString("");
 		for(String s : name.split("\\-|\\_|(?<!^)(?=[A-Z][a-z])|(?<!(^|[A-Z]))(?=[A-Z])")) {
 			String first = Character.toString(s.charAt(0));
 			comp.appendText(s.replaceFirst(first, first.toUpperCase())).appendText(" ");

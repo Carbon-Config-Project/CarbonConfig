@@ -7,7 +7,7 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.CompoundScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -27,7 +27,7 @@ import net.minecraft.client.resources.I18n;
  */
 public class CompoundElement extends ConfigElement
 {
-	Button textBox;
+	CarbonButton textBox;
 	ICompoundNode compound;
 	
 	public CompoundElement(IConfigNode node) {
@@ -46,7 +46,7 @@ public class CompoundElement extends ConfigElement
 		textBox = addChild(new CarbonButton(0, 0, isArray() ? 144 : 72, 18, I18n.format("gui.carbonconfig.edit"), this::onPress));
 	}
 	
-	private void onPress(Button button) {
+	private void onPress(GuiButton button) {
 		mc.displayGuiScreen(new CompoundScreen(node, compound, mc.currentScreen, owner.getCustomTexture()));
 	}
 	

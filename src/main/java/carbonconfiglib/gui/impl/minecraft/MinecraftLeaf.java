@@ -10,10 +10,11 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -99,11 +100,11 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public ITextComponent getTooltip() {
 		String id = entry.getDescriptionId();
-		TextComponent result = new StringTextComponent("");
-		result.appendSibling(new TranslationTextComponent(id).applyTextStyle(TextFormatting.YELLOW));
+		TextComponentBase result = new TextComponentString("");
+		result.appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 		id += ".description";
 		if(I18n.hasKey(id)) {
-			result.appendText("\n").appendSibling(new TranslationTextComponent(id).applyTextStyle(TextFormatting.GRAY));
+			result.appendText("\n").appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.GRAY)));
 		}
 		return result;
 	}

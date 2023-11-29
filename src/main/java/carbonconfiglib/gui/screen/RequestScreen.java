@@ -10,12 +10,13 @@ import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -34,23 +35,23 @@ import net.minecraft.util.text.TranslationTextComponent;
  */
 public class RequestScreen extends ListScreen implements IRequestScreen
 {
-	static final ITextComponent REQUEST = new TranslationTextComponent("gui.carbonconfig.requesting_config");
+	static final ITextComponent REQUEST = new TextComponentTranslation("gui.carbonconfig.requesting_config");
 	static final ITextComponent[] ANIMATION = new ITextComponent[] {
-			new StringTextComponent("Ooooo").applyTextStyle(TextFormatting.GRAY),
-			new StringTextComponent("oOooo").applyTextStyle(TextFormatting.GRAY),
-			new StringTextComponent("ooOoo").applyTextStyle(TextFormatting.GRAY),
-			new StringTextComponent("oooOo").applyTextStyle(TextFormatting.GRAY),
-			new StringTextComponent("ooooO").applyTextStyle(TextFormatting.GRAY),
+			new TextComponentString("Ooooo").setStyle(new Style().setColor(TextFormatting.GRAY)),
+			new TextComponentString("oOooo").setStyle(new Style().setColor(TextFormatting.GRAY)),
+			new TextComponentString("ooOoo").setStyle(new Style().setColor(TextFormatting.GRAY)),
+			new TextComponentString("oooOo").setStyle(new Style().setColor(TextFormatting.GRAY)),
+			new TextComponentString("ooooO").setStyle(new Style().setColor(TextFormatting.GRAY)),
 	};
-	Screen parent;
+	GuiScreen parent;
 	IModConfig config;
 	UUID requestId;
 	Predicate<PacketBuffer> result;
 	Navigator nav;
 	int tick = 0;
 	
-	public RequestScreen(BackgroundHolder customTexture, Navigator nav, Screen parent, IModConfig config) {
-		super(new StringTextComponent("Request Screen"), customTexture);
+	public RequestScreen(BackgroundHolder customTexture, Navigator nav, GuiScreen parent, IModConfig config) {
+		super(new TextComponentString("Request GuiScreen"), customTexture);
 		this.parent = parent;
 		this.nav = nav;
 		requestId = UUID.randomUUID();
@@ -65,33 +66,33 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
-			minecraft.displayGuiScreen(new ConfigScreen(nav, config, parent, getCustomTexture()));
+			mc.displayGuiScreen(new ConfigScreen(nav, config, parent, getCustomTexture()));
 			return;
 		}
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 	
 	@Override
 	public void tick() {
 		super.tick();
 		tick++;
-		if(tick > 400) minecraft.displayGuiScreen(parent);
+		if(tick > 400) mc.displayGuiScreen(parent);
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		super.render(mouseX, mouseY, partialTicks);
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		String request = REQUEST.getFormattedText();
-		font.drawString(request, width / 2 - font.getStringWidth(request) / 2, height / 2 - 12, -1);
+		fontRenderer.drawString(request, width / 2 - fontRenderer.getStringWidth(request) / 2, height / 2 - 12, -1);
 		int index = (tick / 5) % 8;
 		if(index >= 5) index = 8-index;
 		String animation = ANIMATION[index].getFormattedText();
-		font.drawString(animation, width / 2 - font.getStringWidth(animation) / 2, height / 2, -1);
+		fontRenderer.drawString(animation, width / 2 - fontRenderer.getStringWidth(animation) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
-			ITextComponent draw = new TranslationTextComponent("gui.carbonconfig.timeout", timeout).applyTextStyle(TextFormatting.RED);
+			ITextComponent draw = new TextComponentTranslation("gui.carbonconfig.timeout", timeout).setStyle(new Style().setColor(TextFormatting.RED));
 			String drawing = draw.getFormattedText();
-			font.drawString(drawing, width / 2 - font.getStringWidth(drawing) / 2, height / 2 + 12, -1);
+			fontRenderer.drawString(drawing, width / 2 - fontRenderer.getStringWidth(drawing) / 2, height / 2 + 12, -1);
 		}
 	}
 	

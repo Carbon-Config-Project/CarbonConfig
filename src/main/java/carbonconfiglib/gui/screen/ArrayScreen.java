@@ -12,12 +12,13 @@ import carbonconfiglib.gui.config.ConfigElement;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,12 +37,12 @@ import net.minecraft.util.text.TranslationTextComponent;
  */
 public class ArrayScreen extends ListScreen
 {
-	Screen prev;
+	GuiScreen prev;
 	IConfigNode entry;
 	IArrayNode array;
 	List<DataType> type;
 	
-	public ArrayScreen(IConfigNode entry, Screen prev, BackgroundHolder customTexture) {
+	public ArrayScreen(IConfigNode entry, GuiScreen prev, BackgroundHolder customTexture) {
 		super(entry.getName(), customTexture);
 		this.prev = prev;
 		this.entry = entry;
@@ -51,13 +52,13 @@ public class ArrayScreen extends ListScreen
 	}
 	
 	@Override
-	protected void init() {
-		super.init();
+	public void initGui() {
+		super.initGui();
 		int x = width / 2;
 		int y = height;
-		addButton(new CarbonButton(x-92, y-27, 80, 20, I18n.format("gui.carbonconfig.apply"), this::apply));
-		addButton(new CarbonButton(x-10, y-27, 20, 20, "+", this::createEntry));
-		addButton(new CarbonButton(x+12, y-27, 80, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
+		addWidget(new CarbonButton(x-92, y-27, 80, 20, I18n.format("gui.carbonconfig.apply"), this::apply));
+		addWidget(new CarbonButton(x-10, y-27, 20, 20, "+", this::createEntry));
+		addWidget(new CarbonButton(x+12, y-27, 80, 20, I18n.format("gui.carbonconfig.back"), this::goBack));
 	}
 	
 	@Override
@@ -73,24 +74,24 @@ public class ArrayScreen extends ListScreen
 	@Override
 	public void onClose() {
 		array.setPrevious();
-		minecraft.displayGuiScreen(prev);
+		mc.displayGuiScreen(prev);
 	}
 	
-	private void apply(Button button) {
+	private void apply(GuiButton button) {
 		array.apply();
-		minecraft.displayGuiScreen(prev);
+		mc.displayGuiScreen(prev);
 	}
 	
-	private void goBack(Button button) {
+	private void goBack(GuiButton button) {
 		if(array.isChanged()) {
-			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
+			mc.displayGuiScreen(new GuiYesNo((T, V) -> {
 				if(T) array.setPrevious();
-				minecraft.displayGuiScreen(T ? prev : this);				
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
+				mc.displayGuiScreen(T ? prev : this);				
+			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		array.setPrevious();
-		minecraft.displayGuiScreen(prev);
+		mc.displayGuiScreen(prev);
 	}
 	
 	@Override
@@ -108,19 +109,19 @@ public class ArrayScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		super.render(mouseX, mouseY, partialTicks);
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 30, -1);
+		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 30, -1);
 	}
 	
-	public void createEntry(Button button) {
+	public void createEntry(GuiButton button) {
 		int size = array.size();
 		array.createNode();
 		if(entry.getValidValues().size() > 0) {
 			ListSelectionScreen screen = entry.getDataType().size() > 1 ? ListSelectionScreen.ofCompound(prev, entry, array.asCompound(size), getCustomTexture()) : ListSelectionScreen.ofValue(prev, entry, array.asValue(size), getCustomTexture());
 			screen.withListener(() -> postCreate(size, true), () -> array.removeNode(size)).disableAbortWarning();
-			minecraft.displayGuiScreen(screen);
+			mc.displayGuiScreen(screen);
 			return;
 		}
 		postCreate(size, false);
@@ -130,7 +131,7 @@ public class ArrayScreen extends ListScreen
 		if(type.size() > 1) {
 			CompoundScreen screen = new CompoundScreen(entry, array.asCompound(size), this, getCustomTexture());
 			screen.setAbortListener(() -> array.removeNode(size));
-			minecraft.displayGuiScreen(screen);
+			mc.displayGuiScreen(screen);
 			lastScroll = Double.MAX_VALUE;
 			return;
 		}
@@ -138,9 +139,9 @@ public class ArrayScreen extends ListScreen
 		if(element != null) {
 			addEntry(element);
 			visibleList.addElement(element);
-			visibleList.setScrollAmount(visibleList.getMaxScroll(), true);
+			visibleList.setScrollAmount(visibleList.getMaxScroll());
 		}
-		if(reopen) minecraft.displayGuiScreen(this);
+		if(reopen) mc.displayGuiScreen(this);
 	}
 	
 	@Override

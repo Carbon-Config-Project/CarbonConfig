@@ -16,9 +16,11 @@ import carbonconfiglib.config.SyncedConfig;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.utils.AutomationType;
 import carbonconfiglib.utils.MultilinePolicy;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class SimpleConfigExample
 {
@@ -39,7 +41,7 @@ public class SimpleConfigExample
 	
 	public ConfigHandler handler;
 	
-	public SimpleConfigExample() {
+	public void preInit(FMLPreInitializationEvent event) {
 		Config config = new Config("simpleExample");
 		ConfigSection section = config.add("general");
 		numberExample = section.addInt("numberExample", 512, "Simple Commented Number Example"); //Comments can be multiline by using \n or making an array out of this.
@@ -69,13 +71,14 @@ public class SimpleConfigExample
 		return settings.withMultiline(MultilinePolicy.ALWAYS_MULTILINE); //Settings are not required, by default it sets all required values, its only to OVERRIDE settings.
 	}
 	
-	public void onCommonEvent(FMLCommonSetupEvent event) {
+	@EventHandler
+	public void onCommonEvent(FMLPostInitializationEvent event) {
 		if(LOAD_LATE) {
 			handler.load();//If you need to load your config late just remove the AUTO_LOAD function and call load when you need it. NOTE: REGISTER HAS TO BE CALLED IN THE MOD CONSTRUCTOR! But Register doesn't load it unless auto load was being set.
 		}
 	}
 	
-	public int getClientValue(PlayerEntity player) {
+	public int getClientValue(EntityPlayer player) {
 		return clientSyncedValue.get(player.getUniqueID()).get(); // Gets the PlayerEntity Specific value from the config automatically. If no value is provided the server side config applies! NOTE: THIS requires AutomationType.AUTO_SYNC to be set (default) otherwise no SYNC
 	}
 	

@@ -4,7 +4,7 @@ import java.util.List;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponentString;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -54,5 +54,5 @@ public interface IConfigFolderNode extends IConfigNode
 	@Override
 	public default boolean requiresReload() { return false; }
 	@Override
-	public default ITextComponent getTooltip() { return new StringTextComponent(""); }
+	public default ITextComponent getTooltip() { return new TextComponentString(""); }
 }

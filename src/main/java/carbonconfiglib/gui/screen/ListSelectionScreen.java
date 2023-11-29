@@ -16,14 +16,15 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,13 +45,13 @@ public abstract class ListSelectionScreen extends ListScreen
 {
 	IConfigNode node;
 	INode value;
-	Screen parent;
-	Button apply;
+	GuiScreen parent;
+	GuiButton apply;
 	Runnable abortListener;
 	Runnable successListener;
 	boolean dontWarn;
 	
-	public ListSelectionScreen(Screen parent, IConfigNode node, INode value, BackgroundHolder customTexture) {
+	public ListSelectionScreen(GuiScreen parent, IConfigNode node, INode value, BackgroundHolder customTexture) {
 		super(node.getName(), customTexture);
 		this.parent = parent;
 		this.node = node;
@@ -58,28 +59,28 @@ public abstract class ListSelectionScreen extends ListScreen
 		this.value.createTemp();
 	}
 	
-	public static ListSelectionScreen ofValue(Screen parent, IConfigNode node, IValueNode value, BackgroundHolder customTexture) {
+	public static ListSelectionScreen ofValue(GuiScreen parent, IConfigNode node, IValueNode value, BackgroundHolder customTexture) {
 		return new Value(parent, node, value, customTexture);
 	}
 	
-	public static ListSelectionScreen ofCompound(Screen parent, IConfigNode node, ICompoundNode value, BackgroundHolder customTexture) {
+	public static ListSelectionScreen ofCompound(GuiScreen parent, IConfigNode node, ICompoundNode value, BackgroundHolder customTexture) {
 		return new Compound(parent, node, value, customTexture);
 	}
 	
-	public static ListSelectionScreen ofCompoundValue(Screen parent, IConfigNode node, IValueNode value, ICompoundNode compound, int index, BackgroundHolder customTexture) {
+	public static ListSelectionScreen ofCompoundValue(GuiScreen parent, IConfigNode node, IValueNode value, ICompoundNode compound, int index, BackgroundHolder customTexture) {
 		return new CompoundValue(parent, node, value, compound, index, customTexture);
 	}
 	
 	@Override
-	protected void init() {
-		super.init();
+	public void initGui() {
+		super.initGui();
 		visibleList.setRenderSelection(true);
 		loadDefault();
 		visibleList.setCallback(T -> setValue(((SelectionElement)T).getSuggestion().getValue()));
 		int x = width / 2 - 100;
 		int y = height;
-		apply = addButton(new CarbonButton(x+10, y-27, 85, 20, I18n.format("gui.carbonconfig.pick"), this::save));
-		addButton(new CarbonButton(x+105, y-27, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
+		apply = addWidget(new CarbonButton(x+10, y-27, 85, 20, I18n.format("gui.carbonconfig.pick"), this::save));
+		addWidget(new CarbonButton(x+105, y-27, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
 	}
 	
 	public ListSelectionScreen withListener(Runnable success, Runnable abort) {
@@ -113,11 +114,11 @@ public abstract class ListSelectionScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		apply.active = value.isChanged();
-		super.render(mouseX, mouseY, partialTicks);
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		apply.enabled = value.isChanged();
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		font.drawString(title, (width/2)-(font.getStringWidth(title)/2), 8, -1);
+		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 8, -1);
 	}
 	
 	@Override
@@ -130,25 +131,25 @@ public abstract class ListSelectionScreen extends ListScreen
 	@Override
 	public void onClose() {
 		abort();
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 	
-	private void save(Button button) {
+	private void save(GuiButton button) {
 		value.apply();
 		if(successListener != null) successListener.run();
-		else minecraft.displayGuiScreen(parent);
+		else mc.displayGuiScreen(parent);
 	}
 	
-	private void cancel(Button button) {
+	private void cancel(GuiButton button) {
 		if(value.isChanged() && !dontWarn) {
-			minecraft.displayGuiScreen(new ConfirmScreen(T -> {
+			mc.displayGuiScreen(new GuiYesNo((T, V) -> {
 				if(T) abort();
-				minecraft.displayGuiScreen(T ? parent : this);	
-			}, new TranslationTextComponent("gui.carbonconfig.warn.changed"), new TranslationTextComponent("gui.carbonconfig.warn.changed.desc").applyTextStyle(TextFormatting.GRAY)));
+				mc.displayGuiScreen(T ? parent : this);	
+			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		abort();
-		minecraft.displayGuiScreen(parent);
+		mc.displayGuiScreen(parent);
 	}
 	
 	private void abort() {
@@ -158,7 +159,7 @@ public abstract class ListSelectionScreen extends ListScreen
 	
 	public static class Value extends ListSelectionScreen {
 
-		public Value(Screen parent, IConfigNode node, IValueNode value, BackgroundHolder customTexture) {
+		public Value(GuiScreen parent, IConfigNode node, IValueNode value, BackgroundHolder customTexture) {
 			super(parent, node, value, customTexture);
 		}
 		
@@ -177,7 +178,7 @@ public abstract class ListSelectionScreen extends ListScreen
 		ICompoundNode compound;
 		int index;
 		
-		public CompoundValue(Screen parent, IConfigNode node, IValueNode value, ICompoundNode compound, int index, BackgroundHolder customTexture) {
+		public CompoundValue(GuiScreen parent, IConfigNode node, IValueNode value, ICompoundNode compound, int index, BackgroundHolder customTexture) {
 			super(parent, node, value, customTexture);
 			this.compound = compound;
 			this.index = index;
@@ -203,7 +204,7 @@ public abstract class ListSelectionScreen extends ListScreen
 	
 	public static class Compound extends ListSelectionScreen {
 
-		public Compound(Screen parent, IConfigNode node, ICompoundNode value, BackgroundHolder customTexture) {
+		public Compound(GuiScreen parent, IConfigNode node, ICompoundNode value, BackgroundHolder customTexture) {
 			super(parent, node, value, customTexture);
 		}
 		
@@ -227,7 +228,7 @@ public abstract class ListSelectionScreen extends ListScreen
 		
 		
 		public SelectionElement(Suggestion suggestion, ElementList list) {
-			super(new TranslationTextComponent(suggestion.getName()));
+			super(new TextComponentTranslation(suggestion.getName()));
 			this.suggestion = suggestion;
 			this.myList = list;
 		}
@@ -241,7 +242,7 @@ public abstract class ListSelectionScreen extends ListScreen
 					owner.addTooltips(comp);
 				}
 			}
-			renderText(new StringTextComponent("").applyTextStyle(myList.getSelected() == this ? TextFormatting.YELLOW : TextFormatting.WHITE).appendSibling(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
+			renderText(new TextComponentString("").setStyle(new Style().setColor(myList.getSelected() == this ? TextFormatting.YELLOW : TextFormatting.WHITE)).appendSibling(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
 		}
 		
 		private ISuggestionRenderer getRenderer() {
@@ -258,7 +259,7 @@ public abstract class ListSelectionScreen extends ListScreen
 		}
 		
 		@Override
-		public boolean mouseClicked(double p_94737_, double p_94738_, int p_94739_) {
+		public boolean mouseClick(double p_94737_, double p_94738_, int p_94739_) {
 			if(myList.getSelected() == this) {
 				if(lastClick >= 0 && myList.getLastTick() - lastClick <= 5) {
 					save(null);

@@ -8,7 +8,7 @@ import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -62,11 +62,11 @@ public class EnumElement extends ConfigElement
 		GuiUtils.drawScrollingString(font, value.get(), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
 	}
 	
-	private void onSelect(Button button) {
+	private void onSelect(GuiButton button) {
 		mc.displayGuiScreen(ListSelectionScreen.ofValue(mc.currentScreen, node, value, owner.getCustomTexture()));
 	}
 	
-	private void onPress(Button button) {
+	private void onPress(GuiButton button) {
 		mc.displayGuiScreen(new EditStringScreen(mc.currentScreen, name, node, value, owner.getCustomTexture()));
 	}
 }

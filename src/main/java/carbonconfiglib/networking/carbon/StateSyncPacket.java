@@ -4,9 +4,9 @@ package carbonconfiglib.networking.carbon;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.ICarbonPacket;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -25,10 +25,10 @@ import net.minecraftforge.api.distmarker.Dist;
  */
 public class StateSyncPacket implements ICarbonPacket
 {
-	Dist source;
+	Side source;
 	
 	public StateSyncPacket() {}
-	public StateSyncPacket(Dist source) {
+	public StateSyncPacket(Side source) {
 		this.source = source;
 	}
 
@@ -39,12 +39,12 @@ public class StateSyncPacket implements ICarbonPacket
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		source = buffer.readBoolean() ? Dist.CLIENT : Dist.DEDICATED_SERVER;
+		source = buffer.readBoolean() ? Side.CLIENT : Side.SERVER;
 	}
 	
 	@Override
-	public void process(PlayerEntity player) {
-		if(source.isDedicatedServer()) CarbonConfig.NETWORK.onPlayerJoined(player, false);
+	public void process(EntityPlayer player) {
+		if(source.isServer()) CarbonConfig.NETWORK.onPlayerJoined(player, false);
 		else EventHandler.INSTANCE.onServerJoinPacket(player);
 	}
 	

@@ -1,35 +1,29 @@
 package carbonconfiglib.networking;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
-import carbonconfiglib.networking.carbon.ConfigRequestPacket;
-import carbonconfiglib.networking.carbon.SaveConfigPacket;
-import carbonconfiglib.networking.carbon.StateSyncPacket;
-import carbonconfiglib.networking.forge.RequestConfigPacket;
-import carbonconfiglib.networking.forge.SaveForgeConfigPacket;
-import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
-import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
-import carbonconfiglib.networking.snyc.BulkSyncPacket;
-import carbonconfiglib.networking.snyc.SyncPacket;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.NetworkManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraft.util.IThreadListener;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
+import net.minecraftforge.fml.common.network.FMLOutboundHandler;
+import net.minecraftforge.fml.common.network.FMLOutboundHandler.OutboundTarget;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import speiger.src.collections.objects.sets.ObjectOpenHashSet;
 
 /**
@@ -47,33 +41,29 @@ import speiger.src.collections.objects.sets.ObjectOpenHashSet;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonNetwork
+@Sharable
+public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 {
 	public static final String VERSION = "1.0.0";
-	SimpleChannel channel;
+	private EnumMap<Side, FMLEmbeddedChannel> channel;
 	Set<UUID> clientInstalledPlayers = new ObjectOpenHashSet<>();
 	boolean serverInstalled = false;
 	
 	public void init() {
-		channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("carbonconfig", "networking"), () -> VERSION, this::acceptsConnection, this::acceptsConnection);	
-		registerPacket(0, SyncPacket.class, SyncPacket::new);
-		registerPacket(1, BulkSyncPacket.class, BulkSyncPacket::new);
-		registerPacket(2, ConfigRequestPacket.class, ConfigRequestPacket::new);
-		registerPacket(3, ConfigAnswerPacket.class, ConfigAnswerPacket::new);
-		registerPacket(4, SaveConfigPacket.class, SaveConfigPacket::new);
-		registerPacket(5, RequestConfigPacket.class, RequestConfigPacket::new);
-		registerPacket(6, SaveForgeConfigPacket.class, SaveForgeConfigPacket::new);
-		registerPacket(7, RequestGameRulesPacket.class, RequestGameRulesPacket::new);
-		registerPacket(8, SaveGameRulesPacket.class, SaveGameRulesPacket::new);
-		registerPacket(255, StateSyncPacket.class, StateSyncPacket::new);
+		channel = NetworkRegistry.INSTANCE.newChannel("carbonconfig", new CarbonChannel(), this);
 	}
 	
-	private boolean acceptsConnection(String version) {
-		return VERSION.equals(version) || NetworkRegistry.ACCEPTVANILLA.equals(version) || NetworkRegistry.ABSENT.equals(version);
-	}
-	
-	private <T extends ICarbonPacket> void registerPacket(int index, Class<T> packet, Supplier<T> creator) {
-		channel.registerMessage(index, packet, this::writePacket, (K) -> readPacket(K, creator), this::handlePacket);
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, ICarbonPacket msg) throws Exception {
+		try {
+			INetHandler netHandler = ctx.channel().attr(NetworkRegistry.NET_HANDLER).get();
+	        IThreadListener thread = FMLCommonHandler.instance().getWorldThread(netHandler);
+	        if(thread.isCallingFromMinecraftThread()) handlePacket(msg, netHandler);
+	        else thread.addScheduledTask(() -> handlePacket(msg, netHandler));
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	protected void writePacket(ICarbonPacket packet, PacketBuffer buffer) {
@@ -91,12 +81,10 @@ public class CarbonNetwork
 		return null;
 	}
 	
-	protected void handlePacket(ICarbonPacket packet, Supplier<NetworkEvent.Context> provider) {
+	protected void handlePacket(ICarbonPacket packet, INetHandler provider) {
 		try {
-			Context context = provider.get();
-			PlayerEntity player = getPlayer(context);
-			context.enqueueWork(() -> packet.process(player));
-			context.setPacketHandled(true);
+			EntityPlayer player = getPlayer(provider);
+			packet.process(player);
 		}
 		catch(Exception e) { e.printStackTrace(); }
 	}
@@ -105,49 +93,56 @@ public class CarbonNetwork
 		return getClientPlayer() != null;
 	}
 	
-	protected PlayerEntity getPlayer(Context cont) {
-		PlayerEntity entity = cont.getSender();
+	protected EntityPlayer getPlayer(INetHandler handler) {
+		EntityPlayer entity = (handler instanceof NetHandlerPlayServer ? ((NetHandlerPlayServer)handler).player : null);
 		return entity != null ? entity : getClientPlayer();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	protected PlayerEntity getClientPlayer() {
-		Minecraft mc = Minecraft.getInstance();
+	@SideOnly(Side.CLIENT)
+	protected EntityPlayer getClientPlayer() {
+		Minecraft mc = Minecraft.getMinecraft();
 		return mc == null ? null : mc.player;
 	}
 	
 	public void sendToServer(ICarbonPacket packet) {
-		channel.send(PacketDistributor.SERVER.noArg(), packet);
+		FMLEmbeddedChannel data = channel.get(Side.CLIENT);
+		data.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(OutboundTarget.TOSERVER);
+		data.writeOutbound(packet);
 	}
 	
 	public void sendToAllPlayers(ICarbonPacket packet) {
-		channel.send(PacketDistributor.NMLIST.with(this::getAllPlayers), packet);
+		for(EntityPlayer player : getAllPlayers()) {
+			FMLEmbeddedChannel data = channel.get(Side.SERVER);
+			data.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(OutboundTarget.PLAYER);
+			data.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);	
+			data.writeOutbound(packet);
+		}
 	}
 	
-	public void onPlayerJoined(PlayerEntity player, boolean server) {
+	public void onPlayerJoined(EntityPlayer player, boolean server) {
 		if(server) clientInstalledPlayers.add(player.getUniqueID());
 		else serverInstalled = true;
 	}
 	
-	public void onPlayerLeft(PlayerEntity player, boolean server) {
+	public void onPlayerLeft(EntityPlayer player, boolean server) {
 		if(server) clientInstalledPlayers.remove(player.getUniqueID());
 		else serverInstalled = false;
 	}
 	
-	private List<NetworkManager> getAllPlayers() {
-		List<NetworkManager> players = new ObjectArrayList<>();
-		for(ServerPlayerEntity player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
+	private List<EntityPlayerMP> getAllPlayers() {
+		List<EntityPlayerMP> players = new ObjectArrayList<>();
+		for(EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers()) {
 			if(isInstalledOnClient(player)) 
-				players.add(player.connection.getNetworkManager());
+				players.add(player);
 		}
 		return players;
 	}
 	
-	public boolean isInstalled(PlayerEntity player) {
-		return player instanceof ServerPlayerEntity ? isInstalledOnClient((ServerPlayerEntity)player) : isInstalledOnServer();
+	public boolean isInstalled(EntityPlayer player) {
+		return player instanceof EntityPlayerMP ? isInstalledOnClient((EntityPlayerMP)player) : isInstalledOnServer();
 	}
 	
-	public boolean isInstalledOnClient(ServerPlayerEntity player) {
+	public boolean isInstalledOnClient(EntityPlayerMP player) {
 		return clientInstalledPlayers.contains(player.getUniqueID());
 	}
 		
@@ -155,10 +150,13 @@ public class CarbonNetwork
 		return serverInstalled;
 	}
 	
-	public void sendToPlayer(ICarbonPacket packet, PlayerEntity player) {
-		if(!(player instanceof ServerPlayerEntity)) {
+	public void sendToPlayer(ICarbonPacket packet, EntityPlayer player) {
+		if(!(player instanceof EntityPlayerMP)) {
 			throw new RuntimeException("Sending a Packet to a PlayerEntity from client is not allowed");
 		}
-		channel.send(PacketDistributor.PLAYER.with(() -> ((ServerPlayerEntity)player)), packet);
+		FMLEmbeddedChannel data = channel.get(Side.SERVER);
+		data.attr(FMLOutboundHandler.FML_MESSAGETARGET).set(OutboundTarget.PLAYER);
+		data.attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);	
+		data.writeOutbound(packet);
 	}
 }

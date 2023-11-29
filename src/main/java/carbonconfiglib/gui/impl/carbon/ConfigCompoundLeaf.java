@@ -19,8 +19,9 @@ import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.IEntryDataType.EntryDataType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -130,8 +131,8 @@ public class ConfigCompoundLeaf implements IConfigNode
 	public ITextComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
 	@Override
 	public ITextComponent getTooltip() {
-		TextComponent comp = new StringTextComponent("");
-		comp.appendSibling(new StringTextComponent(entry.getKey()).applyTextStyle(TextFormatting.YELLOW));
+		TextComponentBase comp = new TextComponentString("");
+		comp.appendSibling(new TextComponentString(entry.getKey()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 		String[] array = entry.getComment();
 		if(array != null && array.length > 0) {
 			comp.appendText("\n");
@@ -140,7 +141,7 @@ public class ConfigCompoundLeaf implements IConfigNode
 		String limit = entry.getLimitations();
 		if(!Strings.isBlank(limit)) {
 			String[] split = Helpers.splitArray(limit, ",");
-			for(int i = 0,m=split.length;i<m;comp.appendText("\n").appendSibling(new StringTextComponent(split[i++]).applyTextStyle(TextFormatting.GRAY)));
+			for(int i = 0,m=split.length;i<m;comp.appendText("\n").appendSibling(new TextComponentString(split[i++]).setStyle(new Style().setColor(TextFormatting.GRAY))));
 		}
 		return comp;
 	}
