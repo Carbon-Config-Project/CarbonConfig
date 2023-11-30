@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.widgets.screen.AbstractScrollList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -122,7 +122,7 @@ public class ElementList extends AbstractScrollList<Element>
 		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getBackgroundTexture());
 		int color = texture.getBackgroundBrightness();
 		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder builder = tes.getBuffer();
+		VertexBuffer builder = tes.getBuffer();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 		builder.pos(x0, y1, 0D).tex(x0 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
 		builder.pos(x1, y1, 0D).tex(x1 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
@@ -133,7 +133,7 @@ public class ElementList extends AbstractScrollList<Element>
 
 	public static void renderListOverlay(int x0, int x1, int y0, int y1, int width, int height, BackgroundTexture texture) {
 		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder builder = tes.getBuffer();
+		VertexBuffer builder = tes.getBuffer();
 		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getForegroundTexture());
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableDepth();

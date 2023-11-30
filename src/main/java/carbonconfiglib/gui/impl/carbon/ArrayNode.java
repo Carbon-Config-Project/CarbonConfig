@@ -12,7 +12,7 @@ import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris

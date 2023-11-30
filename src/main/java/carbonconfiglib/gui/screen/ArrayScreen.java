@@ -112,7 +112,7 @@ public class ArrayScreen extends ListScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 30, -1);
+		fontRendererObj.drawString(title, (width/2)-(fontRendererObj.getStringWidth(title)/2), 30, -1);
 	}
 	
 	public void createEntry(GuiButton button) {

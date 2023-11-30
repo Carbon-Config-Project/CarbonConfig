@@ -36,7 +36,7 @@ public class CarbonButton extends GuiButton implements IWidget
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
-		if(this.enabled && this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
+		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
 			playPressSound(Minecraft.getMinecraft().getSoundHandler());
 			if(handler != null) handler.accept(this);
 			return true;
@@ -50,18 +50,18 @@ public class CarbonButton extends GuiButton implements IWidget
 		this.hovered = mousePressed(mc, mouseX, mouseY);
 		int k = this.getHoverState(this.hovered);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1F);
-		GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
-		GuiUtils.drawScrollingShadowString(mc.fontRenderer, displayString, x, y, width, height-2, GuiAlign.CENTER, this.enabled ? 16777215 : 10526880, hash);
+		GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, this.xPosition, this.yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
+		GuiUtils.drawScrollingShadowString(mc.fontRendererObj, displayString, xPosition, yPosition, width, height-2, GuiAlign.CENTER, this.enabled ? 16777215 : 10526880, hash);
 	}
 
 	@Override
-	public void setX(int x) { this.x = x; }
+	public void setX(int x) { this.xPosition = x; }
 	@Override
-	public void setY(int y) { this.y = y; }
+	public void setY(int y) { this.yPosition = y; }
 	@Override
-	public int getX() { return x; }
+	public int getX() { return xPosition; }
 	@Override
-	public int getY() { return y; }
+	public int getY() { return yPosition; }
 	@Override
 	public int getWidgetWidth() { return width; }
 	@Override

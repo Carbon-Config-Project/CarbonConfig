@@ -1,6 +1,8 @@
 package carbonconfiglib.gui.screen;
 
 import java.util.Comparator;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -22,9 +24,6 @@ import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.gui.widgets.CarbonIconCheckbox;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
-import it.unimi.dsi.fastutil.PriorityQueue;
-import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -37,6 +36,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -148,14 +148,14 @@ public class ConfigScreen extends ListScreen
 	
 	@Override
 	public void handleForground(int mouseX, int mouseY, float partialTicks) {
-		GuiUtils.drawScrollingString(fontRenderer, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
+		GuiUtils.drawScrollingString(fontRendererObj, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
 	}
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
 		if(mouseX >= 50F && mouseX <= width-100 && mouseY >= 6 && mouseY <= 16) {
-			float scroll = GuiUtils.calculateScrollOffset(width-100, fontRenderer, GuiAlign.CENTER, nav.getHeader(), 0);
-			GuiScreen screen = nav.getScreen(fontRenderer, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, fontRenderer.getStringWidth(nav.getHeader())) - scroll));
+			float scroll = GuiUtils.calculateScrollOffset(width-100, fontRendererObj, GuiAlign.CENTER, nav.getHeader(), 0);
+			GuiScreen screen = nav.getScreen(fontRendererObj, (int)(mouseX - GuiAlign.CENTER.align(50, width-100, fontRendererObj.getStringWidth(nav.getHeader())) - scroll));
 			if(screen instanceof ConfigScreen) {
 				mc.displayGuiScreen(screen);
 				return true;
@@ -243,12 +243,12 @@ public class ConfigScreen extends ListScreen
 	
 	private List<IConfigNode> processedChanged(Consumer<IConfigNode> action) {
 		List<IConfigNode> output = new ObjectArrayList<>();
-		PriorityQueue<IConfigNode> nodes = new ObjectArrayFIFOQueue<>();
-		nodes.enqueue(node);
+		Deque<IConfigNode> nodes = new LinkedList<>();
+		nodes.push(node);
 		while(!nodes.isEmpty()) {
-			IConfigNode node = nodes.dequeue();
+			IConfigNode node = nodes.pop();
 			if(!node.isLeaf()) {
-				node.getChildren().forEach(nodes::enqueue);
+				node.getChildren().forEach(nodes::push);
 				continue;
 			}
 			if(node.isChanged()) {
@@ -260,12 +260,12 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	private void processAction(Consumer<IConfigNode> action) {
-		PriorityQueue<IConfigNode> nodes = new ObjectArrayFIFOQueue<>();
-		nodes.enqueue(node);
+		Deque<IConfigNode> nodes = new LinkedList<>();
+		nodes.push(node);
 		while(!nodes.isEmpty()) {
-			IConfigNode node = nodes.dequeue();
+			IConfigNode node = nodes.pop();
 			if(!node.isLeaf()) {
-				node.getChildren().forEach(nodes::enqueue);
+				node.getChildren().forEach(nodes::push);
 				continue;
 			}
 			action.accept(node);
@@ -312,12 +312,12 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	private boolean isChanged() {
-		PriorityQueue<IConfigNode> nodes = new ObjectArrayFIFOQueue<>();
-		nodes.enqueue(node);
+		Deque<IConfigNode> nodes = new LinkedList<>();
+		nodes.push(node);
 		while(!nodes.isEmpty()) {
-			IConfigNode node = nodes.dequeue();
+			IConfigNode node = nodes.pop();
 			if(!node.isLeaf()) {
-				node.getChildren().forEach(nodes::enqueue);
+				node.getChildren().forEach(nodes::push);
 				continue;
 			}
 			if(node.isChanged()) return true;
@@ -359,13 +359,13 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	private static List<Element> getAllElements(IConfigNode initGui) {
-		PriorityQueue<IConfigNode> nodes = new ObjectArrayFIFOQueue<>();
-		nodes.enqueue(initGui);
+		Deque<IConfigNode> nodes = new LinkedList<>();
+		nodes.push(initGui);
 		List<Element> results = new ObjectArrayList<>();
 		while(!nodes.isEmpty()) {
-			IConfigNode node = nodes.dequeue();
+			IConfigNode node = nodes.pop();
 			if(!node.isLeaf()) {
-				node.getChildren().forEach(nodes::enqueue);
+				node.getChildren().forEach(nodes::push);
 				continue;
 			}
 			if(node.isArray()) {

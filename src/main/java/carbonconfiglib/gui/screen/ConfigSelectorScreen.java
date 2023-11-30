@@ -74,7 +74,7 @@ public class ConfigSelectorScreen extends ListScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String modName = this.modName.getFormattedText();
-		fontRenderer.drawString(modName, (width/2)-(fontRenderer.getStringWidth(modName)/2), 8, -1);
+		fontRendererObj.drawString(modName, (width/2)-(fontRendererObj.getStringWidth(modName)/2), 8, -1);
 	}
 	
 	@Override
@@ -191,12 +191,12 @@ public class ConfigSelectorScreen extends ListScreen
 		
 		@Override
 		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left+width-82;
-			button.y = top + 2;
+			button.xPosition = left+width-82;
+			button.yPosition = top + 2;
 			button.render(mc, mouseX, mouseY, partialTicks);
 			if(reset != null) {
-				reset.x = left+width-20;
-				reset.y = top + 2;
+				reset.xPosition = left+width-20;
+				reset.yPosition = top + 2;
 				reset.render(mc, mouseX, mouseY, partialTicks);
 			}
 			GuiUtils.drawScrollingString(font, type.getFormattedText(), left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);

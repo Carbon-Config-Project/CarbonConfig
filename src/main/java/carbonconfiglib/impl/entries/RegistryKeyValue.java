@@ -20,12 +20,12 @@ import carbonconfiglib.utils.IEntryDataType.SimpleDataType;
 import carbonconfiglib.utils.MultilinePolicy;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.IForgeRegistry;
+import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
+import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,13 +44,13 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  */
 public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Set<ResourceLocation>> implements IArrayConfig
 {
-	ForgeRegistry<?> registry;
+	FMLControlledNamespacedRegistry<?> registry;
 	Class<?> clz;
 	Predicate<ResourceLocation> filter;
 	
 	public RegistryKeyValue(String key, IForgeRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (ForgeRegistry<?>)registry;
+		this.registry = (FMLControlledNamespacedRegistry<?>)registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistryKeySuggestions(this));

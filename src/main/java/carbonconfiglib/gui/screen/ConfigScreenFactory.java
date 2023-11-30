@@ -38,4 +38,9 @@ public class ConfigScreenFactory implements IModGuiFactory
 	public GuiScreen createConfigGui(GuiScreen parentScreen) { return new ConfigSelectorScreen(configs, parentScreen); }
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() { return null; }
+	@Override
+	public Class<? extends GuiScreen> mainConfigGuiClass() { return null; }
+	@Override
+	@SuppressWarnings("deprecation")
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) { return null; }
 }

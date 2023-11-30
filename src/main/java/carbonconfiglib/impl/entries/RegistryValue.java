@@ -20,12 +20,12 @@ import carbonconfiglib.utils.IEntryDataType.SimpleDataType;
 import carbonconfiglib.utils.MultilinePolicy;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.IForgeRegistry;
+import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
+import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,13 +44,13 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  */
 public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionConfigEntry<T, Set<T>> implements IArrayConfig
 {
-	ForgeRegistry<T> registry;
+	FMLControlledNamespacedRegistry<T> registry;
 	Class<T> clz;
 	Predicate<T> filter;
 	
 	protected RegistryValue(String key, IForgeRegistry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (ForgeRegistry<T>)registry;
+		this.registry = (FMLControlledNamespacedRegistry<T>)registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistrySuggestions<>(this));
@@ -156,7 +156,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		Set<T> value = getValue();
 		buffer.writeVarInt(value.size());
 		for(T entry : value) {
-			buffer.writeVarInt(registry.getID(entry));
+			buffer.writeVarInt(registry.getId(entry));
 		}
 	}
 
@@ -165,7 +165,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
-			T entry = registry.getValue(buffer.readVarInt());
+			T entry = registry.getRaw(buffer.readVarInt());
 			if(entry != null) {
 				result.add(entry);
 			}

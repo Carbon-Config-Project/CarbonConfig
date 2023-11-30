@@ -20,7 +20,6 @@ import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.screen.IInteractable;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -33,6 +32,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.storage.WorldSummary;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -90,7 +90,7 @@ public class SelectFileScreen extends ListScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String text = TEXT.getFormattedText();
-		fontRenderer.drawString(text, (width/2)-(fontRenderer.getStringWidth(text)/2), 8, -1);
+		fontRendererObj.drawString(text, (width/2)-(fontRendererObj.getStringWidth(text)/2), 8, -1);
 	}
 	
 	@Override
@@ -145,8 +145,8 @@ public class SelectFileScreen extends ListScreen
 		
 		@Override
 		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left+width-62;
-			button.y = top + 2;
+			button.xPosition = left+width-62;
+			button.yPosition = top + 2;
 			button.render(mc, mouseX, mouseY, partialTicks);
 			GuiUtils.drawScrollingString(font, title.getFormattedText(), left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawScrollingString(font, path.getFormattedText(), left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);

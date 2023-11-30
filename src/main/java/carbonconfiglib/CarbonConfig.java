@@ -44,9 +44,9 @@ import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -63,7 +63,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.12]")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.11]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();

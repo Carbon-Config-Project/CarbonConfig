@@ -15,9 +15,9 @@ import carbonconfiglib.networking.buffer.WriteBuffer;
 import carbonconfiglib.utils.SyncType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 
 /**
  * Copyright 2023 Speiger, Meduris

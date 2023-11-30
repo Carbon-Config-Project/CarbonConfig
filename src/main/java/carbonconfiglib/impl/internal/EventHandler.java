@@ -171,7 +171,7 @@ public class EventHandler implements IConfigChangeListener
 			if(factory.containsKey(M)) return;
 			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
-		if(CarbonConfig.FORGE_SUPPORT.get()) {			
+		if(CarbonConfig.FORGE_SUPPORT.get()) {
 			forgeConfigs.forEach((M, C) -> {
 				if(factory.containsKey(M) && !CarbonConfig.FORCE_FORGE_SUPPORT.get()) return;
 				mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(new ForgeConfigs(M, C));
@@ -219,7 +219,6 @@ public class EventHandler implements IConfigChangeListener
 		CarbonConfig.NETWORK.onPlayerLeft(event.player, true);
 	}
 	
-	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientJoinEvent() {
 		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
@@ -229,7 +228,6 @@ public class EventHandler implements IConfigChangeListener
 		CarbonConfig.NETWORK.sendToServer(packet);
 	}
 	
-	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientLeaveEvent() {
 		CarbonConfig.NETWORK.onPlayerLeft(null, false);

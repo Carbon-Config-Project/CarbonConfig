@@ -35,6 +35,7 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	public CarbonEditBox(FontRenderer font, int x, int y, int width, int height) {
 		super(0, font, x, y, width, height);
 		this.setGuiResponder(this);
+		setCanLoseFocus(true);
 	}
 	
 	public CarbonEditBox setInnerDiff(int innerDiff) {
@@ -77,7 +78,7 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-		hovered = this.getVisible() && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+		hovered = this.getVisible() && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
 		drawTextBox();
 	}
 	
@@ -97,7 +98,11 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
-		return mouseClicked((int)mouseX, (int)mouseY, button);
+		if(this.getVisible() && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
+			mouseClicked((int)mouseX, (int)mouseY, button);
+			return true;
+		}
+		return false;
 	}
 	
 	@Override
@@ -117,13 +122,13 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	}
 	
 	@Override
-	public void setX(int x) { this.x = x; }
+	public void setX(int x) { this.xPosition = x; }
 	@Override
-	public void setY(int y) { this.y = y; }
+	public void setY(int y) { this.yPosition = y; }
 	@Override
-	public int getX() { return x; }
+	public int getX() { return xPosition; }
 	@Override
-	public int getY() { return y; }
+	public int getY() { return yPosition; }
 	@Override
 	public int getWidgetWidth() { return width; }
 	@Override

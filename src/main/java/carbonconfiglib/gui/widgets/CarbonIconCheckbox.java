@@ -62,7 +62,7 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
-		if(this.enabled && this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
+		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
 			playPressSound(Minecraft.getMinecraft().getSoundHandler());
 			selected = !selected;
 			if(listener != null) listener.run();
@@ -81,21 +81,21 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
-		GuiUtils.drawTextureRegion(x, y, hovered ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
-		GuiUtils.drawTextureRegion(x+2, y+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
+		GuiUtils.drawTextureRegion(xPosition, yPosition, hovered ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		GuiUtils.drawTextureRegion(xPosition+2, yPosition+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
 		if(owner != null && hovered) {
 			owner.addTooltips(tooltip);
 		}
 	}
 	
 	@Override
-	public void setX(int x) { this.x = x; }
+	public void setX(int x) { this.xPosition = x; }
 	@Override
-	public void setY(int y) { this.y = y; }
+	public void setY(int y) { this.yPosition = y; }
 	@Override
-	public int getX() { return x; }
+	public int getX() { return xPosition; }
 	@Override
-	public int getY() { return y; }
+	public int getY() { return yPosition; }
 	@Override
 	public int getWidgetWidth() { return width; }
 	@Override

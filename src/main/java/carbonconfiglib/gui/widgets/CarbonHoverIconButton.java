@@ -47,13 +47,13 @@ public class CarbonHoverIconButton extends GuiButton implements IWidget
 		this.hovered = mousePressed(mc, mouseX, mouseY);
 		int j = this.enabled ? 16777215 : 10526880;
         GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(x + info.xOff, y + info.yOff, info.width, info.height, icons[hovered ? 1 : 0], 16, 16);
+		GuiUtils.drawTextureRegion(xPosition + info.xOff, yPosition + info.yOff, info.width, info.height, icons[hovered ? 1 : 0], 16, 16);
 		GlStateManager.color(1F, 1F, 1F, 1F);
 	}
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
-		if(this.enabled && this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
+		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
 			playPressSound(Minecraft.getMinecraft().getSoundHandler());
 			if(listener != null) listener.accept(this);
 			return true;
@@ -62,13 +62,13 @@ public class CarbonHoverIconButton extends GuiButton implements IWidget
 	}
 	
 	@Override
-	public void setX(int x) { this.x = x; }
+	public void setX(int x) { this.xPosition = x; }
 	@Override
-	public void setY(int y) { this.y = y; }
+	public void setY(int y) { this.yPosition = y; }
 	@Override
-	public int getX() { return x; }
+	public int getX() { return xPosition; }
 	@Override
-	public int getY() { return y; }
+	public int getY() { return yPosition; }
 	@Override
 	public int getWidgetWidth() { return width; }
 	@Override

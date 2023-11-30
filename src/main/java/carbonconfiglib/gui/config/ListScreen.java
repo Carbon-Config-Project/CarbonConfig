@@ -14,13 +14,13 @@ import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.gui.GuiConfirmOpenLink;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -69,7 +69,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 		visibleList.addElements(sortElements(allEntries));
 		addWidget(visibleList);
 		if(shouldHaveSearch()) {
-			searchBox = new CarbonEditBox(fontRenderer, width / 2 - 100, 25, 200, 20);
+			searchBox = new CarbonEditBox(fontRendererObj, width / 2 - 100, 25, 200, 20);
 			searchBox.setSuggestion(I18n.format("gui.carbonconfig.search"));
 			searchBox.setListener(T -> onSearchChange(searchBox, T.toLowerCase(Locale.ROOT)));
 			addWidget(searchBox);
@@ -102,7 +102,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 		if(!tooltips.isEmpty()) {
 			List<String> text = new ObjectArrayList<>();
 			for(ITextComponent entry : tooltips) {
-				text.addAll(fontRenderer.listFormattedStringToWidth(entry.getFormattedText(), Math.max(mouseX, width - mouseX) - 20));
+				text.addAll(fontRendererObj.listFormattedStringToWidth(entry.getFormattedText(), Math.max(mouseX, width - mouseX) - 20));
 			}
 			drawHoveringText(text, mouseX, mouseY);
 			tooltips.clear();
@@ -197,7 +197,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 		}
 		if(validElements.isEmpty()) {
 			box.setSuggestion("");
-			visibleList.updateList(ObjectLists.emptyList());
+			visibleList.updateList(ObjectLists.empty());
 			visibleList.setScrollAmount(visibleList.getScrollAmount());
 			return false;
 		}

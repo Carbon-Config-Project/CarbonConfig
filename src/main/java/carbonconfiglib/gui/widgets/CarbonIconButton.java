@@ -45,7 +45,7 @@ public class CarbonIconButton extends GuiButton implements IWidget
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
-		if(this.enabled && this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height) {
+		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
 			playPressSound(Minecraft.getMinecraft().getSoundHandler());
 			if(listener != null) listener.accept(this);
 			return true;
@@ -58,33 +58,33 @@ public class CarbonIconButton extends GuiButton implements IWidget
 		if(!visible) return;
 		this.hovered = mousePressed(mc, mouseX, mouseY);
         int k = this.getHoverState(this.hovered);
-        GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, x, y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
+        GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, xPosition, yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
         if(iconOnly) {
     		int j = this.enabled ? 16777215 : 10526880;
             GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-    		GuiUtils.drawTextureRegion(x + (width / 2) - 5.5F, y+height/2-5.5F, 11, 11, icon, 16, 16);
+    		GuiUtils.drawTextureRegion(xPosition + (width / 2) - 5.5F, yPosition+height/2-5.5F, 11, 11, icon, 16, 16);
     		GlStateManager.color(1F, 1F, 1F, 1F);
         	return;
         }
         
-		FontRenderer font = mc.fontRenderer;
+		FontRenderer font = mc.fontRendererObj;
 		int width = font.getStringWidth(displayString) + 21;
-		float minX = x + 4 + (this.width / 2) - (width / 2);
+		float minX = xPosition + 4 + (this.width / 2) - (width / 2);
 		int j = this.enabled ? 16777215 : 10526880;
 		GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(minX, y+(height-8)/2, 11, 11, icon, 16, 16);
+		GuiUtils.drawTextureRegion(minX, yPosition+(height-8)/2, 11, 11, icon, 16, 16);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		GuiUtils.drawScrollingShadowString(font, displayString, minX+15, y, width, height-2, GuiAlign.CENTER, j, hash);
+		GuiUtils.drawScrollingShadowString(font, displayString, minX+15, yPosition, width, height-2, GuiAlign.CENTER, j, hash);
 	}
 	
 	@Override
-	public void setX(int x) { this.x = x; }
+	public void setX(int x) { this.xPosition = x; }
 	@Override
-	public void setY(int y) { this.y = y; }
+	public void setY(int y) { this.yPosition = y; }
 	@Override
-	public int getX() { return x; }
+	public int getX() { return xPosition; }
 	@Override
-	public int getY() { return y; }
+	public int getY() { return yPosition; }
 	@Override
 	public int getWidgetWidth() { return width; }
 	@Override

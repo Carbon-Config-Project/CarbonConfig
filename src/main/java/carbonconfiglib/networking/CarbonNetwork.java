@@ -94,7 +94,7 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 	}
 	
 	protected EntityPlayer getPlayer(INetHandler handler) {
-		EntityPlayer entity = (handler instanceof NetHandlerPlayServer ? ((NetHandlerPlayServer)handler).player : null);
+		EntityPlayer entity = (handler instanceof NetHandlerPlayServer ? ((NetHandlerPlayServer)handler).playerEntity : null);
 		return entity != null ? entity : getClientPlayer();
 	}
 	

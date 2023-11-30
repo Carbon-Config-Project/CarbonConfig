@@ -83,16 +83,16 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String request = REQUEST.getFormattedText();
-		fontRenderer.drawString(request, width / 2 - fontRenderer.getStringWidth(request) / 2, height / 2 - 12, -1);
+		fontRendererObj.drawString(request, width / 2 - fontRendererObj.getStringWidth(request) / 2, height / 2 - 12, -1);
 		int index = (tick / 5) % 8;
 		if(index >= 5) index = 8-index;
 		String animation = ANIMATION[index].getFormattedText();
-		fontRenderer.drawString(animation, width / 2 - fontRenderer.getStringWidth(animation) / 2, height / 2, -1);
+		fontRendererObj.drawString(animation, width / 2 - fontRendererObj.getStringWidth(animation) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
 			ITextComponent draw = new TextComponentTranslation("gui.carbonconfig.timeout", timeout).setStyle(new Style().setColor(TextFormatting.RED));
 			String drawing = draw.getFormattedText();
-			fontRenderer.drawString(drawing, width / 2 - fontRenderer.getStringWidth(drawing) / 2, height / 2 + 12, -1);
+			fontRendererObj.drawString(drawing, width / 2 - fontRendererObj.getStringWidth(drawing) / 2, height / 2 + 12, -1);
 		}
 	}
 	

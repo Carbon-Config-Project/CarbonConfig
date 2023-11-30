@@ -1,7 +1,6 @@
 package carbonconfiglib.gui.widgets;
 
 import carbonconfiglib.gui.api.ISuggestionRenderer;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -11,7 +10,6 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -26,6 +24,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -82,7 +81,7 @@ public class SuggestionRenderers
 		public ITextComponent renderSuggestion(String value, int x, int y) {
 			Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(value));
 			if(ench == null) return null;
-			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(ench, ench.getMinLevel())), x, y);
+			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(ench, ench.getMinLevel())), x, y);
 			return new TextComponentString(ench.getTranslatedName(ench.getMinLevel())).setStyle(new Style().setColor(TextFormatting.YELLOW)).appendText("\n").appendSibling(new TextComponentString(value).setStyle(new Style().setColor(TextFormatting.GRAY)));
 		}
 	}

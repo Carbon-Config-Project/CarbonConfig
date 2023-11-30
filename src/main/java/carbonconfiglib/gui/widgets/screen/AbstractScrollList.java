@@ -19,7 +19,7 @@ import carbonconfiglib.gui.screen.SmoothFloat;
 import carbonconfiglib.gui.widgets.screen.AbstractScrollList.Entry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -194,7 +194,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 		scrollAmount.update(partialTicks);
 		this.renderBackground();
 		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder builder = tes.getBuffer();
+		VertexBuffer builder = tes.getBuffer();
 		this.hovered = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPosition((double)mouseX, (double)mouseY) : null;
 		if (this.renderBackground) {
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

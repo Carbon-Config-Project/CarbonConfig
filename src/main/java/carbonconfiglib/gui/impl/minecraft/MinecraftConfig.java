@@ -61,7 +61,7 @@ public class MinecraftConfig implements IModConfig
 	public MinecraftConfig() {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
-		setRules(server.getWorld(0).getWorldInfo().getGameRulesInstance());
+		setRules(server.worlds[0].getWorldInfo().getGameRulesInstance());
 	}
 	
 	protected MinecraftConfig(GameRules current) {

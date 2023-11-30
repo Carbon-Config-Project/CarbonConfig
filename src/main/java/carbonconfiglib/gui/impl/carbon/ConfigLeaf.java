@@ -2,8 +2,6 @@ package carbonconfiglib.gui.impl.carbon;
 
 import java.util.List;
 
-import org.apache.logging.log4j.util.Strings;
-
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.IArrayConfig;
@@ -13,12 +11,12 @@ import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.impl.ReloadMode;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -119,7 +117,7 @@ public class ConfigLeaf implements IConfigNode
 			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
 		}
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) comp.appendText("\n").appendSibling(new TextComponentString(limit).setStyle(new Style().setColor(TextFormatting.BLUE)));
+		if(limit != null && !limit.trim().isEmpty()) comp.appendText("\n").appendSibling(new TextComponentString(limit).setStyle(new Style().setColor(TextFormatting.BLUE)));
 		return comp;
 	}
 }

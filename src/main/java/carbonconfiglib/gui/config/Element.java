@@ -6,12 +6,12 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.screen.AbstractScrollList;
 import carbonconfiglib.gui.widgets.screen.IInteractable;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -30,7 +30,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class Element extends AbstractScrollList.ContainerEntry<Element> {
 	protected Minecraft mc = Minecraft.getMinecraft();
-	protected FontRenderer font = mc.fontRenderer;
+	protected FontRenderer font = mc.fontRendererObj;
 	protected ITextComponent name;
 	protected ITextComponent unchanged;
 	protected ITextComponent changed;
@@ -82,6 +82,6 @@ public class Element extends AbstractScrollList.ContainerEntry<Element> {
 	
 	@Override
 	public List<? extends IInteractable> children() {
-		return ObjectLists.emptyList();
+		return ObjectLists.empty();
 	}
 }

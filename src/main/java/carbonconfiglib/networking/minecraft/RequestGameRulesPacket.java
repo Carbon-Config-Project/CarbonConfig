@@ -55,7 +55,7 @@ public class RequestGameRulesPacket implements ICarbonPacket
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeCompoundTag(server.getWorld(0).getGameRules().writeToNBT());
+		buf.writeCompoundTag(server.worlds[0].getGameRules().writeToNBT());
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(requestId, data), player);

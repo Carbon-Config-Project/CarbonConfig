@@ -167,12 +167,12 @@ public class ConfigElement extends Element
 		int maxX = Integer.MAX_VALUE;
 		if(renderChildren()) {
 			if(isArray()) {
-				moveUp.x = left + width - 16;
-				moveUp.y = top;
+				moveUp.xPosition = left + width - 16;
+				moveUp.yPosition = top;
 				moveUp.visible = canMoveUp();
 				moveUp.render(mc, mouseX, mouseY, partialTicks);
-				moveDown.x = left + width - 16;
-				moveDown.y = top + 10;
+				moveDown.xPosition = left + width - 16;
+				moveDown.yPosition = top + 10;
 				moveDown.visible = canMoveDown();
 				moveDown.render(mc, mouseX, mouseY, partialTicks);
 				if(moveDown.visible || moveUp.visible) {

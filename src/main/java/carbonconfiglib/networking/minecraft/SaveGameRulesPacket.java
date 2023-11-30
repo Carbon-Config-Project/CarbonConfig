@@ -55,7 +55,7 @@ public class SaveGameRulesPacket implements ICarbonPacket
 		}
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
-		GameRules rule = server.getWorld(0).getGameRules();
+		GameRules rule = server.worlds[0].getGameRules();
 		rule.readFromNBT(rules.writeToNBT());
 	}
 	

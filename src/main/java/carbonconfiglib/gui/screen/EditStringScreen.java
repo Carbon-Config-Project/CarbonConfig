@@ -60,7 +60,7 @@ public class EditStringScreen extends CarbonScreen
 		int x = width / 2 - 100;
 		GuiButton apply = addWidget(new CarbonButton(x+10, 160, 85, 20, I18n.format("gui.carbonconfig.apply"), this::save));
 		addWidget(new CarbonButton(x+105, 160, 85, 20, I18n.format("gui.carbonconfig.cancel"), this::cancel));
-		textBox = new CarbonEditBox(fontRenderer, x, 113, 200, 18);
+		textBox = new CarbonEditBox(fontRendererObj, x, 113, 200, 18);
 		addWidget(textBox);
 		textBox.setText(value.get());
 		textBox.setListener(T -> {
@@ -82,9 +82,9 @@ public class EditStringScreen extends CarbonScreen
 		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 85, -1);
+		fontRendererObj.drawString(title, (width/2)-(fontRendererObj.getStringWidth(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			drawHoveringText(new ObjectArrayList<>(fontRenderer.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY);
+			drawHoveringText(new ObjectArrayList<>(fontRendererObj.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY);
 		}
 	}
 	

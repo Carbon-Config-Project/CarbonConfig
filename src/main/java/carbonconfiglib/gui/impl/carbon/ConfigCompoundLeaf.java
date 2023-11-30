@@ -3,8 +3,6 @@ package carbonconfiglib.gui.impl.carbon;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.util.Strings;
-
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.IArrayConfig;
@@ -139,7 +137,7 @@ public class ConfigCompoundLeaf implements IConfigNode
 			for(int i = 0;i<array.length;comp.appendText(array[i++]).appendText("\n"));
 		}
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) {
+		if(limit != null && !limit.trim().isEmpty()) {
 			String[] split = Helpers.splitArray(limit, ",");
 			for(int i = 0,m=split.length;i<m;comp.appendText("\n").appendSibling(new TextComponentString(split[i++]).setStyle(new Style().setColor(TextFormatting.GRAY))));
 		}

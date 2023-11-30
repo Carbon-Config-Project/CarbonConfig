@@ -51,7 +51,7 @@ public class MultiChoiceScreen extends CarbonScreen
 	@Override
 	public void initGui() {
 		super.initGui();
-		output = fontRenderer.listFormattedStringToWidth(message.getFormattedText(), width-50);
+		output = fontRendererObj.listFormattedStringToWidth(message.getFormattedText(), width-50);
 		this.addButtons(MathHelper.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
 	}
 	
@@ -66,10 +66,10 @@ public class MultiChoiceScreen extends CarbonScreen
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks){
 		drawDefaultBackground();
-		drawCenteredString(this.fontRenderer, this.title.getFormattedText(), this.width / 2, this.titleTop(), 16777215);
+		drawCenteredString(this.fontRendererObj, this.title.getFormattedText(), this.width / 2, this.titleTop(), 16777215);
 		int yOffset = messageTop();
 		for(String s : output) {
-			drawCenteredString(this.fontRenderer, s, this.width / 2, yOffset, 16777215);
+			drawCenteredString(this.fontRendererObj, s, this.width / 2, yOffset, 16777215);
 			yOffset += 9;
 		}
 		super.drawScreen(mouseX, mouseY, partialTicks);

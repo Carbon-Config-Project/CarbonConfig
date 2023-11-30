@@ -118,7 +118,7 @@ public abstract class ListSelectionScreen extends ListScreen
 		apply.enabled = value.isChanged();
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		String title = this.title.getFormattedText();
-		fontRenderer.drawString(title, (width/2)-(fontRenderer.getStringWidth(title)/2), 8, -1);
+		fontRendererObj.drawString(title, (width/2)-(fontRendererObj.getStringWidth(title)/2), 8, -1);
 	}
 	
 	@Override
