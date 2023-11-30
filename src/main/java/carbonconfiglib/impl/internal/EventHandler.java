@@ -219,7 +219,6 @@ public class EventHandler implements IConfigChangeListener
 		CarbonConfig.NETWORK.onPlayerLeft(event.player, true);
 	}
 	
-	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientJoinEvent() {
 		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
@@ -229,7 +228,6 @@ public class EventHandler implements IConfigChangeListener
 		CarbonConfig.NETWORK.sendToServer(packet);
 	}
 	
-	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientLeaveEvent() {
 		CarbonConfig.NETWORK.onPlayerLeft(null, false);
