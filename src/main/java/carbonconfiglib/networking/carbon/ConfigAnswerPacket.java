@@ -41,13 +41,13 @@ public class ConfigAnswerPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUniqueId(id);
+		buffer.writeUuid(id);
 		buffer.writeByteArray(data);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		id = buffer.readUniqueId();
+		id = buffer.readUuid();
 		data = buffer.readByteArray();
 	}
 	

@@ -224,7 +224,7 @@ public class ConfigScreen extends ListScreen
 			mc.displayGuiScreen(choice);
 			return;
 		}
-		else if(mc.world != null && findFirst(IConfigNode::requiresReload, value)) {
+		else if(mc.theWorld != null && findFirst(IConfigNode::requiresReload, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
 				mc.displayGuiScreen(parent);
 			}, new TextComponentTranslation("gui.carbonconfig.reload.title"), new TextComponentTranslation("gui.carbonconfig.reload.message").setStyle(new Style().setColor(TextFormatting.GRAY)), new TextComponentTranslation("gui.carbonconfig.ok"));

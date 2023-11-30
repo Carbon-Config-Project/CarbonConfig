@@ -101,7 +101,7 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 	@SideOnly(Side.CLIENT)
 	protected EntityPlayer getClientPlayer() {
 		Minecraft mc = Minecraft.getMinecraft();
-		return mc == null ? null : mc.player;
+		return mc == null ? null : mc.thePlayer;
 	}
 	
 	public void sendToServer(ICarbonPacket packet) {
@@ -131,7 +131,7 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 	
 	private List<EntityPlayerMP> getAllPlayers() {
 		List<EntityPlayerMP> players = new ObjectArrayList<>();
-		for(EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers()) {
+		for(EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList()) {
 			if(isInstalledOnClient(player)) 
 				players.add(player);
 		}

@@ -42,14 +42,14 @@ public class ConfigRequestPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUniqueId(id);
+		buffer.writeUuid(id);
 		buffer.writeString(identifier);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		id = buffer.readUniqueId();
-		identifier = buffer.readString(32767);
+		id = buffer.readUuid();
+		identifier = buffer.readStringFromBuffer(32767);
 	}
 	
 	@Override

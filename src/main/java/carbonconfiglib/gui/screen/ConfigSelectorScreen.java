@@ -83,7 +83,7 @@ public class ConfigSelectorScreen extends ListScreen
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
 		toAdd = null;
-		if(mc.world != null) {
+		if(mc.theWorld != null) {
 			if(!mc.isIntegratedServerRunning()) {
 				if(!isInstalledOnServer()) {
 					return;
@@ -91,7 +91,7 @@ public class ConfigSelectorScreen extends ListScreen
 				if(isLanServer()) {
 					return;
 				}
-				if(mc.player.getPermissionLevel() < 4) {
+				if(mc.thePlayer.getPermissionLevel() < 4) {
 					return;
 				}
 				toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.multiplayer").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
@@ -214,7 +214,7 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		private boolean isInWorldConfig() {
-			return mc.world != null && (handler.getConfigType() == ConfigType.SERVER || (handler.getConfigType() == ConfigType.SHARED && multiplayer));
+			return mc.theWorld != null && (handler.getConfigType() == ConfigType.SERVER || (handler.getConfigType() == ConfigType.SHARED && multiplayer));
 		}
 		
 		private Icon getIcon() {

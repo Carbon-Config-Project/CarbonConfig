@@ -90,10 +90,10 @@ public class ForgeConfig implements IModConfig
 	public void save() {
 		boolean needsRestart = scanConfigs(this::hasRestartChanged);
 		config.save();
-        ConfigChangedEvent event = new OnConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().world != null, needsRestart);
+        ConfigChangedEvent event = new OnConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.getResult().equals(Result.DENY))
-            MinecraftForge.EVENT_BUS.post(new PostConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().world != null, needsRestart));
+            MinecraftForge.EVENT_BUS.post(new PostConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart));
 	}
 	
 	private boolean scanConfigs(Predicate<Property> props) {

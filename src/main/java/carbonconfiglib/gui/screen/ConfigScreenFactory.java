@@ -32,15 +32,12 @@ public class ConfigScreenFactory implements IModGuiFactory
 	
 	@Override
 	public void initialize(Minecraft minecraftInstance) {}
-	@Override
-	public boolean hasConfigGui() { return true; }
-	@Override
 	public GuiScreen createConfigGui(GuiScreen parentScreen) { return new ConfigSelectorScreen(configs, parentScreen); }
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() { return null; }
 	@Override
-	public Class<? extends GuiScreen> mainConfigGuiClass() { return null; }
+	public Class<? extends GuiScreen> mainConfigGuiClass() { return ConfigSelectorScreen.class; }
 	@Override
 	@SuppressWarnings("deprecation")
-	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) { return null; }
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) { return null; }		
 }

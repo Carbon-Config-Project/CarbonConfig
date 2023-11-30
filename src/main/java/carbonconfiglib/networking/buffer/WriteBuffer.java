@@ -55,7 +55,7 @@ public class WriteBuffer implements IWriteBuffer
 	
 	@Override
 	public void writeVarInt(int value) {
-		buf.writeVarInt(value);
+		buf.writeVarIntToBuffer(value);
 	}
 	
 	@Override
@@ -95,7 +95,7 @@ public class WriteBuffer implements IWriteBuffer
 	
 	@Override
 	public void writeUUID(UUID value) {
-		buf.writeUniqueId(value);
+		buf.writeUuid(value);
 	}
 	
 }

@@ -39,12 +39,12 @@ public class RequestGameRulesPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUniqueId(requestId);
+		buffer.writeUuid(requestId);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		requestId = buffer.readUniqueId();
+		requestId = buffer.readUuid();
 	}
 	
 	@Override
@@ -55,7 +55,7 @@ public class RequestGameRulesPacket implements ICarbonPacket
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeCompoundTag(server.worlds[0].getGameRules().writeToNBT());
+		buf.writeNBTTagCompoundToBuffer(server.worldServers[0].getGameRules().writeToNBT());
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(requestId, data), player);

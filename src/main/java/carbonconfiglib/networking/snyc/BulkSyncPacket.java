@@ -48,7 +48,7 @@ public class BulkSyncPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeVarInt(packets.size());
+		buffer.writeVarIntToBuffer(packets.size());
 		for(SyncPacket packet : packets) {
 			packet.write(buffer);
 		}
@@ -56,7 +56,7 @@ public class BulkSyncPacket implements ICarbonPacket
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		int size = buffer.readVarInt();
+		int size = buffer.readVarIntFromBuffer();
 		for(int i = 0;i<size;i++) {
 			SyncPacket packet = new SyncPacket();
 			packet.read(buffer);
@@ -71,7 +71,7 @@ public class BulkSyncPacket implements ICarbonPacket
 			result = ReloadMode.or(result, packet.processEntry(player));
 		}
 		if(result != null) {
-			player.sendMessage(result.getName());
+			player.addChatMessage(result.getName());
 		}
 	}
 	

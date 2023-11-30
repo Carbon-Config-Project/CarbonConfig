@@ -72,7 +72,7 @@ public class SyncPacket implements ICarbonPacket
 	public void write(PacketBuffer buffer) {
 		buffer.writeString(identifier);
 		buffer.writeEnumValue(type);
-		buffer.writeVarInt(entries.size());
+		buffer.writeVarIntToBuffer(entries.size());
 		for(Map.Entry<String, byte[]> entry : entries.entrySet()) {
 			buffer.writeString(entry.getKey());
 			buffer.writeByteArray(entry.getValue());
@@ -81,11 +81,11 @@ public class SyncPacket implements ICarbonPacket
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		identifier = buffer.readString(32767);
+		identifier = buffer.readStringFromBuffer(32767);
 		type = buffer.readEnumValue(SyncType.class);
-		int size = buffer.readVarInt();
+		int size = buffer.readVarIntFromBuffer();
 		for(int i = 0;i<size;i++) {
-			entries.put(buffer.readString(32767), buffer.readByteArray());
+			entries.put(buffer.readStringFromBuffer(32767), buffer.readByteArray());
 		}
 	}
 	
@@ -93,7 +93,7 @@ public class SyncPacket implements ICarbonPacket
 	public void process(EntityPlayer player) {
 		ReloadMode mode = processEntry(player);
 		if(mode != null) {
-			player.sendMessage(mode.getName());
+			player.addChatMessage(mode.getName());
 		}
 	}
 	

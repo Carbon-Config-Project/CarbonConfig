@@ -20,6 +20,7 @@ import carbonconfiglib.gui.screen.ConfigScreenFactory;
 import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import carbonconfiglib.impl.PerWorldProxy;
+import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
@@ -35,6 +36,7 @@ import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -161,6 +163,20 @@ public class EventHandler implements IConfigChangeListener
 		}
 	}
 	
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onGuiButtonClicked(ActionPerformedEvent.Pre event) {
+		if(event.getGui() instanceof GuiModList && event.getButton().id == 20) {
+			ModContainer container = Reflects.getSelectedMod((GuiModList)event.getGui());
+			if(container == null) return;
+			IModGuiFactory factory = FMLClientHandler.instance().getGuiFactoryFor(container);
+			if(factory instanceof ConfigScreenFactory) {
+				event.setCanceled(true);
+				Minecraft.getMinecraft().displayGuiScreen(((ConfigScreenFactory)factory).createConfigGui(event.getGui()));
+			}
+		}
+	}
+	
 	@SideOnly(Side.CLIENT)
 	private void registerConfigs() {
 		if(loaded) return;
@@ -178,7 +194,7 @@ public class EventHandler implements IConfigChangeListener
 			});
 		}
 		//This has to be done because otherwise MinecraftServer crashes during startup. I assume forges code deleter in 1.12.2 is as shitty as fabrics was in 1.19.2 xD
-		Optional.of(Loader.instance().getMinecraftModContainer()).ifPresent(T -> {
+		Optional.of(Loader.instance().getIndexedModList().get("carbonconfig")).ifPresent(T -> {
 			mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
 		});
 		mappedConfigs.forEach((M, C) -> factory.put(M, new ConfigScreenFactory(ModConfigList.createMultiIfApplicable(M, C))));

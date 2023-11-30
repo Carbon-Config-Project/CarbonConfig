@@ -55,7 +55,7 @@ public class ReadBuffer implements IReadBuffer
 	
 	@Override
 	public int readVarInt() {
-		return buf.readVarInt();
+		return buf.readVarIntFromBuffer();
 	}
 	
 	@Override
@@ -90,11 +90,11 @@ public class ReadBuffer implements IReadBuffer
 	
 	@Override
 	public String readString() {
-		return buf.readString(32767);
+		return buf.readStringFromBuffer(32767);
 	}
 	
 	@Override
 	public UUID readUUID() {
-		return buf.readUniqueId();
+		return buf.readUuid();
 	}
 }

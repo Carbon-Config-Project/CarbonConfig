@@ -63,7 +63,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.11]")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.10]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -188,11 +188,11 @@ public class CarbonConfig
 			return;
 		}
 		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.player == null) {
+		if(mc.thePlayer == null) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
 			return;
 		}
-		else if(mc.player.getPermissionLevel() < 4) {
+		else if(mc.thePlayer.getPermissionLevel() < 4) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");			
 			return;
 		}
@@ -246,7 +246,7 @@ public class CarbonConfig
 	@SideOnly(Side.CLIENT)
 	public void onClientLoad() {
 		EventHandler.INSTANCE.onConfigsLoaded();
-		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPADENTER, "key.carbon_config");
+		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPAD0, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
 		MOD_GUI = mapping::isKeyDown;
 	}
@@ -255,7 +255,7 @@ public class CarbonConfig
 	@SideOnly(Side.CLIENT)
 	public void onKeyPressed(KeyInputEvent event) {
 		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.player != null && MOD_GUI.getAsBoolean()) {
+		if(mc.thePlayer != null && MOD_GUI.getAsBoolean()) {
 			mc.displayGuiScreen(new GuiModList(mc.currentScreen));
 		}
 	}

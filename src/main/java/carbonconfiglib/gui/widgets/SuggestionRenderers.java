@@ -49,7 +49,7 @@ public class SuggestionRenderers
 		@Override
 		public ITextComponent renderSuggestion(String value, int x, int y) {
 			Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(value));
-			if(item == Items.AIR || item == null) return null;
+			if(item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
 			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(itemStack, x, y);
 			return new TextComponentString(itemStack.getDisplayName()).setStyle(new Style().setColor(TextFormatting.YELLOW)).appendText("\n").appendSibling(new TextComponentString(value).setStyle(new Style().setColor(TextFormatting.GRAY)));			

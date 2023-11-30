@@ -61,7 +61,7 @@ public class MinecraftConfig implements IModConfig
 	public MinecraftConfig() {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
-		setRules(server.worlds[0].getWorldInfo().getGameRulesInstance());
+		setRules(server.worldServers[0].getWorldInfo().getGameRulesInstance());
 	}
 	
 	protected MinecraftConfig(GameRules current) {
@@ -258,7 +258,7 @@ public class MinecraftConfig implements IModConfig
 		@Override
 		public boolean test(PacketBuffer buffer) {
 			try {
-				setRules(FileConfig.parse(buffer.readCompoundTag()));
+				setRules(FileConfig.parse(buffer.readNBTTagCompoundFromBuffer()));
 				return true;
 			}
 			catch(IOException e) {

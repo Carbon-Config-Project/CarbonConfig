@@ -46,8 +46,8 @@ public class SaveConfigPacket implements ICarbonPacket
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		identifier = buffer.readString(32767);
-		data = buffer.readString(262144);
+		identifier = buffer.readStringFromBuffer(32767);
+		data = buffer.readStringFromBuffer(262144);
 	}
 	
 	@Override

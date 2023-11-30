@@ -19,9 +19,9 @@ import carbonconfiglib.gui.screen.SmoothFloat;
 import carbonconfiglib.gui.widgets.screen.AbstractScrollList.Entry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 
@@ -151,7 +151,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 		int j = this.x0 + this.width / 2;
 		int k = j - i;
 		int l = j + i;
-		int i1 = MathHelper.floor(mouseY - (double)this.y0) - this.headerHeight + (int)this.getScrollAmount() - 4;
+		int i1 = MathHelper.floor_double(mouseY - (double)this.y0) - this.headerHeight + (int)this.getScrollAmount() - 4;
 		int j1 = i1 / this.itemHeight;
 		return (E)(mouseX < (double)this.getScrollbarPosition() && mouseX >= (double)k && mouseX <= (double)l && j1 >= 0 && i1 >= 0 && j1 < this.getItemCount() ? this.children().get(j1) : null);
 	}
@@ -252,7 +252,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 		int maxScroll = this.getMaxScroll();
 		if (maxScroll > 0) {
 			int maxPosition = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
-			maxPosition = MathHelper.clamp(maxPosition, 32, this.y1 - this.y0 - 8);
+			maxPosition = MathHelper.clamp_int(maxPosition, 32, this.y1 - this.y0 - 8);
 			int scrollValue = (int)this.getScrollAmount() * (this.y1 - this.y0 - maxPosition) / maxScroll + this.y0;
 			if (scrollValue < this.y0) {
 				scrollValue = this.y0;
@@ -315,7 +315,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	}
 	
 	public void setScrollAmount(double value) {
-		this.scrollAmount.setTarget((float)MathHelper.clamp(value, 0.0D, (double)this.getMaxScroll()));
+		this.scrollAmount.setTarget((float)MathHelper.clamp_double(value, 0.0D, (double)this.getMaxScroll()));
 	}
 	
 	public int getMaxScroll() {
@@ -373,7 +373,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 			} else {
 				double d0 = (double)Math.max(1, this.getMaxScroll());
 				int i = this.y1 - this.y0;
-				int j = MathHelper.clamp((int)((float)(i * i) / (float)this.getMaxPosition()), 32, i - 8);
+				int j = MathHelper.clamp_int((int)((float)(i * i) / (float)this.getMaxPosition()), 32, i - 8);
 				double d1 = Math.max(1.0D, d0 / (double)(i - j));
 				this.setScrollAmount(this.getScrollAmount() + dragY * d1);
 			}
@@ -422,7 +422,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 		if (!this.children().isEmpty()) {
 			int index = this.children().indexOf(this.getSelected());
 			while(true) {
-				int nextIndex = MathHelper.clamp(index + i, 0, this.getItemCount() - 1);
+				int nextIndex = MathHelper.clamp_int(index + i, 0, this.getItemCount() - 1);
 				if (index == nextIndex) break;
 				E entry = this.children().get(nextIndex);
 				if (filter.test(entry)) {

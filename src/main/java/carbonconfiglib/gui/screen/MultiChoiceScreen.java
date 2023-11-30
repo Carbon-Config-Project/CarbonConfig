@@ -52,7 +52,7 @@ public class MultiChoiceScreen extends CarbonScreen
 	public void initGui() {
 		super.initGui();
 		output = fontRendererObj.listFormattedStringToWidth(message.getFormattedText(), width-50);
-		this.addButtons(MathHelper.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
+		this.addButtons(MathHelper.clamp_int(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
 	}
 	
 	protected void addButtons(int y) {
@@ -77,7 +77,7 @@ public class MultiChoiceScreen extends CarbonScreen
 	
 	private int titleTop() {
 		int i = (this.height - this.messageHeight()) / 2;
-		return MathHelper.clamp(i - 20 - 9, 10, 80);
+		return MathHelper.clamp_int(i - 20 - 9, 10, 80);
 	}
 	
 	private int messageTop() {
