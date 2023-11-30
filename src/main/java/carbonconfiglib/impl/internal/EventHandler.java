@@ -1,6 +1,10 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import com.google.common.collect.BiMap;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
@@ -10,9 +14,12 @@ import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.api.ISuggestionRenderer;
 import carbonconfiglib.gui.config.ColorElement;
 import carbonconfiglib.gui.config.RegistryElement;
-import carbonconfiglib.gui.screen.ConfigSelectorScreen;
+import carbonconfiglib.gui.impl.forge.ForgeConfigs;
+import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
+import carbonconfiglib.gui.screen.ConfigScreenFactory;
 import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.gui.widgets.screen.CarbonScreen;
+import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
@@ -27,10 +34,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.GuiModList;
+import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -38,7 +51,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
+import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -58,7 +73,24 @@ import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHas
 public class EventHandler implements IConfigChangeListener
 {
 	public static final EventHandler INSTANCE = new EventHandler();
+	boolean loaded = false;
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
+	Object2ObjectMap<ModContainer, List<Configuration>> forgeConfigs = new Object2ObjectLinkedOpenHashMap<ModContainer, List<Configuration>>().synchronize();
+	
+	public static void registerConfig(Configuration config) {
+		if(config == null || config.getConfigFile() == null || FMLCommonHandler.instance().getSide().isServer()) return;
+		ModContainer container = Loader.instance().activeModContainer();
+		if(container == null) return;
+		INSTANCE.forgeConfigs.supplyIfAbsent(container, ObjectArrayList::new).add(config);
+	}
+	
+	public static void onPlayerClientJoin() {
+		INSTANCE.onPlayerClientJoinEvent();
+	}
+	
+	public static void onPlayerClientLeave() {
+		INSTANCE.onPlayerClientLeaveEvent();
+	}
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
@@ -104,7 +136,7 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
+	@SideOnly(Side.SERVER)
 	public void onServerTickEvent(ServerTickEvent event) {
 		if(event.phase == Phase.END) processEvents();
 	}
@@ -121,31 +153,40 @@ public class EventHandler implements IConfigChangeListener
 		}
 	}
 	
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onGuiOpenedEvent(GuiOpenEvent event) {
+		if(event.getGui() instanceof GuiModList) {
+			registerConfigs();
+		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	private void registerConfigs() {
+		if(loaded) return;
+		loaded = true;
+		BiMap<ModContainer, IModGuiFactory> factory = ObfuscationReflectionHelper.getPrivateValue(FMLClientHandler.class, FMLClientHandler.instance(), "guiFactories");
+		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
+		configs.forEach((M, C) -> {
+			if(factory.containsKey(M)) return;
+			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
+		});
+		if(CarbonConfig.FORGE_SUPPORT.get()) {			
+			forgeConfigs.forEach((M, C) -> {
+				if(factory.containsKey(M) && !CarbonConfig.FORCE_FORGE_SUPPORT.get()) return;
+				mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(new ForgeConfigs(M, C));
+			});
+		}
+		//This has to be done because otherwise MinecraftServer crashes during startup. I assume forges code deleter in 1.12.2 is as shitty as fabrics was in 1.19.2 xD
+		Optional.of(Loader.instance().getMinecraftModContainer()).ifPresent(T -> {
+			mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
+		});
+		mappedConfigs.forEach((M, C) -> factory.put(M, new ConfigScreenFactory(ModConfigList.createMultiIfApplicable(M, C))));
+	}
+	
 	@SideOnly(Side.CLIENT)
 	public void onConfigsLoaded() {
 		loadDefaultTypes();
-//		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
-//		configs.forEach((M, C) -> {
-//			if(M.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) return;
-//			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
-//		});
-//		if(CarbonConfig.FORGE_SUPPORT.get()) {
-//			for(ModContainer container : Loader.instance().getModList()) {
-//				
-//			}
-//			ModList.get().forEachModContainer((K, T)-> {
-//				if(!T.getCustomExtension(ExtensionPoint.CONFIGGUIFACTORY).isPresent()) {
-//					ForgeConfigs configs = new ForgeConfigs(T);
-//					if(configs.hasConfigs()) {
-//						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
-//					}
-//					else if(T instanceof MinecraftModContainer) {
-//						mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
-//					}
-//				};
-//			});
-//		}
-//		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (E, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C))));
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -165,11 +206,6 @@ public class EventHandler implements IConfigChangeListener
 		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new));
 	}
 	
-	@SideOnly(Side.CLIENT)
-	private GuiScreen create(GuiScreen screen, IModConfigs configs) {	
-		return new ConfigSelectorScreen(configs, screen);
-	}
-	
 	public void onServerJoinPacket(EntityPlayer player) {
 		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Side.SERVER), player);
 		CarbonConfig.NETWORK.onPlayerJoined(player, true);
@@ -180,38 +216,39 @@ public class EventHandler implements IConfigChangeListener
 	
 	@SubscribeEvent
 	public void onServerLeaveEvent(PlayerLoggedOutEvent event) {
-		CarbonConfig.NETWORK.onPlayerLeft(event.player, true);		
+		CarbonConfig.NETWORK.onPlayerLeft(event.player, true);
 	}
 	
-//	@SubscribeEvent
-//	@SideOnly(Side.CLIENT)
-//	public void onPlayerServerJoinEvent(LoggedInEvent event) {
-//		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
-//		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Side.CLIENT));
-//		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
-//		if(packet == null) return;
-//		CarbonConfig.NETWORK.sendToServer(packet);
-//	}
-//	
-//	@SubscribeEvent
-//	@SideOnly(Side.CLIENT)
-//	public void onPlayerServerJoinEvent(LoggedOutEvent event) {
-//		if(Minecraft.getMinecraft().getIntegratedServer() != null) {
-//			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
-//				if(PerWorldProxy.isProxy(handler.getProxy())) {
-//					handler.unload();
-//				}
-//			}
-//		}
-//	}
-//	
-//	private void loadMPConfigs() {
-//		for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
-//			if(PerWorldProxy.isProxy(handler.getProxy())) {
-//				handler.load();
-//			}
-//		}
-//	}
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onPlayerClientJoinEvent() {
+		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
+		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Side.CLIENT));
+		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
+		if(packet == null) return;
+		CarbonConfig.NETWORK.sendToServer(packet);
+	}
+	
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onPlayerClientLeaveEvent() {
+		CarbonConfig.NETWORK.onPlayerLeft(null, false);
+		if(Minecraft.getMinecraft().getIntegratedServer() != null) {
+			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
+				if(PerWorldProxy.isProxy(handler.getProxy())) {
+					handler.unload();
+				}
+			}
+		}
+	}
+	
+	private void loadMPConfigs() {
+		for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
+			if(PerWorldProxy.isProxy(handler.getProxy())) {
+				handler.load();
+			}
+		}
+	}
 	
 	private void processEvents() {
 		CarbonConfig.CONFIGS.processFileSystemEvents();

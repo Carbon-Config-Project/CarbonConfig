@@ -55,6 +55,7 @@ public class CarbonIconButton extends GuiButton implements IWidget
 	
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		if(!visible) return;
 		this.hovered = mousePressed(mc, mouseX, mouseY);
         int k = this.getHoverState(this.hovered);
         GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, x, y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);

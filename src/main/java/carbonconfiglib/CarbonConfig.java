@@ -72,10 +72,12 @@ public class CarbonConfig
 	public static BooleanSupplier MOD_GUI = () -> false;
 	ConfigHandler handler;
 	public static BoolValue FORGE_SUPPORT; 
+	public static BoolValue FORCE_FORGE_SUPPORT; 
 	public static BoolValue FORCE_CUSTOM_BACKGROUND;
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
 	
+	@net.minecraftforge.fml.common.Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
 	{
 		NETWORK.init();
@@ -85,11 +87,13 @@ public class CarbonConfig
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
+			FORCE_FORGE_SUPPORT = section.addBool("force-forge-support", true, "Enables that Carbon Config Overrides the config guis of forge mods that have added their own guis").setRequiredReload(ReloadMode.GAME);
 			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
 			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
-			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
+			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD, AutomationType.AUTO_RELOAD));
 			handler.register();
+			LOGGER.info("Config Loaded");
 		}
 	}
 	

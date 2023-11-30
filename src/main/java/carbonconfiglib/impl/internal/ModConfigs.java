@@ -79,7 +79,7 @@ public class ModConfigs implements IModConfigs
 	}
 	
 	public static Optional<BackgroundTexture> computeTexture(ModContainer container) {
-		String[] values = container.getCustomModProperties().get("guiconfig").split(";");
+		String[] values = container.getCustomModProperties().getOrDefault("guiconfig", "").split(";");
 		if(values.length < 2) return Optional.empty();
 		Map<String, String> arguments = new Object2ObjectOpenHashMap<>();
 		for(int i = 0,m=values.length;i+1<m;i+=2) {

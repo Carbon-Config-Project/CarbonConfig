@@ -35,7 +35,7 @@ public class BackgroundTexture
 	private BackgroundTexture() {}
 	
 	public static Builder of() {
-		return new Builder().withTexture("minecraft:textures/block/oak_planks.png").withBrightness(192);
+		return new Builder().withTexture("minecraft:textures/blocks/planks_oak.png").withBrightness(192);
 	}
 	
 	public static Builder of(String id) {

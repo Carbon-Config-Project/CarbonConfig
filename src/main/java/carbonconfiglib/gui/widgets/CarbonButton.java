@@ -46,6 +46,7 @@ public class CarbonButton extends GuiButton implements IWidget
 	
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		if(!visible) return;
 		this.hovered = mousePressed(mc, mouseX, mouseY);
 		int k = this.getHoverState(this.hovered);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1F);

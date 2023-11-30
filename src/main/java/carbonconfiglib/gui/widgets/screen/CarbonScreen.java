@@ -33,10 +33,8 @@ public class CarbonScreen extends GuiScreen implements IInteractableContainer
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		double weel = Mouse.getEventDWheel() / 120D;
-		if(mouseScroll(mouseX, mouseY, weel)) {
-			Mouse.getDWheel();
-		}
+		double weel = Mouse.getDWheel() / 120D;
+		if(((int)weel) != 0 && mouseScroll(mouseX, mouseY, weel));
 		
 		for(IRenderable render : renderable) {
 			render.render(mc, mouseX, mouseY, partialTicks);
@@ -100,7 +98,7 @@ public class CarbonScreen extends GuiScreen implements IInteractableContainer
 	@Override
 	protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		double diffX = mouseX - lastX;
-		double diffY = mouseX - lastY;
+		double diffY = mouseY - lastY;
 		lastX = mouseX;
 		lastY = mouseY;
 		if(mouseDrag(mouseX, mouseY, clickedMouseButton, diffX, diffY)) return;

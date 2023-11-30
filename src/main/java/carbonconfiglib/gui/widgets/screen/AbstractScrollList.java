@@ -51,7 +51,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	private IInteractable focused;
 	private boolean isDragging;
 	private int lastTick = 0;
-	SmoothFloat scrollAmount = new SmoothFloat(0.8F);
+	SmoothFloat scrollAmount = new SmoothFloat(0.5F);
 	
 	public AbstractScrollList(int width, int height, int screenY, int listY, int itemHeight) {
 		this.width = width;
@@ -311,7 +311,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	}
 	
 	public double getScrollAmount() {
-		return scrollAmount.getValue();
+		return scrolling ? scrollAmount.getTarget() : scrollAmount.getValue();
 	}
 	
 	public void setScrollAmount(double value) {
@@ -354,7 +354,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	
 	@Override
 	public boolean mouseRelease(double mouseX, double mouseY, int button) {
-		if(scrolling) scrollAmount.forceFinish();
+		scrolling = false;
 		if (this.getFocused() != null) {
 			this.getFocused().mouseRelease(mouseX, mouseY, button);
 		}
@@ -384,8 +384,9 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 		}
 	}
 	
-	public boolean mouseScrolled(double p_93416_, double p_93417_, double p_93418_) {
-		this.setScrollAmount(this.getScrollAmount() - p_93418_ * (double)this.itemHeight * 2.0D);
+	@Override
+	public boolean mouseScroll(double mouseX, double mouseY, double scroll) {
+		this.setScrollAmount(this.getScrollAmount() - scroll * (double)this.itemHeight * 2.0D);
 		return true;
 	}
 	

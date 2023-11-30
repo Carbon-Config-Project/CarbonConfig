@@ -73,6 +73,7 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		if(!visible) return;
 		this.hovered = mousePressed(mc, mouseX, mouseY);
 		Minecraft.getMinecraft().getTextureManager().bindTexture(TEXTURE);
 		GlStateManager.enableDepth();

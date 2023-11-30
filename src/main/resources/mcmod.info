@@ -1,0 +1,16 @@
+[
+{
+  "modid": "carbonconfig",
+  "name": "Carbon Config",
+  "description": "Carbon Config is IC2Classics Config Implementation made open source",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://github.com/Carbon-Config-Project/CarbonConfig",
+  "updateUrl": "",
+  "authorList": ["Meduris", "Speiger"],
+  "credits": "Thanks to the IC2Classic team for open sourcing this",
+  "logoFile": "carbonconfig.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]
