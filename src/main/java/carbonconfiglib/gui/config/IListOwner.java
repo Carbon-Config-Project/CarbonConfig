@@ -2,7 +2,7 @@ package carbonconfiglib.gui.config;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,7 +21,7 @@ import net.minecraft.util.text.ITextComponent;
  */
 public interface IListOwner
 {
-	public void addTooltips(ITextComponent tooltip);
+	public void addTooltips(IChatComponent tooltip);
 	public boolean isInsideList(double mouseX, double mouseY);
 	public BackgroundHolder getCustomTexture();
 	

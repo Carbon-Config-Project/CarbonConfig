@@ -28,8 +28,9 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameRules.ValueType;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.ISaveFormat;
-import net.minecraft.world.storage.WorldSummary;
+import net.minecraft.world.storage.SaveFormatComparator;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
@@ -60,8 +61,10 @@ public class MinecraftConfig implements IModConfig
 	
 	public MinecraftConfig() {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		if(server == null) return;
-		setRules(server.worldServers[0].getWorldInfo().getGameRulesInstance());
+		if(server == null || server.worldServers.length <= 0) return;
+		WorldServer world = server.worldServers[0];
+		if(world == null) return;
+		setRules(world.getWorldInfo().getGameRulesInstance());
 	}
 	
 	protected MinecraftConfig(GameRules current) {
@@ -143,13 +146,14 @@ public class MinecraftConfig implements IModConfig
 	@Override
 	public List<IConfigTarget> getPotentialFiles() {
 		ISaveFormat storage = Minecraft.getMinecraft().getSaveLoader();
+		Path basePath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("saves");
 		List<IConfigTarget> folders = new ObjectArrayList<>();
 		try {
-			for(WorldSummary sum : storage.getSaveList()) {
+			for(SaveFormatComparator sum : storage.getSaveList()) {
 				try {
-					Path path = storage.getFile(sum.getFileName(), "level.dat").toPath();
+					Path path = basePath.resolve(sum.getFileName()).resolve("level.dat");
 					if(Files.notExists(path)) continue;
-					folders.add(new WorldConfigTarget(new WorldTarget(sum, storage.getFile(sum.getFileName(), ".").toPath(), path), path));
+					folders.add(new WorldConfigTarget(new WorldTarget(sum, path.getParent(), path), path));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}

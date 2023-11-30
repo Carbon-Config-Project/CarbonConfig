@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.lwjgl.input.Mouse;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.gui.GuiScreen;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 public class CarbonScreen extends GuiScreen implements IInteractableContainer
 {

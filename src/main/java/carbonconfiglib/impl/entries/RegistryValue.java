@@ -19,13 +19,11 @@ import carbonconfiglib.utils.IEntryDataType;
 import carbonconfiglib.utils.IEntryDataType.SimpleDataType;
 import carbonconfiglib.utils.MultilinePolicy;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
+import speiger.src.collections.objects.utils.ObjectSets;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -42,21 +40,21 @@ import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionConfigEntry<T, Set<T>> implements IArrayConfig
+public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implements IArrayConfig
 {
 	FMLControlledNamespacedRegistry<T> registry;
 	Class<T> clz;
 	Predicate<T> filter;
 	
-	protected RegistryValue(String key, IForgeRegistry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
+	protected RegistryValue(String key, FMLControlledNamespacedRegistry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (FMLControlledNamespacedRegistry<T>)registry;
+		this.registry = registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistrySuggestions<>(this));
 	}
 	
-	public static <E extends IForgeRegistryEntry<E>> Builder<E> builder(String key, Class<E> clz) {
+	public static <E> Builder<E> builder(String key, Class<E> clz) {
 		return new Builder<>(key, clz);
 	}
 	
@@ -70,7 +68,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		String[] result = new String[value.size()];
 		int i = 0;
 		for(T entry : value) {
-			result[i] = registry.getKey(entry).toString();
+			result[i] = registry.getNameForObject(entry).toString();
 		}
 		return serializeArray(policy, result);
 	}
@@ -80,7 +78,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		String[] values = Helpers.splitArray(value, ",");
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		for(int i = 0,m=values.length;i<m;i++) {
-			T entry = registry.getValue(new ResourceLocation(values[i]));
+			T entry = registry.getObject(new ResourceLocation(values[i]));
 			if(entry == null || (filter != null && !filter.test(entry))) continue;
 			result.add(entry);
 		}
@@ -92,8 +90,8 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		ParseResult<Boolean> result = super.canSet(value);
 		if(result.hasError()) return result;
 		for(T entry : value) {
-			if(!registry.containsValue(entry)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
-			if(filter != null && !filter.test(entry)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+registry.getKey(entry)+"] isn't allowed");
+			if(registry.getNameForObject(entry) == null) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
+			if(filter != null && !filter.test(entry)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+registry.getNameForObject(entry)+"] isn't allowed");
 		}
 		return ParseResult.success(true);
 	}
@@ -102,7 +100,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 	public List<String> getEntries() {
 		List<String> result = new ObjectArrayList<>();
 		for(T entry : getValue()) {
-			result.add(registry.getKey(entry).toString());
+			result.add(registry.getNameForObject(entry).toString());
 		}
 		return result;
 	}
@@ -111,7 +109,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 	public List<String> getDefaults() {
 		List<String> result = new ObjectArrayList<>();
 		for(T entry : getDefault()) {
-			result.add(registry.getKey(entry).toString());
+			result.add(registry.getNameForObject(entry).toString());
 		}
 		return result;
 	}
@@ -120,7 +118,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 	public ParseResult<Boolean> canSetArray(List<String> entries) {
 		if(entries == null) return ParseResult.partial(false, NullPointerException::new, "Value isn't allowed to be null");
 		for(int i = 0,m=entries.size();i<m;i++) {
-			T result = registry.getValue(new ResourceLocation(entries.get(i)));
+			T result = registry.getObject(new ResourceLocation(entries.get(i)));
 			if(result == null) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entries.get(i)+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(result)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entries.get(i)+"] isn't allowed");
 		}
@@ -177,7 +175,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		return ObjectSets.singleton(value);
 	}
 	
-	public static class RegistrySuggestions<T extends IForgeRegistryEntry<T>> implements ISuggestionProvider {
+	public static class RegistrySuggestions<T> implements ISuggestionProvider {
 		RegistryValue<T> value;
 		
 		public RegistrySuggestions(RegistryValue<T> value) {
@@ -187,14 +185,14 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		@Override
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
 			for(T entry : value.registry) {
-				String key = value.registry.getKey(entry).toString();
+				String key = value.registry.getNameForObject(entry).toString();
 				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
 			}
 		}
 	}
 	
-	public static class Builder<E extends IForgeRegistryEntry<E>> {
+	public static class Builder<E> {
 		Class<E> clz;
 		String key;
 		Set<E> values = new ObjectLinkedOpenHashSet<>();
@@ -227,11 +225,11 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 			return this;
 		}
 		
-		public RegistryValue<E> build(IForgeRegistry<E> registry) {
+		public RegistryValue<E> build(FMLControlledNamespacedRegistry<E> registry) {
 			return new RegistryValue<>(key, registry, clz, values, filter, comments);
 		}
 		
-		public RegistryValue<E> build(IForgeRegistry<E> registry, ConfigSection section) {
+		public RegistryValue<E> build(FMLControlledNamespacedRegistry<E> registry, ConfigSection section) {
 			return section.add(new RegistryValue<>(key, registry, clz, values, filter, comments));
 		}
 	}

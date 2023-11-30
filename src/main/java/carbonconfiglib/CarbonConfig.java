@@ -44,7 +44,6 @@ import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -63,7 +62,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.10]")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.8.9]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -137,7 +136,7 @@ public class CarbonConfig
 	 * @param clz the Class-Type for Config Gui rendering.
 	 * @return a Builder for registry Keys
 	 */
-	public static <E extends IForgeRegistryEntry<E>> RegistryKeyValue.Builder<E> createRegistryKeyBuilder(String key, Class<E> clz) {
+	public static <E> RegistryKeyValue.Builder<E> createRegistryKeyBuilder(String key, Class<E> clz) {
 		return RegistryKeyValue.builder(key, clz);
 	}
 	
@@ -150,7 +149,7 @@ public class CarbonConfig
 	 * @param clz the Class-Type for Config Gui rendering.
 	 * @return a Builder for registry Keys
 	 */
-	public static <E extends IForgeRegistryEntry<E>> RegistryValue.Builder<E> createRegistryBuilder(String key, Class<E> clz) {
+	public static <E> RegistryValue.Builder<E> createRegistryBuilder(String key, Class<E> clz) {
 		return RegistryValue.builder(key, clz);
 	}
 	
@@ -192,7 +191,7 @@ public class CarbonConfig
 			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
 			return;
 		}
-		else if(mc.thePlayer.getPermissionLevel() < 4) {
+		else if(!NETWORK.hasPermissions()) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");			
 			return;
 		}

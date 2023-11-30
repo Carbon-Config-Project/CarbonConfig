@@ -5,9 +5,9 @@ import carbonconfiglib.gui.widgets.screen.IWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -31,7 +31,7 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	Icon selectedIcon;
 	Icon unselectedIcon;
 	Runnable listener;
-	ITextComponent tooltip;
+	IChatComponent tooltip;
 	IListOwner owner;
 	
 	public CarbonIconCheckbox(int x, int y, int width, int height, Icon selectedIcon, Icon unselectedIcon, boolean selected) {
@@ -48,7 +48,7 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	
 	public CarbonIconCheckbox setTooltip(IListOwner owner, String tooltips) {
 		this.owner = owner;
-		tooltip = new TextComponentTranslation(tooltips);
+		tooltip = new ChatComponentTranslation(tooltips);
 		return this;
 	}
 	
@@ -79,7 +79,7 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 		GlStateManager.enableDepth();
 		GlStateManager.color(1F, 1F, 1F, 1F);
 		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		GlStateManager.blendFunc(770, 771);
 		
 		GuiUtils.drawTextureRegion(xPosition, yPosition, hovered ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
 		GuiUtils.drawTextureRegion(xPosition+2, yPosition+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);

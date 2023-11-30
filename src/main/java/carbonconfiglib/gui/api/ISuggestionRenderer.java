@@ -2,7 +2,7 @@ package carbonconfiglib.gui.api;
 
 import java.util.Map;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.IChatComponent;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
@@ -23,7 +23,7 @@ import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
  */
 public interface ISuggestionRenderer
 {
-	public ITextComponent renderSuggestion(String value, int x, int y);
+	public IChatComponent renderSuggestion(String value, int x, int y);
 	
 	public static class Registry {
 		private static final Map<Class<?>, ISuggestionRenderer> REGISTRY = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());

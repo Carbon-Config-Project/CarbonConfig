@@ -50,7 +50,7 @@ public class CarbonButton extends GuiButton implements IWidget
 		this.hovered = mousePressed(mc, mouseX, mouseY);
 		int k = this.getHoverState(this.hovered);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1F);
-		GuiUtils.drawTextureWithBorder(BUTTON_TEXTURES, this.xPosition, this.yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
+		GuiUtils.drawTextureWithBorder(buttonTextures, this.xPosition, this.yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
 		GuiUtils.drawScrollingShadowString(mc.fontRendererObj, displayString, xPosition, yPosition, width, height-2, GuiAlign.CENTER, this.enabled ? 16777215 : 10526880, hash);
 	}
 

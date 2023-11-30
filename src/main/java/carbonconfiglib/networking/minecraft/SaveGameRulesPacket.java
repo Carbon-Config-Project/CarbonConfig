@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -61,7 +62,8 @@ public class SaveGameRulesPacket implements ICarbonPacket
 	
 	private boolean hasPermissions(EntityPlayer player, int value) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		return server.getPlayerList().getOppedPlayers().getPermissionLevel(player.getGameProfile()) >= value;
+		UserListOpsEntry entry = server.getConfigurationManager().getOppedPlayers().getEntry(player.getGameProfile());
+		return entry != null && entry.getPermissionLevel() >= value;
 	}
 	
 	private boolean canIgnorePermissionCheck() {

@@ -5,7 +5,7 @@ import java.util.Objects;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris

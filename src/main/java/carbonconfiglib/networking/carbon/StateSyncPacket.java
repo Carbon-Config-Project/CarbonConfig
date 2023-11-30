@@ -26,25 +26,31 @@ import net.minecraftforge.fml.relauncher.Side;
 public class StateSyncPacket implements ICarbonPacket
 {
 	Side source;
+	boolean commands;
 	
 	public StateSyncPacket() {}
-	public StateSyncPacket(Side source) {
+	public StateSyncPacket(Side source, boolean commands) {
 		this.source = source;
 	}
 
 	@Override
 	public void write(PacketBuffer buffer) {
 		buffer.writeBoolean(source.isClient());
+		buffer.writeBoolean(commands);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
 		source = buffer.readBoolean() ? Side.CLIENT : Side.SERVER;
+		commands = buffer.readBoolean();
 	}
 	
 	@Override
 	public void process(EntityPlayer player) {
-		if(source.isServer()) CarbonConfig.NETWORK.onPlayerJoined(player, false);
+		if(source.isServer()) {
+			CarbonConfig.NETWORK.onPlayerJoined(player, false);
+			CarbonConfig.NETWORK.setPermissions(commands);
+		}
 		else EventHandler.INSTANCE.onServerJoinPacket(player);
 	}
 	

@@ -9,15 +9,16 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy;
 import carbonconfiglib.api.SimpleConfigProxy.SimpleTarget;
 import carbonconfiglib.config.ConfigSettings;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.ISaveFormat;
-import net.minecraft.world.storage.WorldSummary;
+import net.minecraft.world.storage.SaveFormatComparator;
+import net.minecraft.world.storage.SaveFormatOld;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -63,7 +64,7 @@ public final class PerWorldProxy implements IConfigProxy
 	public List<Path> getBasePaths() {
 		List<Path> paths = new ObjectArrayList<>();
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		if(server != null) paths.add(server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath());
+		if(server != null) paths.add(((SaveFormatOld)server.getActiveAnvilConverter()).savesDirectory.toPath().resolve(server.getFolderName()).resolve("serverconfig"));
 		else if(FMLCommonHandler.instance().getSide().isClient()) paths.add(baseClientPath);
 		paths.add(baseServerPath);
 		return paths;
@@ -74,7 +75,7 @@ public final class PerWorldProxy implements IConfigProxy
 		if(FMLCommonHandler.instance().getSide().isClient()) return getLevels();
 		else {
 			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-			return Collections.singletonList(new SimpleTarget(server.getActiveAnvilConverter().getFile(server.getFolderName(), "serverconfig").toPath(), "server"));
+			return Collections.singletonList(new SimpleTarget(((SaveFormatOld)server.getActiveAnvilConverter()).savesDirectory.toPath().resolve(server.getFolderName()).resolve("serverconfig"), "server"));
 		}
 	}
 	
@@ -86,10 +87,11 @@ public final class PerWorldProxy implements IConfigProxy
 			folders.add(new SimpleTarget(baseServerPath, "Default Config"));
 		}
 		try {
-			for(WorldSummary sum : storage.getSaveList()) {
+			Path basePath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("saves");
+			for(SaveFormatComparator sum : storage.getSaveList()) {
 				try {
-					Path path = storage.getFile(sum.getFileName(), "serverconfig").toPath();
-					if(Files.exists(path)) folders.add(new WorldTarget(sum, storage.getFile(sum.getFileName(), ".").toPath(), path));
+					Path path = basePath.resolve(sum.getFileName()).resolve("level.dat");
+					if(Files.exists(path)) folders.add(new WorldTarget(sum, path.getParent(), path));
 				}
 				catch(Exception e) { e.printStackTrace(); }
 			}
@@ -104,11 +106,11 @@ public final class PerWorldProxy implements IConfigProxy
 	}
 	
 	public static class WorldTarget implements IPotentialTarget {
-		WorldSummary summary;
+		SaveFormatComparator summary;
 		Path worldFile;
 		Path folder;
 		
-		public WorldTarget(WorldSummary summary, Path worldFile, Path folder) {
+		public WorldTarget(SaveFormatComparator summary, Path worldFile, Path folder) {
 			this.summary = summary;
 			this.worldFile = worldFile;
 			this.folder = folder;
@@ -128,7 +130,7 @@ public final class PerWorldProxy implements IConfigProxy
 			return worldFile;
 		}
 		
-		public WorldSummary getSummary() {
+		public SaveFormatComparator getSummary() {
 			return summary;
 		}
 	}

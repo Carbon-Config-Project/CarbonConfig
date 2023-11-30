@@ -6,9 +6,9 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -77,7 +77,7 @@ public class ColorElement extends ConfigElement
 			Gui.drawRect(left+xOff+1, top, left+xOff+16, top+18, Integer.decode(value.get()) | 0xFF000000);
 		}
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(new TextComponentString(result.getError().getMessage()).setStyle(new Style().setColor(TextFormatting.RED)));
+			owner.addTooltips(new ChatComponentText(result.getError().getMessage()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED)));
 		}
 	}
 	

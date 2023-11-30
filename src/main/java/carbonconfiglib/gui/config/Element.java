@@ -8,9 +8,9 @@ import carbonconfiglib.gui.widgets.screen.AbstractScrollList;
 import carbonconfiglib.gui.widgets.screen.IInteractable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -31,13 +31,13 @@ import speiger.src.collections.objects.utils.ObjectLists;
 public class Element extends AbstractScrollList.ContainerEntry<Element> {
 	protected Minecraft mc = Minecraft.getMinecraft();
 	protected FontRenderer font = mc.fontRendererObj;
-	protected ITextComponent name;
-	protected ITextComponent unchanged;
-	protected ITextComponent changed;
+	protected IChatComponent name;
+	protected IChatComponent unchanged;
+	protected IChatComponent changed;
 	protected IListOwner owner;
 	protected int hash = hashCode();
 	
-	public Element(ITextComponent name) {
+	public Element(IChatComponent name) {
 		setName(name);
 	}
 	
@@ -45,10 +45,10 @@ public class Element extends AbstractScrollList.ContainerEntry<Element> {
 		return name.getFormattedText();
 	}
 	
-	public void setName(ITextComponent newName) {
+	public void setName(IChatComponent newName) {
 		this.name = newName;
-		this.unchanged = name.createCopy().setStyle(new Style().setColor(TextFormatting.GRAY));
-		this.changed = name.createCopy().setStyle(new Style().setColor(TextFormatting.ITALIC));
+		this.unchanged = name.createCopy().setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY));
+		this.changed = name.createCopy().setChatStyle(new ChatStyle().setColor(EnumChatFormatting.ITALIC));
 	}
 		
 	public void updateValues() {
@@ -76,7 +76,7 @@ public class Element extends AbstractScrollList.ContainerEntry<Element> {
 		GuiUtils.drawScrollingString(font, (changed ? this.changed : unchanged).getFormattedText(), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
-	protected void renderText(ITextComponent text, float x, float y, float width, float height, GuiAlign align, int color) {
+	protected void renderText(IChatComponent text, float x, float y, float width, float height, GuiAlign align, int color) {
 		GuiUtils.drawScrollingString(font, text.getFormattedText(), x, y, width, height, align, -1, hash);
 	}
 	

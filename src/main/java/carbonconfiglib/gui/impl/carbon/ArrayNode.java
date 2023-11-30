@@ -11,7 +11,7 @@ import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**

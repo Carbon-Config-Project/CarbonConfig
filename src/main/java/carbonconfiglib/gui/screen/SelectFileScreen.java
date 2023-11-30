@@ -1,13 +1,8 @@
 package carbonconfiglib.gui.screen;
 
-import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
-
-import javax.imageio.ImageIO;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
@@ -20,18 +15,15 @@ import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.screen.IInteractable;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.storage.WorldSummary;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.world.storage.SaveFormatComparator;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -51,11 +43,11 @@ import speiger.src.collections.objects.utils.ObjectLists;
  */
 public class SelectFileScreen extends ListScreen
 {
-	private static final ITextComponent TEXT = new TextComponentTranslation("gui.carbonconfig.select_world");
+	private static final IChatComponent TEXT = new ChatComponentTranslation("gui.carbonconfig.select_world");
 	IModConfig config;
 	GuiScreen parent;
 	
-	public SelectFileScreen(ITextComponent name, BackgroundHolder customTexture, GuiScreen parent, IModConfig config) {
+	public SelectFileScreen(IChatComponent name, BackgroundHolder customTexture, GuiScreen parent, IModConfig config) {
 		super(name, customTexture);
 		this.config = config;
 		this.parent = parent;
@@ -92,31 +84,18 @@ public class SelectFileScreen extends ListScreen
 		String text = TEXT.getFormattedText();
 		fontRendererObj.drawString(text, (width/2)-(fontRendererObj.getStringWidth(text)/2), 8, -1);
 	}
-	
-	@Override
-	public void onGuiClosed() {
-		allEntries.forEach(this::cleanup);
-		super.onGuiClosed();
-	}
-	
-	private void cleanup(Element element) {
-		if(element instanceof WorldElement) {
-			((WorldElement)element).cleanup();
-		}
-	}
-	
+		
 	private static class WorldElement extends Element {
 		IModConfig config;
 		IConfigTarget target;
 		GuiScreen parent;
 		CarbonButton button;
-		ITextComponent title;
-		ITextComponent path;
-		DynamicTexture texture;
+		IChatComponent title;
+		IChatComponent path;
 		Navigator nav;
 		
-		public WorldElement(IConfigTarget target, IModConfig config, GuiScreen parent, ITextComponent prevName) {
-			super(new TextComponentString(target.getName()));
+		public WorldElement(IConfigTarget target, IModConfig config, GuiScreen parent, IChatComponent prevName) {
+			super(new ChatComponentText(target.getName()));
 			nav = new Navigator(prevName);
 			nav.setScreenForLayer(parent);
 			this.target = target;
@@ -129,17 +108,16 @@ public class SelectFileScreen extends ListScreen
 			button = new CarbonButton(0, 0, 62, 20, I18n.format("gui.carbonconfig.pick"), this::onPick);
 			if(target instanceof WorldConfigTarget) {
 				WorldConfigTarget world = (WorldConfigTarget)target;
-				WorldSummary sum = world.getSummary();
-				loadIcon(Minecraft.getMinecraft().getSaveLoader().getFile(sum.getFileName(), "icon.png").toPath());
-				title = new TextComponentString(sum.getDisplayName());
-				path = new TextComponentString(sum.getFileName()).setStyle(new Style().setColor(TextFormatting.GRAY));
+				SaveFormatComparator sum = world.getSummary();
+				title = new ChatComponentText(sum.getDisplayName());
+				path = new ChatComponentText(sum.getFileName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY));
 			}
 			else 
 			{
-				title = new TextComponentString(target.getName());
+				title = new ChatComponentText(target.getName());
 				Path folder = target.getFolder();
 				int index = folder.getNameCount();
-				path = new TextComponentString(folder.subpath(index-3, index).toString()).setStyle(new Style().setColor(TextFormatting.GRAY));
+				path = new ChatComponentText(folder.subpath(index-3, index).toString()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY));
 			}
 		}
 		
@@ -150,21 +128,8 @@ public class SelectFileScreen extends ListScreen
 			button.render(mc, mouseX, mouseY, partialTicks);
 			GuiUtils.drawScrollingString(font, title.getFormattedText(), left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawScrollingString(font, path.getFormattedText(), left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
-			if(texture != null) {
-				GlStateManager.bindTexture(texture.getGlTextureId());
-				GuiUtils.drawTextureRegion(left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
-			}
 		}
-		
-		private void loadIcon(Path iconFile) {
-			try(InputStream stream = Files.newInputStream(iconFile)) {
-				BufferedImage image = ImageIO.read(stream);
-				if(image == null || image.getWidth() != 64 || image.getHeight() != 64) return;
-				texture = new DynamicTexture(image);
-			}
-			catch(Exception e) { e.printStackTrace(); }
-		}
-		
+				
 		@Override
 		public List<? extends IInteractable> children() {
 			return ObjectLists.singleton(button);
@@ -176,13 +141,7 @@ public class SelectFileScreen extends ListScreen
 				mc.displayGuiScreen(parent);
 				return;
 			}
-			mc.displayGuiScreen(new ConfigScreen(nav.add(path.createCopy().setStyle(new Style().setColor(TextFormatting.WHITE))), config, parent, owner.getCustomTexture()));
-		}
-		
-		private void cleanup() {
-			if(texture == null) return;
-			texture.deleteGlTexture();
-			texture = null;
+			mc.displayGuiScreen(new ConfigScreen(nav.add(path.createCopy().setChatStyle(new ChatStyle().setColor(EnumChatFormatting.WHITE))), config, parent, owner.getCustomTexture()));
 		}
 	}
 }

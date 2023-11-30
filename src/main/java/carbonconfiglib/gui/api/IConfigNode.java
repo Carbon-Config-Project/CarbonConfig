@@ -3,9 +3,9 @@ package carbonconfiglib.gui.api;
 import java.util.List;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.ChatComponentStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -45,12 +45,12 @@ public interface IConfigNode
 	public boolean requiresReload();
 	
 	public String getNodeName();
-	public ITextComponent getName();
-	public ITextComponent getTooltip();
+	public IChatComponent getName();
+	public IChatComponent getTooltip();
 	
 	
-	public static TextComponentBase createLabel(String name) {
-		TextComponentBase comp = new TextComponentString("");
+	public static ChatComponentStyle createLabel(String name) {
+		ChatComponentStyle comp = new ChatComponentText("");
 		for(String s : name.split("\\-|\\_|(?<!^)(?=[A-Z][a-z])|(?<!(^|[A-Z]))(?=[A-Z])")) {
 			String first = Character.toString(s.charAt(0));
 			comp.appendText(s.replaceFirst(first, first.toUpperCase())).appendText(" ");

@@ -4,10 +4,10 @@ import java.util.List;
 
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.config.Configuration;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -51,5 +51,5 @@ public class ForgeRoot implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public ITextComponent getName() { return new TextComponentString(fileName); }
+	public IChatComponent getName() { return new ChatComponentText(fileName); }
 }

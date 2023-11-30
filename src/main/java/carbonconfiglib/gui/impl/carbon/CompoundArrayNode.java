@@ -15,9 +15,9 @@ import carbonconfiglib.gui.impl.carbon.CompoundNode.CompoundValue;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.IEntryDataType.CompoundDataType;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -275,8 +275,8 @@ public class CompoundArrayNode implements IArrayNode
 		}
 		
 		@Override
-		public ITextComponent getName(int index) {
-			return new TextComponentString(names[index]);
+		public IChatComponent getName(int index) {
+			return new ChatComponentText(names[index]);
 		}
 
 		@Override

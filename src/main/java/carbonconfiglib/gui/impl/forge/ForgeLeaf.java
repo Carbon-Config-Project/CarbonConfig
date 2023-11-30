@@ -9,15 +9,15 @@ import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.common.config.Property.Type;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -142,19 +142,23 @@ public class ForgeLeaf implements IConfigNode
 	}
 	
 	@Override
-	public ITextComponent getName() { return IConfigNode.createLabel(I18n.hasKey(property.getLanguageKey()) ? I18n.format(property.getLanguageKey()) : property.getName()); }
+	public IChatComponent getName() { return IConfigNode.createLabel(hasKey(property.getLanguageKey()) ? I18n.format(property.getLanguageKey()) : property.getName()); }
 	@Override
-	public ITextComponent getTooltip() {
-		TextComponentBase comp = new TextComponentString("");
-		comp.appendSibling(new TextComponentString(I18n.hasKey(property.getLanguageKey()) ? I18n.format(property.getLanguageKey()) : property.getName()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
-		String comment = property.getComment();
+	public IChatComponent getTooltip() {
+		ChatComponentStyle comp = new ChatComponentText("");
+		comp.appendSibling(new ChatComponentText(hasKey(property.getLanguageKey()) ? I18n.format(property.getLanguageKey()) : property.getName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
+		String comment = property.comment;
 		if(comment != null) {
 			String[] array = comment.split("\n");
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
+				for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 			}
 		}
 		return comp;
+	}
+	
+	public static boolean hasKey(String key) {
+		return I18n.format(key) != key;
 	}
 	
 	private DataType fromType(Type type) {

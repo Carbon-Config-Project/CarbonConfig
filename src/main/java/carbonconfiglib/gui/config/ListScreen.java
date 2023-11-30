@@ -13,13 +13,13 @@ import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import carbonconfiglib.gui.widgets.screen.CarbonScreen;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.gui.GuiConfirmOpenLink;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -39,11 +39,11 @@ import speiger.src.collections.objects.utils.ObjectLists;
  */
 public abstract class ListScreen extends CarbonScreen implements IListOwner
 {
-	private static final ITextComponent LOG_INFO = new TextComponentTranslation("gui.carbonconfig.logo.name").setStyle(new Style().setColor(TextFormatting.GOLD)).appendText("\n").appendSibling(new TextComponentTranslation("gui.carbonconfig.logo.page").setStyle(new Style().setColor(TextFormatting.GRAY)));
-	protected ITextComponent title;
+	private static final IChatComponent LOG_INFO = new ChatComponentTranslation("gui.carbonconfig.logo.name").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD)).appendText("\n").appendSibling(new ChatComponentTranslation("gui.carbonconfig.logo.page").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
+	protected IChatComponent title;
 	protected ElementList visibleList;
 	protected List<Element> allEntries = new ObjectArrayList<>();
-	protected List<ITextComponent> tooltips = new ObjectArrayList<>();
+	protected List<IChatComponent> tooltips = new ObjectArrayList<>();
 	protected CarbonEditBox activeWidget;
 	protected long currentTick = 0;
 	protected long lastTick = -1;
@@ -51,7 +51,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 	protected CarbonEditBox searchBox;
 	BackgroundHolder customTexture;
 	
-	public ListScreen(ITextComponent name, BackgroundHolder customTexture) {
+	public ListScreen(IChatComponent name, BackgroundHolder customTexture) {
 		this.title = name;
 		this.customTexture = customTexture;
 	}
@@ -101,7 +101,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 		handleForground(mouseX, mouseY, partialTicks);
 		if(!tooltips.isEmpty()) {
 			List<String> text = new ObjectArrayList<>();
-			for(ITextComponent entry : tooltips) {
+			for(IChatComponent entry : tooltips) {
 				text.addAll(fontRendererObj.listFormattedStringToWidth(entry.getFormattedText(), Math.max(mouseX, width - mouseX) - 20));
 			}
 			drawHoveringText(text, mouseX, mouseY);
@@ -127,8 +127,8 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 				if(T.isMain()) openURL("https://curseforge.com/minecraft/mc-mods/carbon-config");
 				else if(T.isOther()) openURL("https://modrinth.com/mod/carbon-config");
 				else mc.displayGuiScreen(this);
-			}, new TextComponentTranslation("gui.carbonconfig.logo.link.title"), new TextComponentTranslation("gui.carbonconfig.logo.link.message").setStyle(new Style().setColor(TextFormatting.GRAY)), 
-			   new TextComponentTranslation("gui.carbonconfig.logo.link.curseforge"), new TextComponentTranslation("gui.carbonconfig.logo.link.modrinth"), new TextComponentTranslation("gui.carbonconfig.reset_all.cancel"));
+			}, new ChatComponentTranslation("gui.carbonconfig.logo.link.title"), new ChatComponentTranslation("gui.carbonconfig.logo.link.message").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)), 
+			   new ChatComponentTranslation("gui.carbonconfig.logo.link.curseforge"), new ChatComponentTranslation("gui.carbonconfig.logo.link.modrinth"), new ChatComponentTranslation("gui.carbonconfig.reset_all.cancel"));
 			mc.displayGuiScreen(screen);
 			return true;
 		}
@@ -237,7 +237,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 	}
 	
 	@Override
-	public void addTooltips(ITextComponent tooltip) {
+	public void addTooltips(IChatComponent tooltip) {
 		if(shouldHaveTooltips()) tooltips.add(tooltip);
 	}
 	

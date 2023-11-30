@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -24,6 +23,7 @@ import net.minecraftforge.fml.common.network.FMLOutboundHandler.OutboundTarget;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectOpenHashSet;
 
 /**
@@ -48,6 +48,7 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 	private EnumMap<Side, FMLEmbeddedChannel> channel;
 	Set<UUID> clientInstalledPlayers = new ObjectOpenHashSet<>();
 	boolean serverInstalled = false;
+	boolean hasPermissions = false;
 	
 	public void init() {
 		channel = NetworkRegistry.INSTANCE.newChannel("carbonconfig", new CarbonChannel(), this);
@@ -93,6 +94,14 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 		return getClientPlayer() != null;
 	}
 	
+	public boolean hasPermissions() {
+		return hasPermissions;
+	}
+	
+	public void setPermissions(boolean value) {
+		this.hasPermissions = value;
+	}
+	
 	protected EntityPlayer getPlayer(INetHandler handler) {
 		EntityPlayer entity = (handler instanceof NetHandlerPlayServer ? ((NetHandlerPlayServer)handler).playerEntity : null);
 		return entity != null ? entity : getClientPlayer();
@@ -131,7 +140,7 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 	
 	private List<EntityPlayerMP> getAllPlayers() {
 		List<EntityPlayerMP> players = new ObjectArrayList<>();
-		for(EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList()) {
+		for(EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getPlayerList()) {
 			if(isInstalledOnClient(player)) 
 				players.add(player);
 		}

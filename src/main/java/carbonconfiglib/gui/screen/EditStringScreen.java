@@ -9,15 +9,15 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,7 +36,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class EditStringScreen extends CarbonScreen
 {
-	ITextComponent title;
+	IChatComponent title;
 	GuiScreen parent;
 	IConfigNode node;
 	IValueNode value;
@@ -45,7 +45,7 @@ public class EditStringScreen extends CarbonScreen
 	BackgroundHolder texture;
 	ParseResult<Boolean> result;
 
-	public EditStringScreen(GuiScreen parent, ITextComponent name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
+	public EditStringScreen(GuiScreen parent, IChatComponent name, IConfigNode node, IValueNode value, BackgroundHolder texture) {
 		this.title = name;
 		this.parent = parent;
 		this.node = node;
@@ -105,7 +105,7 @@ public class EditStringScreen extends CarbonScreen
 			mc.displayGuiScreen(new GuiYesNo((T, k) -> {
 				if(T) value.setPrevious();
 				mc.displayGuiScreen(T ? parent : this);
-			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
+			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		value.setPrevious();

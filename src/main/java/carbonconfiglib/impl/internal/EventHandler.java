@@ -33,7 +33,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.potion.Potion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
@@ -158,7 +157,7 @@ public class EventHandler implements IConfigChangeListener
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onGuiOpenedEvent(GuiOpenEvent event) {
-		if(event.getGui() instanceof GuiModList) {
+		if(event.gui instanceof GuiModList) {
 			registerConfigs();
 		}
 	}
@@ -166,13 +165,13 @@ public class EventHandler implements IConfigChangeListener
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onGuiButtonClicked(ActionPerformedEvent.Pre event) {
-		if(event.getGui() instanceof GuiModList && event.getButton().id == 20) {
-			ModContainer container = Reflects.getSelectedMod((GuiModList)event.getGui());
+		if(event.gui instanceof GuiModList && event.button.id == 20) {
+			ModContainer container = Reflects.getSelectedMod((GuiModList)event.gui);
 			if(container == null) return;
 			IModGuiFactory factory = FMLClientHandler.instance().getGuiFactoryFor(container);
 			if(factory instanceof ConfigScreenFactory) {
 				event.setCanceled(true);
-				Minecraft.getMinecraft().displayGuiScreen(((ConfigScreenFactory)factory).createConfigGui(event.getGui()));
+				Minecraft.getMinecraft().displayGuiScreen(((ConfigScreenFactory)factory).createConfigGui(event.gui));
 			}
 		}
 	}
@@ -212,18 +211,16 @@ public class EventHandler implements IConfigChangeListener
 		ISuggestionRenderer.Registry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
 		ISuggestionRenderer.Registry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
 		ISuggestionRenderer.Registry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
-		ISuggestionRenderer.Registry.register(Potion.class, new SuggestionRenderers.PotionEntry());
 		
 		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
 		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
 		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:water"));
 		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
-		DataType.registerType(Potion.class, RegistryElement.createForType(Potion.class, "minecraft:luck"));
 		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new));
 	}
 	
 	public void onServerJoinPacket(EntityPlayer player) {
-		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Side.SERVER), player);
+		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Side.SERVER, MinecraftServer.getServer().getConfigurationManager().canSendCommands(player.getGameProfile())), player);
 		CarbonConfig.NETWORK.onPlayerJoined(player, true);
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);
 		if(packet == null) return;
@@ -238,7 +235,7 @@ public class EventHandler implements IConfigChangeListener
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientJoinEvent() {
 		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
-		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Side.CLIENT));
+		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Side.CLIENT, false));
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
 		if(packet == null) return;
 		CarbonConfig.NETWORK.sendToServer(packet);
@@ -247,6 +244,7 @@ public class EventHandler implements IConfigChangeListener
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientLeaveEvent() {
 		CarbonConfig.NETWORK.onPlayerLeft(null, false);
+		CarbonConfig.NETWORK.setPermissions(false);
 		if(Minecraft.getMinecraft().getIntegratedServer() != null) {
 			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
 				if(PerWorldProxy.isProxy(handler.getProxy())) {

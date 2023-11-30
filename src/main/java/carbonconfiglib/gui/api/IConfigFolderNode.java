@@ -3,8 +3,8 @@ package carbonconfiglib.gui.api;
 import java.util.List;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -54,5 +54,5 @@ public interface IConfigFolderNode extends IConfigNode
 	@Override
 	public default boolean requiresReload() { return false; }
 	@Override
-	public default ITextComponent getTooltip() { return new TextComponentString(""); }
+	public default IChatComponent getTooltip() { return new ChatComponentText(""); }
 }

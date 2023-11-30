@@ -9,12 +9,12 @@ import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -93,18 +93,18 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public ITextComponent getName() {
+	public IChatComponent getName() {
 		return IConfigNode.createLabel(I18n.format(entry.getDescriptionId()));
 	}
 	
 	@Override
-	public ITextComponent getTooltip() {
+	public IChatComponent getTooltip() {
 		String id = entry.getDescriptionId();
-		TextComponentBase result = new TextComponentString("");
-		result.appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+		ChatComponentStyle result = new ChatComponentText("");
+		result.appendSibling(new ChatComponentTranslation(id).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
 		id += ".description";
-		if(I18n.hasKey(id)) {
-			result.appendText("\n").appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.GRAY)));
+		if(I18n.format(id) != id) {
+			result.appendText("\n").appendSibling(new ChatComponentTranslation(id).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 		}
 		return result;
 	}

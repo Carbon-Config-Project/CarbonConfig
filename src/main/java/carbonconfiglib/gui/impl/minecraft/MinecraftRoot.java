@@ -6,8 +6,8 @@ import java.util.Map;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfig.Category;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
@@ -47,7 +47,7 @@ public class MinecraftRoot implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public ITextComponent getName() { return new TextComponentString("Minecraft"); }
+	public IChatComponent getName() { return new ChatComponentText("Minecraft"); }
 	@Override
 	public boolean isRoot() { return true; }
 }

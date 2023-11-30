@@ -18,12 +18,12 @@ import carbonconfiglib.gui.widgets.IOwnable;
 import carbonconfiglib.gui.widgets.Icon;
 import carbonconfiglib.gui.widgets.screen.IInteractable;
 import carbonconfiglib.gui.widgets.screen.IWidget;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -42,12 +42,12 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class ConfigElement extends Element
 {
-	private static final ITextComponent DELETE = new TextComponentTranslation("gui.carbonconfig.delete");
-	private static final ITextComponent REVERT = new TextComponentTranslation("gui.carbonconfig.revert");
-	private static final ITextComponent DEFAULT = new TextComponentTranslation("gui.carbonconfig.default");
-	private static final ITextComponent SUGGESTIONS = new TextComponentTranslation("gui.carbonconfig.suggestions");
-	private static final ITextComponent RELOAD = new TextComponentTranslation("gui.carbonconfig.reload").setStyle(new Style().setColor(TextFormatting.YELLOW));
-	private static final ITextComponent RESTART = new TextComponentTranslation("gui.carbonconfig.restart").setStyle(new Style().setColor(TextFormatting.YELLOW));
+	private static final IChatComponent DELETE = new ChatComponentTranslation("gui.carbonconfig.delete");
+	private static final IChatComponent REVERT = new ChatComponentTranslation("gui.carbonconfig.revert");
+	private static final IChatComponent DEFAULT = new ChatComponentTranslation("gui.carbonconfig.default");
+	private static final IChatComponent SUGGESTIONS = new ChatComponentTranslation("gui.carbonconfig.suggestions");
+	private static final IChatComponent RELOAD = new ChatComponentTranslation("gui.carbonconfig.reload").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW));
+	private static final IChatComponent RESTART = new ChatComponentTranslation("gui.carbonconfig.restart").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW));
 	protected List<IInteractable> listeners = new ObjectArrayList<>();
 	protected List<Map.Entry<IWidget, AlignOffset>> mappedListeners = new ObjectArrayList<>();
 	protected IConfigNode node;
@@ -190,7 +190,7 @@ public class ConfigElement extends Element
 		}
 		maxX = getMaxX(maxX);
 		if(isArray()) {
-			ITextComponent comp = new TextComponentString(indexOf()+":");
+			IChatComponent comp = new ChatComponentText(indexOf()+":");
 			renderText(comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {

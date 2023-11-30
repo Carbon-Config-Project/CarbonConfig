@@ -13,7 +13,7 @@ import carbonconfiglib.gui.impl.carbon.ModConfig;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.storage.WorldSummary;
+import net.minecraft.world.storage.SaveFormatComparator;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -90,7 +90,7 @@ public interface IModConfig
 	}
 	
 	public static class WorldConfigTarget implements IConfigTarget {
-		WorldSummary summary;
+		SaveFormatComparator summary;
 		Path folder;
 		Path file;
 		String name;
@@ -99,7 +99,7 @@ public interface IModConfig
 			this(target.getSummary(), target.getFolder(), file, target.getName());
 		}
 		
-		public WorldConfigTarget(WorldSummary summary, Path folder, Path file, String name) {
+		public WorldConfigTarget(SaveFormatComparator summary, Path folder, Path file, String name) {
 			this.summary = summary;
 			this.folder = folder;
 			this.file = file;
@@ -121,7 +121,7 @@ public interface IModConfig
 			return file;
 		}
 		
-		public WorldSummary getSummary() {
+		public SaveFormatComparator getSummary() {
 			return summary;
 		}
 		

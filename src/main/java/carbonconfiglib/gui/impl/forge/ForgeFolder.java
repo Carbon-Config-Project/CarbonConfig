@@ -5,15 +5,15 @@ import java.util.Locale;
 
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Property;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -53,16 +53,16 @@ public class ForgeFolder implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return category.getName().toLowerCase(Locale.ROOT); }
 	@Override
-	public ITextComponent getName() { return IConfigNode.createLabel(I18n.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()); }
+	public IChatComponent getName() { return IConfigNode.createLabel(ForgeLeaf.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()); }
 	@Override
-	public ITextComponent getTooltip() {
-		TextComponentBase comp = new TextComponentString("");
-		comp.appendSibling(new TextComponentString(I18n.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+	public IChatComponent getTooltip() {
+		ChatComponentStyle comp = new ChatComponentText("");
+		comp.appendSibling(new ChatComponentText(ForgeLeaf.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
 		String comment = category.getComment();
 		if(comment != null) {
 			String[] array = comment.split("\n");
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
+				for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 			}
 
 		}

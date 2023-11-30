@@ -12,11 +12,11 @@ import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -35,13 +35,13 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class RequestScreen extends ListScreen implements IRequestScreen
 {
-	static final ITextComponent REQUEST = new TextComponentTranslation("gui.carbonconfig.requesting_config");
-	static final ITextComponent[] ANIMATION = new ITextComponent[] {
-			new TextComponentString("Ooooo").setStyle(new Style().setColor(TextFormatting.GRAY)),
-			new TextComponentString("oOooo").setStyle(new Style().setColor(TextFormatting.GRAY)),
-			new TextComponentString("ooOoo").setStyle(new Style().setColor(TextFormatting.GRAY)),
-			new TextComponentString("oooOo").setStyle(new Style().setColor(TextFormatting.GRAY)),
-			new TextComponentString("ooooO").setStyle(new Style().setColor(TextFormatting.GRAY)),
+	static final IChatComponent REQUEST = new ChatComponentTranslation("gui.carbonconfig.requesting_config");
+	static final IChatComponent[] ANIMATION = new IChatComponent[] {
+			new ChatComponentText("Ooooo").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)),
+			new ChatComponentText("oOooo").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)),
+			new ChatComponentText("ooOoo").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)),
+			new ChatComponentText("oooOo").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)),
+			new ChatComponentText("ooooO").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)),
 	};
 	GuiScreen parent;
 	IModConfig config;
@@ -51,7 +51,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	int tick = 0;
 	
 	public RequestScreen(BackgroundHolder customTexture, Navigator nav, GuiScreen parent, IModConfig config) {
-		super(new TextComponentString("Request GuiScreen"), customTexture);
+		super(new ChatComponentText("Request GuiScreen"), customTexture);
 		this.parent = parent;
 		this.nav = nav;
 		requestId = UUID.randomUUID();
@@ -90,7 +90,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		fontRendererObj.drawString(animation, width / 2 - fontRendererObj.getStringWidth(animation) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
-			ITextComponent draw = new TextComponentTranslation("gui.carbonconfig.timeout", timeout).setStyle(new Style().setColor(TextFormatting.RED));
+			IChatComponent draw = new ChatComponentTranslation("gui.carbonconfig.timeout", timeout).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED));
 			String drawing = draw.getFormattedText();
 			fontRendererObj.drawString(drawing, width / 2 - fontRendererObj.getStringWidth(drawing) / 2, height / 2 + 12, -1);
 		}

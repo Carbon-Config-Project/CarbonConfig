@@ -29,11 +29,11 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -75,7 +75,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public ConfigScreen(Navigator nav, IModConfig config, GuiScreen parent, BackgroundHolder customTexture) {
-		super(new TextComponentString(""), customTexture);
+		super(new ChatComponentText(""), customTexture);
 		this.nav = nav;
 		this.config = config;
 		this.node = config.getRootNode();
@@ -84,7 +84,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public ConfigScreen(Navigator nav, IConfigNode node, GuiScreen parent, BackgroundHolder customTexture) {
-		super(new TextComponentString(""), customTexture);
+		super(new ChatComponentText(""), customTexture);
 		this.nav = nav;
 		this.node = node;
 		this.parent = parent;
@@ -198,7 +198,7 @@ public class ConfigScreen extends ListScreen
 			if(node.isRoot() && prev.isChanged()) {
 				mc.displayGuiScreen(new GuiYesNo((T, K) -> {
 					mc.displayGuiScreen(T ? toOpen : this);	
-				}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
+				}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
 				return;
 			}
 			mc.displayGuiScreen(toOpen);
@@ -210,8 +210,8 @@ public class ConfigScreen extends ListScreen
 			if(T.isMain()) processAction(IConfigNode::setDefault);
 			else if(T.isOther()) processAction(IConfigNode::setPrevious);
 			mc.displayGuiScreen(this);
-		}, new TextComponentTranslation("gui.carbonconfig.reset_all.title"), new TextComponentTranslation("gui.carbonconfig.reset_all.message").setStyle(new Style().setColor(TextFormatting.GRAY)), 
-			new TextComponentTranslation("gui.carbonconfig.reset_all.default"), new TextComponentTranslation("gui.carbonconfig.reset_all.reset"), new TextComponentTranslation("gui.carbonconfig.reset_all.cancel")));
+		}, new ChatComponentTranslation("gui.carbonconfig.reset_all.title"), new ChatComponentTranslation("gui.carbonconfig.reset_all.message").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)), 
+			new ChatComponentTranslation("gui.carbonconfig.reset_all.default"), new ChatComponentTranslation("gui.carbonconfig.reset_all.reset"), new ChatComponentTranslation("gui.carbonconfig.reset_all.cancel")));
 	}
 	
 	private void save(GuiButton button) {
@@ -220,14 +220,14 @@ public class ConfigScreen extends ListScreen
 		if(findFirst(IConfigNode::requiresRestart, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
 				mc.displayGuiScreen(parent);
-			}, new TextComponentTranslation("gui.carbonconfig.restart.title"), new TextComponentTranslation("gui.carbonconfig.restart.message").setStyle(new Style().setColor(TextFormatting.GRAY)), new TextComponentTranslation("gui.carbonconfig.ok"));
+			}, new ChatComponentTranslation("gui.carbonconfig.restart.title"), new ChatComponentTranslation("gui.carbonconfig.restart.message").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)), new ChatComponentTranslation("gui.carbonconfig.ok"));
 			mc.displayGuiScreen(choice);
 			return;
 		}
 		else if(mc.theWorld != null && findFirst(IConfigNode::requiresReload, value)) {
 			MultiChoiceScreen choice = new MultiChoiceScreen(T -> {
 				mc.displayGuiScreen(parent);
-			}, new TextComponentTranslation("gui.carbonconfig.reload.title"), new TextComponentTranslation("gui.carbonconfig.reload.message").setStyle(new Style().setColor(TextFormatting.GRAY)), new TextComponentTranslation("gui.carbonconfig.ok"));
+			}, new ChatComponentTranslation("gui.carbonconfig.reload.title"), new ChatComponentTranslation("gui.carbonconfig.reload.message").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)), new ChatComponentTranslation("gui.carbonconfig.ok"));
 			mc.displayGuiScreen(choice);
 			return;
 		}
@@ -305,7 +305,7 @@ public class ConfigScreen extends ListScreen
 		if(node.isRoot() && isChanged()) {
 			mc.displayGuiScreen(new GuiYesNo((T, K) -> {
 				mc.displayGuiScreen(T ? parent : this);	
-			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
+			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		mc.displayGuiScreen(parent);
@@ -399,7 +399,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	public static class Navigator {
-		private static final ITextComponent SPLITTER = new TextComponentString(" > ").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true));
+		private static final IChatComponent SPLITTER = new ChatComponentText(" > ").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD).setBold(true));
 		List<String> layer = new ObjectArrayList<>();
 		List<GuiScreen> screenByIndex = new ObjectArrayList<>();
 		List<String> walker = null;
@@ -407,22 +407,22 @@ public class ConfigScreen extends ListScreen
 		
 		private Navigator() {}
 		
-		public Navigator(ITextComponent base) {
+		public Navigator(IChatComponent base) {
 			layer.add(base.getFormattedText());
 		}
 		
 		public static Navigator create(IModConfig config) {
 			ModContainer container = Loader.instance().getIndexedModList().get(config.getModId());
-			Navigator nav = new Navigator(new TextComponentString(container == null ? "Unknown" : container.getName()));
+			Navigator nav = new Navigator(new ChatComponentText(container == null ? "Unknown" : container.getName()));
 			nav.setScreenForLayer(null);
-			return nav.add(new TextComponentTranslation("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase()));
+			return nav.add(new ChatComponentTranslation("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase()));
 		}
 		
-		public Navigator add(ITextComponent name) {
+		public Navigator add(IChatComponent name) {
 			return add(name, null);
 		}
 		
-		public Navigator add(ITextComponent name, String walkerEntry) {
+		public Navigator add(IChatComponent name, String walkerEntry) {
 			Navigator nav = new Navigator();
 			nav.layer.addAll(layer);
 			nav.screenByIndex.addAll(screenByIndex);

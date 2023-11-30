@@ -20,8 +20,8 @@ import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.networking.carbon.ConfigRequestPacket;
 import carbonconfiglib.networking.carbon.SaveConfigPacket;
 import carbonconfiglib.utils.MultilinePolicy;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.PacketBuffer;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris

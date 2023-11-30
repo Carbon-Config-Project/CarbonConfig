@@ -4,7 +4,7 @@ import java.util.List;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,7 +24,7 @@ import net.minecraft.util.text.ITextComponent;
 public interface ICompoundNode extends INode
 {
 	public List<IValueNode> getValues();
-	public ITextComponent getName(int index);
+	public IChatComponent getName(int index);
 	public boolean isForcedSuggestion(int index);
 	public List<Suggestion> getValidValues(int index);
 	public boolean isValid();

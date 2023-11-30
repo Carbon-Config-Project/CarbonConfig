@@ -11,20 +11,14 @@ import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -47,28 +41,28 @@ public class SuggestionRenderers
 	
 	public static class ItemEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(String value, int x, int y) {
-			Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(value));
+		public IChatComponent renderSuggestion(String value, int x, int y) {
+			Item item = Item.itemRegistry.getObject(new ResourceLocation(value));
 			if(item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
 			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(itemStack, x, y);
-			return new TextComponentString(itemStack.getDisplayName()).setStyle(new Style().setColor(TextFormatting.YELLOW)).appendText("\n").appendSibling(new TextComponentString(value).setStyle(new Style().setColor(TextFormatting.GRAY)));			
+			return new ChatComponentText(itemStack.getDisplayName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)).appendText("\n").appendSibling(new ChatComponentText(value).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));			
 		}
 	}
 	
 	public static class FluidEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(String value, int x, int y) {
+		public IChatComponent renderSuggestion(String value, int x, int y) {
 			Fluid fluid = FluidRegistry.getFluid(value);
 			if(fluid == null) return null;
 			TextureAtlasSprite sprite = getSprite(fluid);
 			if(sprite == null) return null;
-			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 			int color = fluid.getColor();
 			GlStateManager.color((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
 			GUI.drawTexturedModalRect(0, 0, sprite, 18, 18);
 			GlStateManager.color(1F, 1F, 1F, 1F);
-			return new TextComponentString(fluid.getLocalizedName(new FluidStack(fluid, 1))).setStyle(new Style().setColor(TextFormatting.YELLOW)).appendText("\n").appendSibling(new TextComponentString(value).setStyle(new Style().setColor(TextFormatting.GRAY)));
+			return new ChatComponentText(fluid.getLocalizedName(new FluidStack(fluid, 1))).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)).appendText("\n").appendSibling(new ChatComponentText(value).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
@@ -78,35 +72,17 @@ public class SuggestionRenderers
 	
 	public static class EnchantmentEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(String value, int x, int y) {
-			Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(value));
+		public IChatComponent renderSuggestion(String value, int x, int y) {
+			Enchantment ench = Enchantment.getEnchantmentByLocation(value);
 			if(ench == null) return null;
-			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(ench, ench.getMinLevel())), x, y);
-			return new TextComponentString(ench.getTranslatedName(ench.getMinLevel())).setStyle(new Style().setColor(TextFormatting.YELLOW)).appendText("\n").appendSibling(new TextComponentString(value).setStyle(new Style().setColor(TextFormatting.GRAY)));
-		}
-	}
-	
-	public static class PotionEntry implements ISuggestionRenderer {
-		@Override
-		public ITextComponent renderSuggestion(String value, int x, int y) {
-			Potion potion = ForgeRegistries.POTIONS.getValue(new ResourceLocation(value));
-			if(potion == null) return null;
-			ItemStack item = new ItemStack(Items.POTIONITEM);
-			PotionUtils.appendEffects(item, ObjectLists.singleton(new PotionEffect(potion)));
-			NBTTagCompound nbt = item.getTagCompound();
-			if(nbt == null) {
-				nbt = new NBTTagCompound();
-				item.setTagCompound(nbt);
-			}
-			nbt.setInteger("CustomPotionColor", potion.getLiquidColor());
-			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(item, x, y);
-			return new TextComponentString(potion.getName()).setStyle(new Style().setColor(TextFormatting.YELLOW)).appendText("\n").appendSibling(new TextComponentString(value).setStyle(new Style().setColor(TextFormatting.GRAY)));
+			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(Items.enchanted_book.getEnchantedItemStack(new EnchantmentData(ench, ench.getMinLevel())), x, y);
+			return new ChatComponentText(ench.getTranslatedName(ench.getMinLevel())).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)).appendText("\n").appendSibling(new ChatComponentText(value).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 		}
 	}
 	
 	public static class ColorEntry implements ISuggestionRenderer {
 		@Override
-		public ITextComponent renderSuggestion(String value, int x, int y) {
+		public IChatComponent renderSuggestion(String value, int x, int y) {
 			try {
 				Gui.drawRect(x+1, y+1, x+18, y+19, 0xFFA0A0A0);
 				Gui.drawRect(x+2, y+2, x+17, y+18, Long.decode(value).intValue() | 0xFF000000);

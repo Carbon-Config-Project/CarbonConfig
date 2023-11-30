@@ -18,16 +18,16 @@ import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import carbonconfiglib.gui.widgets.screen.IInteractable;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +48,7 @@ public class ConfigSelectorScreen extends ListScreen
 {
 	IModConfigs configs;
 	GuiScreen parent;
-	ITextComponent modName;
+	IChatComponent modName;
 	Label toAdd;
 	
 	public ConfigSelectorScreen(IModConfigs configs, GuiScreen parent) {
@@ -56,10 +56,10 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	public ConfigSelectorScreen(IModConfigs configs, BackgroundHolder customTexture, GuiScreen parent) {
-		super(new TextComponentTranslation("gui.carbonconfig.select_config"), customTexture);
+		super(new ChatComponentTranslation("gui.carbonconfig.select_config"), customTexture);
 		this.configs = configs;
 		this.parent = parent;
-		modName = new TextComponentString(configs.getModName());
+		modName = new ChatComponentText(configs.getModName());
 	}
 	
 	@Override
@@ -79,7 +79,7 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	@Override
 	protected void collectElements(Consumer<Element> elements) {
-		toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.local").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
+		toAdd = new Label(new ChatComponentTranslation("gui.carbonconfig.configs.local").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD).setBold(true)));
 		addConfigs(ConfigType.CLIENT, false, elements);
 		addConfigs(ConfigType.SHARED, false, elements);
 		toAdd = null;
@@ -91,18 +91,18 @@ public class ConfigSelectorScreen extends ListScreen
 				if(isLanServer()) {
 					return;
 				}
-				if(mc.thePlayer.getPermissionLevel() < 4) {
+				if(!CarbonConfig.NETWORK.hasPermissions()) {
 					return;
 				}
-				toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.multiplayer").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
+				toAdd = new Label(new ChatComponentTranslation("gui.carbonconfig.configs.multiplayer").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD).setBold(true)));
 				addConfigs(ConfigType.SHARED, true, elements);
 			}
 			else  {
-				toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.world").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
+				toAdd = new Label(new ChatComponentTranslation("gui.carbonconfig.configs.world").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD).setBold(true)));
 			}
 		}
 		else {
-			toAdd = new Label(new TextComponentTranslation("gui.carbonconfig.configs.world").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true)));
+			toAdd = new Label(new ChatComponentTranslation("gui.carbonconfig.configs.world").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD).setBold(true)));
 		}
 		addConfigs(ConfigType.SERVER, true, elements);
 		toAdd = null;
@@ -129,11 +129,11 @@ public class ConfigSelectorScreen extends ListScreen
 	
 	private boolean isLanServer() {
 		ServerData data = mc.getCurrentServerData();
-		return data != null && data.isOnLAN();
+		return data != null && data.func_181041_d();
 	}
 	
 	public static class Label extends Element implements IIgnoreSearch {
-		public Label(ITextComponent name) {
+		public Label(IChatComponent name) {
 			super(name);
 		}
 
@@ -157,12 +157,12 @@ public class ConfigSelectorScreen extends ListScreen
 		boolean multi;
 		boolean multiplayer;
 		Navigator nav;
-		ITextComponent type;
-		ITextComponent fileName;
-		ITextComponent baseName;
+		IChatComponent type;
+		IChatComponent fileName;
+		IChatComponent baseName;
 		
-		public DirectConfig(IModConfig handler, ITextComponent baseName, GuiScreen parent, boolean multiplayer) {
-			super(new TextComponentString(handler.getFileName()));
+		public DirectConfig(IModConfig handler, IChatComponent baseName, GuiScreen parent, boolean multiplayer) {
+			super(new ChatComponentText(handler.getFileName()));
 			nav = new Navigator(baseName);
 			nav.setScreenForLayer(parent);
 			this.handler = handler;
@@ -185,8 +185,8 @@ public class ConfigSelectorScreen extends ListScreen
 				children.add(button);
 				children.add(reset);
 			}
-			type = new TextComponentTranslation("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
-			fileName = new TextComponentString(handler.getFileName()).setStyle(new Style().setColor(TextFormatting.GRAY));
+			type = new ChatComponentTranslation("gui.carbonconfig.type."+handler.getConfigType().name().toLowerCase());
+			fileName = new ChatComponentText(handler.getFileName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY));
 		}
 		
 		@Override

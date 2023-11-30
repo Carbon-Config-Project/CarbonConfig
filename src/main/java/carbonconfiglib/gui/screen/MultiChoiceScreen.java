@@ -7,8 +7,8 @@ import org.lwjgl.input.Keyboard;
 
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.screen.CarbonScreen;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -27,19 +27,19 @@ import net.minecraft.util.text.ITextComponent;
  */
 public class MultiChoiceScreen extends CarbonScreen
 {
-	protected ITextComponent title;
-	private final ITextComponent message;
-	protected ITextComponent mainButton;
-	protected ITextComponent otherButton;
-	protected ITextComponent cancelButton;
+	protected IChatComponent title;
+	private final IChatComponent message;
+	protected IChatComponent mainButton;
+	protected IChatComponent otherButton;
+	protected IChatComponent cancelButton;
 	protected List<String> output;
 	protected final Consumer<Result> callback;
 
-	public MultiChoiceScreen(Consumer<Result> callback, ITextComponent title, ITextComponent message, ITextComponent mainButton) {
+	public MultiChoiceScreen(Consumer<Result> callback, IChatComponent title, IChatComponent message, IChatComponent mainButton) {
 		this(callback, title, message, mainButton, null, null);
 	}
 	
-	public MultiChoiceScreen(Consumer<Result> callback, ITextComponent title, ITextComponent message, ITextComponent mainButton, ITextComponent otherButton, ITextComponent cancelButton) {
+	public MultiChoiceScreen(Consumer<Result> callback, IChatComponent title, IChatComponent message, IChatComponent mainButton, IChatComponent otherButton, IChatComponent cancelButton) {
 	      this.title = title;
 	      this.callback = callback;
 	      this.message = message;

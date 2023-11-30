@@ -11,11 +11,11 @@ import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.impl.ReloadMode;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -107,17 +107,17 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public ITextComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
+	public IChatComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
 	@Override
-	public ITextComponent getTooltip() {
-		TextComponentBase comp = new TextComponentString("");
-		comp.appendSibling(new TextComponentString(entry.getKey()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
+	public IChatComponent getTooltip() {
+		ChatComponentStyle comp = new ChatComponentText("");
+		comp.appendSibling(new ChatComponentText(entry.getKey()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
 		String[] array = entry.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
+			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 		}
 		String limit = entry.getLimitations();
-		if(limit != null && !limit.trim().isEmpty()) comp.appendText("\n").appendSibling(new TextComponentString(limit).setStyle(new Style().setColor(TextFormatting.BLUE)));
+		if(limit != null && !limit.trim().isEmpty()) comp.appendText("\n").appendSibling(new ChatComponentText(limit).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.BLUE)));
 		return comp;
 	}
 }

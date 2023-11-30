@@ -136,7 +136,7 @@ public class ForgeConfig implements IModConfig
 		if(prop.isList()) {
 			Property newProp = new Property(prop.getName(), prop.getStringList(), prop.getType());
 			newProp.setDefaultValues(prop.getDefaults());
-			newProp.setComment(prop.getComment());
+			newProp.comment = prop.comment;
 			newProp.setLanguageKey(prop.getLanguageKey());
 			newProp.setRequiresMcRestart(prop.requiresMcRestart());
 			newProp.setRequiresWorldRestart(prop.requiresWorldRestart());
@@ -145,7 +145,7 @@ public class ForgeConfig implements IModConfig
 		}
 		Property newProp = new Property(prop.getName(), prop.getStringList(), prop.getType());
 		newProp.setDefaultValues(prop.getDefaults());
-		newProp.setComment(prop.getComment());
+		newProp.comment = prop.comment;
 		newProp.setLanguageKey(prop.getLanguageKey());
 		newProp.setRequiresMcRestart(prop.requiresMcRestart());
 		newProp.setRequiresWorldRestart(prop.requiresWorldRestart());

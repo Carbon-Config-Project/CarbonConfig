@@ -20,11 +20,11 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -145,7 +145,7 @@ public abstract class ListSelectionScreen extends ListScreen
 			mc.displayGuiScreen(new GuiYesNo((T, V) -> {
 				if(T) abort();
 				mc.displayGuiScreen(T ? parent : this);	
-			}, new TextComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new TextComponentTranslation("gui.carbonconfig.warn.changed.desc").setStyle(new Style().setColor(TextFormatting.GRAY)).getFormattedText(), 0));
+			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}
 		abort();
@@ -228,7 +228,7 @@ public abstract class ListSelectionScreen extends ListScreen
 		
 		
 		public SelectionElement(Suggestion suggestion, ElementList list) {
-			super(new TextComponentTranslation(suggestion.getName()));
+			super(new ChatComponentTranslation(suggestion.getName()));
 			this.suggestion = suggestion;
 			this.myList = list;
 		}
@@ -237,12 +237,12 @@ public abstract class ListSelectionScreen extends ListScreen
 		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			ISuggestionRenderer renderer = getRenderer();
 			if(renderer != null) {
-				ITextComponent comp = renderer.renderSuggestion(suggestion.getValue(), left, top);
+				IChatComponent comp = renderer.renderSuggestion(suggestion.getValue(), left, top);
 				if(comp != null && mouseX >= left && mouseX <= left + 20 && mouseY >= top && mouseY <= top + 20) {
 					owner.addTooltips(comp);
 				}
 			}
-			renderText(new TextComponentString("").setStyle(new Style().setColor(myList.getSelected() == this ? TextFormatting.YELLOW : TextFormatting.WHITE)).appendSibling(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
+			renderText(new ChatComponentText("").setChatStyle(new ChatStyle().setColor(myList.getSelected() == this ? EnumChatFormatting.YELLOW : EnumChatFormatting.WHITE)).appendSibling(name), left+(renderer != null ? 20 : 0), top, width - 5, height-1, GuiAlign.LEFT, 0xFFFFFFFF);
 		}
 		
 		private ISuggestionRenderer getRenderer() {

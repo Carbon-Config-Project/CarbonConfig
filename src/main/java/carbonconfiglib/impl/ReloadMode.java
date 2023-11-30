@@ -1,8 +1,8 @@
 package carbonconfiglib.impl;
 
 import carbonconfiglib.api.IReloadMode;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -21,16 +21,16 @@ import net.minecraft.util.text.TextComponentTranslation;
  */
 public enum ReloadMode implements IReloadMode
 {
-	WORLD(new TextComponentTranslation("gui.carbonconfig.reload.sync")),
-	GAME(new TextComponentTranslation("gui.carbonconfig.restart.sync"));
+	WORLD(new ChatComponentTranslation("gui.carbonconfig.reload.sync")),
+	GAME(new ChatComponentTranslation("gui.carbonconfig.restart.sync"));
 	
-	ITextComponent message;
+	IChatComponent message;
 	
-	private ReloadMode(ITextComponent message) {
+	private ReloadMode(IChatComponent message) {
 		this.message = message;
 	}
 	
-	public ITextComponent getName() {
+	public IChatComponent getName() {
 		return message;
 	}
 	

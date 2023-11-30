@@ -19,13 +19,11 @@ import carbonconfiglib.utils.IEntryDataType;
 import carbonconfiglib.utils.IEntryDataType.SimpleDataType;
 import carbonconfiglib.utils.MultilinePolicy;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
+import speiger.src.collections.objects.utils.ObjectSets;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,15 +46,15 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	Class<?> clz;
 	Predicate<ResourceLocation> filter;
 	
-	public RegistryKeyValue(String key, IForgeRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
+	public RegistryKeyValue(String key, FMLControlledNamespacedRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (FMLControlledNamespacedRegistry<?>)registry;
+		this.registry = registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistryKeySuggestions(this));
 	}
 	
-	public static <E extends IForgeRegistryEntry<E>> Builder<E> builder(String key, Class<E> clz) {
+	public static <E> Builder<E> builder(String key, Class<E> clz) {
 		return new Builder<>(key, clz);
 	}
 	
@@ -194,7 +192,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		}
 	}
 	
-	public static class Builder<E extends IForgeRegistryEntry<E>> {
+	public static class Builder<E> {
 		Class<E> clz;
 		String key;
 		Set<E> unparsedValues = new ObjectLinkedOpenHashSet<>();
@@ -238,20 +236,20 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 			return this;
 		}
 		
-		private void parseValues(IForgeRegistry<E> registry) {
+		private void parseValues(FMLControlledNamespacedRegistry<E> registry) {
 			for(E entry : unparsedValues) {
-				ResourceLocation location = registry.getKey(entry);
+				ResourceLocation location = registry.getNameForObject(entry);
 				if(location != null) values.add(location);
 			}
 			unparsedValues.clear();
 		}
 		
-		public RegistryKeyValue build(IForgeRegistry<E> registry) {
+		public RegistryKeyValue build(FMLControlledNamespacedRegistry<E> registry) {
 			parseValues(registry);
 			return new RegistryKeyValue(key, registry, clz, values, filter, comments);
 		}
 		
-		public RegistryKeyValue build(IForgeRegistry<E> registry, ConfigSection section) {
+		public RegistryKeyValue build(FMLControlledNamespacedRegistry<E> registry, ConfigSection section) {
 			parseValues(registry);
 			return section.add(new RegistryKeyValue(key, registry, clz, values, filter, comments));
 		}

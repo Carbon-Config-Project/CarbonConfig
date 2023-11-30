@@ -34,7 +34,7 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	
 	public CarbonEditBox(FontRenderer font, int x, int y, int width, int height) {
 		super(0, font, x, y, width, height);
-		this.setGuiResponder(this);
+		this.func_175207_a(this);
 		setCanLoseFocus(true);
 	}
 	
@@ -111,11 +111,11 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	}
 	
 	@Override
-	public void setEntryValue(int id, boolean value) {}
+	public void func_175321_a(int id, boolean value) {}
 	@Override
-	public void setEntryValue(int id, float value) {}
+	public void onTick(int id, float value) {}
 	@Override
-	public void setEntryValue(int id, String value) {
+	public void func_175319_a(int id, String value) {
 		if(listener != null) {
 			listener.accept(value);
 		}

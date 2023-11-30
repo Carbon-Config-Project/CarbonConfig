@@ -21,9 +21,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.MathHelper;
 
 public class AbstractScrollList<E extends Entry<E>> implements IInteractableContainer, IWidget
 {
@@ -194,7 +194,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 		scrollAmount.update(partialTicks);
 		this.renderBackground();
 		Tessellator tes = Tessellator.getInstance();
-		VertexBuffer builder = tes.getBuffer();
+		WorldRenderer builder = tes.getWorldRenderer();
 		this.hovered = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPosition((double)mouseX, (double)mouseY) : null;
 		if (this.renderBackground) {
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -230,7 +230,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 			GlStateManager.depthFunc(515);
 			GlStateManager.disableDepth();
 	        GlStateManager.enableBlend();
-	        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
 	        GlStateManager.disableAlpha();
 	        GlStateManager.shadeModel(7425);
 			GlStateManager.disableTexture2D();
@@ -260,7 +260,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 			int minX = this.getScrollbarPosition();
 			int maxX = minX + 6;
 			GlStateManager.enableBlend();
-			GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
 			GlStateManager.disableAlpha();
 			GlStateManager.shadeModel(7425);
 			GlStateManager.disableTexture2D();

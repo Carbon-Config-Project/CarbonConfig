@@ -9,9 +9,9 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
@@ -122,7 +122,7 @@ public class GuiUtils
 	
 	private static void drawTexture(int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel) {
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer builder = tessellator.getBuffer();
+		WorldRenderer builder = tessellator.getWorldRenderer();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
@@ -155,7 +155,7 @@ public class GuiUtils
 		tessellator.draw();
 	}
 	
-	private static void drawTextured(int x, int y, int u, int v, int width, int height, float zLevel, VertexBuffer builder) {
+	private static void drawTextured(int x, int y, int u, int v, int width, int height, float zLevel, WorldRenderer builder) {
 		builder.pos(x, y + height, zLevel).tex(u * U_SCALE, (v + height) * V_SCALE).endVertex();
 		builder.pos(x + width, y + height, zLevel).tex((u + width) * U_SCALE, (v + height) * V_SCALE).endVertex();
 		builder.pos(x + width, y, zLevel).tex((u + width) * U_SCALE, v * V_SCALE).endVertex();
@@ -181,7 +181,7 @@ public class GuiUtils
 		float t_maxY = (texY + texHeight) / textureHeight;
 		
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer bufferbuilder = tessellator.getBuffer();
+		WorldRenderer bufferbuilder = tessellator.getWorldRenderer();
 		bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		bufferbuilder.pos(x, maxY, 0).tex(t_minX, t_maxY).endVertex();
 		bufferbuilder.pos(maxX, maxY, 0).tex(t_maxX, t_maxY).endVertex();
