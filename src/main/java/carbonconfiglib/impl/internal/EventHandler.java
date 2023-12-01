@@ -198,7 +198,8 @@ public class EventHandler implements IConfigChangeListener
 	
 	@SubscribeEvent
 	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerJoinEvent(LoggedOutEvent event) {
+	public void onPlayerServerLeaveEvent(LoggedOutEvent event) {
+		CarbonConfig.NETWORK.onPlayerLeft(null, false);
 		if(Minecraft.getInstance().getIntegratedServer() != null) {
 			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
 				if(PerWorldProxy.isProxy(handler.getProxy())) {
