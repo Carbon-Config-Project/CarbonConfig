@@ -139,7 +139,6 @@ public class ModConfig implements IModConfig
 	public void save() {
 		if(config == handler.getConfig()) {
 			handler.save();
-			handler.onSynced();
 		}
 		else {
 			try (BufferedWriter writer = Files.newBufferedWriter(path)) {
