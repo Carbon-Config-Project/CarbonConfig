@@ -30,6 +30,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiYesNo;
+import net.minecraft.client.gui.GuiYesNoCallback;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
@@ -197,7 +198,7 @@ public class ConfigScreen extends ListScreen
 			GuiScreen toOpen = prev.parent;
 			if(node.isRoot() && prev.isChanged()) {
 				mc.displayGuiScreen(new GuiYesNo((T, K) -> {
-					mc.displayGuiScreen(T ? toOpen : this);	
+					mc.displayGuiScreen(T ? toOpen : ConfigScreen.this);	
 				}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
 				return;
 			}
@@ -303,8 +304,11 @@ public class ConfigScreen extends ListScreen
 	
 	private void goBack(GuiButton button) {
 		if(node.isRoot() && isChanged()) {
-			mc.displayGuiScreen(new GuiYesNo((T, K) -> {
-				mc.displayGuiScreen(T ? parent : this);	
+			mc.displayGuiScreen(new GuiYesNo(new GuiYesNoCallback() {
+				@Override
+				public void confirmClicked(boolean result, int p_73878_2_) {
+					mc.displayGuiScreen(result ? parent : ConfigScreen.this);	
+				}
 			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
 			return;
 		}

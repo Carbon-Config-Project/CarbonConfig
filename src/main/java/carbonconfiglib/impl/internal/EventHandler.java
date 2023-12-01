@@ -49,7 +49,6 @@ import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
-import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -187,7 +186,6 @@ public class EventHandler implements IConfigChangeListener
 			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
-			forgeConfigs.supplyIfAbsent(Loader.instance().getIndexedModList().get("Forge"), ObjectArrayList::new).add(ForgeModContainer.getConfig());
 			forgeConfigs.forEach((M, C) -> {
 				if(factory.containsKey(M) && !CarbonConfig.FORCE_FORGE_SUPPORT.get()) return;
 				mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(new ForgeConfigs(M, C));

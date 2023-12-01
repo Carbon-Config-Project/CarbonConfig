@@ -62,7 +62,7 @@ import net.minecraftforge.common.MinecraftForge;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config Library", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.7.10]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -81,8 +81,10 @@ public class CarbonConfig
 	{
 		NETWORK.init();
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
+		FMLCommonHandler.instance().bus().register(EventHandler.INSTANCE);
 		if(FMLCommonHandler.instance().getSide().isClient()) {
 			MinecraftForge.EVENT_BUS.register(this);
+			FMLCommonHandler.instance().bus().register(this);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
