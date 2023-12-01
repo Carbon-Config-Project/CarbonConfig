@@ -246,7 +246,7 @@ public class CarbonConfig
 	@SideOnly(Side.CLIENT)
 	public void onClientLoad() {
 		EventHandler.INSTANCE.onConfigsLoaded();
-		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPADENTER, "key.carbon_config");
+		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPAD0, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
 		MOD_GUI = mapping::isKeyDown;
 	}
