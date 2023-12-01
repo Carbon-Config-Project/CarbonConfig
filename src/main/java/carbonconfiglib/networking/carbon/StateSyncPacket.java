@@ -6,7 +6,7 @@ import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.ICarbonPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
+import net.neoforged.api.distmarker.Dist;
 
 /**
  * Copyright 2023 Speiger, Meduris

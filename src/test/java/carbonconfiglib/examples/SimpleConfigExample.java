@@ -18,7 +18,7 @@ import carbonconfiglib.utils.AutomationType;
 import carbonconfiglib.utils.MultilinePolicy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public class SimpleConfigExample
 {

@@ -33,21 +33,21 @@ import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.gui.ModListScreen;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.ModListScreen;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -81,13 +81,13 @@ public class CarbonConfig
 	{
 		NETWORK.init();
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonLoad);
-		MinecraftForge.EVENT_BUS.addListener(this::load);
-		MinecraftForge.EVENT_BUS.addListener(this::unload);
-		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
+		NeoForge.EVENT_BUS.addListener(this::load);
+		NeoForge.EVENT_BUS.addListener(this::unload);
+		NeoForge.EVENT_BUS.register(EventHandler.INSTANCE);
 		if(FMLEnvironment.dist.isClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
-			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
+			NeoForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);

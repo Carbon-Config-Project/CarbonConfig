@@ -15,8 +15,8 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.impl.carbon.ModConfig;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
 
 /**
  * Copyright 2023 Speiger, Meduris

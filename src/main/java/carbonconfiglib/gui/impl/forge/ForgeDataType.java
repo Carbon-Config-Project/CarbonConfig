@@ -13,7 +13,7 @@ import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ValueSpec;
 
 /**
  * Copyright 2023 Speiger, Meduris

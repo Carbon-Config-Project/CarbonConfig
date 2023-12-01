@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[48,)"
+loaderVersion="[1,)"
 license="Apache-2.0"
 [[mods]]
 	modId="carbonconfig"
@@ -13,9 +13,9 @@ license="Apache-2.0"
 		Carbon Config is IC2Classics Config Implementation made open source
 	'''
 	[[dependencies.carbonconfig]]
-		modId="forge"
+		modId="neoforge"
 		mandatory=true
-		versionRange="[48,)"
+		versionRange="[1,)"
 		ordering="NONE"
 		side="BOTH"
 	[[dependencies.carbonconfig]]

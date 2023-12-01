@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -23,8 +24,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +48,7 @@ public class SuggestionRenderers
 		public Component renderSuggestion(GuiGraphics graphics, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			Item item = ForgeRegistries.ITEMS.getValue(id);
+			Item item = BuiltInRegistries.ITEM.get(id);
 			if(item == Items.AIR || item == null) return null;
 			ItemStack itemStack = new ItemStack(item);
 			graphics.renderItem(itemStack, x, y);
@@ -61,7 +61,7 @@ public class SuggestionRenderers
 		public Component renderSuggestion(GuiGraphics graphics, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			Fluid fluid = ForgeRegistries.FLUIDS.getValue(id);
+			Fluid fluid = BuiltInRegistries.FLUID.get(id);
 			if(fluid == Fluids.EMPTY || fluid == null) return null;
 			TextureAtlasSprite sprite = getSprite(fluid);
 			if(sprite == null) return null;
@@ -83,7 +83,7 @@ public class SuggestionRenderers
 		public Component renderSuggestion(GuiGraphics graphics, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(id);
+			Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(id);
 			if(ench == null) return null;
 			graphics.renderItem(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, ench.getMinLevel())), x, y);
 			return ench.getFullname(ench.getMinLevel()).copy().withStyle(ChatFormatting.YELLOW).append("\n").append(Component.literal(id.toString()).withStyle(ChatFormatting.GRAY));
@@ -95,7 +95,7 @@ public class SuggestionRenderers
 		public Component renderSuggestion(GuiGraphics graphics, String value, int x, int y) {
 			ResourceLocation id = ResourceLocation.tryParse(value);
 			if(id == null) return null;
-			MobEffect potion = ForgeRegistries.MOB_EFFECTS.getValue(id);
+			MobEffect potion = BuiltInRegistries.MOB_EFFECT.get(id);
 			if(potion == null) return null;
 			ItemStack item = new ItemStack(Items.POTION);
 			PotionUtils.setCustomEffects(item, ObjectLists.singleton(new MobEffectInstance(potion)));

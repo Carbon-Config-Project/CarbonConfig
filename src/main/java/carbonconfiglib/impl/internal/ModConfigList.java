@@ -7,7 +7,7 @@ import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
-import net.minecraftforge.fml.ModContainer;
+import net.neoforged.fml.ModContainer;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 public class ModConfigList implements IModConfigs

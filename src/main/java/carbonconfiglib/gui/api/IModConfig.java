@@ -15,7 +15,7 @@ import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 /**
  * Copyright 2023 Speiger, Meduris

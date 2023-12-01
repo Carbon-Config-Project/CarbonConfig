@@ -18,9 +18,9 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec.ValueSpec;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -48,7 +48,7 @@ public class ForgeLeaf implements IConfigNode
 	ForgeArrayValue array;
 	Component tooltip;
 	
-	public ForgeLeaf(ForgeConfigSpec spec, ConfigValue<?> data, CommentedConfig config) {
+	public ForgeLeaf(ModConfigSpec spec, ConfigValue<?> data, CommentedConfig config) {
 		this.data = data;
 		this.config = config;
 		this.spec = getSpec(spec, data);
@@ -164,14 +164,14 @@ public class ForgeLeaf implements IConfigNode
 		return comp;
 	}
 	
-	private String[] buildComment(ForgeConfigSpec spec) {
+	private String[] buildComment(ModConfigSpec spec) {
 		String value = this.spec.getComment();
 		if(value == null) return null;
 		int cutoffPoint = getSmallerOfPresent(value.indexOf("Range: "), value.indexOf("Allowed Values: "));
 		return (cutoffPoint >= 0 ? value.substring(0, cutoffPoint) : value).split("\n");
 	}
 	
-	private ValueSpec getSpec(ForgeConfigSpec spec, ConfigValue<?> value) {
+	private ValueSpec getSpec(ModConfigSpec spec, ConfigValue<?> value) {
 		return spec.get(value.getPath());
 	}
 	

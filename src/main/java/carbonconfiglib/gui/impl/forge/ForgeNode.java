@@ -14,8 +14,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -36,16 +36,16 @@ public class ForgeNode implements IConfigFolderNode
 {
 	List<String> paths;
 	CommentedConfig config;
-	ForgeConfigSpec spec;
+	ModConfigSpec spec;
 	UnmodifiableConfig specConfig;
 	List<IConfigNode> children;
 	Component tooltip;
 	
-	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec) {
+	public ForgeNode(List<String> paths, CommentedConfig config, ModConfigSpec spec) {
 		this(paths, config, spec, spec.getValues());
 	}
 	
- 	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec, UnmodifiableConfig specConfig) {
+ 	public ForgeNode(List<String> paths, CommentedConfig config, ModConfigSpec spec, UnmodifiableConfig specConfig) {
 		this.paths = paths;
 		this.config = config;
 		this.spec = spec;

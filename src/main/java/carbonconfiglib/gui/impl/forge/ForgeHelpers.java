@@ -9,12 +9,12 @@ import com.electronwill.nightconfig.core.io.WritingMode;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfig.Type;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.ModConfigSpec.ValueSpec;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * Copyright 2023 Speiger, Meduris

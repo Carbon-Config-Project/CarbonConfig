@@ -4,7 +4,7 @@ import java.util.List;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.minecraftforge.fml.IExtensionPoint;
+import net.neoforged.fml.IExtensionPoint;
 
 /**
  * Copyright 2023 Speiger, Meduris

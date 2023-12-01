@@ -30,12 +30,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfig.Type;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -55,14 +55,14 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 public class ForgeConfig implements IModConfig
 {
 	ModConfig config;
-	ForgeConfigSpec spec;
+	ModConfigSpec spec;
 	CommentedConfig data;
 	List<ConfigValue<?>> entries;
 	Path path;
 	
 	public ForgeConfig(ModConfig config) {
 		this.config = config;
-		spec = (ForgeConfigSpec)config.getSpec();
+		spec = (ModConfigSpec)config.getSpec();
 		data = config.getConfigData();
 		entries = collect();
 	}
@@ -71,7 +71,7 @@ public class ForgeConfig implements IModConfig
 		this.config = config;
 		this.data = data;
 		this.path = path;
-		spec = (ForgeConfigSpec)config.getSpec();
+		spec = (ModConfigSpec)config.getSpec();
 		entries = collect();
 	}
 	

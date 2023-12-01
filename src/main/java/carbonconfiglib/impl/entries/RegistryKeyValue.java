@@ -22,9 +22,8 @@ import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -43,13 +42,13 @@ import net.minecraftforge.registries.IForgeRegistry;
  */
 public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Set<ResourceLocation>> implements IArrayConfig
 {
-	ForgeRegistry<?> registry;
+	Registry<?> registry;
 	Class<?> clz;
 	Predicate<ResourceLocation> filter;
 	
-	public RegistryKeyValue(String key, IForgeRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
+	public RegistryKeyValue(String key, Registry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (ForgeRegistry<?>)registry;
+		this.registry = registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistryKeySuggestions(this));
@@ -185,7 +184,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		
 		@Override
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(ResourceLocation entry : value.registry.getKeys()) {
+			for(ResourceLocation entry : value.registry.keySet()) {
 				String key = entry.toString();
 				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
@@ -237,7 +236,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 			return this;
 		}
 		
-		private void parseValues(IForgeRegistry<E> registry) {
+		private void parseValues(Registry<E> registry) {
 			for(E entry : unparsedValues) {
 				ResourceLocation location = registry.getKey(entry);
 				if(location != null) values.add(location);
@@ -245,12 +244,12 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 			unparsedValues.clear();
 		}
 		
-		public RegistryKeyValue build(IForgeRegistry<E> registry) {
+		public RegistryKeyValue build(Registry<E> registry) {
 			parseValues(registry);
 			return new RegistryKeyValue(key, registry, clz, values, filter, comments);
 		}
 		
-		public RegistryKeyValue build(IForgeRegistry<E> registry, ConfigSection section) {
+		public RegistryKeyValue build(Registry<E> registry, ConfigSection section) {
 			parseValues(registry);
 			return section.add(new RegistryKeyValue(key, registry, clz, values, filter, comments));
 		}

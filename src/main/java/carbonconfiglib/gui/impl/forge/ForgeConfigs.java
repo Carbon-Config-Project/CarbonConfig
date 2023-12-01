@@ -11,12 +11,12 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.impl.internal.ModConfigs;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforgespi.language.IModInfo;
 
 /**
  * Copyright 2023 Speiger, Meduris

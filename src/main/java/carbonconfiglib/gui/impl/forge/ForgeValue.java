@@ -8,7 +8,7 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ValueSpec;
 
 /**
  * Copyright 2023 Speiger, Meduris
