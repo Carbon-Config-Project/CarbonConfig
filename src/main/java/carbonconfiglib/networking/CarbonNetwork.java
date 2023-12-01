@@ -24,11 +24,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkEvent.Context;
-import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.sets.ObjectOpenHashSet;
 
@@ -55,7 +54,7 @@ public class CarbonNetwork
 	boolean serverInstalled = false;
 	
 	public void init() {
-		channel = NetworkRegistry.newSimpleChannel(new ResourceLocation("carbonconfig", "networking"), () -> VERSION, this::acceptsConnection, this::acceptsConnection);	
+		channel = ChannelBuilder.named(new ResourceLocation("carbonconfig", "networking")).optional().simpleChannel();	
 		registerPacket(0, SyncPacket.class, SyncPacket::new);
 		registerPacket(1, BulkSyncPacket.class, BulkSyncPacket::new);
 		registerPacket(2, ConfigRequestPacket.class, ConfigRequestPacket::new);
@@ -68,12 +67,9 @@ public class CarbonNetwork
 		registerPacket(255, StateSyncPacket.class, StateSyncPacket::new);
 	}
 	
-	private boolean acceptsConnection(String version) {
-		return VERSION.equals(version) || NetworkRegistry.ACCEPTVANILLA.equals(version) || NetworkRegistry.ABSENT.version().equals(version);
-	}
 	
 	private <T extends ICarbonPacket> void registerPacket(int index, Class<T> packet, Supplier<T> creator) {
-		channel.registerMessage(index, packet, this::writePacket, (K) -> readPacket(K, creator), this::handlePacket);
+		channel.messageBuilder(packet, index).encoder(this::writePacket).decoder(K -> readPacket(K, creator)).consumerMainThread(this::handlePacket).add();
 	}
 	
 	protected void writePacket(ICarbonPacket packet, FriendlyByteBuf buffer) {
@@ -91,12 +87,11 @@ public class CarbonNetwork
 		return null;
 	}
 	
-	protected void handlePacket(ICarbonPacket packet, Supplier<NetworkEvent.Context> provider) {
+	protected void handlePacket(ICarbonPacket packet, CustomPayloadEvent.Context provider) {
 		try {
-			Context context = provider.get();
-			Player player = getPlayer(context);
-			context.enqueueWork(() -> packet.process(player));
-			context.setPacketHandled(true);
+			Player player = getPlayer(provider);
+			provider.enqueueWork(() -> packet.process(player));
+			provider.setPacketHandled(true);
 		}
 		catch(Exception e) { e.printStackTrace(); }
 	}
@@ -105,7 +100,7 @@ public class CarbonNetwork
 		return getClientPlayer() != null;
 	}
 	
-	protected Player getPlayer(Context cont) {
+	protected Player getPlayer(CustomPayloadEvent.Context cont) {
 		Player entity = cont.getSender();
 		return entity != null ? entity : getClientPlayer();
 	}
@@ -117,11 +112,11 @@ public class CarbonNetwork
 	}
 	
 	public void sendToServer(ICarbonPacket packet) {
-		channel.send(PacketDistributor.SERVER.noArg(), packet);
+		channel.send(packet, PacketDistributor.SERVER.noArg());
 	}
 	
 	public void sendToAllPlayers(ICarbonPacket packet) {
-		channel.send(PacketDistributor.NMLIST.with(this::getAllPlayers), packet);
+		channel.send(packet, PacketDistributor.NMLIST.with(getAllPlayers()));
 	}
 	
 	public void onPlayerJoined(Player player, boolean server) {
@@ -138,7 +133,7 @@ public class CarbonNetwork
 		List<Connection> players = new ObjectArrayList<>();
 		for(ServerPlayer player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
 			if(isInstalledOnClient(player)) 
-				players.add(player.connection.connection);
+				players.add(player.connection.getConnection());
 		}
 		return players;
 	}
@@ -159,6 +154,6 @@ public class CarbonNetwork
 		if(!(player instanceof ServerPlayer)) {
 			throw new RuntimeException("Sending a Packet to a Player from client is not allowed");
 		}
-		channel.send(PacketDistributor.PLAYER.with(() -> ((ServerPlayer)player)), packet);
+		channel.send(packet, PacketDistributor.PLAYER.with(((ServerPlayer)player)));
 	}
 }

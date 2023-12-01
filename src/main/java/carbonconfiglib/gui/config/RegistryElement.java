@@ -72,14 +72,6 @@ public class RegistryElement extends ConfigElement
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
-		if(edit != null) {
-			edit.tick();
-		}
-	}
-	
-	@Override
 	public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(graphics, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(renderer != null) {

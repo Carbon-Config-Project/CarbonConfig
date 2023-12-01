@@ -90,7 +90,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 	
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(graphics);
+		renderBackground(graphics, mouseX, mouseY, partialTicks);
 		super.render(graphics, mouseX, mouseY, partialTicks);
 		GuiUtils.drawTextureRegion(graphics, 5, 5, 40, 40, Icon.LOGO, 400, 400);
 		if(mouseX >= 5 && mouseX <= 45 && mouseY >= 5 && mouseY <= 40) {

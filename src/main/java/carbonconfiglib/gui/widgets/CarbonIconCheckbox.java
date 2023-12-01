@@ -28,7 +28,8 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class CarbonIconCheckbox extends AbstractButton
 {
-	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/checkbox.png");
+	private static final ResourceLocation CHECKBOX_HIGHLIGHTED_SPRITE = new ResourceLocation("widget/checkbox_highlighted");
+	private static final ResourceLocation CHECKBOX_SPRITE = new ResourceLocation("widget/checkbox");
 	private boolean selected;
 	Icon selectedIcon;
 	Icon unselectedIcon;
@@ -69,14 +70,13 @@ public class CarbonIconCheckbox extends AbstractButton
 	
 	@Override
 	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		RenderSystem.setShaderTexture(0, TEXTURE);
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
-		GuiUtils.drawTextureRegion(graphics, getX(), getY(), isHoveredOrFocused() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		graphics.blitSprite(isHoveredOrFocused() ? CHECKBOX_HIGHLIGHTED_SPRITE : CHECKBOX_SPRITE, getX(), getY(), width, height);
 		GuiUtils.drawTextureRegion(graphics, getX()+2, getY()+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
 		if(owner != null && isMouseOver(mouseX, mouseY)) {
 			owner.addTooltips(tooltip);

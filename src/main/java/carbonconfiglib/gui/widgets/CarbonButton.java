@@ -33,14 +33,7 @@ public class CarbonButton extends Button
 	@Override
 	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
-		int k = getTextureY();
-		graphics.blitWithBorder(WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2);
+	    graphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
 		GuiUtils.drawScrollingShadowString(graphics, mc.font, getMessage(), getX(), getY(), width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
-	}
-	
-	private int getTextureY() {
-		if (!this.active) return 0;
-		else if (this.isHoveredOrFocused()) return 2;
-		return 1;
 	}
 }

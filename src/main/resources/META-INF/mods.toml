@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[46,)"
+loaderVersion="[48,)"
 license="Apache-2.0"
 [[mods]]
 	modId="carbonconfig"
@@ -15,12 +15,12 @@ license="Apache-2.0"
 	[[dependencies.carbonconfig]]
 		modId="forge"
 		mandatory=true
-		versionRange="[46,)"
+		versionRange="[48,)"
 		ordering="NONE"
 		side="BOTH"
 	[[dependencies.carbonconfig]]
 		modId="minecraft"
 		mandatory=true
-		versionRange="[1.20,)"
+		versionRange="[1.20.2,)"
 		ordering="NONE"
 		side="BOTH"

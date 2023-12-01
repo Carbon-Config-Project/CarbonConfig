@@ -71,7 +71,6 @@ public abstract class ListSelectionScreen extends ListScreen
 	@Override
 	protected void init() {
 		super.init();
-		visibleList.setRenderSelection(true);
 		loadDefault();
 		visibleList.setCallback(T -> setValue(((SelectionElement)T).getSuggestion().getValue()));
 		int x = width / 2 - 100;
