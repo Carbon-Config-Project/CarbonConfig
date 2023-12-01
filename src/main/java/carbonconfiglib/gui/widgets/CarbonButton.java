@@ -38,6 +38,6 @@ public class CarbonButton extends Button
 		int k = this.getYImage(this.isHovered);
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		this.renderBg(poseStack, mc, mouseX, mouseY);
-		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), x, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), x, y, width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
 	}
 }
