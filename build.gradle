@@ -7,7 +7,6 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
-jarJar.enable()
 
 version = MC_VERSION + '-' + MOD_VERSION
 group = 'carbonconfiglib'
@@ -80,10 +79,7 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
-    minecraftLibrary ':Primitive Collections-0.8.9'
-    jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
-	 	jarJar.pin(it, "0.8.9")
-	}
+    implementation ':Primitive Collections-0.8.9'
 }
 
 jar {
@@ -98,22 +94,14 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+    dependsOn configurations.runtimeClasspath
+	from {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+		configurations.runtimeClasspath.findAll { it.name.contains('Primitive Collections') }.collect { zipTree(it) }	
+	}
 }
 
 jar.finalizedBy('reobfJar')
-reobf {
-    jarJar { }
-}
-tasks.jarJar.finalizedBy('reobfJarJar')
-
-task deobfJar(type: Jar) {
-    archiveClassifier.set("deobf")
-    from sourceSets.main.output
-}
-
-artifacts {
-    archives deobfJar
-}
 
 publishing {
     publications {
