@@ -2,10 +2,8 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.45'
+    id 'net.neoforged.gradle.userdev' version '7.0.55'
 }
-jarJar.enable()
-
 version = MC_VERSION + '-' + MOD_VERSION
 group = 'carbonconfiglib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'Carbon Config'
@@ -28,6 +26,9 @@ runs {
     // applies to all the run configs below
     configureEach {
         modSource project.sourceSets.main
+		dependencies {
+    		runtime ':Primitive Collections-0.8.9'
+    	}
     }
 
     client {
@@ -69,9 +70,6 @@ repositories {
 dependencies {
     implementation "net.neoforged:neoforge:20.2.59-beta"
 	implementation ':Primitive Collections-0.8.9'
-    jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
-	 	jarJar.pin(it, "0.8.9")
-	}
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
