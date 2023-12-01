@@ -9,10 +9,8 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -56,12 +54,12 @@ public class GuiUtils
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.drawString(text, x - align.align(width) + align.align(textWidth) + (float)lerp(offset, 0D, diff), y + (height / 2) - (font.FONT_HEIGHT / 3), color, false);
+			font.drawString(text, (int)(x - align.align(width) + align.align(textWidth) + (float)lerp(offset, 0D, diff)), (int)(y + (height / 2) - (font.FONT_HEIGHT / 3)), color, false);
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.drawString(text, x - align.align(width) + offset, y + (height / 2) - (font.FONT_HEIGHT / 3), color, false);
+		font.drawString(text, (int)(x - align.align(width) + offset), (int)(y + (height / 2) - (font.FONT_HEIGHT / 3)), color, false);
 	}
 	
 	public static void drawScrollingShadowString(FontRenderer font, String text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
@@ -72,12 +70,12 @@ public class GuiUtils
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.drawStringWithShadow(text, x - align.align(width) + align.align(textWidth) + (float)lerp(offset, 0D, diff), y + (height / 2) - (font.FONT_HEIGHT / 3), color);
+			font.drawStringWithShadow(text, (int)(x - align.align(width) + align.align(textWidth) + (float)lerp(offset, 0D, diff)), (int)(y + (height / 2) - (font.FONT_HEIGHT / 3)), color);
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.drawStringWithShadow(text, x - align.align(width) + offset, y + (height / 2) - (font.FONT_HEIGHT / 3), color);
+		font.drawStringWithShadow(text, (int)(x - align.align(width) + offset), (int)(y + (height / 2) - (font.FONT_HEIGHT / 3)), color);
 	}
 	
 	private static long milliTime() {
@@ -107,7 +105,7 @@ public class GuiUtils
 			return;
 		}
 		Minecraft mc = Minecraft.getMinecraft();
-		ScaledResolution res = new ScaledResolution(mc);
+		ScaledResolution res = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
 		int bottom = rect.maxY;
 		double scaledHeight = (double)mc.displayHeight / (double)res.getScaledHeight_double();
 		double scaledWidth = (double)mc.displayWidth / (double)res.getScaledWidth_double();
@@ -121,11 +119,10 @@ public class GuiUtils
 	}
 	
 	private static void drawTexture(int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel) {
-		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer builder = tessellator.getWorldRenderer();
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+		Tessellator tessellator = Tessellator.instance;
+		tessellator.startDrawingQuads();
+        GL11.glEnable(GL11.GL_BLEND);
+        OpenGlHelper.glBlendFunc(770, 771, 0, 1);
 		
 		int fillerWidth = textureWidth - leftBorder - rightBorder;
 		int fillerHeight = textureHeight - topBorder - bottomBorder;
@@ -136,30 +133,31 @@ public class GuiUtils
 		int yPasses = canvasHeight / fillerHeight;
 		int remainderHeight = canvasHeight % fillerHeight;
 
-		drawTextured(x, y, u, v, leftBorder, topBorder, zLevel, builder);
-		drawTextured(x + leftBorder + canvasWidth, y, u + leftBorder + fillerWidth, v, rightBorder, topBorder, zLevel, builder);
-		drawTextured(x, y + topBorder + canvasHeight, u, v + topBorder + fillerHeight, leftBorder, bottomBorder, zLevel, builder);
-		drawTextured(x + leftBorder + canvasWidth, y + topBorder + canvasHeight, u + leftBorder + fillerWidth, v + topBorder + fillerHeight, rightBorder, bottomBorder, zLevel, builder);
+		drawTextured(x, y, u, v, leftBorder, topBorder, zLevel, tessellator);
+		drawTextured(x + leftBorder + canvasWidth, y, u + leftBorder + fillerWidth, v, rightBorder, topBorder, zLevel, tessellator);
+		drawTextured(x, y + topBorder + canvasHeight, u, v + topBorder + fillerHeight, leftBorder, bottomBorder, zLevel, tessellator);
+		drawTextured(x + leftBorder + canvasWidth, y + topBorder + canvasHeight, u + leftBorder + fillerWidth, v + topBorder + fillerHeight, rightBorder, bottomBorder, zLevel, tessellator);
 
 		for (int i = 0; i < xPasses + (remainderWidth > 0 ? 1 : 0); i++) {
-			drawTextured(x + leftBorder + (i * fillerWidth), y, u + leftBorder, v, (i == xPasses ? remainderWidth : fillerWidth), topBorder, zLevel, builder);
-			drawTextured(x + leftBorder + (i * fillerWidth), y + topBorder + canvasHeight, u + leftBorder, v + topBorder + fillerHeight, (i == xPasses ? remainderWidth : fillerWidth), bottomBorder, zLevel, builder);
+			drawTextured(x + leftBorder + (i * fillerWidth), y, u + leftBorder, v, (i == xPasses ? remainderWidth : fillerWidth), topBorder, zLevel, tessellator);
+			drawTextured(x + leftBorder + (i * fillerWidth), y + topBorder + canvasHeight, u + leftBorder, v + topBorder + fillerHeight, (i == xPasses ? remainderWidth : fillerWidth), bottomBorder, zLevel, tessellator);
 			for (int j = 0; j < yPasses + (remainderHeight > 0 ? 1 : 0); j++)
-				drawTextured(x + leftBorder + (i * fillerWidth), y + topBorder + (j * fillerHeight), u + leftBorder, v + topBorder, (i == xPasses ? remainderWidth : fillerWidth), (j == yPasses ? remainderHeight : fillerHeight), zLevel, builder);
+				drawTextured(x + leftBorder + (i * fillerWidth), y + topBorder + (j * fillerHeight), u + leftBorder, v + topBorder, (i == xPasses ? remainderWidth : fillerWidth), (j == yPasses ? remainderHeight : fillerHeight), zLevel, tessellator);
 		}
 
 		for (int j = 0; j < yPasses + (remainderHeight > 0 ? 1 : 0); j++) {
-			drawTextured(x, y + topBorder + (j * fillerHeight), u, v + topBorder, leftBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel, builder);
-			drawTextured(x + leftBorder + canvasWidth, y + topBorder + (j * fillerHeight), u + leftBorder + fillerWidth, v + topBorder, rightBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel, builder);
+			drawTextured(x, y + topBorder + (j * fillerHeight), u, v + topBorder, leftBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel, tessellator);
+			drawTextured(x + leftBorder + canvasWidth, y + topBorder + (j * fillerHeight), u + leftBorder + fillerWidth, v + topBorder, rightBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel, tessellator);
 		}
 		tessellator.draw();
+        GL11.glDisable(GL11.GL_BLEND);
 	}
 	
-	private static void drawTextured(int x, int y, int u, int v, int width, int height, float zLevel, WorldRenderer builder) {
-		builder.pos(x, y + height, zLevel).tex(u * U_SCALE, (v + height) * V_SCALE).endVertex();
-		builder.pos(x + width, y + height, zLevel).tex((u + width) * U_SCALE, (v + height) * V_SCALE).endVertex();
-		builder.pos(x + width, y, zLevel).tex((u + width) * U_SCALE, v * V_SCALE).endVertex();
-		builder.pos(x, y, zLevel).tex(u * U_SCALE, v * V_SCALE).endVertex();
+	private static void drawTextured(int x, int y, int u, int v, int width, int height, float zLevel, Tessellator builder) {
+		builder.addVertexWithUV(x, y + height, zLevel, u * U_SCALE, (v + height) * V_SCALE);
+		builder.addVertexWithUV(x + width, y + height, zLevel, (u + width) * U_SCALE, (v + height) * V_SCALE);
+		builder.addVertexWithUV(x + width, y, zLevel, (u + width) * U_SCALE, v * V_SCALE);
+		builder.addVertexWithUV(x, y, zLevel, u * U_SCALE, v * V_SCALE);
 	}
 	
 	public static void drawTextureRegion(float x, float y, float width, float height, Icon icon, float texWidth, float texHeight) {
@@ -180,18 +178,17 @@ public class GuiUtils
 		float t_maxX = (texX + texWidth) / textureWidth;
 		float t_maxY = (texY + texHeight) / textureHeight;
 		
-		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer bufferbuilder = tessellator.getWorldRenderer();
-		bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		bufferbuilder.pos(x, maxY, 0).tex(t_minX, t_maxY).endVertex();
-		bufferbuilder.pos(maxX, maxY, 0).tex(t_maxX, t_maxY).endVertex();
-		bufferbuilder.pos(maxX, y, 0).tex(t_maxX, t_minY).endVertex();
-		bufferbuilder.pos(x, y, 0).tex(t_minX, t_minY).endVertex();
+		Tessellator tessellator = Tessellator.instance;
+		tessellator.startDrawingQuads();
+		tessellator.addVertexWithUV(x, maxY, 0, t_minX, t_maxY);
+		tessellator.addVertexWithUV(maxX, maxY, 0, t_maxX, t_maxY);
+		tessellator.addVertexWithUV(maxX, y, 0, t_maxX, t_minY);
+		tessellator.addVertexWithUV(x, y, 0, t_minX, t_minY);
 		
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+        GL11.glEnable(GL11.GL_BLEND);
+        OpenGlHelper.glBlendFunc(770, 771, 0, 1);
 		tessellator.draw();
-		GlStateManager.disableBlend();
+        GL11.glDisable(GL11.GL_BLEND);
 	}
 	
 	public static class Rect {

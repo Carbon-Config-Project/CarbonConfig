@@ -19,8 +19,7 @@ import carbonconfiglib.utils.IEntryDataType;
 import carbonconfiglib.utils.IEntryDataType.SimpleDataType;
 import carbonconfiglib.utils.MultilinePolicy;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 import speiger.src.collections.objects.utils.ObjectSets;
@@ -78,7 +77,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		String[] values = Helpers.splitArray(value, ",");
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		for(int i = 0,m=values.length;i<m;i++) {
-			T entry = registry.getObject(new ResourceLocation(values[i]));
+			T entry = registry.getObject(values[i]);
 			if(entry == null || (filter != null && !filter.test(entry))) continue;
 			result.add(entry);
 		}
@@ -118,7 +117,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 	public ParseResult<Boolean> canSetArray(List<String> entries) {
 		if(entries == null) return ParseResult.partial(false, NullPointerException::new, "Value isn't allowed to be null");
 		for(int i = 0,m=entries.size();i<m;i++) {
-			T result = registry.getObject(new ResourceLocation(entries.get(i)));
+			T result = registry.getObject(entries.get(i));
 			if(result == null) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entries.get(i)+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(result)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entries.get(i)+"] isn't allowed");
 		}
@@ -183,8 +182,9 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>> implement
 		}
 		
 		@Override
+		@SuppressWarnings("unchecked")
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(T entry : value.registry) {
+			for(T entry : (Collection<T>)value.registry) {
 				String key = value.registry.getNameForObject(entry).toString();
 				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);

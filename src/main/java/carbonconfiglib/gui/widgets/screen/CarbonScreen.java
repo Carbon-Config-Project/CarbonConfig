@@ -1,6 +1,5 @@
 package carbonconfiglib.gui.widgets.screen;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.lwjgl.input.Mouse;
@@ -67,7 +66,7 @@ public class CarbonScreen extends GuiScreen implements IInteractableContainer
 	}
 	
 	@Override
-	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+	protected void keyTyped(char typedChar, int keyCode) {
 		if(this.charTyped(typedChar, keyCode)) return;
 		if (keyCode == 1) {
 			onClose();
@@ -82,17 +81,18 @@ public class CarbonScreen extends GuiScreen implements IInteractableContainer
 	}
 
 	@Override
-	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
 		lastX = mouseX;
 		lastY = mouseY;
 		if(mouseClick(mouseX, mouseY, mouseButton)) return;
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
-
+	
+	
 	@Override
-	protected void mouseReleased(int mouseX, int mouseY, int state) {
+	protected void mouseMovedOrUp(int mouseX, int mouseY, int state) {
 		if(mouseRelease(mouseX, mouseY, state)) return;
-		super.mouseReleased(mouseX, mouseY, state);
+		super.mouseMovedOrUp(mouseX, mouseY, state);
 	}
 
 	@Override

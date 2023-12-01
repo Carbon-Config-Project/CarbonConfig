@@ -2,15 +2,19 @@ package carbonconfiglib.networking.carbon;
 
 import java.util.UUID;
 
+import carbonconfiglib.api.buffer.IReadBuffer;
+import carbonconfiglib.api.buffer.IWriteBuffer;
 import carbonconfiglib.gui.api.IRequestScreen;
 import carbonconfiglib.networking.ICarbonPacket;
+import carbonconfiglib.networking.buffer.ReadBuffer;
+import carbonconfiglib.networking.buffer.WriteBuffer;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -41,14 +45,16 @@ public class ConfigAnswerPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUuid(id);
-		buffer.writeByteArray(data);
+		IWriteBuffer buf = new WriteBuffer(buffer);
+		buf.writeUUID(id);
+		buf.writeBytes(data);
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		id = buffer.readUuid();
-		data = buffer.readByteArray();
+		IReadBuffer buf = new ReadBuffer(buffer);
+		id = buf.readUUID();
+		data = buf.readBytes();
 	}
 	
 	@Override

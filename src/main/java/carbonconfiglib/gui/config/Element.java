@@ -30,7 +30,7 @@ import speiger.src.collections.objects.utils.ObjectLists;
  */
 public class Element extends AbstractScrollList.ContainerEntry<Element> {
 	protected Minecraft mc = Minecraft.getMinecraft();
-	protected FontRenderer font = mc.fontRendererObj;
+	protected FontRenderer font = mc.fontRenderer;
 	protected IChatComponent name;
 	protected IChatComponent unchanged;
 	protected IChatComponent changed;

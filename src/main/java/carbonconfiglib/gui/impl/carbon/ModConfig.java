@@ -158,9 +158,8 @@ public class ModConfig implements IModConfig
 
 		@Override
 		public boolean test(PacketBuffer t) {
-			List<String> lines = ObjectArrayList.wrap(t.readStringFromBuffer(262144).split("\n"));
 			try {
-				ConfigHandler.load(handler, config, lines, false);
+				ConfigHandler.load(handler, config,  ObjectArrayList.wrap(t.readStringFromBuffer(262144).split("\n")), false);
 				return true;
 			}
 			catch(Exception e) {

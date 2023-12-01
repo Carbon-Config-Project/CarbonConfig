@@ -41,7 +41,7 @@ public class FolderElement extends ConfigElement
 	public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.xPosition = left;
 		button.yPosition = top;
-		button.setWidth(width);
+		button.width = width;
 		button.render(mc, mouseX, mouseY, partialTicks);
 	}
 }

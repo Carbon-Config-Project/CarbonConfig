@@ -21,17 +21,16 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.GameRules.ValueType;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.SaveFormatComparator;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
@@ -79,12 +78,7 @@ public class MinecraftConfig implements IModConfig
 	
 	private void collect() {
 		for(String key : current.getRules()) {
-			if(current.areSameType(key, ValueType.BOOLEAN_VALUE)) {
-				add(key, IGameRuleValue.bool(key, current));
-			}
-			else if(current.areSameType(key, ValueType.NUMERICAL_VALUE)) {
-				add(key, IGameRuleValue.ints(key, current));				
-			}
+			add(key, IGameRuleValue.bool(key, current));
 		}
 	}
 	
@@ -144,12 +138,13 @@ public class MinecraftConfig implements IModConfig
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<IConfigTarget> getPotentialFiles() {
 		ISaveFormat storage = Minecraft.getMinecraft().getSaveLoader();
 		Path basePath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("saves");
 		List<IConfigTarget> folders = new ObjectArrayList<>();
 		try {
-			for(SaveFormatComparator sum : storage.getSaveList()) {
+			for(SaveFormatComparator sum : (List<SaveFormatComparator>)storage.getSaveList()) {
 				try {
 					Path path = basePath.resolve(sum.getFileName()).resolve("level.dat");
 					if(Files.notExists(path)) continue;
@@ -181,7 +176,7 @@ public class MinecraftConfig implements IModConfig
 	@Override
 	public void save() {
 		if(current == null) return;
-		current.readFromNBT(current.writeToNBT());
+		current.readGameRulesFromNBT(current.writeGameRulesToNBT());
 	}
 	
 	public static Map<String, Category> createCategories() {
@@ -236,13 +231,13 @@ public class MinecraftConfig implements IModConfig
 		
 		private static GameRules parse(NBTTagCompound tag) {
 			GameRules rules = new GameRules();
-			rules.readFromNBT(tag);;
+			rules.readGameRulesFromNBT(tag);;
 			return rules;
 		}
 		
 		@Override
 		public void save() {
-			tag.getCompoundTag("Data").setTag("GameRules", current.writeToNBT());
+			tag.getCompoundTag("Data").setTag("GameRules", current.writeGameRulesToNBT());
 			try(OutputStream stream = Files.newOutputStream(file)) {
 				CompressedStreamTools.writeCompressed(tag, stream);
 			}

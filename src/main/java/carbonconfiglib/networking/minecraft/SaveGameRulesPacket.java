@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.networking.ICarbonPacket;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.world.GameRules;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -38,13 +38,14 @@ public class SaveGameRulesPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeNBTTagCompoundToBuffer(rules.writeToNBT());
+		try { buffer.writeNBTTagCompoundToBuffer(rules.writeGameRulesToNBT()); }
+		catch(IOException e) { e.printStackTrace(); }
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
 		rules = new GameRules();
-		try { rules.readFromNBT(buffer.readNBTTagCompoundFromBuffer()); }
+		try { rules.readGameRulesFromNBT(buffer.readNBTTagCompoundFromBuffer()); }
 		catch(IOException e) { e.printStackTrace(); }
 	}
 	
@@ -57,13 +58,13 @@ public class SaveGameRulesPacket implements ICarbonPacket
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
 		GameRules rule = server.worldServers[0].getGameRules();
-		rule.readFromNBT(rules.writeToNBT());
+		rule.readGameRulesFromNBT(rules.writeGameRulesToNBT());
 	}
 	
 	private boolean hasPermissions(EntityPlayer player, int value) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		UserListOpsEntry entry = server.getConfigurationManager().getOppedPlayers().getEntry(player.getGameProfile());
-		return entry != null && entry.getPermissionLevel() >= value;
+		UserListOpsEntry entry = (UserListOpsEntry)server.getConfigurationManager().func_152603_m().func_152683_b(player.getGameProfile());
+		return entry != null && entry.func_152644_a() >= value;
 	}
 	
 	private boolean canIgnorePermissionCheck() {

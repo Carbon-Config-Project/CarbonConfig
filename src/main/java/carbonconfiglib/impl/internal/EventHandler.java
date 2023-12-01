@@ -27,31 +27,31 @@ import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.utils.SyncType;
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.client.GuiModList;
+import cpw.mods.fml.client.IModGuiFactory;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
+import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.client.GuiModList;
-import net.minecraftforge.fml.client.IModGuiFactory;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
@@ -187,6 +187,7 @@ public class EventHandler implements IConfigChangeListener
 			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
+			forgeConfigs.supplyIfAbsent(Loader.instance().getIndexedModList().get("Forge"), ObjectArrayList::new).add(ForgeModContainer.getConfig());
 			forgeConfigs.forEach((M, C) -> {
 				if(factory.containsKey(M) && !CarbonConfig.FORCE_FORGE_SUPPORT.get()) return;
 				mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(new ForgeConfigs(M, C));
@@ -209,18 +210,16 @@ public class EventHandler implements IConfigChangeListener
 		ISuggestionRenderer.Registry.register(Item.class, new SuggestionRenderers.ItemEntry());
 		ISuggestionRenderer.Registry.register(Block.class, new SuggestionRenderers.ItemEntry());
 		ISuggestionRenderer.Registry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
-		ISuggestionRenderer.Registry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
 		ISuggestionRenderer.Registry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
 		
 		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
 		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
 		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:water"));
-		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
 		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new));
 	}
 	
 	public void onServerJoinPacket(EntityPlayer player) {
-		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Side.SERVER, MinecraftServer.getServer().getConfigurationManager().canSendCommands(player.getGameProfile())), player);
+		CarbonConfig.NETWORK.sendToPlayer(new StateSyncPacket(Side.SERVER, MinecraftServer.getServer().getConfigurationManager().func_152596_g(player.getGameProfile())), player);
 		CarbonConfig.NETWORK.onPlayerJoined(player, true);
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);
 		if(packet == null) return;

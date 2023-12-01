@@ -2,10 +2,11 @@ package carbonconfiglib.gui.widgets;
 
 import java.util.function.Consumer;
 
+import org.lwjgl.opengl.GL11;
+
 import carbonconfiglib.gui.widgets.screen.IWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,17 +45,17 @@ public class CarbonHoverIconButton extends GuiButton implements IWidget
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		if(!visible) return;
-		this.hovered = mousePressed(mc, mouseX, mouseY);
+		this.field_146123_n = mousePressed(mc, mouseX, mouseY);
 		int j = this.enabled ? 16777215 : 10526880;
-        GlStateManager.color(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(xPosition + info.xOff, yPosition + info.yOff, info.width, info.height, icons[hovered ? 1 : 0], 16, 16);
-		GlStateManager.color(1F, 1F, 1F, 1F);
+        GL11.glColor4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+		GuiUtils.drawTextureRegion(xPosition + info.xOff, yPosition + info.yOff, info.width, info.height, icons[field_146123_n ? 1 : 0], 16, 16);
+		GL11.glColor4f(1F, 1F, 1F, 1F);
 	}
 	
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
 		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
-			playPressSound(Minecraft.getMinecraft().getSoundHandler());
+			func_146113_a(Minecraft.getMinecraft().getSoundHandler());
 			if(listener != null) listener.accept(this);
 			return true;
 		}
@@ -74,7 +75,7 @@ public class CarbonHoverIconButton extends GuiButton implements IWidget
 	@Override
 	public int getWidgetHeight() { return height; }
 	@Override
-	public boolean isHovered() { return hovered; }
+	public boolean isHovered() { return field_146123_n; }
 	
 	public static class IconInfo {
 		int xOff;

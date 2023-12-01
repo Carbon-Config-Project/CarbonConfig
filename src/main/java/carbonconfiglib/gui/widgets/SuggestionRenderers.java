@@ -1,14 +1,13 @@
 package carbonconfiglib.gui.widgets;
 
+import org.lwjgl.opengl.GL11;
+
 import carbonconfiglib.gui.api.ISuggestionRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentData;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
@@ -38,14 +37,15 @@ import net.minecraftforge.fluids.FluidStack;
 public class SuggestionRenderers
 {
 	private static final Gui GUI = new Gui();
-	
+	private static final RenderItem RENDERER = new RenderItem();
 	public static class ItemEntry implements ISuggestionRenderer {
 		@Override
 		public IChatComponent renderSuggestion(String value, int x, int y) {
-			Item item = Item.itemRegistry.getObject(new ResourceLocation(value));
+			Item item = (Item)Item.itemRegistry.getObject(new ResourceLocation(value));
 			if(item == null) return null;
+			Minecraft mc = Minecraft.getMinecraft();
 			ItemStack itemStack = new ItemStack(item);
-			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(itemStack, x, y);
+			RENDERER.renderItemAndEffectIntoGUI(mc.fontRenderer, mc.getTextureManager(), itemStack, x, y);
 			return new ChatComponentText(itemStack.getDisplayName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)).appendText("\n").appendSibling(new ChatComponentText(value).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));			
 		}
 	}
@@ -59,24 +59,14 @@ public class SuggestionRenderers
 			if(sprite == null) return null;
 			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 			int color = fluid.getColor();
-			GlStateManager.color((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
-			GUI.drawTexturedModalRect(0, 0, sprite, 18, 18);
-			GlStateManager.color(1F, 1F, 1F, 1F);
+			GL11.glColor4f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1F);
+			GUI.drawTexturedModelRectFromIcon(0, 0, sprite, 18, 18);
+			GL11.glColor4f(1F, 1F, 1F, 1F);
 			return new ChatComponentText(fluid.getLocalizedName(new FluidStack(fluid, 1))).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)).appendText("\n").appendSibling(new ChatComponentText(value).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
 		}
 		
 		private TextureAtlasSprite getSprite(Fluid fluid) {
-			return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fluid.getStill().toString());
-		}
-	}
-	
-	public static class EnchantmentEntry implements ISuggestionRenderer {
-		@Override
-		public IChatComponent renderSuggestion(String value, int x, int y) {
-			Enchantment ench = Enchantment.getEnchantmentByLocation(value);
-			if(ench == null) return null;
-			Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(Items.enchanted_book.getEnchantedItemStack(new EnchantmentData(ench, ench.getMinLevel())), x, y);
-			return new ChatComponentText(ench.getTranslatedName(ench.getMinLevel())).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)).appendText("\n").appendSibling(new ChatComponentText(value).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
+			return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(fluid.getStillIcon().toString());
 		}
 	}
 	

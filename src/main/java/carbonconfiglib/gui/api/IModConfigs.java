@@ -5,7 +5,7 @@ import java.util.Map;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import net.minecraftforge.fml.common.ModContainer;
+import cpw.mods.fml.common.ModContainer;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 

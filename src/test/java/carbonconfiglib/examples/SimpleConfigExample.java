@@ -16,11 +16,11 @@ import carbonconfiglib.config.SyncedConfig;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.utils.AutomationType;
 import carbonconfiglib.utils.MultilinePolicy;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class SimpleConfigExample
 {

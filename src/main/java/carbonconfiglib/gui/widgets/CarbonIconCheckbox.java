@@ -1,10 +1,11 @@
 package carbonconfiglib.gui.widgets;
 
+import org.lwjgl.opengl.GL11;
+
 import carbonconfiglib.gui.config.IListOwner;
 import carbonconfiglib.gui.widgets.screen.IWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
@@ -63,7 +64,7 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
 		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
-			playPressSound(Minecraft.getMinecraft().getSoundHandler());
+			func_146113_a(Minecraft.getMinecraft().getSoundHandler());
 			selected = !selected;
 			if(listener != null) listener.run();
 			return true;
@@ -74,16 +75,14 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		if(!visible) return;
-		this.hovered = mousePressed(mc, mouseX, mouseY);
+		this.field_146123_n = mousePressed(mc, mouseX, mouseY);
 		Minecraft.getMinecraft().getTextureManager().bindTexture(TEXTURE);
-		GlStateManager.enableDepth();
-		GlStateManager.color(1F, 1F, 1F, 1F);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(770, 771);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glColor4f(1F, 1F, 1F, 1F);
 		
-		GuiUtils.drawTextureRegion(xPosition, yPosition, hovered ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		GuiUtils.drawTextureRegion(xPosition, yPosition, field_146123_n ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
 		GuiUtils.drawTextureRegion(xPosition+2, yPosition+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
-		if(owner != null && hovered) {
+		if(owner != null && field_146123_n) {
 			owner.addTooltips(tooltip);
 		}
 	}
@@ -101,5 +100,5 @@ public class CarbonIconCheckbox extends GuiButton implements IWidget
 	@Override
 	public int getWidgetHeight() { return height; }
 	@Override
-	public boolean isHovered() { return hovered; }
+	public boolean isHovered() { return field_146123_n; }
 }

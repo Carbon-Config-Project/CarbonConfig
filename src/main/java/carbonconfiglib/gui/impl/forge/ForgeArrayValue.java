@@ -11,9 +11,9 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
+import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.common.config.Property.Type;
-import net.minecraftforge.fml.common.Loader;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**

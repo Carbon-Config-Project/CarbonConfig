@@ -6,6 +6,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.FMLEmbeddedChannel;
+import cpw.mods.fml.common.network.FMLOutboundHandler;
+import cpw.mods.fml.common.network.FMLOutboundHandler.OutboundTarget;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -15,14 +22,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.IThreadListener;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
-import net.minecraftforge.fml.common.network.FMLOutboundHandler;
-import net.minecraftforge.fml.common.network.FMLOutboundHandler.OutboundTarget;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectOpenHashSet;
 
@@ -57,10 +56,7 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, ICarbonPacket msg) throws Exception {
 		try {
-			INetHandler netHandler = ctx.channel().attr(NetworkRegistry.NET_HANDLER).get();
-	        IThreadListener thread = FMLCommonHandler.instance().getWorldThread(netHandler);
-	        if(thread.isCallingFromMinecraftThread()) handlePacket(msg, netHandler);
-	        else thread.addScheduledTask(() -> handlePacket(msg, netHandler));
+			handlePacket(msg, ctx.channel().attr(NetworkRegistry.NET_HANDLER).get());
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -138,9 +134,10 @@ public class CarbonNetwork extends SimpleChannelInboundHandler<ICarbonPacket>
 		else serverInstalled = false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<EntityPlayerMP> getAllPlayers() {
 		List<EntityPlayerMP> players = new ObjectArrayList<>();
-		for(EntityPlayerMP player : FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getPlayerList()) {
+		for(EntityPlayerMP player : (List<EntityPlayerMP>)FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().playerEntityList) {
 			if(isInstalledOnClient(player)) 
 				players.add(player);
 		}

@@ -1,18 +1,19 @@
 package carbonconfiglib.networking.carbon;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.MultilinePolicy;
+import cpw.mods.fml.common.FMLCommonHandler;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.UserListOpsEntry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -42,14 +43,15 @@ public class ConfigRequestPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(PacketBuffer buffer) {
-		buffer.writeUuid(id);
-		buffer.writeString(identifier);
+	public void write(PacketBuffer buffer) throws IOException {
+		buffer.writeLong(id.getMostSignificantBits());
+		buffer.writeLong(id.getLeastSignificantBits());
+		buffer.writeStringToBuffer(identifier);
 	}
 	
 	@Override
-	public void read(PacketBuffer buffer) {
-		id = buffer.readUuid();
+	public void read(PacketBuffer buffer) throws IOException {
+		id = new UUID(buffer.readLong(), buffer.readLong());
 		identifier = buffer.readStringFromBuffer(32767);
 	}
 	
@@ -61,7 +63,8 @@ public class ConfigRequestPacket implements ICarbonPacket
 		ConfigHandler handler = CarbonConfig.CONFIGS.getConfig(identifier);
 		if(handler == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeString(handler.getConfig().serialize(MultilinePolicy.DISABLED));
+		try { buf.writeStringToBuffer(handler.getConfig().serialize(MultilinePolicy.DISABLED)); }
+		catch(IOException e) { e.printStackTrace(); }
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(id, data), player);
@@ -69,8 +72,8 @@ public class ConfigRequestPacket implements ICarbonPacket
 	
 	private boolean hasPermissions(EntityPlayer player, int value) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		UserListOpsEntry entry = server.getConfigurationManager().getOppedPlayers().getEntry(player.getGameProfile());
-		return entry != null && entry.getPermissionLevel() >= value;
+		UserListOpsEntry entry = (UserListOpsEntry)server.getConfigurationManager().func_152603_m().func_152683_b(player.getGameProfile());
+		return entry != null && entry.func_152644_a() >= value;
 	}
 	
 	private boolean canIgnorePermissionCheck() {

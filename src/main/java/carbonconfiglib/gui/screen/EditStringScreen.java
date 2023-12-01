@@ -77,6 +77,7 @@ public class EditStringScreen extends CarbonScreen
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
 		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
@@ -84,7 +85,7 @@ public class EditStringScreen extends CarbonScreen
 		String title = this.title.getFormattedText();
 		fontRendererObj.drawString(title, (width/2)-(fontRendererObj.getStringWidth(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			drawHoveringText(new ObjectArrayList<>(fontRendererObj.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY);
+			drawHoveringText(new ObjectArrayList<>(fontRendererObj.listFormattedStringToWidth(result.getError().getMessage(), Integer.MAX_VALUE)), mouseX, mouseY, fontRendererObj);
 		}
 	}
 	

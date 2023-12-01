@@ -10,17 +10,16 @@ import java.util.function.Predicate;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import cpw.mods.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import cpw.mods.fml.client.event.ConfigChangedEvent.PostConfigChangedEvent;
+import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent.PostConfigChangedEvent;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -90,7 +89,7 @@ public class ForgeConfig implements IModConfig
 	public void save() {
 		boolean needsRestart = scanConfigs(this::hasRestartChanged);
 		config.save();
-        ConfigChangedEvent event = new OnConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart);
+		OnConfigChangedEvent event = new OnConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart);
         MinecraftForge.EVENT_BUS.post(event);
         if (!event.getResult().equals(Result.DENY))
             MinecraftForge.EVENT_BUS.post(new PostConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart));

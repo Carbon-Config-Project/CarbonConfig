@@ -29,23 +29,23 @@ import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
+import cpw.mods.fml.client.GuiModList;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
+import cpw.mods.fml.common.event.FMLServerStoppingEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.GuiModList;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -62,7 +62,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.8.9]")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.7.10]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -76,7 +76,7 @@ public class CarbonConfig
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
 	
-	@net.minecraftforge.fml.common.Mod.EventHandler
+	@cpw.mods.fml.common.Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
 	{
 		NETWORK.init();
@@ -230,7 +230,7 @@ public class CarbonConfig
 		mc.displayGuiScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.currentScreen, texture.asHolder()));
 	}
 	
-	@net.minecraftforge.fml.common.Mod.EventHandler
+	@cpw.mods.fml.common.Mod.EventHandler
 	public void onCommonLoad(FMLPostInitializationEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
@@ -247,7 +247,7 @@ public class CarbonConfig
 		EventHandler.INSTANCE.onConfigsLoaded();
 		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPAD0, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
-		MOD_GUI = mapping::isKeyDown;
+		MOD_GUI = mapping::getIsKeyPressed;
 	}
 	
 	@SubscribeEvent
@@ -259,7 +259,7 @@ public class CarbonConfig
 		}
 	}
 	
-	@net.minecraftforge.fml.common.Mod.EventHandler
+	@cpw.mods.fml.common.Mod.EventHandler
 	public void load(FMLServerAboutToStartEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
@@ -268,7 +268,7 @@ public class CarbonConfig
 		}
 	}
 	
-	@net.minecraftforge.fml.common.Mod.EventHandler
+	@cpw.mods.fml.common.Mod.EventHandler
 	public void unload(FMLServerStoppingEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if(PerWorldProxy.isProxy(handler.getProxy())) {

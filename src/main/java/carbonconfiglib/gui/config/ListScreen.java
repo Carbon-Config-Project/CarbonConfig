@@ -92,6 +92,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		GuiUtils.drawTextureRegion(5, 5, 40, 40, Icon.LOGO, 400, 400);
@@ -104,7 +105,7 @@ public abstract class ListScreen extends CarbonScreen implements IListOwner
 			for(IChatComponent entry : tooltips) {
 				text.addAll(fontRendererObj.listFormattedStringToWidth(entry.getFormattedText(), Math.max(mouseX, width - mouseX) - 20));
 			}
-			drawHoveringText(text, mouseX, mouseY);
+			drawHoveringText(text, mouseX, mouseY, fontRendererObj);
 			tooltips.clear();
 		}
 	}

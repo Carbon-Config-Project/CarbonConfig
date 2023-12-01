@@ -49,6 +49,7 @@ public class MultiChoiceScreen extends CarbonScreen
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void initGui() {
 		super.initGui();
 		output = fontRendererObj.listFormattedStringToWidth(message.getFormattedText(), width-50);

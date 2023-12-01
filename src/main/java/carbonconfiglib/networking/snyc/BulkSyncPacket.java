@@ -1,5 +1,6 @@
 package carbonconfiglib.networking.snyc;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class BulkSyncPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(PacketBuffer buffer) {
+	public void write(PacketBuffer buffer) throws IOException {
 		buffer.writeVarIntToBuffer(packets.size());
 		for(SyncPacket packet : packets) {
 			packet.write(buffer);
@@ -55,7 +56,7 @@ public class BulkSyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void read(PacketBuffer buffer) {
+	public void read(PacketBuffer buffer) throws IOException {
 		int size = buffer.readVarIntFromBuffer();
 		for(int i = 0;i<size;i++) {
 			SyncPacket packet = new SyncPacket();

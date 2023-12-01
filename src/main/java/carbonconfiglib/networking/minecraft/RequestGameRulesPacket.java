@@ -1,17 +1,18 @@
 package carbonconfiglib.networking.minecraft;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
+import cpw.mods.fml.common.FMLCommonHandler;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.UserListOpsEntry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -40,12 +41,13 @@ public class RequestGameRulesPacket implements ICarbonPacket
 
 	@Override
 	public void write(PacketBuffer buffer) {
-		buffer.writeUuid(requestId);
+		buffer.writeLong(requestId.getMostSignificantBits());
+		buffer.writeLong(requestId.getLeastSignificantBits());
 	}
 	
 	@Override
 	public void read(PacketBuffer buffer) {
-		requestId = buffer.readUuid();
+		requestId = new UUID(buffer.readLong(), buffer.readLong());
 	}
 	
 	@Override
@@ -56,7 +58,8 @@ public class RequestGameRulesPacket implements ICarbonPacket
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server == null) return;
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
-		buf.writeNBTTagCompoundToBuffer(server.worldServers[0].getGameRules().writeToNBT());
+		try { buf.writeNBTTagCompoundToBuffer(server.worldServers[0].getGameRules().writeGameRulesToNBT()); }
+		catch(IOException e) { e.printStackTrace(); }
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(requestId, data), player);
@@ -64,8 +67,8 @@ public class RequestGameRulesPacket implements ICarbonPacket
 	
 	private boolean hasPermissions(EntityPlayer player, int value) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		UserListOpsEntry entry = server.getConfigurationManager().getOppedPlayers().getEntry(player.getGameProfile());
-		return entry != null && entry.getPermissionLevel() >= value;
+		UserListOpsEntry entry = (UserListOpsEntry)server.getConfigurationManager().func_152603_m().func_152683_b(player.getGameProfile());
+		return entry != null && entry.func_152644_a() >= value;
 	}
 	
 	private boolean canIgnorePermissionCheck() {

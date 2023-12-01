@@ -1,5 +1,6 @@
 package carbonconfiglib.networking.buffer;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import carbonconfiglib.api.buffer.IReadBuffer;
@@ -80,21 +81,25 @@ public class ReadBuffer implements IReadBuffer
 	
 	@Override
 	public <T extends Enum<T>> T readEnum(Class<T> clz) {
-		return buf.readEnumValue(clz);
+		return clz.getEnumConstants()[buf.readVarIntFromBuffer()];
 	}
 	
 	@Override
 	public byte[] readBytes() {
-		return buf.readByteArray();
+		byte[] data = new byte[buf.readVarIntFromBuffer()];
+		buf.readBytes(data);
+        return data;
 	}
 	
 	@Override
 	public String readString() {
-		return buf.readStringFromBuffer(32767);
+		try { return buf.readStringFromBuffer(32767); }
+		catch(IOException e) { e.printStackTrace(); }
+		throw new RuntimeException();
 	}
 	
 	@Override
 	public UUID readUUID() {
-		return buf.readUuid();
+		return new UUID(buf.readLong(), buf.readLong());
 	}
 }

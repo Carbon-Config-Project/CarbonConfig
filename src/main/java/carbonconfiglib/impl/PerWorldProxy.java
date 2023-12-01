@@ -9,15 +9,15 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy;
 import carbonconfiglib.api.SimpleConfigProxy.SimpleTarget;
 import carbonconfiglib.config.ConfigSettings;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.SaveFormatComparator;
 import net.minecraft.world.storage.SaveFormatOld;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
@@ -80,6 +80,7 @@ public final class PerWorldProxy implements IConfigProxy
 	}
 	
 	@SideOnly(Side.CLIENT)
+	@SuppressWarnings("unchecked")
 	private List<IPotentialTarget> getLevels() {
 		ISaveFormat storage = Minecraft.getMinecraft().getSaveLoader();
 		List<IPotentialTarget> folders = new ObjectArrayList<>();
@@ -88,7 +89,7 @@ public final class PerWorldProxy implements IConfigProxy
 		}
 		try {
 			Path basePath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("saves");
-			for(SaveFormatComparator sum : storage.getSaveList()) {
+			for(SaveFormatComparator sum : (List<SaveFormatComparator>)storage.getSaveList()) {
 				try {
 					Path path = basePath.resolve(sum.getFileName()).resolve("level.dat");
 					if(Files.exists(path)) folders.add(new WorldTarget(sum, path.getParent(), path));

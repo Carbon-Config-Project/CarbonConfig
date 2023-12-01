@@ -7,8 +7,8 @@ import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
+import cpw.mods.fml.common.ModContainer;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.common.ModContainer;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 

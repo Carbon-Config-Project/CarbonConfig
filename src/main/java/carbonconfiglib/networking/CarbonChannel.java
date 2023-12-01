@@ -8,11 +8,11 @@ import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
+import cpw.mods.fml.common.network.FMLIndexedMessageToMessageCodec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.FMLIndexedMessageToMessageCodec;
 
 @Sharable
 public class CarbonChannel extends FMLIndexedMessageToMessageCodec<ICarbonPacket>

@@ -2,11 +2,12 @@ package carbonconfiglib.gui.widgets;
 
 import java.util.function.Consumer;
 
+import org.lwjgl.opengl.GL11;
+
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.widgets.screen.IWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -37,7 +38,7 @@ public class CarbonButton extends GuiButton implements IWidget
 	@Override
 	public boolean mouseClick(double mouseX, double mouseY, int button) {
 		if(this.enabled && this.visible && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height) {
-			playPressSound(Minecraft.getMinecraft().getSoundHandler());
+			func_146113_a(Minecraft.getMinecraft().getSoundHandler());
 			if(handler != null) handler.accept(this);
 			return true;
 		}
@@ -47,11 +48,11 @@ public class CarbonButton extends GuiButton implements IWidget
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		if(!visible) return;
-		this.hovered = mousePressed(mc, mouseX, mouseY);
-		int k = this.getHoverState(this.hovered);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1F);
+		this.field_146123_n = mousePressed(mc, mouseX, mouseY);
+		int k = this.getHoverState(this.field_146123_n);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1F);
 		GuiUtils.drawTextureWithBorder(buttonTextures, this.xPosition, this.yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
-		GuiUtils.drawScrollingShadowString(mc.fontRendererObj, displayString, xPosition, yPosition, width, height-2, GuiAlign.CENTER, this.enabled ? 16777215 : 10526880, hash);
+		GuiUtils.drawScrollingShadowString(mc.fontRenderer, displayString, xPosition, yPosition, width, height-2, GuiAlign.CENTER, this.enabled ? 16777215 : 10526880, hash);
 	}
 
 	@Override
@@ -67,6 +68,6 @@ public class CarbonButton extends GuiButton implements IWidget
 	@Override
 	public int getWidgetHeight() { return height; }
 	@Override
-	public boolean isHovered() { return hovered; }
+	public boolean isHovered() { return field_146123_n; }
 	
 }

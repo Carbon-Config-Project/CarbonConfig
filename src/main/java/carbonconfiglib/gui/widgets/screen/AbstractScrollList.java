@@ -19,10 +19,8 @@ import carbonconfiglib.gui.screen.SmoothFloat;
 import carbonconfiglib.gui.widgets.screen.AbstractScrollList.Entry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.MathHelper;
 
 public class AbstractScrollList<E extends Entry<E>> implements IInteractableContainer, IWidget
@@ -46,7 +44,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	private boolean renderBackground = true;
 	private boolean renderTopAndBottom = true;
 	@Nullable
-	private E hovered;
+	private E field_146123_n;
 	   
 	private IInteractable focused;
 	private boolean isDragging;
@@ -71,7 +69,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	public int getX() { return 0; }
 	@Override
 	public int getY() { return 0; }
-	public boolean isHovered() { return hovered != null; }
+	public boolean isHovered() { return field_146123_n != null; }
 	
 	public void setRenderSelection(boolean render) {
 		this.renderSelection = render;
@@ -193,60 +191,64 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		scrollAmount.update(partialTicks);
 		this.renderBackground();
-		Tessellator tes = Tessellator.getInstance();
-		WorldRenderer builder = tes.getWorldRenderer();
-		this.hovered = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPosition((double)mouseX, (double)mouseY) : null;
+		Tessellator tes = Tessellator.instance;
+		this.field_146123_n = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPosition((double)mouseX, (double)mouseY) : null;
 		if (this.renderBackground) {
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			BackgroundTexture texture = this.texture.getTexture();
 			Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getBackgroundTexture());
 			int color = texture.getBackgroundBrightness();
 			float scroll = (float)getScrollAmount();
-			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-			builder.pos(x0, y1, 0D).tex(x0 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x1, y1, 0D).tex(x1 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x1, y0, 0D).tex(x1 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x0, y0, 0D).tex(x0 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
+			tes.startDrawingQuads();
+			tes.setColorOpaque(color, color, color);
+			tes.addVertexWithUV(x0, y1, 0D, x0 / 32F, (y1 + scroll) / 32F);
+			tes.addVertexWithUV(x1, y1, 0D, x1 / 32F, (y1 + scroll) / 32F);
+			tes.addVertexWithUV(x1, y0, 0D, x1 / 32F, (y0 + scroll) / 32F);
+			tes.addVertexWithUV(x0, y0, 0D, x0 / 32F, (y0 + scroll) / 32F);
 			tes.draw();
 		}
 		this.renderList(mouseX, mouseY, partialTicks);
 		if (this.renderTopAndBottom) {
 			BackgroundTexture texture = this.texture.getTexture();
 			Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getForegroundTexture());
-			GlStateManager.enableTexture2D();
-			GlStateManager.enableDepth();
-			GlStateManager.depthFunc(519);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+	        GL11.glEnable(GL11.GL_DEPTH_TEST);
+	        GL11.glDepthFunc(GL11.GL_ALWAYS);
 			int color = texture.getForegroundBrightness();
-			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-			builder.pos(x0, y0, -100D).tex(0, y0 / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x0 + width, y0, -100D).tex(width / 32F, y0 / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x0 + width, 0D, -100D).tex(width / 32F, 0F).color(color, color, color, 255).endVertex();
-			builder.pos(x0, 0D, -100D).tex(0F, 0F).color(color, color, color, 255).endVertex();
-			builder.pos(x0, height, -100D).tex(0F, height / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x0 + width, height, -100D).tex(width / 32F, height / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x0 + width, y1, -100D).tex(width / 32F, y1 / 32F).color(color, color, color, 255).endVertex();
-			builder.pos(x0, y1, -100D).tex(0F, y1 / 32F).color(color, color, color, 255).endVertex();
+			tes.startDrawingQuads();
+			tes.setColorOpaque(color, color, color);
+			tes.addVertexWithUV(x0, y0, -100D, 0, y0 / 32F);
+			tes.addVertexWithUV(x0 + width, y0, -100D, width / 32F, y0 / 32F);
+			tes.addVertexWithUV(x0 + width, 0D, -100D, width / 32F, 0F);
+			tes.addVertexWithUV(x0, 0D, -100D, 0F, 0F);
+			tes.addVertexWithUV(x0, height, -100D, 0F, height / 32F);
+			tes.addVertexWithUV(x0 + width, height, -100D, width / 32F, height / 32F);
+			tes.addVertexWithUV(x0 + width, y1, -100D, width / 32F, y1 / 32F);
+			tes.addVertexWithUV(x0, y1, -100D, 0F, y1 / 32F);
 			tes.draw();
-			GlStateManager.depthFunc(515);
-			GlStateManager.disableDepth();
-	        GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
-	        GlStateManager.disableAlpha();
-	        GlStateManager.shadeModel(7425);
-			GlStateManager.disableTexture2D();
-			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-			builder.pos(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
-			builder.pos(x1, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
-			builder.pos(x1, y0, 0D).color(0, 0, 0, 255).endVertex();
-			builder.pos(x0, y0, 0D).color(0, 0, 0, 255).endVertex();
-			builder.pos(x0, y1, 0D).color(0, 0, 0, 255).endVertex();
-			builder.pos(x1, y1, 0D).color(0, 0, 0, 255).endVertex();
-			builder.pos(x1, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
-			builder.pos(x0, y1 - 4, 0D).color(0, 0, 0, 0).endVertex();
+	        GL11.glDepthFunc(GL11.GL_LEQUAL);
+	        GL11.glDisable(GL11.GL_DEPTH_TEST);
+	        GL11.glEnable(GL11.GL_BLEND);
+	        OpenGlHelper.glBlendFunc(770, 771, 0, 1);
+	        GL11.glDisable(GL11.GL_ALPHA_TEST);
+	        GL11.glShadeModel(GL11.GL_SMOOTH);
+	        GL11.glDisable(GL11.GL_TEXTURE_2D);
+			tes.startDrawingQuads();
+			tes.setColorRGBA(0, 0, 0, 0);
+			tes.addVertex(x0, y0 + 4, 0D);
+			tes.addVertex(x1, y0 + 4, 0D);
+			tes.setColorRGBA(0, 0, 0, 255);
+			tes.addVertex(x1, y0, 0D);
+			tes.addVertex(x0, y0, 0D);
+			tes.addVertex(x0, y1, 0D);
+			tes.addVertex(x1, y1, 0D);
+			tes.setColorRGBA(0, 0, 0, 0);
+			tes.addVertex(x1, y1 - 4, 0D);
+			tes.addVertex(x0, y1 - 4, 0D);
 			tes.draw();
-			GlStateManager.enableAlpha();
-			GlStateManager.disableBlend();
-			GlStateManager.enableTexture2D();
+	        GL11.glEnable(GL11.GL_ALPHA_TEST);
+	        GL11.glDisable(GL11.GL_BLEND);
+	        GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 		
 		int maxScroll = this.getMaxScroll();
@@ -259,33 +261,36 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 			}
 			int minX = this.getScrollbarPosition();
 			int maxX = minX + 6;
-			GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
-			GlStateManager.disableAlpha();
-			GlStateManager.shadeModel(7425);
-			GlStateManager.disableTexture2D();
-			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-			builder.pos((double)minX, (double)this.y1, 0.0D).tex(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-			builder.pos((double)maxX, (double)this.y1, 0.0D).tex(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-			builder.pos((double)maxX, (double)this.y0, 0.0D).tex(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-			builder.pos((double)minX, (double)this.y0, 0.0D).tex(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+	        GL11.glEnable(GL11.GL_BLEND);
+	        OpenGlHelper.glBlendFunc(770, 771, 0, 1);
+	        GL11.glDisable(GL11.GL_ALPHA_TEST);
+	        GL11.glShadeModel(GL11.GL_SMOOTH);
+	        GL11.glDisable(GL11.GL_TEXTURE_2D);
+			tes.startDrawingQuads();
+			tes.setColorOpaque(0, 0, 0);
+			tes.addVertexWithUV((double)minX, (double)this.y1, 0.0D, 0.0F, 1.0F);
+			tes.addVertexWithUV((double)maxX, (double)this.y1, 0.0D, 1.0F, 1.0F);
+			tes.addVertexWithUV((double)maxX, (double)this.y0, 0.0D, 1.0F, 0.0F);
+			tes.addVertexWithUV((double)minX, (double)this.y0, 0.0D, 0.0F, 0.0F);
 			tes.draw();
-			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-			builder.pos((double)minX, (double)(scrollValue + maxPosition), 0.0D).tex(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-			builder.pos((double)maxX, (double)(scrollValue + maxPosition), 0.0D).tex(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-			builder.pos((double)maxX, (double)scrollValue, 0.0D).tex(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-			builder.pos((double)minX, (double)scrollValue, 0.0D).tex(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+			tes.startDrawingQuads();
+			tes.setColorOpaque(128, 128, 128);
+			tes.addVertexWithUV((double)minX, (double)(scrollValue + maxPosition), 0.0D, 0.0F, 1.0F);
+			tes.addVertexWithUV((double)maxX, (double)(scrollValue + maxPosition), 0.0D, 1.0F, 1.0F);
+			tes.addVertexWithUV((double)maxX, (double)scrollValue, 0.0D, 1.0F, 0.0F);
+			tes.addVertexWithUV((double)minX, (double)scrollValue, 0.0D, 0.0F, 0.0F);
 			tes.draw();
-			builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-			builder.pos((double)minX, (double)(scrollValue + maxPosition - 1), 0.0D).tex(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-			builder.pos((double)(maxX - 1), (double)(scrollValue + maxPosition - 1), 0.0D).tex(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-			builder.pos((double)(maxX - 1), (double)scrollValue, 0.0D).tex(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-			builder.pos((double)minX, (double)scrollValue, 0.0D).tex(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			tes.startDrawingQuads();
+			tes.setColorOpaque(192, 192, 192);
+			tes.addVertexWithUV((double)minX, (double)(scrollValue + maxPosition - 1), 0.0D, 0.0F, 1.0F);
+			tes.addVertexWithUV((double)(maxX - 1), (double)(scrollValue + maxPosition - 1), 0.0D, 1.0F, 1.0F);
+			tes.addVertexWithUV((double)(maxX - 1), (double)scrollValue, 0.0D, 1.0F, 0.0F);
+			tes.addVertexWithUV((double)minX, (double)scrollValue, 0.0D, 0.0F, 0.0F);
 			tes.draw();
-			GlStateManager.enableTexture2D();
+	        GL11.glEnable(GL11.GL_ALPHA_TEST);
+	        GL11.glDisable(GL11.GL_BLEND);
+	        GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
-		GlStateManager.enableTexture2D();
-		GlStateManager.disableBlend();
 	}
 	
 	protected void centerScrollOn(E entry) {
@@ -462,7 +467,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 			int i = this.isFocused() ? -1 : -8355712;
 			this.renderSelection(top, width, height, i, -16777216);
 		}
-		e.render(x, top, left, width, height, mouseX, mouseY, Objects.equals(this.hovered, e), partialTicks);
+		e.render(x, top, left, width, height, mouseX, mouseY, Objects.equals(this.field_146123_n, e), partialTicks);
 	}
 	
 	protected void renderSelection(int top, int width, int height, int mainColor, int subColor) {
@@ -509,7 +514,7 @@ public class AbstractScrollList<E extends Entry<E>> implements IInteractableCont
 	
 	@Nullable
 	protected E getHovered() {
-		return this.hovered;
+		return this.field_146123_n;
 	}
 	
 	void bindEntryToSelf(AbstractScrollList.Entry<E> entry) {

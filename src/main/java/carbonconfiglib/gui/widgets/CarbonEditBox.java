@@ -1,12 +1,12 @@
 package carbonconfiglib.gui.widgets;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import carbonconfiglib.gui.config.IListOwner;
 import carbonconfiglib.gui.widgets.screen.IWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiPageButtonList.GuiResponder;
 import net.minecraft.client.gui.GuiTextField;
 
 /**
@@ -24,17 +24,16 @@ import net.minecraft.client.gui.GuiTextField;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponder, IWidget
+public class CarbonEditBox extends GuiTextField implements IOwnable, IWidget
 {
 	IListOwner owner;
 	boolean bordered = true;
 	int innerDiff = 8;
 	Consumer<String> listener;
-	boolean hovered;
+	boolean field_146123_n;
 	
 	public CarbonEditBox(FontRenderer font, int x, int y, int width, int height) {
-		super(0, font, x, y, width, height);
-		this.func_175207_a(this);
+		super(font, x, y, width, height);
 		setCanLoseFocus(true);
 	}
 	
@@ -78,7 +77,7 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	
 	@Override
 	public void render(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-		hovered = this.getVisible() && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+		field_146123_n = this.getVisible() && mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
 		drawTextBox();
 	}
 	
@@ -111,16 +110,27 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	}
 	
 	@Override
-	public void func_175321_a(int id, boolean value) {}
-	@Override
-	public void onTick(int id, float value) {}
-	@Override
-	public void func_175319_a(int id, String value) {
-		if(listener != null) {
-			listener.accept(value);
+	public void writeText(String p_146191_1_) {
+		String s = getText();
+		super.writeText(p_146191_1_);
+		if(!Objects.equals(s, getText())) {
+			if(listener != null) {
+				listener.accept(getText());
+			}
 		}
 	}
 	
+	@Override
+	public void deleteFromCursor(int p_146175_1_) {
+		String s = getText();
+		super.deleteFromCursor(p_146175_1_);
+		if(!Objects.equals(s, getText())) {
+			if(listener != null) {
+				listener.accept(getText());
+			}
+		}
+	}
+		
 	@Override
 	public void setX(int x) { this.xPosition = x; }
 	@Override
@@ -134,5 +144,5 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	@Override
 	public int getWidgetHeight() { return height; }
 	@Override
-	public boolean isHovered() { return hovered; }
+	public boolean isHovered() { return field_146123_n; }
 }

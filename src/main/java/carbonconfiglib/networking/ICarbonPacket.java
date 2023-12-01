@@ -1,5 +1,7 @@
 package carbonconfiglib.networking;
 
+import java.io.IOException;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 
@@ -20,8 +22,8 @@ import net.minecraft.network.PacketBuffer;
  */
 public interface ICarbonPacket
 {
-	public void write(PacketBuffer buffer);
-	public void read(PacketBuffer buffer);
+	public void write(PacketBuffer buffer) throws IOException;
+	public void read(PacketBuffer buffer) throws IOException;
 	
 	public void process(EntityPlayer player);
 }

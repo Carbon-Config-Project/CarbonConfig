@@ -128,8 +128,8 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	private boolean isLanServer() {
-		ServerData data = mc.getCurrentServerData();
-		return data != null && data.func_181041_d();
+		ServerData data = mc.func_147104_D();
+		return data != null && data.func_152585_d();
 	}
 	
 	public static class Label extends Element implements IIgnoreSearch {

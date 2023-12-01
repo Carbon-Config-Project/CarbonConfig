@@ -1,7 +1,6 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.world.GameRules;
 
@@ -33,10 +32,6 @@ public interface IGameRuleValue
 		return new BooleanEntry(key, rules);
 	}
 	
-	public static IGameRuleValue ints(String key, GameRules rules) {
-		return new IntegerEntry(key, rules);
-	}
-	
 	public static class BooleanEntry implements IGameRuleValue {
 		String key;
 		boolean value;
@@ -44,7 +39,7 @@ public interface IGameRuleValue
 		
 		private BooleanEntry(String key, GameRules rules) {
 			this.key = key;
-			this.value = rules.getBoolean(key);
+			this.value = rules.getGameRuleBooleanValue(key);
 			this.rules = rules;
 		}
 		
@@ -58,46 +53,10 @@ public interface IGameRuleValue
 		@Override
 		public String get() { return Boolean.toString(this.value); }
 		@Override
-		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getBoolean(key)); }
+		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getGameRuleBooleanValue(key)); }
 		@Override
 		public String getDescriptionId() { return "gamerule."+key; }
 		@Override
 		public DataType getType() { return DataType.BOOLEAN; }
-	}
-	
-	public static class IntegerEntry implements IGameRuleValue {
-		String key;
-		int value;
-		GameRules rules;
-		
-		private IntegerEntry(String key, GameRules rules) {
-			this.key = key;
-			this.value = rules.getInt(key);
-			this.rules = rules;
-		}
-		
-		@Override
-		public void set(String value) {
-			ParseResult<Integer> result = Helpers.parseInt(value);
-			if(result.isValid()) {
-				this.value = result.getValue();
-				rules.setOrCreateGameRule(key, Integer.toString(this.value));
-			}
-		}
-		
-		@Override
-		public ParseResult<Boolean> isValid(String value) {
-			ParseResult<Integer> result = Helpers.parseInt(value);
-			return result.withDefault(result.isValid());
-		}
-		
-		@Override
-		public String get() { return Integer.toString(this.value); }
-		@Override
-		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getInt(key)); }
-		@Override
-		public String getDescriptionId() { return "gamerule."+key; }
-		@Override
-		public DataType getType() { return DataType.INTEGER; }
 	}
 }

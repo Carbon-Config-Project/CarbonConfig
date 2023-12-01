@@ -1,14 +1,16 @@
 package carbonconfiglib.networking.carbon;
 
+import java.io.IOException;
+
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.networking.ICarbonPacket;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.UserListOpsEntry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
@@ -40,13 +42,13 @@ public class SaveConfigPacket implements ICarbonPacket
 	}
 
 	@Override
-	public void write(PacketBuffer buffer) {
-		buffer.writeString(identifier);
-		buffer.writeString(data);
+	public void write(PacketBuffer buffer) throws IOException {
+		buffer.writeStringToBuffer(identifier);
+		buffer.writeStringToBuffer(data);
 	}
 	
 	@Override
-	public void read(PacketBuffer buffer) {
+	public void read(PacketBuffer buffer) throws IOException {
 		identifier = buffer.readStringFromBuffer(32767);
 		data = buffer.readStringFromBuffer(262144);
 	}
@@ -73,8 +75,8 @@ public class SaveConfigPacket implements ICarbonPacket
 	
 	private boolean hasPermissions(EntityPlayer player, int value) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		UserListOpsEntry entry = server.getConfigurationManager().getOppedPlayers().getEntry(player.getGameProfile());
-		return entry != null && entry.getPermissionLevel() >= value;
+		UserListOpsEntry entry = (UserListOpsEntry)server.getConfigurationManager().func_152603_m().func_152683_b(player.getGameProfile());
+		return entry != null && entry.func_152644_a() >= value;
 	}
 	
 	

@@ -1,5 +1,6 @@
 package carbonconfiglib.networking.snyc;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -69,23 +70,28 @@ public class SyncPacket implements ICarbonPacket
 	}
 	
 	@Override
-	public void write(PacketBuffer buffer) {
-		buffer.writeString(identifier);
-		buffer.writeEnumValue(type);
+	public void write(PacketBuffer buffer) throws IOException {
+		buffer.writeStringToBuffer(identifier);
+		buffer.writeVarIntToBuffer(type.ordinal());
 		buffer.writeVarIntToBuffer(entries.size());
 		for(Map.Entry<String, byte[]> entry : entries.entrySet()) {
-			buffer.writeString(entry.getKey());
-			buffer.writeByteArray(entry.getValue());
+			buffer.writeStringToBuffer(entry.getKey());
+			byte[] data = entry.getValue();
+			buffer.writeVarIntToBuffer(data.length);
+			buffer.writeBytes(data);
 		}
 	}
 	
 	@Override
-	public void read(PacketBuffer buffer) {
+	public void read(PacketBuffer buffer) throws IOException {
 		identifier = buffer.readStringFromBuffer(32767);
-		type = buffer.readEnumValue(SyncType.class);
+		type = SyncType.values()[buffer.readVarIntFromBuffer()];
 		int size = buffer.readVarIntFromBuffer();
 		for(int i = 0;i<size;i++) {
-			entries.put(buffer.readStringFromBuffer(32767), buffer.readByteArray());
+			String key = buffer.readStringFromBuffer(32767);
+			byte[] value = new byte[buffer.readVarIntFromBuffer()];
+			buffer.readBytes(value);
+			entries.put(key, value);
 		}
 	}
 	

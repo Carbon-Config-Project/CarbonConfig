@@ -1,5 +1,6 @@
 package carbonconfiglib.networking.buffer;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import carbonconfiglib.api.buffer.IWriteBuffer;
@@ -80,22 +81,25 @@ public class WriteBuffer implements IWriteBuffer
 	
 	@Override
 	public void writeEnum(Enum<?> value) {
-		buf.writeEnumValue(value);
+		buf.writeVarIntToBuffer(value.ordinal());
 	}
 	
 	@Override
 	public void writeString(String value) {
-		buf.writeString(value);
+		try { buf.writeStringToBuffer(value); }
+		catch(IOException e) { e.printStackTrace(); }
 	}
 	
 	@Override
 	public void writeBytes(byte[] value) {
-		buf.writeByteArray(value);
+		buf.writeVarIntToBuffer(value.length);
+        buf.writeBytes(value);
 	}
 	
 	@Override
 	public void writeUUID(UUID value) {
-		buf.writeUuid(value);
+		buf.writeLong(value.getMostSignificantBits());
+		buf.writeLong(value.getLeastSignificantBits());
 	}
 	
 }
