@@ -69,7 +69,7 @@ public class CarbonNetwork
 	}
 	
 	private boolean acceptsConnection(String version) {
-		return VERSION.equals(version) || NetworkRegistry.ACCEPTVANILLA.equals(version) || NetworkRegistry.ABSENT.equals(version);
+		return VERSION.equals(version) || NetworkRegistry.ACCEPTVANILLA.equals(version) || NetworkRegistry.ABSENT.version().equals(version);
 	}
 	
 	private <T extends ICarbonPacket> void registerPacket(int index, Class<T> packet, Supplier<T> creator) {
@@ -138,7 +138,7 @@ public class CarbonNetwork
 		List<Connection> players = new ObjectArrayList<>();
 		for(ServerPlayer player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
 			if(isInstalledOnClient(player)) 
-				players.add(player.connection.getConnection());
+				players.add(player.connection.connection);
 		}
 		return players;
 	}

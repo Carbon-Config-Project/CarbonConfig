@@ -67,7 +67,8 @@ public class CarbonIconCheckbox extends AbstractButton
 		return this.selected;
 	}
 	
-	public void renderButton(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	@Override
+	public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);

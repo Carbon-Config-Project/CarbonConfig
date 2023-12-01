@@ -197,6 +197,10 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	@Override
 	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		super.renderList(stack, mouseX, mouseY, partialTicks);
+	}
+	
+	@Override
+	protected void renderDecorations(PoseStack stack, int mouseX, int mouseY) {
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}
@@ -223,7 +227,6 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 		RenderSystem.disableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ZERO, DestFactor.ONE);
-		RenderSystem.disableTexture();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		builder.vertex(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();

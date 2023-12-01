@@ -48,9 +48,9 @@ public class CarbonIconButton extends AbstractButton
 	}
 	
 	@Override
-	public void renderButton(PoseStack stack, int mouseX, int mouseY, float p_93679_) {
-        int k = this.getYImage(this.isHoveredOrFocused());
-        ScreenUtils.blitWithBorder(stack, WIDGETS_LOCATION, getX(), getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+	public void renderWidget(PoseStack stack, int mouseX, int mouseY, float p_93679_) {
+        int k = getTextureY();
+        ScreenUtils.blitWithBorder(stack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, 0);
         if(iconOnly) {
     		int j = getFGColor();
             RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
@@ -68,7 +68,12 @@ public class CarbonIconButton extends AbstractButton
 		GuiUtils.drawTextureRegion(stack, minX, getY()+(height-8)/2, 11, 11, icon, 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		GuiUtils.drawScrollingShadowString(stack, font, getMessage(), minX+15, getY(), width, height-2, GuiAlign.CENTER, getFGColor(), hash);
-
+	}
+	
+	private int getTextureY() {
+		if (!this.active) return 0;
+		else if (this.isHoveredOrFocused()) return 2;
+		return 1;
 	}
 	
 	@Override
