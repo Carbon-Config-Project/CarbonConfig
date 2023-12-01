@@ -48,7 +48,6 @@ public class CarbonEditBox extends GuiTextField implements IOwnable, GuiResponde
 	}
 	
 	public CarbonEditBox setSuggestion(String value) {
-		//TODO implement me?
 		return this;
 	}
 	
