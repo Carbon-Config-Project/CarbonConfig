@@ -61,8 +61,6 @@ public class SaveConfigPacket implements ICarbonPacket
 		if(handler == null) return;
 		try {
 			ConfigHandler.load(handler, handler.getConfig(), ObjectArrayList.wrap(data.split("\n")), false);
-			//TODO update
-			handler.onSynced();
 			handler.save();
 			CarbonConfig.LOGGER.info("Saved ["+identifier+"] Config");
 		}
