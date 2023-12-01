@@ -188,12 +188,12 @@ public class ConfigSelectorScreen extends ListScreen
 		
 		@Override
 		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left+width-82;
-			button.y = top + 2;
+			button.setX(left+width-82);
+			button.setY(top + 2);
 			button.render(poseStack, mouseX, mouseY, partialTicks);
 			if(reset != null) {
-				reset.x = left+width-20;
-				reset.y = top + 2;
+				reset.setX(left+width-20);
+				reset.setY(top + 2);
 				reset.render(poseStack, mouseX, mouseY, partialTicks);
 			}
 			GuiUtils.drawScrollingString(poseStack, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);

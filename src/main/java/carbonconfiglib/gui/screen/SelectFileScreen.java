@@ -139,8 +139,8 @@ public class SelectFileScreen extends ListScreen
 		
 		@Override
 		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left+width-62;
-			button.y = top + 2;
+			button.setX(left+width-62);
+			button.setY(top + 2);
 			button.render(poseStack, mouseX, mouseY, partialTicks);
 			GuiUtils.drawScrollingString(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawScrollingString(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);

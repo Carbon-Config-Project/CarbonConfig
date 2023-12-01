@@ -28,7 +28,7 @@ public class CarbonButton extends Button
 	int hash;
 	
 	public CarbonButton(int xPos, int yPos, int width, int height, Component displayString, OnPress handler) {
-		super(xPos, yPos, width, height, displayString, handler);
+		super(xPos, yPos, width, height, displayString, handler, DEFAULT_NARRATION);
 		hash = displayString.getString().hashCode();
 	}
 	
@@ -36,8 +36,8 @@ public class CarbonButton extends Button
 	public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		int k = this.getYImage(this.isHovered);
-		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		this.renderBg(poseStack, mc, mouseX, mouseY);
-		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), x, y, width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
+		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), getX(), getY(), width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
 	}
 }

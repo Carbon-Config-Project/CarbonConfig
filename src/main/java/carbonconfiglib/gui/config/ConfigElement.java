@@ -166,12 +166,12 @@ public class ConfigElement extends Element
 		int maxX = Integer.MAX_VALUE;
 		if(renderChildren()) {
 			if(isArray()) {
-				moveUp.x = left + width - 16;
-				moveUp.y = top;
+				moveUp.setX(left + width - 16);
+				moveUp.setY(top);
 				moveUp.visible = canMoveUp();
 				moveUp.render(poseStack, mouseX, mouseY, partialTicks);
-				moveDown.x = left + width - 16;
-				moveDown.y = top + 10;
+				moveDown.setX(left + width - 16);
+				moveDown.setY(top + 10);
 				moveDown.visible = canMoveDown();
 				moveDown.render(poseStack, mouseX, mouseY, partialTicks);
 				if(moveDown.visible || moveUp.visible) {
@@ -181,10 +181,10 @@ public class ConfigElement extends Element
 			for(Map.Entry<AbstractWidget, AlignOffset> entry : mappedListeners) {
 				AbstractWidget widget = entry.getKey();
 				AlignOffset offset = entry.getValue();
-				widget.x = offset.align.align(left, width, widget.getWidth()) + offset.offset;
-				widget.y = top;
+				widget.setX(offset.align.align(left, width, widget.getWidth()) + offset.offset);
+				widget.setY(top);
 				widget.render(poseStack, mouseX, mouseY, partialTicks);
-				maxX = Math.min(maxX, widget.x);
+				maxX = Math.min(maxX, widget.getX());
 			}
 		}
 		maxX = getMaxX(maxX);

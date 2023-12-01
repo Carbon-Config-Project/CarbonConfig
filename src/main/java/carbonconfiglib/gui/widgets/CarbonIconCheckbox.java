@@ -75,15 +75,15 @@ public class CarbonIconCheckbox extends AbstractButton
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
-		GuiUtils.drawTextureRegion(stack, x, y, isHoveredOrFocused() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
-		GuiUtils.drawTextureRegion(stack, x+2, y+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
+		GuiUtils.drawTextureRegion(stack, getX(), getY(), isHoveredOrFocused() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		GuiUtils.drawTextureRegion(stack, getX()+2, getY()+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
 		if(owner != null && isMouseOver(mouseX, mouseY)) {
 			owner.addTooltips(tooltip);
 		}
 	}
 
 	@Override
-	public void updateNarration(NarrationElementOutput output) {
+	public void updateWidgetNarration(NarrationElementOutput output) {
 		output.add(NarratedElementType.TITLE, this.createNarrationMessage());
 		if(!this.active) return;
 		output.add(NarratedElementType.USAGE, Component.translatable(isFocused() ? "narration.checkbox.usage.hovered" : "narration.checkbox.usage.focused"));		

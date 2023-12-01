@@ -42,8 +42,8 @@ public class FolderElement extends ConfigElement
 	
 	@Override
 	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		button.x = left;
-		button.y = top;
+		button.setX(left);
+		button.setY(top);
 		button.setWidth(width);
 		button.render(poseStack, mouseX, mouseY, partialTicks);
 	}
