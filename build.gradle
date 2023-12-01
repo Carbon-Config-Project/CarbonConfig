@@ -7,6 +7,7 @@ plugins {
 version = MC_VERSION + '-' + MOD_VERSION
 group = 'carbonconfiglib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'Carbon Config'
+jarJar.enable()
 
 
 
@@ -26,12 +27,15 @@ runs {
     // applies to all the run configs below
     configureEach {
         modSource project.sourceSets.main
+        //Required for JIJ iirc.
 		dependencies {
     		runtime ':Primitive Collections-0.8.9'
     	}
     }
 
     client {
+    	//RUN GROUPS NOW INSTEAD OF JUST RUNS....
+    	//Thanks technici4n for figuring that out
     }
 
     server {
@@ -70,6 +74,9 @@ repositories {
 dependencies {
     implementation "net.neoforged:neoforge:20.2.59-beta"
 	implementation ':Primitive Collections-0.8.9'
+	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
+	 	jarJar.pin(it, "0.8.9")
+	}
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
