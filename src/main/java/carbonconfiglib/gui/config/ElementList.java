@@ -9,7 +9,6 @@ import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
@@ -18,6 +17,7 @@ import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.screen.SmoothFloat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
@@ -176,10 +176,10 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		value.update(partialTicks);
 		super.setScrollAmount(value.getValue());
-		super.render(stack, mouseX, mouseY, partialTicks);
+		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	public void setCustomBackground(BackgroundHolder customBackground) {
@@ -189,18 +189,13 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	protected void renderBackground(PoseStack stack) {
+	protected void renderBackground(GuiGraphics graphics) {
 		if(customBackground == null || (minecraft.level != null && customBackground.shouldDisableInLevel())) return;
 		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground.getTexture());
 	}
 	
 	@Override
-	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.renderList(stack, mouseX, mouseY, partialTicks);
-	}
-	
-	@Override
-	protected void renderDecorations(PoseStack stack, int mouseX, int mouseY) {
+	protected void renderDecorations(GuiGraphics graphics, int mouseX, int mouseY) {
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
 	}

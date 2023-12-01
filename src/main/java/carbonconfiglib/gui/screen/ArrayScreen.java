@@ -3,8 +3,6 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
@@ -15,6 +13,7 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -109,9 +108,9 @@ public class ArrayScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 30, -1);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		super.render(graphics, mouseX, mouseY, partialTicks);
+		graphics.drawCenteredString(font, title, width/2, 30, -1);
 	}
 	
 	public void createEntry(Button button) {

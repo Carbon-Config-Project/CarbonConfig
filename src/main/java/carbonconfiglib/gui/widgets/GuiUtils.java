@@ -9,7 +9,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 
@@ -17,6 +16,7 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -52,7 +52,7 @@ public class GuiUtils
 		return 0;
 	}
 	
-	public static void drawScrollingString(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
+	public static void drawScrollingString(GuiGraphics graphics, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -60,15 +60,17 @@ public class GuiUtils
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.draw(stack, text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height / 2) - (font.lineHeight / 3), color);
+			font.drawInBatch(text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height / 2) - (font.lineHeight / 3), color, false, graphics.pose().last().pose(), graphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+			graphics.flush();
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.draw(stack, text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color);
+		font.drawInBatch(text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color, false, graphics.pose().last().pose(), graphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+		graphics.flush();
 	}
 	
-	public static void drawScrollingShadowString(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
+	public static void drawScrollingShadowString(GuiGraphics graphics, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -76,12 +78,14 @@ public class GuiUtils
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.drawShadow(stack, text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height / 2) - (font.lineHeight / 3), color);
+			font.drawInBatch(text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height / 2) - (font.lineHeight / 3), color, true, graphics.pose().last().pose(), graphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+			graphics.flush();
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.drawShadow(stack, text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color);
+		font.drawInBatch(text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color, true, graphics.pose().last().pose(), graphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
+		graphics.flush();
 	}
 	
 	public static void pushScissors(int x, int y, int width, int height) {
@@ -109,18 +113,18 @@ public class GuiUtils
 		RenderSystem.enableScissor((int)(rect.getX() * scaledWidth), (int)(window.getHeight() - bottom * scaledHeight), (int)(rect.getWidth() * scaledWidth), (int)(rect.getHeigth() * scaledHeight));
 	}
 	
-	public static void drawTextureRegion(PoseStack stack, float x, float y, float width, float height, Icon icon, float texWidth, float texHeight) {
+	public static void drawTextureRegion(GuiGraphics graphics, float x, float y, float width, float height, Icon icon, float texWidth, float texHeight) {
 		RenderSystem._setShaderTexture(0, icon.getTexture());
-		drawTextureRegion(stack, x, y, icon.getX(), icon.getY(), width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
+		drawTextureRegion(graphics, x, y, icon.getX(), icon.getY(), width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
 	}
 	
-	public static void drawTextureRegion(PoseStack stack, float x, float y, int xOff, int yOff, float width, float height, Icon icon, float texWidth, float texHeight) {
+	public static void drawTextureRegion(GuiGraphics graphics, float x, float y, int xOff, int yOff, float width, float height, Icon icon, float texWidth, float texHeight) {
 		RenderSystem._setShaderTexture(0, icon.getTexture());
-		drawTextureRegion(stack, x, y, icon.getX() + xOff, icon.getY() + yOff, width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
+		drawTextureRegion(graphics, x, y, icon.getX() + xOff, icon.getY() + yOff, width, height, texWidth, texHeight, icon.getSheetWidth(), icon.getSheetHeight());
 	}
     
-	public static void drawTextureRegion(PoseStack stack, float x, float y, float texX, float texY, float width, float height, float texWidth, float texHeight, float textureWidth, float textureHeight) {
-		Matrix4f matrix = stack.last().pose();
+	public static void drawTextureRegion(GuiGraphics graphics, float x, float y, float texX, float texY, float width, float height, float texWidth, float texHeight, float textureWidth, float textureHeight) {
+		Matrix4f matrix = graphics.pose().last().pose();
 		float maxX = x + width;
 		float maxY = y + height;
 		float t_minX = texX / textureWidth;

@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
@@ -22,6 +21,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -82,9 +82,9 @@ public class SelectFileScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, TEXT, (width/2)-(font.width(TEXT)/2), 8, -1);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		super.render(graphics, mouseX, mouseY, partialTicks);
+		graphics.drawCenteredString(font, TEXT, width/2, 8, -1);
 	}
 	
 	@Override
@@ -138,16 +138,16 @@ public class SelectFileScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.setX(left+width-62);
 			button.setY(top + 2);
-			button.render(poseStack, mouseX, mouseY, partialTicks);
-			GuiUtils.drawScrollingString(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
+			button.render(graphics, mouseX, mouseY, partialTicks);
+			GuiUtils.drawScrollingString(graphics, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(graphics, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
 			if(texture != null) {
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.setShaderTexture(0, texture.getId());
-				GuiUtils.drawTextureRegion(poseStack, left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
+				GuiUtils.drawTextureRegion(graphics, left-24, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
 			}
 		}
 		

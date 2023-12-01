@@ -27,7 +27,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.19.4'
+    mappings channel: 'official', version: '1.20'
     runs {
         client {
             workingDirectory project.file('run')
@@ -79,7 +79,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.2.6'
+    minecraft 'net.minecraftforge:forge:1.20-46.0.14'
 //	implementation fg.deobf("curse.maven:the-one-probe-245211:3965693")
     minecraftLibrary ':Primitive Collections-0.8.9'
     jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {

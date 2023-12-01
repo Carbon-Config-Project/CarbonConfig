@@ -2,9 +2,9 @@ package carbonconfiglib.gui.widgets;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.config.IListOwner;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -68,7 +68,7 @@ public class CarbonIconCheckbox extends AbstractButton
 	}
 	
 	@Override
-	public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
@@ -76,8 +76,8 @@ public class CarbonIconCheckbox extends AbstractButton
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
-		GuiUtils.drawTextureRegion(stack, getX(), getY(), isHoveredOrFocused() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
-		GuiUtils.drawTextureRegion(stack, getX()+2, getY()+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
+		GuiUtils.drawTextureRegion(graphics, getX(), getY(), isHoveredOrFocused() ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		GuiUtils.drawTextureRegion(graphics, getX()+2, getY()+2, width-4, height-4, this.selected ? selectedIcon : unselectedIcon, 16, 16);
 		if(owner != null && isMouseOver(mouseX, mouseY)) {
 			owner.addTooltips(tooltip);
 		}

@@ -4,8 +4,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
@@ -20,6 +18,7 @@ import carbonconfiglib.gui.widgets.IOwnable;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
@@ -145,18 +144,18 @@ public class ConfigElement extends Element
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		if(renderName() && !isArray()) {
-			renderName(poseStack, left, top, isChanged(), isCompound() ? 80 : 200, height);
+			renderName(graphics, left, top, isChanged(), isCompound() ? 80 : 200, height);
 			if(!isCompound()) {
 				if(node.requiresReload()) {
-					GuiUtils.drawTextureRegion(poseStack, left-16, top+(height/2)-6, 12, 12, Icon.RELOAD, 16, 16);
+					GuiUtils.drawTextureRegion(graphics, left-16, top+(height/2)-6, 12, 12, Icon.RELOAD, 16, 16);
 					if(mouseX >= left-16 && mouseX <= left-4 && mouseY >= top && mouseY <= top+height && owner.isInsideList(mouseX, mouseY)) {
 						owner.addTooltips(RELOAD);
 					}
 				}
 				if(node.requiresRestart()) {
-					GuiUtils.drawTextureRegion(poseStack, left-16, top+(height/2)-6, 12, 12, Icon.RESTART, 16, 16);
+					GuiUtils.drawTextureRegion(graphics, left-16, top+(height/2)-6, 12, 12, Icon.RESTART, 16, 16);
 					if(mouseX >= left-16 && mouseX <= left-4 && mouseY >= top && mouseY <= top+height && owner.isInsideList(mouseX, mouseY)) {
 						owner.addTooltips(RESTART);
 					}
@@ -169,11 +168,11 @@ public class ConfigElement extends Element
 				moveUp.setX(left + width - 16);
 				moveUp.setY(top);
 				moveUp.visible = canMoveUp();
-				moveUp.render(poseStack, mouseX, mouseY, partialTicks);
+				moveUp.render(graphics, mouseX, mouseY, partialTicks);
 				moveDown.setX(left + width - 16);
 				moveDown.setY(top + 10);
 				moveDown.visible = canMoveDown();
-				moveDown.render(poseStack, mouseX, mouseY, partialTicks);
+				moveDown.render(graphics, mouseX, mouseY, partialTicks);
 				if(moveDown.visible || moveUp.visible) {
 					left -= 8;
 				}
@@ -183,14 +182,14 @@ public class ConfigElement extends Element
 				AlignOffset offset = entry.getValue();
 				widget.setX(offset.align.align(left, width, widget.getWidth()) + offset.offset);
 				widget.setY(top);
-				widget.render(poseStack, mouseX, mouseY, partialTicks);
+				widget.render(graphics, mouseX, mouseY, partialTicks);
 				maxX = Math.min(maxX, widget.getX());
 			}
 		}
 		maxX = getMaxX(maxX);
 		if(isArray()) {
 			Component comp = Component.literal(indexOf()+":");
-			renderText(poseStack, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
+			renderText(graphics, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
 		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
 			owner.addTooltips(node.getTooltip());

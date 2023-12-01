@@ -1,14 +1,12 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -59,17 +57,17 @@ public class ColorElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks)
+	public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks)
 	{
-		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
+		super.render(graphics, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(isArray()) {
-			GuiComponent.fill(poseStack, left+186, top-1, left+203, top+19, 0xFFA0A0A0);
-			GuiComponent.fill(poseStack, left+187, top, left+202, top+18, Integer.decode(value.get()) | 0xFF000000);
+			graphics.fill(left+186, top-1, left+203, top+19, 0xFFA0A0A0);
+			graphics.fill(left+187, top, left+202, top+18, Integer.decode(value.get()) | 0xFF000000);
 		}
 		else {
 			int xOff = isCompound() ? 106 : 186;
-			GuiComponent.fill(poseStack, left+xOff, top-1, left+xOff+17, top+19, 0xFFA0A0A0);
-			GuiComponent.fill(poseStack, left+xOff+1, top, left+xOff+16, top+18, Integer.decode(value.get()) | 0xFF000000);
+			graphics.fill(left+xOff, top-1, left+xOff+17, top+19, 0xFFA0A0A0);
+			graphics.fill(left+xOff+1, top, left+xOff+16, top+18, Integer.decode(value.get()) | 0xFF000000);
 		}
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
 			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));

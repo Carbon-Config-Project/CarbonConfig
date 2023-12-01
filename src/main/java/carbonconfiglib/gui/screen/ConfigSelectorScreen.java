@@ -3,8 +3,6 @@ package carbonconfiglib.gui.screen;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
@@ -21,6 +19,7 @@ import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -69,9 +68,9 @@ public class ConfigSelectorScreen extends ListScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, modName, (width/2)-(font.width(modName)/2), 8, -1);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		super.render(graphics, mouseX, mouseY, partialTicks);
+		graphics.drawCenteredString(font, modName, width/2, 8, -1);
 	}
 	
 	@Override
@@ -140,8 +139,8 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			renderText(poseStack, name, left, top+1, width, height, GuiAlign.CENTER, -1);
+		public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			renderText(graphics, name, left, top+1, width, height, GuiAlign.CENTER, -1);
 		}
 	}
 	
@@ -187,18 +186,18 @@ public class ConfigSelectorScreen extends ListScreen
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			button.setX(left+width-82);
 			button.setY(top + 2);
-			button.render(poseStack, mouseX, mouseY, partialTicks);
+			button.render(graphics, mouseX, mouseY, partialTicks);
 			if(reset != null) {
 				reset.setX(left+width-20);
 				reset.setY(top + 2);
-				reset.render(poseStack, mouseX, mouseY, partialTicks);
+				reset.render(graphics, mouseX, mouseY, partialTicks);
 			}
-			GuiUtils.drawScrollingString(poseStack, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(poseStack, font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawTextureRegion(poseStack, left-20, top, 22, 22, getIcon(), 16, 16);
+			GuiUtils.drawScrollingString(graphics, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingString(graphics, font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawTextureRegion(graphics, left-20, top, 22, 22, getIcon(), 16, 16);
 		}
 		
 		@Override

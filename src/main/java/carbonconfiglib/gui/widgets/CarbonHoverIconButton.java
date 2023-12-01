@@ -3,8 +3,8 @@ package carbonconfiglib.gui.widgets;
 import java.util.function.Consumer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -44,10 +44,10 @@ public class CarbonHoverIconButton extends AbstractButton
 	}
 	
 	@Override
-	public void renderWidget(PoseStack stack, int mouseX, int mouseY, float p_93679_) {
+	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float p_93679_) {
 		int j = getFGColor();
         RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(stack, getX() + info.xOff, getY() + info.yOff, info.width, info.height, icons[isHoveredOrFocused() ? 1 : 0], 16, 16);
+		GuiUtils.drawTextureRegion(graphics, getX() + info.xOff, getY() + info.yOff, info.width, info.height, icons[isHoveredOrFocused() ? 1 : 0], 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 	

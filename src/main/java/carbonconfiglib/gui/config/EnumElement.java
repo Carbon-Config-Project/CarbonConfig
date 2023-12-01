@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
@@ -10,6 +8,7 @@ import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.utils.ParseResult;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -59,10 +58,9 @@ public class EnumElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
-		String value = this.value.get();
-		GuiUtils.drawScrollingString(poseStack, font, Component.literal(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
+	public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		super.render(graphics, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
+		GuiUtils.drawScrollingString(graphics, font, Component.literal(value.get()), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
 	}
 	
 	private void onSelect(Button button) {

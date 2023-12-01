@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.screen.MultiChoiceScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
@@ -16,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -90,25 +89,25 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(stack);
-		super.render(stack, mouseX, mouseY, partialTicks);
-		GuiUtils.drawTextureRegion(stack, 5, 5, 40, 40, Icon.LOGO, 400, 400);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(graphics);
+		super.render(graphics, mouseX, mouseY, partialTicks);
+		GuiUtils.drawTextureRegion(graphics, 5, 5, 40, 40, Icon.LOGO, 400, 400);
 		if(mouseX >= 5 && mouseX <= 45 && mouseY >= 5 && mouseY <= 40) {
 			addTooltips(LOG_INFO);
 		}
-		handleForground(stack, mouseX, mouseY, partialTicks);
+		handleForground(graphics, mouseX, mouseY, partialTicks);
 		if(!tooltips.isEmpty()) {
 			List<FormattedCharSequence> text = new ObjectArrayList<>();
 			for(Component entry : tooltips) {
 				text.addAll(font.split(entry, Math.max(mouseX, width - mouseX) - 20));
 			}
-			renderTooltip(stack, text, mouseX, mouseY);
+			graphics.renderTooltip(font, text, mouseX, mouseY);
 			tooltips.clear();
 		}
 	}
 	
-	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void handleForground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 
 	}
 	
