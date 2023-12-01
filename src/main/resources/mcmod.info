@@ -1,7 +1,7 @@
 [
 {
   "modid": "carbonconfig",
-  "name": "Carbon Config",
+  "name": "Carbon Config Library",
   "description": "Carbon Config is IC2Classics Config Implementation made open source",
   "version": "${version}",
   "mcversion": "${mcversion}",
