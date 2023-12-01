@@ -70,10 +70,27 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-    	from {
+    dependsOn configurations.runtimeClasspath
+	from {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		configurations.runtimeClasspath.findAll { it.name.contains('speiger.src.collections') }.collect { zipTree(it) }	
+		configurations.runtimeClasspath.findAll { it.name.equalsIgnoreCase('Primitive Collections-0.8.9.jar') }.collect { zipTree(it) }	
 	}
+}
+
+processResources {
+    inputs.property "version", version
+    inputs.property "mcversion", MC_VERSION
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        expand 'version':version, 'mcversion':MC_VERSION
+    }
+        
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
 }
 
 jar.finalizedBy('reobfJar')
