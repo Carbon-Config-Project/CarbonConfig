@@ -63,7 +63,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.12]")
+@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config Library", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.12]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();

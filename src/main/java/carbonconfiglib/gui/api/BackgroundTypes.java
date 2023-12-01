@@ -30,7 +30,7 @@ public enum BackgroundTypes
 	AMETHYST(BackgroundTexture.of("minecraft:textures/blocks/amethyst_block.png").withBrightness(192).build()),
 	GRANITE(BackgroundTexture.of("minecraft:textures/blocks/granite.png").withBrightness(192).build()),
 	POLISHED_ANDESITE(BackgroundTexture.of("minecraft:textures/blocks/polished_andesite.png").withBrightness(192).build()),
-	DEEPSLATE_BRICKS(BackgroundTexture.of("minecraft:textures/blocks/deeblockse_bricks.png").withBrightness(192).build()),
+	DEEPSLATE_BRICKS(BackgroundTexture.of("minecraft:textures/blocks/deepslate_bricks.png").withBrightness(192).build()),
 	PURPUR_PILLAR(BackgroundTexture.of("minecraft:textures/blocks/purpur_pillar.png").withBrightness(192).build()),
 	RED_SAND(BackgroundTexture.of("minecraft:textures/blocks/red_sand.png").withBrightness(192).build()),
 	PACKED_ICE(BackgroundTexture.of("minecraft:textures/blocks/packed_ice.png").withBrightness(192).build()),
