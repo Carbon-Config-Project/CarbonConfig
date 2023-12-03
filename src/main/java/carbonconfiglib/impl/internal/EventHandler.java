@@ -87,12 +87,10 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	public static void onPlayerClientJoin() {
-		System.out.println("player joined !!!!!!!!!!!!!");
 		INSTANCE.onPlayerClientJoinEvent();
 	}
 	
 	public static void onPlayerClientLeave(IntegratedServer server) {
-		System.out.println("player left !!!!!!!!!!!!!!!!!!");
 		INSTANCE.onPlayerClientLeaveEvent();
 	}
 	
