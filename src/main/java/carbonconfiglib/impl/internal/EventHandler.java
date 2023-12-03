@@ -180,7 +180,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Environment(EnvType.CLIENT)
 	public void onPlayerServerJoinEvent() {
-		if(Minecraft.getInstance().getCurrentServer() != null) loadMPConfigs();
+		if(Minecraft.getInstance().getCurrentServer() == null) loadMPConfigs();
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.getConfigs().getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
 		if(packet == null) return;
 		CarbonConfig.NETWORK.sendToServer(packet);
@@ -188,7 +188,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Environment(EnvType.CLIENT)
 	public void onPlayerServerLeaveEvent() {
-		if(Minecraft.getInstance().getCurrentServer() != null) {
+		if(!Minecraft.getInstance().isLocalServer()) {
 			for(ConfigHandler handler : CarbonConfig.getConfigs().getAllConfigs()) {
 				if(PerWorldProxy.isProxy(handler.getProxy())) {
 					handler.unload();
