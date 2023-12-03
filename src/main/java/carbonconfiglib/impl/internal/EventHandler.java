@@ -90,7 +90,7 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	public static void onPlayerClientLeave(IntegratedServer server) {
-		INSTANCE.onPlayerClientLeaveEvent();
+		INSTANCE.onPlayerClientLeaveEvent(server);
 	}
 	
 	@Override
@@ -222,7 +222,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@SideOnly(Side.CLIENT)
 	public void onPlayerClientJoinEvent() {
-		if(Minecraft.getMinecraft().getIntegratedServer() != null) loadMPConfigs();
+		if(Minecraft.getMinecraft().getIntegratedServer() == null) loadMPConfigs();
 		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Side.CLIENT));
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
 		if(packet == null) return;
@@ -230,9 +230,9 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public void onPlayerClientLeaveEvent() {
+	public void onPlayerClientLeaveEvent(IntegratedServer server) {
 		CarbonConfig.NETWORK.onPlayerLeft(null, false);
-		if(Minecraft.getMinecraft().getIntegratedServer() != null) {
+		if(server == null) {
 			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
 				if(PerWorldProxy.isProxy(handler.getProxy())) {
 					handler.unload();
