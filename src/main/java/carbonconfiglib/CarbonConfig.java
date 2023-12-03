@@ -1,5 +1,6 @@
 package carbonconfiglib;
 
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,6 +35,9 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.event.FMLInterModComms.IMCEvent;
+import cpw.mods.fml.common.event.FMLInterModComms.IMCMessage;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
@@ -46,6 +50,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -94,7 +99,6 @@ public class CarbonConfig
 			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
 			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD, AutomationType.AUTO_RELOAD));
 			handler.register();
-			LOGGER.info("Config Loaded");
 		}
 	}
 	
@@ -242,6 +246,19 @@ public class CarbonConfig
 		if(FMLCommonHandler.instance().getSide().isClient()) {
 			onClientLoad();
 		}
+	}
+	
+	@cpw.mods.fml.common.Mod.EventHandler
+	public void onIMC(IMCEvent event) {
+		Map<String, ModContainer> mods = new Object2ObjectOpenHashMap<>();
+		for(IMCMessage message : event.getMessages()) {
+			if("registerGui".equalsIgnoreCase(message.key) && message.isStringMessage()) {
+				ModContainer container = Loader.instance().getIndexedModList().get(message.getSender());
+				if(container == null) continue;
+				mods.put(message.getStringValue(), container);
+			}
+		}
+		EventHandler.INSTANCE.processIMCEvents(mods);
 	}
 	
 	@SideOnly(Side.CLIENT)

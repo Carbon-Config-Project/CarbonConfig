@@ -31,6 +31,7 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.GuiModList;
 import cpw.mods.fml.client.IModGuiFactory;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.IFMLSidedHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
@@ -75,14 +76,30 @@ public class EventHandler implements IConfigChangeListener
 {
 	public static final EventHandler INSTANCE = new EventHandler();
 	boolean loaded = false;
+	boolean allowFailed = true;
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
+	Map<String, Configuration> foundFiles = new Object2ObjectLinkedOpenHashMap<String, Configuration>().synchronize();
 	Object2ObjectMap<ModContainer, List<Configuration>> forgeConfigs = new Object2ObjectLinkedOpenHashMap<ModContainer, List<Configuration>>().synchronize();
 	
 	public static void registerConfig(Configuration config) {
-		if(config == null || config.getConfigFile() == null || FMLCommonHandler.instance().getSide().isServer()) return;
+		if(config == null || config.getConfigFile() == null) return;
+		IFMLSidedHandler side = FMLCommonHandler.instance().getSidedDelegate();
+		if(side == null) {
+			applyFailed(config);
+			return;
+		}
+		if(side.getSide() == Side.SERVER) return;
 		ModContainer container = Loader.instance().activeModContainer();
-		if(container == null) return;
+		if(container == null) {
+			applyFailed(config);
+			return;
+		}
 		INSTANCE.forgeConfigs.supplyIfAbsent(container, ObjectArrayList::new).add(config);
+	}
+	
+	private static void applyFailed(Configuration config) {
+		if(!INSTANCE.allowFailed || config == null || config.getConfigFile() == null) return;
+		INSTANCE.foundFiles.put(config.getConfigFile().getAbsolutePath(), config);
 	}
 	
 	public static void onPlayerClientJoin() {
@@ -174,6 +191,19 @@ public class EventHandler implements IConfigChangeListener
 				Minecraft.getMinecraft().displayGuiScreen(((ConfigScreenFactory)factory).createConfigGui(event.gui));
 			}
 		}
+	}
+	
+	public void processIMCEvents(Map<String, ModContainer> config) {
+		if(FMLCommonHandler.instance().getSide().isServer()) {
+			foundFiles.clear();
+			return;
+		}
+		foundFiles.forEach((F, C) -> {
+			ModContainer container = config.get(F);
+			if(container == null) return;
+			forgeConfigs.supplyIfAbsent(container, ObjectArrayList::new).add(C);
+		});
+		foundFiles.clear();
 	}
 	
 	@SideOnly(Side.CLIENT)
