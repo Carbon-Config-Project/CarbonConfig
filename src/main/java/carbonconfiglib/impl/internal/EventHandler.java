@@ -34,6 +34,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.common.config.Configuration;
@@ -86,10 +87,12 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	public static void onPlayerClientJoin() {
+		System.out.println("player joined !!!!!!!!!!!!!");
 		INSTANCE.onPlayerClientJoinEvent();
 	}
 	
-	public static void onPlayerClientLeave() {
+	public static void onPlayerClientLeave(IntegratedServer server) {
+		System.out.println("player left !!!!!!!!!!!!!!!!!!");
 		INSTANCE.onPlayerClientLeaveEvent();
 	}
 	
