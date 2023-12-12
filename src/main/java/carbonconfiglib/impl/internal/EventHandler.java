@@ -195,7 +195,7 @@ public class EventHandler implements IConfigChangeListener
 		}
 	}
 	
-	public void processIMCEvents(Map<String, ModContainer> config) {
+	public void processIMCEvents(Map<String, ModContainer> config, Map<ModContainer, ModContainer> remapping) {
 		if(FMLCommonHandler.instance().getSide().isServer()) {
 			foundFiles.clear();
 			return;
@@ -206,6 +206,11 @@ public class EventHandler implements IConfigChangeListener
 			forgeConfigs.supplyIfAbsent(container, ObjectArrayList::new).add(C);
 		});
 		foundFiles.clear();
+		for(Map.Entry<ModContainer, ModContainer> entry : remapping.entrySet()) {
+			List<Configuration> configs = forgeConfigs.remove(entry.getKey());
+			if(configs == null || configs.isEmpty()) continue;
+			forgeConfigs.supplyIfAbsent(entry.getValue(), ObjectArrayList::new).addAll(configs);
+		}
 	}
 	
 	@SideOnly(Side.CLIENT)
