@@ -50,6 +50,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
 import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
 import net.minecraftforge.fml.relauncher.Side;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 
@@ -250,14 +251,22 @@ public class CarbonConfig
 	@net.minecraftforge.fml.common.Mod.EventHandler
 	public void onIMC(IMCEvent event) {
 		Map<String, ModContainer> mods = new Object2ObjectOpenHashMap<>();
+		Map<ModContainer, ModContainer> mappingTasks = new Object2ObjectLinkedOpenHashMap<>();
 		for(IMCMessage message : event.getMessages()) {
 			if("registerGui".equalsIgnoreCase(message.key) && message.isStringMessage()) {
 				ModContainer container = Loader.instance().getIndexedModList().get(message.getSender());
 				if(container == null) continue;
 				mods.put(message.getStringValue(), container);
 			}
+			else if("remapGui".equalsIgnoreCase(message.key) && message.isStringMessage()) {
+				ModContainer to = Loader.instance().getIndexedModList().get(message.getSender());
+				if(to == null) continue;
+				ModContainer from = Loader.instance().getIndexedModList().get(message.getStringValue());
+				if(from == null) continue;
+				mappingTasks.put(from, to);
+			}
 		}
-		EventHandler.INSTANCE.processIMCEvents(mods);
+		EventHandler.INSTANCE.processIMCEvents(mods, mappingTasks);
 	}
 	
 	@SideOnly(Side.CLIENT)
