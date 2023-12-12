@@ -2,6 +2,7 @@ package carbonconfiglib.gui.impl.forge;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -62,7 +64,7 @@ public class ForgeConfig implements IModConfig
 	
 	public ForgeConfig(ModConfig config) {
 		this.config = config;
-		spec = (ForgeConfigSpec)config.getSpec();
+		spec = getSpec(config.getSpec());
 		data = config.getConfigData();
 		entries = collect();
 	}
@@ -71,8 +73,25 @@ public class ForgeConfig implements IModConfig
 		this.config = config;
 		this.data = data;
 		this.path = path;
-		spec = (ForgeConfigSpec)config.getSpec();
+		spec = getSpec(config.getSpec());
 		entries = collect();
+	}
+	
+	private ForgeConfigSpec getSpec(IConfigSpec<?> spec) {
+		//Mod to fix Night config fixes
+		if(spec instanceof ForgeConfigSpec) {
+			return (ForgeConfigSpec)spec;
+		}
+		try {
+			Class<?> clz = Class.forName("fuzs.nightconfigfixes.config.ConfigSpecWrapper");
+			if(clz == null) return null;
+			if(!clz.isInstance(spec)) return null;
+			Method method = clz.getMethod("getSpec");
+			method.setAccessible(true);
+			return (ForgeConfigSpec)method.invoke(spec);
+		}
+		catch(Exception e) {}
+		return null;
 	}
 	
 	@Override
