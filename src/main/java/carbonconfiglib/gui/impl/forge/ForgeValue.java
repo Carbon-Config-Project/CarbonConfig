@@ -47,7 +47,7 @@ public class ForgeValue implements IValueNode
 	@SuppressWarnings("unchecked")
 	<T> void loadData(ForgeDataType<T> type) {
 		defaultValue = type.serialize((T)spec.getDefault());
-		String starting = type.isEnum() ? config.get(path) : type.serialize(config.get(path));
+		String starting = type.isEnum() && String.class.equals(config.get(path).getClass()) ? config.get(path) : type.serialize(config.get(path));
 		this.current = starting;
 		previous.add(starting);
 	}
