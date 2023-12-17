@@ -224,7 +224,7 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 		RenderSystem.disableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ZERO, DestFactor.ONE);
-		RenderSystem.disableTexture();
+		RenderSystem.setShaderTexture(0,0);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		builder.vertex(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();

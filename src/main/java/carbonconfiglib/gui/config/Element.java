@@ -76,13 +76,13 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	@Override
 	public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 	}
-	
-	protected void renderName(GuiGraphics stack, int x, int y, boolean changed) {
-		GuiUtils.drawScrollingString(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
+
+	protected void renderName(GuiGraphics graphics, int x, int y, boolean changed, int width, int height) {
+		GuiUtils.drawScrollingString(graphics, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
-	
-	protected void renderName(GuiGraphics stack, int x, int y, boolean changed, int maxWidth) {
-		GuiUtils.drawScrollingString(stack, font, text, x, y, width, height, align, -1, hash);
+
+	protected void renderText(GuiGraphics graphics, Component text, int x, int y, float width, float height, GuiAlign align, int color) {
+		GuiUtils.drawScrollingString(graphics, font, text, x, y, width, height, align, -1, hash);
 	}
 	
 	@Override

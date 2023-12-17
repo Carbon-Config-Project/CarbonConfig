@@ -50,7 +50,7 @@ public class CarbonIconButton extends AbstractButton
 	@Override
 	public void renderWidget(GuiGraphics stack, int mouseX, int mouseY, float p_93679_) {
 		int k = this.getYImage(this.isHoveredOrFocused());
-		GuiUtils.drawTextureWithBorder(stack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+		GuiUtils.drawTextureWithBorder(stack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2);
 		if(iconOnly) {
 			int j = active ? 0xFFFFFF : 0xA0A0A0;
 			RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
@@ -67,7 +67,7 @@ public class CarbonIconButton extends AbstractButton
 		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
 		GuiUtils.drawTextureRegion(stack, minX, getY()+(height-8)/2, 11, 11, icon, 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		GuiUtils.drawScrollingShadowString(stack, font, getMessage(), minX+15, y, width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
+		GuiUtils.drawScrollingShadowString(stack, font, getMessage(), minX+15, getY(), width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
 	}
 
 	protected int getYImage(boolean isHovered) {

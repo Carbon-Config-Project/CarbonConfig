@@ -31,7 +31,7 @@ public class CarbonButton extends Button
 
 	public CarbonButton(int i, int j, int k, int l, Component component, OnPress onPress, CreateNarration createNarration) {
 		super(i, j, k, l, component, onPress, createNarration);
-		hash = displayString.getString().hashCode();
+		hash = component.getString().hashCode();
 	}
 
 	public CarbonButton(int i, int j, int k, int l, Component component, OnPress onPress) {
@@ -42,9 +42,8 @@ public class CarbonButton extends Button
 	public void renderWidget(GuiGraphics poseStack, int mouseX, int mouseY, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		int k = this.getYImage(this.isHovered);
-		GuiUtils.drawTextureWithBorder(poseStack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
-		this.renderBg(poseStack, mc, mouseX, mouseY);
-		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), x, y, width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
+		GuiUtils.drawTextureWithBorder(poseStack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2);
+		GuiUtils.drawScrollingShadowString(poseStack, mc.font, getMessage(), getX(), getY(), width, height-2, GuiAlign.CENTER, this.active ? 16777215 : 10526880, hash);
 	}
 
 	protected int getYImage(boolean isHovered) {

@@ -137,7 +137,7 @@ public class ConfigScreen extends ListScreen
 	}
 	
 	@Override
-	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void handleForground(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		GuiUtils.drawScrollingString(stack, font, nav.getHeader(), 50F, 6, width-100, 10, GuiAlign.CENTER, -1, 0);
 		stack.drawString(font, title, (width/2)-(font.width(title)/2), 8, -1);
 	}

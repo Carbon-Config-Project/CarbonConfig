@@ -111,7 +111,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 
 	}
 	
-	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void handleForground(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 	}
 	
 	@Override

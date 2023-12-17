@@ -10,6 +10,7 @@ import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
@@ -74,14 +75,14 @@ public class EnumElement extends ConfigElement
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
 		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
 			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
 		}
 		else if(edit == null) {
 			String value = this.value.get();
-			font.draw(poseStack, value, left + width - 97 - (font.width(value) / 2), top + (height / 2) - 4.5F, 0xFFAAAAAA);
+			poseStack.drawString(font, value, left + width - 97 - (font.width(value) / 2), (int) (top + (height / 2) - 4.5F), 0xFFAAAAAA);
 		}
 	}
 	
