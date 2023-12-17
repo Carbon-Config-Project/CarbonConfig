@@ -124,8 +124,9 @@ public class ConfigCompoundLeaf implements IConfigNode
 		}
 	}
 	@Override
+	public String getNodeName() { return null; }
+	@Override
 	public Component getName() { return IConfigNode.createLabel(entry.getKey()); }
-	
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();

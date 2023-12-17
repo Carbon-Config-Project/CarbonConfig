@@ -99,6 +99,11 @@ public class ModConfig implements IModConfig
 	}
 	
 	@Override
+	public boolean isLocalConfig() {
+		return path == handler.getConfigFile();
+	}
+	
+	@Override
 	public List<IConfigTarget> getPotentialFiles() {
 		List<IConfigTarget> result = new ObjectArrayList<>();
 		for(IPotentialTarget target : handler.getProxy().getPotentialConfigs()) {
@@ -134,7 +139,6 @@ public class ModConfig implements IModConfig
 	public void save() {
 		if(config == handler.getConfig()) {
 			handler.save();
-			handler.onSynced();
 		}
 		else {
 			try (BufferedWriter writer = Files.newBufferedWriter(path)) {
@@ -168,5 +172,8 @@ public class ModConfig implements IModConfig
 		public void save() {
 			CarbonConfig.NETWORK.sendToServer(new SaveConfigPacket(handler.getConfigIdentifer(), config.serialize(MultilinePolicy.DISABLED)));
 		}
+		
+		@Override
+		public boolean isLocalConfig() { return false; }
 	}
 }

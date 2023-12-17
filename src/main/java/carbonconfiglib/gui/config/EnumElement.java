@@ -6,13 +6,13 @@ import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.EditStringScreen;
+import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
-import carbonconfiglib.gui.widgets.CarbonEditBox;
+import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -32,7 +32,6 @@ import net.minecraft.network.chat.Component;
  */
 public class EnumElement extends ConfigElement
 {
-	EditBox edit;
 	ParseResult<Boolean> result;
 	
 	public EnumElement(IConfigNode node, IValueNode value) {
@@ -48,49 +47,28 @@ public class EnumElement extends ConfigElement
 		super.init();
 		if(!hasSuggestions() || isArray()) {
 			if(this.isArray()) {
-				edit = addChild(new CarbonEditBox(font, 0, 0, 150, 18), GuiAlign.CENTER, 0);
-				edit.setValue(value.get());
-				edit.setResponder(T -> {
-					edit.setTextColor(0xE0E0E0);
-					result = null;
-					if(!T.isEmpty() && !(result = value.isValid(T)).getValue()) {
-						edit.setTextColor(0xFF0000);
-						return;
-					}
-					value.set(T);
-				});
+				addChild(new CarbonButton(0, 0, 40, 18, Component.translatable("gui.chunk_pregen.config.edit"), this::onSelect), -12);				
 			}
 			else {
-				addChild(new CarbonButton(0, 0, 72, 18, Component.translatable("gui.carbonconfig.edit"), this::onPress));
+				addChild(new CarbonButton(0, 0, 72, 18, Component.translatable("gui.chunk_pregen.config.edit"), this::onPress));
 			}
 		}
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
-		if(edit != null) {
-			edit.tick();
-		}
+	protected int getMaxX(int prevMaxX) {
+		return super.getMaxX(prevMaxX) - 140;
 	}
 	
 	@Override
 	public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		super.render(poseStack, x, top, left, width, height, mouseX, mouseY, selected, partialTicks);
-		if(edit != null && edit.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			owner.addTooltips(Component.literal(result.getError().getMessage()).withStyle(ChatFormatting.RED));			
-		}
-		else if(edit == null) {
-			String value = this.value.get();
-			poseStack.drawString(font, value, left + width - 97 - (font.width(value) / 2), (int) (top + (height / 2) - 4.5F), 0xFFAAAAAA);
-		}
+		String value = this.value.get();
+		GuiUtils.drawScrollingString(poseStack, font, Component.literal(value), left + width - 235, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);
 	}
 	
-	@Override
-	public void updateValues() {
-		if(edit != null) {
-			edit.setValue(value.get());
-		}
+	private void onSelect(Button button) {
+		mc.setScreen(ListSelectionScreen.ofValue(mc.screen, node, value, owner.getCustomTexture()));
 	}
 	
 	private void onPress(Button button) {

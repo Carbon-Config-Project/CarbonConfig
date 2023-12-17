@@ -1,5 +1,7 @@
 package carbonconfiglib.gui.api;
 
+import java.util.function.BooleanSupplier;
+
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.utils.Helpers;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +29,7 @@ public class BackgroundTexture
 	ResourceLocation foregroundTexture;
 	int backgroundBrightness = 32;
 	int foregroundBrightness = 64;
-	boolean disableBackgroundInLevel = true;
+	BooleanSupplier disableBackgroundInLevel = () -> !CarbonConfig.INGAME_BACKGROUND.get();
 	BackgroundHolder holder = new BackgroundHolder(this);
 	
 	private BackgroundTexture() {}
@@ -61,7 +63,7 @@ public class BackgroundTexture
 	}
 	
 	public boolean shouldDisableInLevel() {
-		return disableBackgroundInLevel;
+		return disableBackgroundInLevel.getAsBoolean();
 	}
 	
 	public int getBackgroundBrightness() {
@@ -154,7 +156,7 @@ public class BackgroundTexture
 		}
 		
 		public Builder withBackgroundPresentIngame(boolean value) {
-			texture.disableBackgroundInLevel = !value;
+			texture.disableBackgroundInLevel = new Constant(!value);
 			return this;
 		}
 		
@@ -162,6 +164,19 @@ public class BackgroundTexture
 			BackgroundTexture result = texture;
 			texture = null;
 			return result;
+		}
+	}
+	
+	private static class Constant implements BooleanSupplier {
+		boolean value;
+
+		public Constant(boolean value) {
+			this.value = value;
+		}
+		
+		@Override
+		public boolean getAsBoolean() {
+			return value;
 		}
 	}
 	

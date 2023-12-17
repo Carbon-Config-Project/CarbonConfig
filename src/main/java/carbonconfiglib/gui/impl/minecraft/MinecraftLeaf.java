@@ -87,12 +87,10 @@ public class MinecraftLeaf implements IConfigNode
 	public boolean requiresRestart() { return false; }
 	@Override
 	public boolean requiresReload() { return false; }
-	
 	@Override
-	public Component getName() {
-		return IConfigNode.createLabel(I18n.get(entry.getDescriptionId()));
-	}
-	
+	public String getNodeName() { return null; }
+	@Override
+	public Component getName() { return IConfigNode.createLabel(I18n.get(entry.getDescriptionId())); }
 	@Override
 	public Component getTooltip() {
 		String id = entry.getDescriptionId();
