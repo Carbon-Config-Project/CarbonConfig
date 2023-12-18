@@ -13,6 +13,7 @@ import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -79,16 +80,16 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, REQUEST, width / 2 - font.width(REQUEST) / 2, height / 2 - 12, -1);
+		stack.drawString(font, REQUEST, width / 2 - font.width(REQUEST) / 2, height / 2 - 12, -1);
 		int index = (tick / 5) % 8;
 		if(index >= 5) index = 8-index;
-		font.draw(stack, ANIMATION[index], width / 2 - font.width(ANIMATION[index]) / 2, height / 2, -1);
+		stack.drawString(font, ANIMATION[index], width / 2 - font.width(ANIMATION[index]) / 2, height / 2, -1);
 		int timeout = (401 - tick) / 20;
 		if(timeout <= 18) {
 			Component draw = Component.translatable("gui.carbonconfig.timeout", timeout).withStyle(ChatFormatting.RED);
-			font.draw(stack, draw, width / 2 - font.width(draw) / 2, height / 2 + 12, -1);
+			stack.drawString(font, draw, width / 2 - font.width(draw) / 2, height / 2 + 12, -1);
 		}
 	}
 	

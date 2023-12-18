@@ -16,11 +16,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -90,7 +92,7 @@ public abstract class ListScreen extends Screen implements IListOwner
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(stack);
 		super.render(stack, mouseX, mouseY, partialTicks);
 		GuiUtils.drawTextureRegion(stack, 5, 5, 40, 40, Icon.LOGO, 400, 400);
@@ -103,13 +105,13 @@ public abstract class ListScreen extends Screen implements IListOwner
 			for(Component entry : tooltips) {
 				text.addAll(font.split(entry, Math.max(mouseX, width - mouseX) - 20));
 			}
-			renderTooltip(stack, text, mouseX, mouseY);
+			stack.renderTooltip(font, text, mouseX, mouseY);
 			tooltips.clear();
 		}
 
 	}
 	
-	public void handleForground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void handleForground(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 	}
 	
 	@Override

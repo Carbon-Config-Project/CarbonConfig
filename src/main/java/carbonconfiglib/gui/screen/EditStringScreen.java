@@ -10,6 +10,7 @@ import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -74,13 +75,13 @@ public class EditStringScreen extends Screen
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
 		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
 		super.render(stack, mouseX, mouseY, partialTicks);
-		font.draw(stack, title, (width/2)-(font.width(title)/2), 85, -1);
+		stack.drawString(font, title, (width/2)-(font.width(title)/2), 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
-			renderTooltip(stack, font.split(Component.literal(result.getError().getMessage()), Integer.MAX_VALUE), mouseX, mouseY);
+			stack.renderTooltip(font, font.split(Component.literal(result.getError().getMessage()), Integer.MAX_VALUE), mouseX, mouseY);
 		}
 	}
 	

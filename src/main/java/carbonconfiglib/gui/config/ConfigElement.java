@@ -20,6 +20,7 @@ import carbonconfiglib.gui.widgets.IOwnable;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
@@ -145,7 +146,7 @@ public class ConfigElement extends Element
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void render(GuiGraphics poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		if(renderName() && !isArray()) {
 			renderName(poseStack, left, top, isChanged(), isCompound() ? 80 : 200, height);
 			if(!isCompound()) {
@@ -166,12 +167,12 @@ public class ConfigElement extends Element
 		int maxX = Integer.MAX_VALUE;
 		if(renderChildren()) {
 			if(isArray()) {
-				moveUp.x = left + width - 16;
-				moveUp.y = top;
+				moveUp.setX(left + width - 16);
+				moveUp.setY(top);
 				moveUp.visible = canMoveUp();
 				moveUp.render(poseStack, mouseX, mouseY, partialTicks);
-				moveDown.x = left + width - 16;
-				moveDown.y = top + 10;
+				moveDown.setX(left + width - 16);
+				moveDown.setY(top + 10);
 				moveDown.visible = canMoveDown();
 				moveDown.render(poseStack, mouseX, mouseY, partialTicks);
 				if(moveDown.visible || moveUp.visible) {
@@ -181,10 +182,10 @@ public class ConfigElement extends Element
 			for(Map.Entry<AbstractWidget, AlignOffset> entry : mappedListeners) {
 				AbstractWidget widget = entry.getKey();
 				AlignOffset offset = entry.getValue();
-				widget.x = offset.align.align(left, width, widget.getWidth()) + offset.offset;
-				widget.y = top;
+				widget.setX(offset.align.align(left, width, widget.getWidth()) + offset.offset);
+				widget.setY(top);
 				widget.render(poseStack, mouseX, mouseY, partialTicks);
-				maxX = Math.min(maxX, widget.x);
+				maxX = Math.min(maxX, widget.getX());
 			}
 		}
 		maxX = getMaxX(maxX);

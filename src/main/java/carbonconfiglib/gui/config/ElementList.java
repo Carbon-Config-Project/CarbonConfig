@@ -18,6 +18,7 @@ import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.screen.SmoothFloat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
@@ -176,7 +177,7 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		value.update(partialTicks);
 		super.setScrollAmount(value.getValue());
 		super.render(stack, mouseX, mouseY, partialTicks);
@@ -189,13 +190,13 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 	}
 	
 	@Override
-	protected void renderBackground(PoseStack stack) {
+	protected void renderBackground(GuiGraphics stack) {
 		if(customBackground == null || (minecraft.level != null && customBackground.shouldDisableInLevel())) return;
 		renderBackground(x0, x1, y0, y1, (float)getScrollAmount(), customBackground.getTexture());
 	}
 	
 	@Override
-	protected void renderList(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderList(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
 		super.renderList(stack, mouseX, mouseY, partialTicks);
 		if(customBackground == null) return;
 		renderListOverlay(x0, x1, y0, y1, width, height, customBackground.getTexture());
@@ -223,7 +224,7 @@ public class ElementList extends ContainerObjectSelectionList<Element>
 		RenderSystem.disableDepthTest();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ZERO, DestFactor.ONE);
-		RenderSystem.disableTexture();
+		RenderSystem.setShaderTexture(0,0);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		builder.vertex(x0, y0 + 4, 0D).color(0, 0, 0, 0).endVertex();
