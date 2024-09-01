@@ -1,4 +1,4 @@
-# CarbonConfig
+# CarbonConfig (This is not the real repository of CarbonConfig)
 
 <img src="img/logo.png" width="15%">
 
