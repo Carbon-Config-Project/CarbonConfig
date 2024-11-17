@@ -76,8 +76,19 @@ public class ForgeDataType<T>
 	}
 	
 	public String serialize(T value) {
-		return serialize.apply(value);
+		try {
+			return serialize.apply(value);
+		} catch (ClassCastException e) {
+			if (value instanceof Integer) {
+				value = (T) Long.valueOf((Integer) value);
+			} else {
+				throw e;
+			}
+			return serialize.apply(value);
+		}
 	}
+
+
 	
 	public static void registerDataType(Class<?> clz, ForgeDataType<?> type) {
 		DATA_TYPES.putIfAbsent(clz, type);
