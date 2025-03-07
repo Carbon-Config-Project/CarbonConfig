@@ -86,10 +86,10 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public INode asNode() {
 		if(isArray) {
-			if(array == null) array = new ForgeArray(getName(), getTooltip(), toReloadMode(), type.getDataType(), getCurrentList(type), getDefaultList(type), () -> ObjectLists.empty(), type::parse, this::save);
+			if(array == null) array = new ForgeArray(getName(), getTooltip(), toReloadMode(), type.getDataType(), getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
 			return array;
 		}
-		if(value == null) value = new ForgeValue(getName(), getTooltip(), toReloadMode(), type.getDataType(), getCurrent(type), getDefault(type), this::getSuggestions, type::parse, this::save);
+		if(value == null) value = new ForgeValue(getName(), getTooltip(), toReloadMode(), type.getDataType(), getCurrent(), getDefault(), this::getSuggestions, type::parse, this::save);
 		return value;
 	}
 	
@@ -101,19 +101,17 @@ public class ForgeLeaf implements IConfigNode
 		};
 	}
 	
-	@SuppressWarnings("unchecked")
-	private <T> List<String> getDefaultList(ForgeDataType<T> type) {
+	private List<String> getDefaultList() {
 		List<String> list = new ObjectArrayList<>();
-		for(T data : (List<T>)spec.getDefault()) {
+		for(Object data : (List<?>)spec.getDefault()) {
 			list.add(type.serialize(data));
 		}
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private <T> List<String> getCurrentList(ForgeDataType<T> type) {
+	private List<String> getCurrentList() {
 		List<String> list = new ObjectArrayList<>();
-		for(T data : (List<T>)config.get(data.getPath())) {
+		for(Object data : (List<?>)config.get(data.getPath())) {
 			list.add(type.serialize(data));
 		}
 		return list;
@@ -128,13 +126,10 @@ public class ForgeLeaf implements IConfigNode
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private <T> String getDefault(ForgeDataType<T> type) {
-		return type.serialize((T)spec.getDefault());
-	}
-	
-	private <T> String getCurrent(ForgeDataType<T> type) {
-		return type.isEnum() && String.class.equals(config.get(data.getPath()).getClass()) ? config.get(data.getPath()) : type.serialize(config.get(data.getPath()));
+	private String getDefault() { return type.serialize(spec.getDefault()); }
+	private String getCurrent() {
+		Object currentValue = config.get(data.getPath());
+		return type.isEnum() && currentValue instanceof String ? (String)currentValue : type.serialize(currentValue);
 	}
 	
 	private List<Suggestion> getSuggestions() {
