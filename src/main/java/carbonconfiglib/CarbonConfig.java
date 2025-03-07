@@ -80,6 +80,7 @@ public class CarbonConfig
 	
 	public CarbonConfig(IEventBus bus)
 	{
+
 		LOGGER.info("Called");
 		bus.addListener(NETWORK::init);
 		bus.addListener(this::onCommonLoad);
