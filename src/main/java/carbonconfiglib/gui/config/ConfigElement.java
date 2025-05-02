@@ -197,8 +197,12 @@ public class ConfigElement extends Element
 			IChatComponent comp = new ChatComponentText(indexOf()+":");
 			renderText(comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
-		if(value != null && mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
-			owner.addTooltips(value.getTooltip());
+		if (mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
+			if (value != null) {
+				owner.addTooltips(value.getTooltip());
+			} else if (this instanceof ArrayElement && ((ArrayElement) this).node != null) {
+				owner.addTooltips(((ArrayElement) this).node.getTooltip());
+			}
 		}
 		if(isArray()) {
 			if(setReset.isHovered() && owner.isInsideList(mouseX, mouseY)) {
