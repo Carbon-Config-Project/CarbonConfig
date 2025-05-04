@@ -11,7 +11,10 @@ public class FormattingUtil {
                 if (code == 'r') {
                     active.setLength(0);
                     resetFound = true;
-                } else if ("0123456789abcdefklmnor".indexOf(code) != -1) {
+                } else if (
+                        (code >= '0' && code <= '9') ||
+                        (code >= 'a' && code <= 'f') ||
+                        (code >= 'k' && code <= 'o')) {
                     if (!resetFound && active.indexOf("§" + code) == -1) {
                         active.append('§').append(code);
                     }

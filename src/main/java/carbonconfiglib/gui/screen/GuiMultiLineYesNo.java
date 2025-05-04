@@ -32,12 +32,14 @@ public class GuiMultiLineYesNo extends GuiYesNo {
         for (int i = 0; i < rawLines.length; ++i) {
             String line = rawLines[i];
 
-            if (!line.matches("^§[0-9a-frk-orA-FK-OR].*")) {
-                line = activeFormatting + line;
+            if (multiLineMessage.startsWith("§")) {
+                if (!line.matches("^§[0-9a-frk-orA-FK-OR].*")) {
+                    line = activeFormatting + line;
+                }
+                activeFormatting = FormattingUtil.getActiveFormattingCodes(line);
             }
 
             this.drawCenteredString(this.fontRendererObj, line, this.width / 2, startY + (i * lineHeight), 16777215);
-            activeFormatting = FormattingUtil.getActiveFormattingCodes(line);
         }
     }
 }

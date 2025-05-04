@@ -62,13 +62,15 @@ public class MultiChoiceScreen extends CarbonScreen
 		for (int i = 0; i < lines.length; ++i) {
 			String line = lines[i];
 
-			if (!line.matches("^§[0-9a-frk-orA-FK-OR].*")) {
-				line = activeFormatting + line;
+			if (fullText.startsWith("§")) {
+				if (!line.matches("^§[0-9a-frk-orA-FK-OR].*")) {
+					line = activeFormatting + line;
+				}
+				activeFormatting = FormattingUtil.getActiveFormattingCodes(line);
 			}
 
 			List<String> croppedToWidth = fontRendererObj.listFormattedStringToWidth(line, width-50);
             output.addAll(croppedToWidth);
-			activeFormatting = FormattingUtil.getActiveFormattingCodes(line);
 		}
 
 		this.addButtons(MathHelper.clamp_int(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
