@@ -16,7 +16,6 @@ import carbonconfiglib.gui.config.SelectionElement;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChatStyle;
@@ -104,7 +103,7 @@ public class CompoundScreen extends ListScreen
 	
 	private void goBack(GuiButton button) {
 		if(compound.isChanged()) {
-			mc.displayGuiScreen(new GuiYesNo((T, K) -> {
+			mc.displayGuiScreen(new GuiMultiLineYesNo((T, K) -> {
 				if(T) notifyClose();
 				mc.displayGuiScreen(T ? prev : this);				
 			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));

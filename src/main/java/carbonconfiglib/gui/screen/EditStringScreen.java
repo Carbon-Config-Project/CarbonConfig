@@ -10,7 +10,6 @@ import carbonconfiglib.gui.widgets.screen.CarbonScreen;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChatStyle;
@@ -100,7 +99,7 @@ public class EditStringScreen extends CarbonScreen
 	
 	private void cancel(GuiButton button) {
 		if(value.isChanged()) {
-			mc.displayGuiScreen(new GuiYesNo((T, k) -> {
+			mc.displayGuiScreen(new GuiMultiLineYesNo((T, k) -> {
 				if(T) value.setPrevious();
 				mc.displayGuiScreen(T ? parent : this);
 			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));

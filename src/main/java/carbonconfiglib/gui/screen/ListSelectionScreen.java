@@ -18,7 +18,6 @@ import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
@@ -135,7 +134,7 @@ public class ListSelectionScreen extends ListScreen
 	
 	private void cancel(GuiButton button) {
 		if(node.isChanged() && !dontWarn) {
-			mc.displayGuiScreen(new GuiYesNo((T, V) -> {
+			mc.displayGuiScreen(new GuiMultiLineYesNo((T, V) -> {
 				if(T) abort();
 				mc.displayGuiScreen(T ? parent : this);	
 			}, new ChatComponentTranslation("gui.carbonconfig.warn.changed").getFormattedText(), new ChatComponentTranslation("gui.carbonconfig.warn.changed.desc").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)).getFormattedText(), 0));
