@@ -1,27 +1,62 @@
 package carbonconfiglib.gui.screen;
 
-public class FormattingUtil {
-    public static String getActiveFormattingCodes(String text) {
-        StringBuilder active = new StringBuilder();
-        boolean resetFound = false;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.IChatComponent;
 
-        for (int i = 0; i < text.length() - 1; i++) {
-            if (text.charAt(i) == '§') {
-                char code = Character.toLowerCase(text.charAt(i + 1));
-                if (code == 'r') {
-                    active.setLength(0);
-                    resetFound = true;
-                } else if (
-                        (code >= '0' && code <= '9') ||
-                        (code >= 'a' && code <= 'f') ||
-                        (code >= 'k' && code <= 'o')) {
-                    if (!resetFound && active.indexOf("§" + code) == -1) {
-                        active.append('§').append(code);
-                    }
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class FormattingUtil {
+    private static boolean isFormatColor(char c) {
+        return c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F';
+    }
+
+    private static boolean isFormatSpecialNoReset(char c) {
+        return c >= 'k' && c <= 'o' || c >= 'K' && c <= 'O';
+    }
+
+    private static String getFormatFromString(String s) {
+        String s1 = "";
+        int i = -1;
+        int j = s.length();
+
+        while ((i = s.indexOf(167, i + 1)) != -1)
+        {
+            if (i < j - 1)
+            {
+                char c0 = s.charAt(i + 1);
+
+                if (isFormatColor(c0))
+                {
+                    s1 = "\u00a7" + c0;
                 }
-                i++;
+                else if (isFormatSpecialNoReset(c0))
+                {
+                    s1 = s1 + "\u00a7" + c0;
+                }
             }
         }
-        return active.toString();
+
+        return s1;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String[] listFormattedStringToWidthRespectingNewlines(FontRenderer fontRenderer, String s, int width) {
+        List<String> result = new ArrayList<>();
+        String[] lines = s.split("\\\\n");
+        String formatting = getFormatFromString(s);
+        for (String line : lines) {
+            if (width > 0) {
+                result.addAll(fontRenderer.listFormattedStringToWidth(formatting + line, width));
+            } else {
+                result.add(formatting + line);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    public static String[] listFormattedStringToWidthRespectingNewlines(FontRenderer fontRenderer, String s) {
+        return listFormattedStringToWidthRespectingNewlines(fontRenderer, s, -1);
     }
 }

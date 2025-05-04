@@ -8,38 +8,28 @@ import net.minecraft.client.gui.GuiYesNoCallback;
 @SideOnly(Side.CLIENT)
 public class GuiMultiLineYesNo extends GuiYesNo {
 
-    private final String multiLineMessage;
+    private final String message;
 
-    public GuiMultiLineYesNo(GuiYesNoCallback parent, String title, String message, int id) {
-        super(parent, title, "", id);
-        this.multiLineMessage = message;
+    public GuiMultiLineYesNo(GuiYesNoCallback callback, String title, String message, int id) {
+        super(callback, title, "", id);
+        this.message = message;
     }
 
     public GuiMultiLineYesNo(GuiYesNoCallback parent, String title, String message, String confirm, String cancel, int id) {
         super(parent, title, "", confirm, cancel, id);
-        this.multiLineMessage = message;
+        this.message = message;
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        String[] rawLines = this.multiLineMessage.split("\\\\n");
         int lineHeight = this.fontRendererObj.FONT_HEIGHT + 2;
         int startY = 90;
-        String activeFormatting = "";
+        String[] messages = FormattingUtil.listFormattedStringToWidthRespectingNewlines(this.fontRendererObj, message, this.width - 50);
 
-        for (int i = 0; i < rawLines.length; ++i) {
-            String line = rawLines[i];
-
-            if (multiLineMessage.startsWith("§")) {
-                if (!line.matches("^§[0-9a-frk-orA-FK-OR].*")) {
-                    line = activeFormatting + line;
-                }
-                activeFormatting = FormattingUtil.getActiveFormattingCodes(line);
-            }
-
-            this.drawCenteredString(this.fontRendererObj, line, this.width / 2, startY + (i * lineHeight), 16777215);
+        for (int i = 0; i < messages.length; ++i) {
+            this.drawCenteredString(this.fontRendererObj, messages[i], this.width / 2, startY + (i * lineHeight), 16777215);
         }
     }
 }

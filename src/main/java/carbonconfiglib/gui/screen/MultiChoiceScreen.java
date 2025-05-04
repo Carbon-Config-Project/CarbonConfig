@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.screen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -55,23 +56,8 @@ public class MultiChoiceScreen extends CarbonScreen
 		super.initGui();
 
 		output = new ArrayList<>();
-		String fullText = message.getFormattedText();
-		String[] lines = fullText.split("\\\\n");
-
-		String activeFormatting = "";
-		for (int i = 0; i < lines.length; ++i) {
-			String line = lines[i];
-
-			if (fullText.startsWith("§")) {
-				if (!line.matches("^§[0-9a-frk-orA-FK-OR].*")) {
-					line = activeFormatting + line;
-				}
-				activeFormatting = FormattingUtil.getActiveFormattingCodes(line);
-			}
-
-			List<String> croppedToWidth = fontRendererObj.listFormattedStringToWidth(line, width-50);
-            output.addAll(croppedToWidth);
-		}
+		String[] lines = FormattingUtil.listFormattedStringToWidthRespectingNewlines(this.fontRendererObj, message.getFormattedText(), width-50);
+		output.addAll(Arrays.asList(lines));
 
 		this.addButtons(MathHelper.clamp_int(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
 	}
