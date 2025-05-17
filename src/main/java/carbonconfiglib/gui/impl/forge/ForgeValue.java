@@ -75,7 +75,10 @@ public class ForgeValue implements IValueNode
 	@Override
 	public void set(String value) { current = value; }
 	@Override
-	public ParseResult<Boolean> isValid(String value) { return ParseResult.success(isValid.apply(value).isValid()); }
+	public ParseResult<Boolean> isValid(String value) {
+		ParseResult<?> parse = isValid.apply(value); 
+		return parse.hasError() ? parse.withDefault(false) : ParseResult.success(true); 
+	}
 	@Override
 	public DataType getDataType() { return type; }
 	@Override
