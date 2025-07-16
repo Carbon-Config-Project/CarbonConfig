@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
@@ -125,6 +126,8 @@ public class ForgeArray implements IArrayNode
 	
 	@Override
 	public StructureType getInnerType() { return StructureType.SIMPLE; }
+	@Override
+	public IEntrySettings getSettings() { return null; }
 	@Override
 	public StructureType getNodeType() { return StructureType.LIST; }
 	@Override
