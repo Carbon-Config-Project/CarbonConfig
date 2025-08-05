@@ -21,6 +21,7 @@ import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
+import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -148,6 +149,12 @@ public class EventHandler implements IConfigChangeListener
 				};
 			});
 		}
+		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
+			List<IModConfigs> configs = new ObjectArrayList<>();
+			V.applyConfigs(K, configs::add);
+			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
+		});
+		
 		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
 	}
 	
