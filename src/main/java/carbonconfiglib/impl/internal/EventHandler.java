@@ -18,6 +18,7 @@ import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
+import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -149,6 +150,7 @@ public class EventHandler implements IConfigChangeListener
 	public Map<String, IModConfigs> createConfigs() {
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C));
+		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> V.applyConfigs(K, mappedConfigs.supplyIfAbsent(K, ObjectArrayList::new)::add));
 		Object2ObjectMap<String, IModConfigs> result = new Object2ObjectLinkedOpenHashMap<>();
 		mappedConfigs.forEach((K, V) -> result.put(K.getMetadata().getId(), ModConfigList.createMultiIfApplicable(K, V)));
 		result.put("minecraft", new MinecraftConfigs());

@@ -40,7 +40,7 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	protected Component changed;
 	protected IListOwner owner;
 	protected int hash = hashCode();
-	
+		
 	public Element(Component name) {
 		setName(name);
 	}
