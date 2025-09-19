@@ -23,7 +23,10 @@
     ],
     "modmenu": [
       "carbonconfiglib.impl.ModMenuIntegration"
-    ]
+    ],
+	"jei_mod_plugin": [
+		"carbonconfiglib.plugins.jei.JEIPlugin"
+	]
   },
   "mixins": [
     "mixins.carbonconfig.json"

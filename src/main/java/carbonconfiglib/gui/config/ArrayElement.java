@@ -37,6 +37,8 @@ public class ArrayElement extends ConfigElement
 	public ArrayElement(IArrayNode owner, IArrayNode node) {
 		super(owner, node.getName());
 		this.node = node;
+		Component result = ConfigElement.create(owner, node);
+		if(result != null) textBox.setMessage(result);
 	}
 	
 	public ArrayElement(ICompoundNode owner, IArrayNode node) {
@@ -53,6 +55,21 @@ public class ArrayElement extends ConfigElement
 		return true;
 	}
 	
+	@Override
+	protected boolean requiresReload() {
+		return node.requiresReload();
+	}
+	
+	@Override
+	protected boolean requiresRestart() {
+		return node.requiresRestart();
+	}
+	
+	@Override
+	protected Component tooltip() {
+		return node.getTooltip();
+	}
+
 	@Override
 	protected int indexOf() {
 		return array.indexOf(node);

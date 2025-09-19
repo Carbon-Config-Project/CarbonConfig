@@ -9,12 +9,14 @@ import com.mojang.logging.LogUtils;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.Config;
+import carbonconfiglib.config.ConfigEntry.ArrayValue;
 import carbonconfiglib.config.ConfigEntry.BoolValue;
 import carbonconfiglib.config.ConfigEntry.EnumValue;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
+import carbonconfiglib.config.HashSetCache;
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.gui.api.IModConfig;
@@ -69,6 +71,7 @@ public class CarbonConfig implements ModInitializer
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
 	public static BoolValue SHOW_MISSING_ENCHANTMENT_TEXTURE;
+	public static HashSetCache<String> MODS_DISABLED;
 
 	@Override
 	public void onInitialize()
@@ -83,11 +86,13 @@ public class CarbonConfig implements ModInitializer
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			MOD_MENU_SUPPORT = section.addBool("enable-modmenu-support", true, "Enables that CarbonConfig automatically adds Mod Menu Support for all Carbon Configs").setRequiredReload(ReloadMode.GAME);
+			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], "Disables these mods from carbon configs Gui System.", "This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored", "List of Blacklisted ModIds").setRequiredReload(ReloadMode.GAME);
 			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
 			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
 			SHOW_MISSING_ENCHANTMENT_TEXTURE = section.addBool("show-missing-texture", true, "Enables that if enchantments are not accessible that missing textures will be shown instead of nothing");
 			handler = createConfig("carbonconfig", config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
+			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
 		}
 	}
