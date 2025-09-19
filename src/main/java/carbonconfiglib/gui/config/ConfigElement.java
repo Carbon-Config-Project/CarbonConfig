@@ -92,6 +92,7 @@ public class ConfigElement extends Element
 	}
 	
 	protected static Component create(IArrayNode array, INode node) {
+		if(array == null) return null;
 		ArrayRenamer settings = array.getSetting(ArrayRenamer.class);
 		return settings == null ? null : Component.translatable(settings.getFunction().apply(array.indexOf(node), node));
 	}
