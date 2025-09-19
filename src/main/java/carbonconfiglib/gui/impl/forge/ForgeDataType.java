@@ -113,6 +113,7 @@ public class ForgeDataType<T>
 		
 		@Override
 		public String serialize(Object value) {
+			if(value instanceof String) return (String)value;
 			return ((Enum<?>)value).name();
 		}
 		

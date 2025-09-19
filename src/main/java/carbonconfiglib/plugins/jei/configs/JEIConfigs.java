@@ -1,6 +1,5 @@
-package carbonconfiglib.gui.impl.forge;
+package carbonconfiglib.plugins.jei.configs;
 
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,51 +9,36 @@ import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.impl.internal.ModConfigs;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
+import mezz.jei.api.runtime.config.IJeiConfigFile;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforgespi.language.IModInfo;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.utils.ObjectLists;
 
-/**
- * Copyright 2023 Speiger, Meduris
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-public class ForgeConfigs implements IModConfigs
+public class JEIConfigs implements IModConfigs
 {
 	ModContainer container;
-	EnumMap<ModConfig.Type, ModConfig> configs;
+	List<IJeiConfigFile> configs;
 	
-	public ForgeConfigs(ModContainer container) {
+	public JEIConfigs(ModContainer container, List<IJeiConfigFile> configs) {
 		this.container = container;
-		configs = ObfuscationReflectionHelper.getPrivateValue(ModContainer.class, container, "configs");
+		this.configs = configs;
 	}
-	
-	public boolean hasConfigs() {
-		return !configs.isEmpty();
-	}
-	
+
 	@Override
 	public String getModName() {
-		return container.getModInfo().getDisplayName();
+		return "Jei";
 	}
 	
 	@Override
 	public List<IModConfig> getConfigInstances(ConfigType type) {
-		ModConfig config = configs.get(fromType(type));
-		return config == null ? ObjectLists.emptyList() : ObjectLists.singleton(new ForgeConfig(config));
+		if(type != ConfigType.CLIENT) return ObjectLists.empty();
+		List<IModConfig> config = new ObjectArrayList<>();
+		for(IJeiConfigFile file : configs) {
+			config.add(new JEIConfig(file));
+		}
+		return config;
 	}
 	
 	@Override
@@ -80,12 +64,4 @@ public class ForgeConfigs implements IModConfigs
 		return BackgroundTexture.DEFAULT;
 	}
 	
-	private ModConfig.Type fromType(ConfigType type) {
-		switch(type) {
-			case CLIENT: return ModConfig.Type.CLIENT;
-			case SERVER: return ModConfig.Type.SERVER;
-			case SHARED: return ModConfig.Type.COMMON;
-			default: throw new UnsupportedOperationException();
-		}
-	}
 }
