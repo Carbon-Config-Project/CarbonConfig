@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IValueNode;
@@ -62,6 +63,8 @@ public class ForgeValue implements IValueNode
 	}
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
+	@Override
+	public IEntrySettings getSettings() { return null; }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override

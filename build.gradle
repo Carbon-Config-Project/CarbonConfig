@@ -84,6 +84,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.19.4-45.2.6'
 //	implementation fg.deobf("curse.maven:the-one-probe-245211:3965693")
     minecraftLibrary ':Primitive Collections-0.8.9'
+    implementation fg.deobf("curse.maven:jei-238222:5846852")
     jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")
 	}
