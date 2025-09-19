@@ -59,6 +59,7 @@ repositories {
 dependencies {
     implementation "net.neoforged:neoforge:21.0.167"
 	implementation ':Primitive Collections-0.8.9'
+	implementation "curse.maven:jei-238222:6829086"
 	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")
 	}

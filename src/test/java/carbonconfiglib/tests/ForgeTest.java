@@ -31,11 +31,11 @@ public class ForgeTest
 
     public static final ConfigValue<List<? extends String>> LIST_ENTRIES_TEST = BUILDER
             .comment("Testing a String list of ResourceLocations")
-            .defineList("blocks", Lists.newArrayList("minecraft:water", "minecraft:cobblestone"), ForgeTest::isResourceLocation);
+            .defineList("blocks", Lists.newArrayList("minecraft:water", "minecraft:cobblestone"), () -> "minecraft:dirt", ForgeTest::isResourceLocation);
 
     public static final ConfigValue<List<? extends Integer>> LIST_INTEGER_TEST = BUILDER
             .comment("Testing a Integer List")
-            .defineList("Integer Multiplier List", LIST_TEST_NUMBERS, ForgeTest::isPositive);
+            .defineList("Integer Multiplier List", LIST_TEST_NUMBERS, () -> 0, ForgeTest::isPositive);
 
     public static final BooleanValue INSCRIBER_RENDER = BUILDER
             .comment("Testing a Boolean")

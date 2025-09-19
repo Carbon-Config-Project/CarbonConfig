@@ -21,6 +21,7 @@ import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
+import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -73,7 +74,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
-		initMinecraftDataTypes(config);
+		InternalFeatures.initMinecraftDataTypes(config);
 		if(FMLEnvironment.dist.isDedicatedServer()) return;
 		ModLoadingContext context = ModLoadingContext.get();
 		if("minecraft".equals(context.getActiveNamespace())) {
@@ -138,6 +139,7 @@ public class EventHandler implements IConfigChangeListener
 		});
 		if(CarbonConfig.FORGE_SUPPORT.get()) {
 			ModList.get().forEachModInOrder(T-> {
+				if(CarbonConfig.MODS_DISABLED.contains(T.getModId())) return;
 				ForgeConfigs configs = new ForgeConfigs(T);
 				if(configs.hasConfigs()) {
 					mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(configs);						
@@ -147,6 +149,11 @@ public class EventHandler implements IConfigChangeListener
 				}
 			});
 		}
+		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
+			List<IModConfigs> configs = new ObjectArrayList<>();
+			V.applyConfigs(K, configs::add);
+			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
+		});
 		mappedConfigs.forEach(this::register);
 	}
 	
