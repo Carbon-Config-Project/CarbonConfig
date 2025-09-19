@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
@@ -22,6 +23,7 @@ public class CarbonValue implements IValueNode, IValueActions
 	IReloadMode mode;
 	Component name;
 	Component tooltip;
+	IEntrySettings settings;
 	DataType type;
 	boolean forced;
 	Supplier<List<Suggestion>> suggestions;
@@ -33,10 +35,11 @@ public class CarbonValue implements IValueNode, IValueActions
 	String current;
 	String defaultValue;
 	
-	public CarbonValue(IReloadMode mode, Component name, Component tooltip, DataType type, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
+	public CarbonValue(IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, DataType type, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
 		this.mode = mode;
 		this.name = name;
 		this.tooltip = tooltip;
+		this.settings = settings;
 		this.type = type;
 		this.forced = forced;
 		this.suggestions = suggestions;
@@ -68,6 +71,8 @@ public class CarbonValue implements IValueNode, IValueActions
 	
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
+	@Override
+	public IEntrySettings getSettings() { return settings; }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override

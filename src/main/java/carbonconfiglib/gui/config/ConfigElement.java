@@ -4,8 +4,10 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import carbonconfiglib.gui.api.EntrySettingTypes.ArrayRenamer;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
+import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.screen.ListSelectionScreen.NodeSupplier;
@@ -50,9 +52,6 @@ public class ConfigElement extends Element
 	protected IValueNode value;
 	protected IArrayNode array;
 	protected ICompoundNode compound;
-//	protected IConfigNode node;
-//	protected IValueNode value;
-//	protected int compoundIndex = -1;
 	
 	protected CarbonIconButton setReset;
 	protected CarbonIconButton setDefault;
@@ -89,6 +88,12 @@ public class ConfigElement extends Element
 		super(value.getName());
 		this.compound = compound;
 		this.value = value;
+	}
+	
+	protected static Component create(IArrayNode array, INode node) {
+		if(array == null) return null;
+		ArrayRenamer settings = array.getSetting(ArrayRenamer.class);
+		return settings == null ? null : Component.translatable(settings.getFunction().apply(array.indexOf(node), node));
 	}
 	
 	protected <T extends AbstractWidget> T addChild(T element) {
@@ -269,6 +274,18 @@ public class ConfigElement extends Element
 	
 	protected boolean renderChildren() {
 		return true;
+	}
+	
+	protected boolean requiresRestart() {
+		return value != null && value.requiresRestart();
+	}
+	
+	protected boolean requiresReload() {
+		return value != null && value.requiresReload();
+	}
+	
+	protected Component tooltip() {
+		return value == null ? null : value.getTooltip();
 	}
 	
 	protected boolean createResetButtons(IValueNode value) {
