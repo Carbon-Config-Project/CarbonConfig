@@ -37,6 +37,7 @@ public class CompoundElement extends ConfigElement
 	public CompoundElement(IArrayNode array, ICompoundNode compound) {
 		super(array, compound.getName());
 		this.compound = compound;
+
 	}
 	
 	public CompoundElement(ICompoundNode owner, ICompoundNode compound) {
@@ -47,7 +48,8 @@ public class CompoundElement extends ConfigElement
 	@Override
 	public void init() {
 		super.init();
-		textBox = addChild(new CarbonButton(0, 0, isArray() ? 190 : isCompound() ? 105 : 72, 18, Component.translatable("gui.carbonconfig.edit"), this::onPress), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, 0);
+		Component result = isArray() ? ConfigElement.create(array, compound) : null;
+		textBox = addChild(new CarbonButton(0, 0, isArray() ? 190 : isCompound() ? 105 : 72, 18, result != null ? result : Component.translatable("gui.carbonconfig.edit"), this::onPress), isArray() ? GuiAlign.CENTER : GuiAlign.RIGHT, 0);
 	}
 	
 	private void onPress(Button button) {
@@ -77,6 +79,21 @@ public class CompoundElement extends ConfigElement
 	@Override
 	public boolean isDefault() {
 		return compound.isDefault();
+	}
+	
+	@Override
+	protected boolean requiresReload() {
+		return compound.requiresReload();
+	}
+	
+	@Override
+	protected boolean requiresRestart() {
+		return compound.requiresRestart();
+	}
+	
+	@Override
+	protected Component tooltip() {
+		return compound.getTooltip();
 	}
 	
 	@Override
