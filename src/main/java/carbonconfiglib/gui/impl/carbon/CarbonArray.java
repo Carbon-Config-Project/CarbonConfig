@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
@@ -41,7 +42,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 	public CarbonArray(IReloadMode mode, ListData data, Component name, Component tooltip, String currentValue, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
 		this.mode = mode;
 		this.data = data;
-		this.inner = data.getFormat();
+		this.inner = data.getType();
 		this.name = name;
 		this.tooltip = tooltip;
 		this.currentValues = ObjectArrayList.wrap(Helpers.splitCompoundArray(currentValue));
@@ -64,7 +65,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 		switch(inner.getDataType()) {
 			case COMPOUND: return new CarbonCompound(mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save);
 			case LIST: return new CarbonArray(mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save);
-			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, DataType.bySimple(inner.asSimple()), false, () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save);
+			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, DataType.bySimple(inner.asSimple()), false, () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save);
 			default: return null;
 		}
 	}
@@ -91,7 +92,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	@Override
 	public void save() {
-		saveAction.accept(Helpers.mergeCompoundArray(currentValues, false, 0), this);
+		saveAction.accept(inner.getDataType() == StructureType.COMPOUND ? Helpers.mergeCompoundArray(currentValues, false, 0) : String.join(", ", currentValues), this);
 	}
 	
 	@Override
@@ -180,6 +181,8 @@ public class CarbonArray implements IArrayNode, IValueActions
 	public StructureType getInnerType() { return inner.getDataType(); }
 	@Override
 	public StructureType getNodeType() { return StructureType.LIST; }
+	@Override
+	public IEntrySettings getSettings() { return data.getSettings(); }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override

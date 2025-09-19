@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
@@ -20,6 +21,7 @@ import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import carbonconfiglib.utils.structure.StructureCompound.CompoundData;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -61,15 +63,15 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 		Map<String, IStructuredData> structure = data.getFormat();
 		for(Map.Entry<String, String> entry : current.entrySet()) {
 			String key = entry.getKey();
-			values.add(addEntry(Helpers.removeLayer(entry.getValue(), 0), Helpers.removeLayer(defaultValue.getOrDefault(key, ""), 0), structure.get(key), key));
+			values.add(addEntry(Helpers.removeLayer(entry.getValue(), 0), Helpers.removeLayer(defaultValue.getOrDefault(key, ""), 0), structure.get(key), key, data.getTranslationKey(key)));
 		}
 	}
 	
-	protected IValueActions addEntry(String value, String defaultValue, IStructuredData type, String key) {
+	protected IValueActions addEntry(String value, String defaultValue, IStructuredData type, String key, String translationKey) {
 		switch(type.getDataType()) {
-			case COMPOUND: return new CarbonCompound(mode, type.asCompound(), IConfigNode.createLabel(key), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
-			case LIST: return new CarbonArray(mode, type.asList(), IConfigNode.createLabel(key), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
-			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key), createTooltip(key), DataType.bySimple(type.asSimple()), data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T));
+			case COMPOUND: return new CarbonCompound(mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
+			case LIST: return new CarbonArray(mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
+			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), data.getEntrySetting(key), DataType.bySimple(type.asSimple()), data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T));
 			default: return null;
 		}
 	}
@@ -95,10 +97,17 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	
 	private Component createTooltip(String key) {
 		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(key).withStyle(ChatFormatting.YELLOW));
-		String[] array = data.getComments(key);
-		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+		String entryKey = data.getTranslationKey(key);
+		comp.append((entryKey != null && I18n.exists(entryKey) ? Component.translatable(entryKey) : Component.literal(key)).withStyle(ChatFormatting.YELLOW));
+		entryKey = data.getTranslationComment(key);
+		if(entryKey != null && I18n.exists(entryKey)) {
+			comp.append("\n").append(Component.translatable(entryKey).withStyle(ChatFormatting.GRAY));
+		}
+		else {
+			String[] array = data.getComments(key);
+			if(array != null && array.length > 0) {
+				for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			}
 		}
 		return comp;
 	}
@@ -156,6 +165,8 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	public List<? extends INode> getValues() { return values; }
 	@Override
 	public StructureType getNodeType() { return StructureType.COMPOUND; }
+	@Override
+	public IEntrySettings getSettings() { return data.getSettings(); }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
