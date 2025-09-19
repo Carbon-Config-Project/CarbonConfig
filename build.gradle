@@ -81,8 +81,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.21-51.0.17'
+    minecraft 'net.minecraftforge:forge:1.21-51.0.33'
 //	implementation fg.deobf("curse.maven:the-one-probe-245211:3965693")
+	implementation "curse.maven:jei-238222:6829085"
     minecraftLibrary':Primitive Collections-0.8.9'
 	implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
