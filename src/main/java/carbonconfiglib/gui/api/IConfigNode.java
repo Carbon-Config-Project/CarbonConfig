@@ -3,6 +3,7 @@ package carbonconfiglib.gui.api;
 import java.util.List;
 
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -42,6 +43,9 @@ public interface IConfigNode
 	public Component getName();
 	public Component getTooltip();
 	
+	public static MutableComponent createLabel(String name, String translationKey) {
+		return translationKey != null && I18n.exists(translationKey) ? Component.translatable(translationKey) : createLabel(name);
+	}
 	
 	public static MutableComponent createLabel(String name) {
 		MutableComponent comp = Component.empty();

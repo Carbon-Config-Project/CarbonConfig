@@ -15,6 +15,7 @@ import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -44,7 +45,7 @@ public class ConfigLeaf implements IConfigNode
 					value = new CarbonArray(mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case SIMPLE:
-					value = new CarbonValue(mode, getName(), getTooltip(), DataType.bySimple(entry.getDataType().asSimple()), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
+					value = new CarbonValue(mode, getName(), getTooltip(), entry.getSettings(), DataType.bySimple(entry.getDataType().asSimple()), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
 					break;
 			}
 		}
@@ -86,15 +87,23 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(entry.getKey()); }
+	public Component getName() { return IConfigNode.createLabel(entry.getKey(), entry.getTranslationKey()); }
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(entry.getKey()).withStyle(ChatFormatting.YELLOW));
-		String[] array = entry.getComment();
-		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+		String key = entry.getTranslationKey();
+		comp.append((key != null && I18n.exists(key) ? Component.translatable(key) : Component.literal(entry.getKey())).withStyle(ChatFormatting.YELLOW));
+		key = entry.getTranslationComment();
+		if(key != null && I18n.exists(key)) {
+			comp.append("\n").append(Component.translatable(key).withStyle(ChatFormatting.GRAY));
 		}
+		else {
+			String[] array = entry.getComment();
+			if(array != null && array.length > 0) {
+				for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			}
+		}
+		
 		String limit = entry.getLimitations();
 		if(!Strings.isBlank(limit)) comp.append("\n").append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
 		return comp;

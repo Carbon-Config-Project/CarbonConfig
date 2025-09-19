@@ -71,13 +71,17 @@ public class EditStringScreen extends Screen
 	
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
-		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
 		super.render(graphics, mouseX, mouseY, partialTicks);
 		graphics.drawCenteredString(font, title, width/2, 85, -1);
 		if(textBox.isMouseOver(mouseX, mouseY) && result != null && !result.getValue()) {
 			graphics.renderTooltip(font, font.split(Component.literal(result.getError().getMessage()), Integer.MAX_VALUE), mouseX, mouseY);
 		}
+	}
+	
+	@Override
+	public void renderBackground(GuiGraphics p_283688_, int p_299421_, int p_298679_, float p_297268_) {
+		ElementList.renderBackground(0, width, 0, height, 0F, texture.getTexture());
+		ElementList.renderListOverlay(0, width, 103, 142, width, height, texture.getTexture());
 	}
 	
 	@Override

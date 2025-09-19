@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.impl.carbon;
+package carbonconfiglib.plugins.jei.configs;
 
 import java.util.List;
 import java.util.Objects;
@@ -7,7 +7,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import carbonconfiglib.api.IEntrySettings;
-import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IValueNode;
@@ -18,39 +17,34 @@ import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.utils.Stack;
 
-public class CarbonValue implements IValueNode, IValueActions
+public class JEIValue implements IValueNode
 {
-	IReloadMode mode;
 	Component name;
 	Component tooltip;
-	IEntrySettings settings;
 	DataType type;
-	boolean forced;
+	ReloadMode mode;
+	Function<String, ParseResult<?>> isValid;
 	Supplier<List<Suggestion>> suggestions;
-	
-	Function<String, ParseResult<Boolean>> isValid;
-	BiConsumer<String, IValueActions> saveAction;
+	BiConsumer<String, JEIValue> saved;
 	
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
 	String defaultValue;
 	
-	public CarbonValue(IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, DataType type, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
-		this.mode = mode;
+	public JEIValue(Component name, Component tooltip, ReloadMode mode, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
 		this.name = name;
 		this.tooltip = tooltip;
-		this.settings = settings;
-		this.type = type;
-		this.forced = forced;
-		this.suggestions = suggestions;
 		this.isValid = isValid;
-		this.saveAction = saveAction;
-		this.current = current;
-		this.defaultValue = defaultValue;
+		this.mode = mode;
+		this.type = type;
+		this.current = value;
 		previous.push(current);
+		this.defaultValue = defaultValue;
+		this.suggestions = suggestions;
+		this.saved = saved;
 	}
-
-	public void save() { saveAction.accept(current, this); }
+	
+	public void save() { saved.accept(current, this); }
 	@Override
 	public boolean isDefault() { return Objects.equals(defaultValue, current); }
 	@Override
@@ -68,11 +62,10 @@ public class CarbonValue implements IValueNode, IValueActions
 	public void apply() {
 		if(previous.size() > 1) previous.pop();
 	}
-	
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override
-	public IEntrySettings getSettings() { return settings; }
+	public IEntrySettings getSettings() { return null; }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
@@ -84,13 +77,17 @@ public class CarbonValue implements IValueNode, IValueActions
 	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { this.current = value; }
+	public void set(String value) { current = value; }
 	@Override
-	public ParseResult<Boolean> isValid(String value) { return isValid.apply(value); }
+	public ParseResult<Boolean> isValid(String value) {
+		ParseResult<?> parse = isValid.apply(value); 
+		return parse.hasError() ? parse.withDefault(false) : ParseResult.success(true); 
+	}
 	@Override
 	public DataType getDataType() { return type; }
 	@Override
-	public boolean isForcingSuggestions() { return forced; }
+	public boolean isForcingSuggestions() { return type == DataType.ENUM; }
 	@Override
 	public List<Suggestion> getSuggestions() { return suggestions.get(); }
+	
 }
