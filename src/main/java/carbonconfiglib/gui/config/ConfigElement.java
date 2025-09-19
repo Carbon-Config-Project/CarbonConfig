@@ -4,8 +4,10 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import carbonconfiglib.gui.api.EntrySettingTypes.ArrayRenamer;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
+import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.screen.ListSelectionScreen;
 import carbonconfiglib.gui.screen.ListSelectionScreen.NodeSupplier;
@@ -86,6 +88,12 @@ public class ConfigElement extends Element
 		super(value.getName());
 		this.compound = compound;
 		this.value = value;
+	}
+	
+	protected static Component create(IArrayNode array, INode node) {
+		if(array == null) return null;
+		ArrayRenamer settings = array.getSetting(ArrayRenamer.class);
+		return settings == null ? null : Component.translatable(settings.getFunction().apply(array.indexOf(node), node));
 	}
 	
 	protected <T extends AbstractWidget> T addChild(T element) {
@@ -194,8 +202,9 @@ public class ConfigElement extends Element
 			Component comp = Component.literal(indexOf()+":");
 			renderText(poseStack, comp, maxX-115, top-1, 105, height, GuiAlign.RIGHT, -1);
 		}
-		if(value != null && mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
-			owner.addTooltips(value.getTooltip());
+		if(mouseY >= top && mouseY <= top + height && mouseX >= left && mouseX <= maxX-2 && owner.isInsideList(mouseX, mouseY)) {
+			Component tooltip = tooltip();
+			if(tooltip != null) owner.addTooltips(tooltip);
 		}
 		if(isArray()) {
 			if(setReset.isHoveredOrFocused() && owner.isInsideList(mouseX, mouseY)) {
@@ -271,6 +280,18 @@ public class ConfigElement extends Element
 	
 	protected boolean renderChildren() {
 		return true;
+	}
+	
+	protected boolean requiresRestart() {
+		return value != null && value.requiresRestart();
+	}
+	
+	protected boolean requiresReload() {
+		return value != null && value.requiresReload();
+	}
+	
+	protected Component tooltip() {
+		return value == null ? null : value.getTooltip();
 	}
 	
 	protected boolean createResetButtons(IValueNode value) {

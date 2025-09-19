@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.api;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.network.chat.Component;
 
@@ -30,6 +31,11 @@ public interface INode
 	
 	
 	public StructureType getNodeType();
+	public IEntrySettings getSettings();
+	public default <T> T getSetting(Class<T> clz) {
+		IEntrySettings setting = getSettings();
+		return setting == null ? null : setting.get(clz);
+	}
 	public boolean requiresRestart();
 	public boolean requiresReload();
 	

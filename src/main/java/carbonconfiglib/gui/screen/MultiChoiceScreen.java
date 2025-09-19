@@ -69,10 +69,9 @@ public class MultiChoiceScreen extends Screen
 	
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks){
-		this.renderBackground(graphics, mouseX, mouseY, partialTicks);
+		super.render(graphics, mouseX, mouseY, partialTicks);
 		graphics.drawCenteredString(this.font, this.title, this.width / 2, this.titleTop(), 16777215);
 		this.multilineMessage.renderCentered(graphics, this.width / 2, this.messageTop());
-		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	private int titleTop() {
