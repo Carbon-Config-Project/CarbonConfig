@@ -1,5 +1,6 @@
 package carbonconfiglib.impl;
 
+import carbonconfiglib.api.ILimitationSerializer;
 import carbonconfiglib.api.IReloadMode;
 import net.minecraft.network.chat.Component;
 
@@ -18,15 +19,17 @@ import net.minecraft.network.chat.Component;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public enum ReloadMode implements IReloadMode
+public enum ReloadMode implements IReloadMode, ILimitationSerializer
 {
-	WORLD(Component.translatable("gui.carbonconfig.reload.sync")),
-	GAME(Component.translatable("gui.carbonconfig.restart.sync"));
+	WORLD(Component.translatable("gui.carbonconfig.reload.sync"), "Requires Reload"),
+	GAME(Component.translatable("gui.carbonconfig.restart.sync"), "Requires Restart");
 	
 	Component message;
+	String comment;
 	
-	private ReloadMode(Component message) {
+	private ReloadMode(Component message, String comment) {
 		this.message = message;
+		this.comment = comment;
 	}
 	
 	public Component getMessage() {
@@ -43,5 +46,10 @@ public enum ReloadMode implements IReloadMode
 	
 	private static ReloadMode getByIndex(int index) {
 		return index == 0 ? ReloadMode.WORLD : (index == 1 ? ReloadMode.GAME : null);
+	}
+
+	@Override
+	public String getLimitation() {
+		return comment;
 	}
 }
