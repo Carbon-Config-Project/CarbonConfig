@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.impl.forge;
+package carbonconfiglib.plugins.jei.configs;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -18,7 +18,7 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 import speiger.src.collections.utils.Stack;
 
-public class ForgeArray implements IArrayNode
+public class JEIArray implements IArrayNode
 {
 	Component name;
 	Component tooltip;
@@ -28,12 +28,12 @@ public class ForgeArray implements IArrayNode
 	Supplier<List<Suggestion>> suggestions;
 	Consumer<List<String>> saved;
 	
-	List<ForgeValue> values = new ObjectArrayList<>();
+	List<JEIValue> values = new ObjectArrayList<>();
 	Stack<List<String>> previous = new ObjectArrayList<>();
 	List<String> currentValues;
 	List<String> defaults;
 	
-	public ForgeArray(Component name, Component tooltip, ReloadMode mode, DataType type, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
+	public JEIArray(Component name, Component tooltip, ReloadMode mode, DataType type, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
@@ -47,12 +47,18 @@ public class ForgeArray implements IArrayNode
 		reload();
 	}
 	
+	private void save(String value, JEIValue entry) {
+		int index = values.indexOf(entry);
+		if(index == -1) return;
+		currentValues.set(0, value);
+	}
+	
 	public void save() { saved.accept(currentValues); }
 	
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new ForgeValue(name, tooltip, mode, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save));
+			values.add(new JEIValue(name, tooltip, mode, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid, this::save));
 		}
 	}
 	
@@ -145,13 +151,7 @@ public class ForgeArray implements IArrayNode
 	public void createNode() {
 		String value = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);
 		currentValues.add(value);
-		values.add(new ForgeValue(name, tooltip, mode, type, value, null, () -> ObjectLists.empty(), isValid::apply, this::save));
-	}
-	
-	private void save(String value, ForgeValue entry) {
-		int index = values.indexOf(entry);
-		if(index == -1) return;
-		currentValues.set(0, value);
+		values.add(new JEIValue(name, tooltip, mode, type, value, null, () -> ObjectLists.empty(), isValid, this::save));
 	}
 	
 	@Override

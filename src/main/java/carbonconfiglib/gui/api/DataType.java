@@ -86,7 +86,7 @@ public class DataType
 	}
 	
 	public static DataType bySimple(SimpleData type) {
-		return byConfig(type.isVariant() ? EntryDataType.CUSTOM : type.getType(), type.getVariant());
+		return byConfig(type.getType(), type.getVariant());
 	}
 	
 	public static DataType byConfig(EntryDataType type, Class<?> variant) {
@@ -102,7 +102,9 @@ public class DataType
 	}
 	
 	public static DataType byClass(Class<?> clz) {
-		return AUTO_DATA_TYPES.getOrDefault(clz, STRING);
+		DataType result = AUTO_DATA_TYPES.get(clz);
+		if(result == null) throw new IllegalStateException("Custom Type ["+clz.getSimpleName()+"] was defined, but the type wasn't registered in "+DataType.class.getSimpleName()+".class");
+		return result;
 	}
 	
 	public static void registerType(Class<?> clz, DataType type) {

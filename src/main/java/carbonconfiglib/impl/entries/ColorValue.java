@@ -105,7 +105,7 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 	
 	@Override
 	public IStructuredData getDataType() {
-		return SimpleData.variant(EntryDataType.INTEGER, ColorWrapper.class);
+		return SimpleData.variant(EntryDataType.CUSTOM, ColorWrapper.class);
 	}
 	
 	public int get() {

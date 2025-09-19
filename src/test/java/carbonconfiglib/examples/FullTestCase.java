@@ -124,13 +124,19 @@ public class FullTestCase
 		}
 		
 		public static IConfigSerializer<ExampleValue> createSerializer() {
-			CompoundBuilder builder = new CompoundBuilder();
-			builder.simple("Name", EntryDataType.STRING).setComments("Testing my ", "New Line Comment").finish();
-			builder.simple("Year", EntryDataType.INTEGER).addSuggestions(ISuggestionProvider.array(Suggestion.value("2000"), Suggestion.value("2005"), Suggestion.value("2017"), Suggestion.value("2023"))).finish();
-			builder.simple("Fluffyness", EntryDataType.DOUBLE).finish();
-			builder.variants("Color", EntryDataType.INTEGER, ColorWrapper.class, ColorWrapper::parse, ColorWrapper::serialize).addSuggestions(ISuggestionProvider.array(Suggestion.namedTypeValue("Red", "0xFF0000", ColorWrapper.class), Suggestion.namedTypeValue("Green", "0x00FF00", ColorWrapper.class), Suggestion.namedTypeValue("Blue", "0x0000FF", ColorWrapper.class), Suggestion.namedTypeValue("Black", "0x000000", ColorWrapper.class), Suggestion.namedTypeValue("White", "0xFFFFFF", ColorWrapper.class))).finish();
-			builder.enums("Dye", DyeColor.class).forceSuggestions(true).finish();
-			builder.simple("Valid", EntryDataType.BOOLEAN).finish();
+			CompoundBuilder builder = new CompoundBuilder()
+					.simple("Name", EntryDataType.STRING).setComments("Testing my ", "New Line Comment")
+					.simple("Year", EntryDataType.INTEGER).addSuggestions(ISuggestionProvider.array(Suggestion.value("2000"), Suggestion.value("2005"), Suggestion.value("2017"), Suggestion.value("2023")))
+					.simple("Fluffyness", EntryDataType.DOUBLE)
+					.variants("Color", EntryDataType.INTEGER, ColorWrapper.class, ColorWrapper::parse, ColorWrapper::serialize)
+						.addSuggestions(ISuggestionProvider.array(
+								Suggestion.namedTypeValue("Red", "0xFF0000", ColorWrapper.class), 
+								Suggestion.namedTypeValue("Green", "0x00FF00", ColorWrapper.class), 
+								Suggestion.namedTypeValue("Blue", "0x0000FF", ColorWrapper.class), 
+								Suggestion.namedTypeValue("Black", "0x000000", ColorWrapper.class), 
+								Suggestion.namedTypeValue("White", "0xFFFFFF", ColorWrapper.class)))
+					.enums("Dye", DyeColor.class).forceSuggestions(true)
+					.simple("Valid", EntryDataType.BOOLEAN);
 			return IConfigSerializer.noSync(builder.build(), new ExampleValue(), ExampleValue::parse, ExampleValue::serialize);
 		}
 		
