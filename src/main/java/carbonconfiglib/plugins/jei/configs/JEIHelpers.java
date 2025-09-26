@@ -83,7 +83,7 @@ public class JEIHelpers
 		IDeserializeResult<T> result = serializer.deserialize(input);
 		Optional<T> data = result.getResult();
 		if(data.isEmpty()) return ParseResult.error(NoSuchElementException::new, String.join("\n", result.getErrors()));
-		if(serializer.isValid(data.get())) return ParseResult.error(input, "Not a Valid Input");
+		if(!serializer.isValid(data.get())) return ParseResult.error(input, "Not a Valid Input");
 		return ParseResult.success(data.get());
 	}
 	
