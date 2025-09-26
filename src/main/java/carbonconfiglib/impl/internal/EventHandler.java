@@ -6,18 +6,11 @@ import java.util.Map;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
 import carbonconfiglib.config.ConfigHandler;
-import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IModConfigs;
-import carbonconfiglib.gui.api.ISuggestionRenderer;
-import carbonconfiglib.gui.config.ColorElement;
-import carbonconfiglib.gui.config.RegistryElement;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screen.ConfigSelectorScreen;
-import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.impl.PerWorldProxy;
-import carbonconfiglib.impl.entries.ColorValue;
-import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
@@ -26,12 +19,7 @@ import carbonconfiglib.utils.SyncType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -84,13 +72,6 @@ public class EventHandler implements IConfigChangeListener
 		configs.computeIfAbsent(context.getActiveContainer(), ModConfigs::new).addConfig(config);
 	}
 	
-	public void initMinecraftDataTypes(ConfigHandler config) {
-		config.addParser('C', ColorValue::parse);
-		config.addTempParser('R');
-		config.addTempParser('r');
-		config.addTempParser('K');
-	}
-	
 	@Override
 	public void onConfigAdded(ConfigHandler config) {
 	}
@@ -131,7 +112,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@OnlyIn(Dist.CLIENT)
 	public void onConfigsLoaded() {
-		loadDefaultTypes();
+		InternalFeatures.loadDefaultTypes();
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
 			if(M.getCustomExtension(IConfigScreenFactory.class).isPresent()) return;
@@ -160,23 +141,6 @@ public class EventHandler implements IConfigChangeListener
 	@OnlyIn(Dist.CLIENT)
 	private void register(ModContainer container, List<IModConfigs> configs) {
 		container.registerExtensionPoint(IConfigScreenFactory.class, new Wrapper(configs, container.getCustomExtension(IConfigScreenFactory.class).orElse(null)));
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	private void loadDefaultTypes() {
-		ISuggestionRenderer.Registry.register(Item.class, new SuggestionRenderers.ItemEntry());
-		ISuggestionRenderer.Registry.register(Block.class, new SuggestionRenderers.ItemEntry());
-		ISuggestionRenderer.Registry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
-		ISuggestionRenderer.Registry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
-		ISuggestionRenderer.Registry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
-		ISuggestionRenderer.Registry.register(MobEffect.class, new SuggestionRenderers.PotionEntry());
-		
-		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
-		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
-		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:empty"));
-		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
-		DataType.registerType(MobEffect.class, RegistryElement.createForType(MobEffect.class, "minecraft:luck"));
-		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new, ColorElement::new));
 	}
 	
 	public void onServerJoinPacket(Player player) {
