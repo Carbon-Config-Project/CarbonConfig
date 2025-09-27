@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.INode;
@@ -23,7 +24,6 @@ import carbonconfiglib.gui.config.ListScreen;
 import carbonconfiglib.gui.config.SelectionElement;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconCheckbox;
-import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;

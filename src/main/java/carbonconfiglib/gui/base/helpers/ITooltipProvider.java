@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.widgets;
+package carbonconfiglib.gui.base.helpers;
 
 import java.util.function.Consumer;
 

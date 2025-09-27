@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.widgets;
+package carbonconfiglib.gui.base.widgets;
 
 import java.util.Collection;
 import java.util.List;
@@ -6,7 +6,8 @@ import java.util.Objects;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.widgets.CarbonDynamicList.DynamicEntry;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
+import carbonconfiglib.gui.base.widgets.CarbonDynamicList.DynamicEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;

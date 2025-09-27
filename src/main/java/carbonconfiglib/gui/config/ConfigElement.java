@@ -7,6 +7,7 @@ import java.util.Map;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.EntrySettingTypes.ArrayRenamer;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.INode;
@@ -16,7 +17,6 @@ import carbonconfiglib.gui.screen.ListSelectionScreen.NodeSupplier;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
-import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.IOwnable;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;

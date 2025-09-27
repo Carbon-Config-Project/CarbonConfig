@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.widgets;
+package carbonconfiglib.gui.base.widgets;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -10,7 +10,9 @@ import java.util.function.Predicate;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.base.helpers.ITooltipProvider;
+import carbonconfiglib.gui.base.helpers.SmoothDouble;
+import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;

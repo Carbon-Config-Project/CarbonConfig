@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.widgets;
+package carbonconfiglib.gui.base.helpers;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
+import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

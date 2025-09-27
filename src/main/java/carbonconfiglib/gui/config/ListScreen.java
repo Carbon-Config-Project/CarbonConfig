@@ -8,9 +8,9 @@ import java.util.function.Consumer;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.screen.MultiChoiceScreen;
 import carbonconfiglib.gui.widgets.CarbonEditBox;
-import carbonconfiglib.gui.widgets.GuiUtils;
 import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;

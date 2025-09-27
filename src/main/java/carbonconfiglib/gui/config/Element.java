@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
-import carbonconfiglib.gui.widgets.GuiUtils;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

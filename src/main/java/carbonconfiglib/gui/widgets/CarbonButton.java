@@ -2,6 +2,7 @@ package carbonconfiglib.gui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
