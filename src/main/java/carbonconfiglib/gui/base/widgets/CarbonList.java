@@ -181,7 +181,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		boolean enabled = true;
 		boolean visible = true;
 		CarbonList<T> owner;
-		
+				
 		@SafeVarargs
 		public ListState(T... nodes) {
 			this.nodes.addAll(Arrays.asList(nodes));

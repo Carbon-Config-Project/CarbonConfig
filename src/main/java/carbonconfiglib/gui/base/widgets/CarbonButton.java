@@ -37,7 +37,9 @@ public class CarbonButton extends CarbonBaseButton {
 	public void renderIcon(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
 		int j = getFGColor();
 		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(pPoseStack, x + (width / 2) - 5.5F, y + height / 2 - 5.5F, 11, 11, icon.get(), 16, 16);
+		float minX = x + 4 + (this.width / 2) - (width / 2);
+		GuiUtils.drawTextureRegion(pPoseStack, minX, y + (height - 8) / 2, 11, 11, icon.get(), 16, 16);
+//		GuiUtils.drawTextureRegion(pPoseStack, x + (width / 2) - 5.5F, y + height / 2 - 5.5F, 11, 11, icon.get(), 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 
@@ -52,10 +54,6 @@ public class CarbonButton extends CarbonBaseButton {
 		Font font = minecraft.font;
 		int width = font.width(getMessage()) + 21;
 		float minX = x + 4 + (this.width / 2) - (width / 2);
-		int j = getFGColor();
-		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(pPoseStack, minX, y + (height - 8) / 2, 11, 11, icon.get(), 16, 16);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		GuiUtils.drawScrollingShadowText(pPoseStack, font, getMessage(), minX + 15, y, width, height - 2, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(pPoseStack, font, getMessage(), minX + 15, y, this.width, height - 2, GuiAlign.CENTER, getFGColor(), hash);
 	}
 }

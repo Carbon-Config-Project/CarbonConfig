@@ -98,6 +98,10 @@ public class CarbonConfig
 			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
 			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
+			ConfigSection test = config.add("test").addSubSection("test2").addSubSection("test3").addSubSection("test4").addSubSection("test5");
+			test.addSubSection("test5-1");
+			test.addSubSection("Test5-2").addBool("TestValue", false);
+			
 			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
@@ -268,7 +272,6 @@ public class CarbonConfig
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if(mc.player != null && event.getAction() == GLFW.GLFW_PRESS && MOD_GUI.getAsBoolean()) {
-			mc.setScreen(new carbonconfiglib.gui.screens.ConfigScreen());
 //			mc.setScreen(new ModListScreen(mc.screen));
 		}
 	}

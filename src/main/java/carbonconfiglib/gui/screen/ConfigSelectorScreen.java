@@ -8,14 +8,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
-import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.IIgnoreSearch;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
 import carbonconfiglib.gui.widgets.Icon;
@@ -230,7 +230,8 @@ public class ConfigSelectorScreen extends ListScreen
 		
 		private void onEdit(Button button) {
 			if(isInWorldConfig() && !mc.hasSingleplayerServer()) mc.setScreen(new RequestScreen(owner.getCustomTexture(), nav.add(type), parent, handler));
-			else mc.setScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
+//			else mc.setScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
+			else mc.setScreen(new carbonconfiglib.gui.screens.ConfigScreen(this.handler.getRootNode()));
 		}
 	}
 }
