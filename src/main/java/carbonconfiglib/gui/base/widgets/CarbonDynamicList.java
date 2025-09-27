@@ -51,6 +51,11 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		return max;
 	}
 	
+	public void setWidth(int width) {
+		x1 = x0 + width;
+		this.width = width;
+	}
+	
 	protected void scroll(int value) {
 		setScrollAmount(getScrollAmount() + (double)value);
 	}
