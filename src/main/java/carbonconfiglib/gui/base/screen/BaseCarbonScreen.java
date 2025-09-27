@@ -8,9 +8,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
+import carbonconfiglib.gui.base.widgets.CarbonEditBox;
+import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
+import carbonconfiglib.gui.base.widgets.CarbonSlider;
+import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -128,6 +132,22 @@ public class BaseCarbonScreen extends Screen
 	
 	public void drawSplitText(PoseStack stack, Component text, float x, float y, Align align, int maxWidth, int color) {
 		GuiUtils.drawSplitText(stack, font, text, x + centerX, y + centerY, align, maxWidth, color);
+	}
+	
+	public CarbonEditBox text(int x, int y, int width, int height, TextState state) {
+		return addRenderableWidget(new CarbonEditBox(font, x, y, width, height, state));
+	}
+	
+	public CarbonEditBox text(int x, int y, int width, int height, Align horizontal, Align vertical, TextState state) {
+		return addRenderableWidget(new CarbonEditBox(font, getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, state));
+	}
+	
+	public CarbonSlider slider(int x, int y, int width, int height, SliderState state) {
+		return addRenderableWidget(new CarbonSlider(x, y, width, height, state));
+	}
+	
+	public CarbonSlider slider(int x, int y, int width, int height, Align horizontal, Align vertical, SliderState state) {
+		return addRenderableWidget(new CarbonSlider(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, state));
 	}
 	
 	public <T extends ListEntry<T>> CarbonList<T> list(int width, int height, int startY, int endY, ListState<T> state) {

@@ -13,12 +13,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.gui.ScreenUtils;
 
-public class CarbonSlider extends Button {
+public class CarbonSlider extends CarbonBaseButton {
 	SliderState state;
 	
 	public CarbonSlider(int xPos, int yPos, int width, int height, SliderState state) {
@@ -53,9 +52,6 @@ public class CarbonSlider extends Button {
 		double progress = Math.max(0, Math.min(1, (mouseX - (x + 4D)) / (width - 8D)));
 		state.set((int)(state.getMin() + (state.getRange() * progress)));
 	}
-	
-	@Override
-	public void onPress() {}
 	
 	@Override
 	public void onClick(double mouseX, double mouseY) {

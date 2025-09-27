@@ -69,7 +69,6 @@ public class GuiUtils
 			y += lineSplit;
 		}
 	}
-
 	
 	public static void drawScrollingText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.width(text);

@@ -123,10 +123,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	}
 	
 	@Override
-	public boolean mouseReleased(double p_93491_, double p_93492_, int p_93493_) {
+	public boolean mouseReleased(double mouseX, double mouseY, int button) {
 		if(!enabled()) return false;
 		scrolling = false;
-		return super.mouseReleased(p_93491_, p_93492_, p_93493_);
+		return super.mouseReleased(mouseX, mouseY, button);
 	}
 	
 	@Override
@@ -144,9 +144,9 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	protected boolean enabled() { return true; }
 	
 	@Override
-	public void render(PoseStack p_93447_, int p_93448_, int p_93449_, float p_93450_) {
+	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		if(!shouldRender()) return;
-		super.render(p_93447_, p_93448_, p_93449_, p_93450_);
+		super.render(stack, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
