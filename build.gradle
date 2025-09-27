@@ -5,6 +5,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
     id 'net.darkhax.curseforgegradle' version '1.1.15'
     id 'com.modrinth.minotaur' version '2.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
 apply plugin: 'java'
@@ -29,7 +30,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'parchment', version: '2022.11.27-1.19.2'
     runs {
         client {
             workingDirectory project.file('run')
