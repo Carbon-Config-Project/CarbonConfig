@@ -68,7 +68,7 @@ public class CarbonIconButton extends AbstractButton
         RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
 		GuiUtils.drawTextureRegion(stack, minX, y+(height-8)/2, 11, 11, icon, 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		GuiUtils.drawScrollingShadowString(stack, font, getMessage(), minX+15, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(stack, font, getMessage(), minX+15, y, width, height-2, GuiAlign.CENTER, getFGColor(), hash);
 
 	}
 	

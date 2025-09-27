@@ -77,11 +77,11 @@ public class Element extends ContainerObjectSelectionList.Entry<Element> {
 	}
 	
 	protected void renderName(PoseStack stack, float x, float y, boolean changed, int width, int height) {
-		GuiUtils.drawScrollingString(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
+		GuiUtils.drawScrollingText(stack, font, (changed ? this.changed : unchanged), x, y-1, width, height, GuiAlign.LEFT, -1, hash);
 	}
 	
 	protected void renderText(PoseStack stack, Component text, float x, float y, float width, float height, GuiAlign align, int color) {
-		GuiUtils.drawScrollingString(stack, font, text, x, y, width, height, align, -1, hash);
+		GuiUtils.drawScrollingText(stack, font, text, x, y, width, height, align, -1, hash);
 	}
 	
 	@Override

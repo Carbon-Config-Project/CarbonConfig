@@ -196,8 +196,8 @@ public class ConfigSelectorScreen extends ListScreen
 				reset.y = top + 2;
 				reset.render(poseStack, mouseX, mouseY, partialTicks);
 			}
-			GuiUtils.drawScrollingString(poseStack, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(poseStack, font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingText(poseStack, font, type, left+5, top, 130, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingText(poseStack, font, fileName, left+5, top+9, 130, 10, GuiAlign.LEFT, -1, 0);
 			GuiUtils.drawTextureRegion(poseStack, left-20, top, 22, 22, getIcon(), 16, 16);
 		}
 		

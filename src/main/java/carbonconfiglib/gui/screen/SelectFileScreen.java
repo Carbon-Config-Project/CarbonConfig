@@ -144,8 +144,8 @@ public class SelectFileScreen extends ListScreen
 			button.x = left+width-62;
 			button.y = top + 2;
 			button.render(poseStack, mouseX, mouseY, partialTicks);
-			GuiUtils.drawScrollingString(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
-			GuiUtils.drawScrollingString(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingText(poseStack, font, title, left+5, top+2, 150, 10, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingText(poseStack, font, path, left+5, top+12, 150, 10, GuiAlign.LEFT, -1, 0);
 			if(texture != null) {
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.setShaderTexture(0, texture.getId());

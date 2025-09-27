@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 /**
@@ -52,7 +53,25 @@ public class GuiUtils
 		return 0;
 	}
 	
-	public static void drawScrollingString(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
+	public static void drawText(PoseStack stack, Font font, Component text, float x, float y, Align align, int color) {
+		float offset = align.align(font.width(text));
+		font.draw(stack, text, x + offset, y, color);
+	}
+	
+	public static void drawSplitText(PoseStack stack, Font font, Component text, float x, float y, Align align, int color, int maxLength) {
+		drawSplitText(stack, font, text, x, y, align, color, maxLength, font.lineHeight);
+	}
+	
+	public static void drawSplitText(PoseStack stack, Font font, Component text, float x, float y, Align align, int color, int maxLength, float lineSplit) {
+		for(FormattedCharSequence line : font.split(text, maxLength)) {
+			float offset = align.align(font.width(line));
+			font.draw(stack, line, x + offset, y, color);
+			y += lineSplit;
+		}
+	}
+
+	
+	public static void drawScrollingText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -68,7 +87,7 @@ public class GuiUtils
 		font.draw(stack, text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color);
 	}
 	
-	public static void drawScrollingShadowString(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
+	public static void drawScrollingShadowText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;

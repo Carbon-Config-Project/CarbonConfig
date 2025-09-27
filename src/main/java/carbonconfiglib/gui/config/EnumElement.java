@@ -69,13 +69,13 @@ public class EnumElement extends ConfigElement
 		String value = this.value.get();
 		if(isCompound()) {
 			int offset = font.width(value) + 135;
-			GuiUtils.drawScrollingString(poseStack, font, Component.literal(value), left + width - offset, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);			
+			GuiUtils.drawScrollingText(poseStack, font, Component.literal(value), left + width - offset, top, 135, height - 2.75F, GuiAlign.LEFT, -1, 0);			
 		}
 		else if(isArray()) {
-			GuiUtils.drawScrollingString(poseStack, font, Component.literal(value), left + (canMove() ? 5 : 10), top, 140, height - 2.75F, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingText(poseStack, font, Component.literal(value), left + (canMove() ? 5 : 10), top, 140, height - 2.75F, GuiAlign.LEFT, -1, 0);
 		}
 		else {
-			GuiUtils.drawScrollingString(poseStack, font, Component.literal(value), left - 20, top, 140, height - 2.75F, GuiAlign.LEFT, -1, 0);
+			GuiUtils.drawScrollingText(poseStack, font, Component.literal(value), left - 20, top, 140, height - 2.75F, GuiAlign.LEFT, -1, 0);
 		}
 	}
 	

@@ -5,7 +5,12 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
+import carbonconfiglib.gui.base.widgets.CarbonList;
+import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -98,4 +103,57 @@ public class BaseCarbonScreen extends Screen
 		renderTooltip(matrix, tooltips, mouseX, mouseY);
 		lastDrawnToolTipAmount = tooltips.size();
 	}
+	
+	public void drawText(PoseStack stack, Component text, float x, float y, Align align, int color) {
+		GuiUtils.drawText(stack, font, text, x + centerX, y + centerY, align, color);
+	}
+	
+	public void drawSplitText(PoseStack stack, Component text, float x, float y, Align align, int maxWidth, int color) {
+		GuiUtils.drawSplitText(stack, font, text, x + centerX, y + centerY, align, maxWidth, color);
+	}
+	
+	public <T extends ListEntry<T>> CarbonList<T> list(int width, int height, int startY, int endY, ListState<T> state) {
+		return addRenderableWidget(new CarbonList<>(this, width, height, startY, endY, state));
+	}
+	
+	public <T extends ListEntry<T>> CarbonList<T> list(ListState<T> state) {
+		return addRenderableWidget(new CarbonList<>(this, state));
+	}
+	
+	public <T extends ListEntry<T>> CarbonList<T> listArea(int x, int y, int width, int height, ListState<T> state) {
+		CarbonList<T> list = addRenderableWidget(new CarbonList<>(this, width, height, y, y+height, state.setRowWidth(width).setScrollOffset(0)));
+		list.setLeftPos(x);
+		list.setRenderBackground(false);
+		list.setRenderTopAndBottom(false);
+		return list;
+	}
+	
+	public <T extends ListEntry<T>> CarbonList<T> listArea(int x, int y, int width, int height, Align horizontal, Align vertical, ListState<T> state) {
+		x = getAlignedX(horizontal) + x;
+		y = getAlignedY(vertical) + y;
+		CarbonList<T> list = addRenderableWidget(new CarbonList<>(this, width, height, y, y+height, state.setRowWidth(width).setScrollOffset(0)));
+		list.setLeftPos(x);
+		list.setRenderBackground(false);
+		list.setRenderTopAndBottom(false);
+		return list;
+	}
+	
+	protected int getAlignedX(Align align) {
+		switch(align) {
+			case CENTER: return centerX;
+			case END: return width;
+			case START: return 0;
+			default: return 0;
+		}
+	}
+	
+	protected int getAlignedY(Align align) {
+		switch(align) {
+			case CENTER: return centerY;
+			case END: return height;
+			case START: return 0;
+			default: return 0;
+		}
+	}
+	
 }
