@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.base.screen;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -8,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
+import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList;
@@ -15,7 +17,9 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
+import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -132,6 +136,22 @@ public class BaseCarbonScreen extends Screen
 	
 	public void drawSplitText(PoseStack stack, Component text, float x, float y, Align align, int maxWidth, int color) {
 		GuiUtils.drawSplitText(stack, font, text, x + centerX, y + centerY, align, maxWidth, color);
+	}
+	
+	public CarbonButton button(int x, int y, int width, int height, Component text, OnPress listener) {
+		return addRenderableWidget(new CarbonButton(x, y, width, height, text, listener));
+	}
+	
+	public CarbonButton button(int x, int y, int width, int height, Align horizontal, Align vertical, Component text, OnPress listener) {
+		return addRenderableWidget(new CarbonButton(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, text, listener));
+	}
+	
+	public CarbonButton iconButton(int x, int y, int width, int height, Icon icon, OnPress listener) {
+		return addRenderableWidget(new CarbonButton(x, y, width, height, Component.empty(), listener).withIcon(Optional.of(icon)));
+	}
+	
+	public CarbonButton iconButton(int x, int y, int width, int height, Align horizontal, Align vertical, Icon icon, OnPress listener) {
+		return addRenderableWidget(new CarbonButton(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, Component.empty(), listener).withIcon(Optional.of(icon)));
 	}
 	
 	public CarbonEditBox text(int x, int y, int width, int height, TextState state) {
