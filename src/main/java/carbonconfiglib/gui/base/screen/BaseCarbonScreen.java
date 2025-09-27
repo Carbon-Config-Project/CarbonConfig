@@ -81,7 +81,7 @@ public class BaseCarbonScreen extends Screen
 		if(mouseX != Integer.MAX_VALUE && mouseY != Integer.MAX_VALUE) {
 			for(GuiEventListener listener : children()) {
 				if(listener instanceof ITooltipProvider) {
-					((ITooltipProvider)listener).provideTooltips(T -> tooltips.addAll(font.split(T, Math.max(mouseX, width - mouseX) - 20)));
+					((ITooltipProvider)listener).provideTooltips(mouseX, mouseY, T -> tooltips.addAll(font.split(T, Math.max(mouseX, width - mouseX) - 20)));
 				}
 			}
 			collectTooltips(matrix, mouseX, mouseY, partialTicks, T -> tooltips.addAll(font.split(T, Math.max(mouseX, width - mouseX) - 20)));

@@ -40,10 +40,10 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 	}
 	
 	@Override
-	public void provideTooltips(Consumer<Component> tooltips) {
+	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
 		for(T entry : children()) {
 			if(entry instanceof ITooltipProvider) {
-				((ITooltipProvider)entry).provideTooltips(tooltips);
+				((ITooltipProvider)entry).provideTooltips(mouseX, mouseY, tooltips);
 			}
 		}
 	}
@@ -143,10 +143,10 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		}
 		
 		@Override
-		public void provideTooltips(Consumer<Component> tooltips) {
+		public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
 			for(GuiEventListener listener : children) {
 				if(listener instanceof ITooltipProvider) {
-					((ITooltipProvider)listener).provideTooltips(tooltips);
+					((ITooltipProvider)listener).provideTooltips(mouseX, mouseY, tooltips);
 				}
 			}
 		}
