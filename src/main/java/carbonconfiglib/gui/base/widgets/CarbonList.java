@@ -211,7 +211,11 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		public ListState<T> add(List<T> nodes) {
 			this.nodes.addAll(nodes);
 			return this;
-		} 
+		}
+		
+		public void clear() {
+			nodes.clear();
+		}
 		
 		public ListState<T> replace(List<T> nodes) {
 			this.nodes.clear();

@@ -55,7 +55,7 @@ public class ConfigScreen extends BaseCarbonScreen
 	}
 	
 	public void pushNode(IConfigNode node, int index) {
-		if(index != 2 && visibleChildren.size() > 2) {
+		if(index != 2 && visibleChildren.size() > 1+index) {
 			for(int i = 0,m=2-index;i<m && visibleChildren.size() > 1;i++) {
 				visibleChildren.remove(visibleChildren.size()-1);
 				pickedNode.remove(pickedNode.size()-1);
@@ -67,7 +67,10 @@ public class ConfigScreen extends BaseCarbonScreen
 	}
 	
 	private void recalculateNode() {
-		for(int i = 0, offset = Math.max(pickedNode.size()-4, 0);i<3 && offset < pickedNode.size();i++) {
+		for(int i = 0;i<3;i++) {
+			all[i].clear();
+		}
+		for(int i = 0, offset = Math.max(pickedNode.size()-3, 0);i<3 && offset < pickedNode.size();i++) {
 			all[i].replace(processElements(i, visibleChildren.get(offset)));
 			offset++;
 		}
