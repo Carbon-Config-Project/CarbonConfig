@@ -2,14 +2,15 @@ package carbonconfiglib.gui.base.widgets;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
-public class CarbonEditBox extends EditBox {
-	
+public class CarbonEditBox extends EditBox implements ITooltipProvider {
 	TextState state;
 	
 	public CarbonEditBox(Font font, int x, int y, int width, int height) {
@@ -26,8 +27,19 @@ public class CarbonEditBox extends EditBox {
 		state.setOwner(this);
 	}
 	
+	
+	@Override
+	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
+		if(state.tooltip != null && isMouseOver(mouseX, mouseY)) {
+			Component result = state.tooltip.apply(state);
+			if(result == null) return;
+			tooltips.accept(result);
+		}
+	}
+	
 	public static class TextState {
 		Predicate<String> filter = Objects::nonNull;
+		Function<TextState, Component> tooltip;
 		Consumer<String> callback;
 		String value = "";
 		String suggestion;
@@ -68,6 +80,16 @@ public class CarbonEditBox extends EditBox {
 			this.callback = listener;
 			return this;
 		}
+		
+		public TextState setTooltip(Component tooltip) {
+			this.tooltip = T -> tooltip;
+			return this;
+		}
+		
+		public TextState withTooltip(Function<TextState, Component> tooltip) {
+			this.tooltip = tooltip;
+			return this;
+		} 
 		
 		public CarbonEditBox getOwner() {
 			return owner; 
