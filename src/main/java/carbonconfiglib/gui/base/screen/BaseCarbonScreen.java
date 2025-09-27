@@ -10,6 +10,8 @@ import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList;
@@ -152,6 +154,14 @@ public class BaseCarbonScreen extends Screen
 	
 	public CarbonButton iconButton(int x, int y, int width, int height, Align horizontal, Align vertical, Icon icon, OnPress listener) {
 		return addRenderableWidget(new CarbonButton(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, Component.empty(), listener).withIcon(Optional.of(icon)));
+	}
+	
+	public CarbonCheckBox checkbox(int x, int y, int width, int height, CheckBoxState state) {
+		return addRenderableWidget(new CarbonCheckBox(x, y, width, height, state));
+	}
+	
+	public CarbonCheckBox checkbox(int x, int y, int width, int height, Align horizontal, Align vertical, CheckBoxState state) {
+		return addRenderableWidget(new CarbonCheckBox(getAlignedX(horizontal) + x, getAlignedY(vertical), width, height, state));
 	}
 	
 	public CarbonEditBox text(int x, int y, int width, int height, TextState state) {
