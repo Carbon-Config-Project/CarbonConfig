@@ -11,11 +11,13 @@ import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import carbonconfiglib.gui.base.widgets.CarbonList;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraftforge.client.ForgeHooksClient;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 public class BaseCarbonScreen extends Screen
@@ -102,6 +104,22 @@ public class BaseCarbonScreen extends Screen
 		lastDrawnToolTipAmount = 0;
 		renderTooltip(matrix, tooltips, mouseX, mouseY);
 		lastDrawnToolTipAmount = tooltips.size();
+	}
+	
+	protected void setScreen(Screen screen) {
+		Minecraft.getInstance().setScreen(screen);
+	}
+	
+	public static void setExternalScreen(Screen screen) {
+		Minecraft.getInstance().setScreen(screen);
+	}
+	
+	public static void pushExternalScreen(Screen screen) {
+		ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), screen);
+	}
+	
+	protected void pushScreen(Screen screen) {
+		ForgeHooksClient.pushGuiLayer(minecraft, screen);
 	}
 	
 	public void drawText(PoseStack stack, Component text, float x, float y, Align align, int color) {
