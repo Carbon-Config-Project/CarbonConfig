@@ -82,12 +82,12 @@ public class GuiUtils
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.draw(stack, text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height / 2) - (font.lineHeight / 3), color);
+			font.draw(stack, text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.draw(stack, text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color);
+		font.draw(stack, text, x - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 	}
 	
 	public static void drawScrollingShadowText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
@@ -98,12 +98,14 @@ public class GuiUtils
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
-			font.drawShadow(stack, text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height / 2) - (font.lineHeight / 3), color);
+			font.drawShadow(stack, text, x - align.align(width) + align.align(textWidth) + (float)Mth.lerp(offset, 0D, diff), y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 			popScissors();
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.drawShadow(stack, text, x - align.align(width) + offset, y + (height / 2) - (font.lineHeight / 3), color);
+//		GuiComponent.fill(stack, (int)x, (int)y, (int)(x+width), (int)(y+height), 0xFF00FF00);
+		
+		font.drawShadow(stack, text, x + 2 - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 	}
 	
 	public static void pushScissors(int x, int y, int width, int height) {
@@ -179,6 +181,8 @@ public class GuiUtils
 			minY = Math.max(rect.minY, minY);
 			maxX = Math.min(rect.maxX, maxX);
 			maxY = Math.min(rect.maxY, maxY);
+			if(minX > maxX) minX = maxX;
+			if(minY > maxY) minY = maxY;
 		}
 		
 		public int getX() { return minX; }
@@ -196,6 +200,7 @@ public class GuiUtils
 				return;
 			}
 			owner.limit(stack.peek());
+			stack.push(owner);
 		}
 		
 		public Rect pop() {

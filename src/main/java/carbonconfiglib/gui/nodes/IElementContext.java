@@ -1,0 +1,9 @@
+package carbonconfiglib.gui.nodes;
+
+public interface IElementContext
+{
+	public boolean isElementActive(BaseElement base);
+	
+	public boolean isAtTop(int layer);
+	public int calculateSegmentWidth();
+}

@@ -64,6 +64,11 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 	}
 	
 	@Override
+	public int getRowLeft() {
+		return x0 + 2;
+	}
+	
+	@Override
 	protected boolean isSelectedItem(int index) {
 		return state.isFramed() || (state.isSelectable() && getEntry(index) == state.getSelected());
 	}
@@ -276,6 +281,11 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			return this;
 		}
 		
+		public ListState<T> setParentRowWidth() {
+			rowWidth = () -> owner != null ? owner.width : 0;
+			return this;
+		}
+		
 		public ListState<T> setScrollOffset(int offset) {
 			this.scrollOffset = offset;
 			return this;
@@ -367,6 +377,10 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		
 		public CarbonList<T> getOwner() {
 			return owner;
+		}
+		
+		public boolean isScrollbarVisible() {
+			return owner != null && owner.getMaxScroll() > 0;
 		}
 		
 		public boolean isSearching() {
