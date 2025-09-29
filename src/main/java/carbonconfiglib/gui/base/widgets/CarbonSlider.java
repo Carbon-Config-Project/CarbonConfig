@@ -143,6 +143,11 @@ public class CarbonSlider extends CarbonBaseButton {
 			return this;
 		}
 		
+		public SliderState setListener(Runnable run) {
+			listener = T -> run.run();
+			return this;
+		}
+		
 		public SliderState setStepSize(int value) {
 			this.stepSize = value;
 			return this;
@@ -176,9 +181,20 @@ public class CarbonSlider extends CarbonBaseButton {
 			int newValue = Math.max(minValue, Math.min(maxValue, value));
 			if(this.value != newValue) {
 				this.value = newValue;
-				if(owner != null) owner.onValueChanged();
+				if(owner != null) {
+					owner.onValueChanged();
+					owner.updateMessage();
+				}
 			}
-			if(owner != null) owner.updateMessage();
+			return this;
+		}
+		
+		public SliderState setSilent(int value) {
+			int newValue = Math.max(minValue, Math.min(maxValue, value));
+			if(this.value != newValue) {
+				this.value = newValue;
+				if(owner != null) owner.updateMessage();
+			}
 			return this;
 		}
 		

@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
@@ -71,7 +70,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 		switch(type.getDataType()) {
 			case COMPOUND: return new CarbonCompound(mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
 			case LIST: return new CarbonArray(mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
-			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), data.getEntrySetting(key), DataType.bySimple(type.asSimple()), data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T));
+			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), data.getEntrySetting(key), type, data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T));
 			default: return null;
 		}
 	}

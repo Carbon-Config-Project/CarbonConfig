@@ -33,7 +33,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
 	List<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
 	List<BaseElement> pickedNode = new ObjectArrayList<>();
-	boolean twoLayerMode = true;
+	boolean twoLayerMode = false;
 	
 	public ConfigScreen(IConfigNode root) {
 		addElement(new FolderElement(root));
@@ -132,6 +132,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 			}
 		}
 		visibleChildren.add(nodes);
+	}
+	
+	@Override
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton)
+	{
+		return super.mouseClicked(pMouseX, pMouseY, pButton);
 	}
 	
 	private void recalculateNode() {

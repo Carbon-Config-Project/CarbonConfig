@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IValueNode;
@@ -22,6 +23,7 @@ public class ForgeValue implements IValueNode
 	Component name;
 	Component tooltip;
 	DataType type;
+	IRange range;
 	ReloadMode mode;
 	Function<String, ParseResult<?>> isValid;
 	Supplier<List<Suggestion>> suggestions;
@@ -31,11 +33,12 @@ public class ForgeValue implements IValueNode
 	String current;
 	String defaultValue;
 	
-	public ForgeValue(Component name, Component tooltip, ReloadMode mode, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, ForgeValue> saved) {
+	public ForgeValue(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, ForgeValue> saved) {
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
 		this.mode = mode;
+		this.range = range;
 		this.type = type;
 		this.current = value;
 		previous.push(current);
@@ -63,6 +66,8 @@ public class ForgeValue implements IValueNode
 	}
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
+	@Override
+	public IRange getRange() { return range; }
 	@Override
 	public IEntrySettings getSettings() { return null; }
 	@Override

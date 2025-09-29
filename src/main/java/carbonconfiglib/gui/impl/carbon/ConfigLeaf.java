@@ -7,7 +7,6 @@ import org.apache.logging.log4j.util.Strings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.ParsedArray;
-import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.impl.ReloadMode;
@@ -45,7 +44,7 @@ public class ConfigLeaf implements IConfigNode
 					value = new CarbonArray(mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case SIMPLE:
-					value = new CarbonValue(mode, getName(), getTooltip(), entry.getSettings(), DataType.bySimple(entry.getDataType().asSimple()), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
+					value = new CarbonValue(mode, getName(), getTooltip(), entry.getSettings(), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
 					break;
 			}
 		}

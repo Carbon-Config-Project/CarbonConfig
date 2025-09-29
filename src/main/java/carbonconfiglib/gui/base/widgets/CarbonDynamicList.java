@@ -3,6 +3,7 @@ package carbonconfiglib.gui.base.widgets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -11,6 +12,7 @@ import carbonconfiglib.gui.base.widgets.CarbonDynamicList.DynamicEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.util.Mth;
 
@@ -107,10 +109,18 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		if(!this.isMouseOver(mouseX, mouseY)) return false;
 		E element = this.getEntryAtPos(mouseX, mouseY);
 		if(element != null) {
+			E prev = getFocused();
 			if(element.mouseClicked(mouseX, mouseY, button)) {
 				this.setFocused(element);
 				this.setDragging(true);
+				if(prev != null && prev != element) {
+					prev.changeFocus(false);
+				}
 				return true;
+			}
+			if(prev != null && prev != element) {
+				prev.changeFocus(false);
+				if(getFocused() == prev) setFocused(null);
 			}
 		}
 		else if(button == 0) {
@@ -137,9 +147,19 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
 		if(!enabled()) return false;
+		Optional<GuiEventListener> listener = getChildAt(mouseX, mouseY);
+		if(!listener.isEmpty() && listener.get().mouseScrolled(mouseX, mouseY, scroll)) return true;
+		
 		scrolling = false;
 		scroll(-(int)(scroll * this.itemHeight * 2D));
 		return true;
+	}
+	
+	@Override
+	public boolean changeFocus(boolean pFocus)
+	{
+		// TODO Auto-generated method stub
+		return super.changeFocus(pFocus);
 	}
 	
 	public boolean isScrolling() { return scrolling; }

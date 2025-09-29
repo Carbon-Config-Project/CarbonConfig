@@ -19,7 +19,6 @@ public class FolderElement extends BaseElement implements IFolderNode
 	CarbonButton button;
 	IConfigNode node;
 	ObjIntConsumer<BaseElement> listener;
-	boolean top = false;
 
 	public FolderElement(IConfigNode node) {
 		this.node = node;
@@ -32,13 +31,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	@Override
-	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		int leftWidth = context.calculateSegmentWidth() - 4;
-		renderLeftPart(poseStack, left, top, leftWidth, height, mouseX, mouseY, selected, partialTicks);
-		if(context.isAtTop(layer)) {
-			renderRightPart(poseStack, left+leftWidth+6, top, width-leftWidth-8, height, mouseX, mouseY, selected, partialTicks);
-		}
-	}
+	protected void setRightComponentsVisible(boolean value) {}
 	
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.x = left;
@@ -52,7 +45,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.getChildren().size()+" Elements"), left, top, width, height, GuiAlign.RIGHT, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.getChildren().size()+" Elements"), left, top, width-2, height, GuiAlign.RIGHT, -1, 32);
 	}
 	
 	protected void onClick(Button button) {
@@ -64,7 +57,9 @@ public class FolderElement extends BaseElement implements IFolderNode
 	public List<BaseElement> getChildNodes() {
 		List<BaseElement> result = new ObjectArrayList<>();
 		for(IConfigNode entry : node.getChildren()) {
-			result.add(createNode(entry));
+			BaseElement element = createNode(entry);
+			if(element == null) continue;
+			result.add(element);
 		}
 		return result;
 	}

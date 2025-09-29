@@ -2,14 +2,14 @@ package carbonconfiglib.gui.nodes;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.IValueNode;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 
 public class TestElement extends ValueElement
 {
 	
-	public TestElement(INode node) {
+	public TestElement(IValueNode node) {
 		super(node);
 	}
 

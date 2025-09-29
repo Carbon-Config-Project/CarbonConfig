@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
@@ -23,6 +24,7 @@ public class ForgeArray implements IArrayNode
 	Component name;
 	Component tooltip;
 	DataType type;
+	IRange range;
 	ReloadMode mode;
 	Function<String, ParseResult<?>> isValid;
 	Supplier<List<Suggestion>> suggestions;
@@ -33,12 +35,13 @@ public class ForgeArray implements IArrayNode
 	List<String> currentValues;
 	List<String> defaults;
 	
-	public ForgeArray(Component name, Component tooltip, ReloadMode mode, DataType type, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
+	public ForgeArray(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
 		this.mode = mode;
 		this.type = type;
+		this.range = range;
 		this.currentValues = value;
 		previous.push(new ObjectArrayList<>(currentValues));
 		this.defaults = defaultValue;
@@ -58,7 +61,7 @@ public class ForgeArray implements IArrayNode
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new ForgeValue(name, tooltip, mode, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save));
+			values.add(new ForgeValue(name, tooltip, mode, type, range, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save));
 		}
 	}
 	
@@ -151,7 +154,7 @@ public class ForgeArray implements IArrayNode
 	public void createNode() {
 		String value = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);
 		currentValues.add(value);
-		values.add(new ForgeValue(name, tooltip, mode, type, value, null, () -> ObjectLists.empty(), isValid::apply, this::save));
+		values.add(new ForgeValue(name, tooltip, mode, type, range, value, null, () -> ObjectLists.empty(), isValid::apply, this::save));
 	}
 	
 	@Override

@@ -65,7 +65,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 		switch(inner.getDataType()) {
 			case COMPOUND: return new CarbonCompound(mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save);
 			case LIST: return new CarbonArray(mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save);
-			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, DataType.bySimple(inner.asSimple()), false, () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save);
+			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, inner, false, () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save);
 			default: return null;
 		}
 	}

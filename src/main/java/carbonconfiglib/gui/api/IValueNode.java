@@ -2,6 +2,7 @@ package carbonconfiglib.gui.api;
 
 import java.util.List;
 
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.utils.ParseResult;
 
@@ -28,6 +29,7 @@ public interface IValueNode extends INode
 	public ParseResult<Boolean> isValid(String value);
 	
 	public DataType getDataType();
+	public IRange getRange();
 	public boolean isForcingSuggestions();
 	public List<Suggestion> getSuggestions();
 }

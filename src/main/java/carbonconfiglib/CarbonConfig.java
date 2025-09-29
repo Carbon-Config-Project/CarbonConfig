@@ -78,8 +78,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 @Mod("carbonconfig")
 public class CarbonConfig {
 	public static final Logger LOGGER = LogUtils.getLogger();
-	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER),
-			FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
+	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	public static BooleanSupplier MOD_GUI = () -> false;
 	ConfigHandler handler;
@@ -90,8 +89,7 @@ public class CarbonConfig {
 	public static HashSetCache<String> MODS_DISABLED;
 
 	public static ShaderInstance modListBackground;
-	public static final VertexFormat BACKGROUND_SCREEN = new VertexFormat(ImmutableMap
-			.<String, VertexFormatElement>builder().put("Position", DefaultVertexFormat.ELEMENT_POSITION).build());
+	public static final VertexFormat BACKGROUND_SCREEN = new VertexFormat(ImmutableMap.<String, VertexFormatElement>builder().put("Position", DefaultVertexFormat.ELEMENT_POSITION).build());
 
 	public CarbonConfig() {
 		NETWORK.init();
@@ -106,28 +104,19 @@ public class CarbonConfig {
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
-			FORGE_SUPPORT = section
-					.addBool("enable-forge-support", true,
-							"Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System")
-					.setRequiredReload(ReloadMode.GAME);
-			ArrayValue blacklist = section
-					.addArray("mod-blacklist", new String[0], "Disables these mods from carbon configs Gui System.",
-							"This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored",
-							"List of Blacklisted ModIds")
-					.setRequiredReload(ReloadMode.GAME);
-			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class,
-					"Allows to pick for a Custom Background for Configs that use the default Background");
-			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false,
-					"Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
-			INGAME_BACKGROUND = section.addBool("ingame-background", false,
-					"Allows to set if the background is always visible or only if you are not in a active world");
-			ConfigSection test = config.add("test").addSubSection("test2").addSubSection("test3").addSubSection("test4")
-					.addSubSection("test5");
+			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
+			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], 
+					"Disables these mods from carbon configs Gui System.",
+					"This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored",
+					"List of Blacklisted ModIds").setRequiredReload(ReloadMode.GAME);
+			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
+			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
+			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
+			ConfigSection test = config.add("test").addSubSection("test2").addSubSection("test3").addSubSection("test4").addSubSection("test5");
 			test.addSubSection("test5-1");
 			test.addSubSection("Test5-2").addBool("TestValue", false);
 
-			handler = CONFIGS.createConfig(config,
-					ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
+			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
 		}
@@ -246,8 +235,7 @@ public class CarbonConfig {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");
 			return;
 		}
-		mc.setScreen(
-				new RequestScreen(texture.asHolder(), Navigator.create(config).withWalker(path), mc.screen, config));
+		mc.setScreen(new RequestScreen(texture.asHolder(), Navigator.create(config).withWalker(path), mc.screen, config));
 	}
 
 	/**
@@ -283,14 +271,12 @@ public class CarbonConfig {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(
-				new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
+		mc.setScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
 	}
 
 	public static boolean hasPermission(Player player, int permissionLevel) {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		if (server.isSingleplayer() && server.isSingleplayerOwner(player.getGameProfile()))
-			return true;
+		if (server.isSingleplayer() && server.isSingleplayerOwner(player.getGameProfile())) return true;
 		return player.hasPermissions(permissionLevel);
 	}
 
@@ -317,7 +303,7 @@ public class CarbonConfig {
 	@OnlyIn(Dist.CLIENT)
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (/* mc.player != null && MOD_GUI.getAsBoolean() && */event.getAction() == GLFW.GLFW_PRESS) {
+		if (/**mc.player != null &&*/ MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
 			mc.setScreen(new ModListScreen(mc.screen));
 		}
 	}

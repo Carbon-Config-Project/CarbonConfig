@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -76,6 +77,8 @@ public class MinecraftValue implements IValueNode
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override
 	public IEntrySettings getSettings() { return null; }
+	@Override
+	public IRange getRange() { return null; }
 	@Override
 	public boolean requiresRestart() { return false; }
 	@Override

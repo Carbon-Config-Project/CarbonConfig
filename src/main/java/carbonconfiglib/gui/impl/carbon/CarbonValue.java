@@ -7,12 +7,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
+import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -24,6 +26,7 @@ public class CarbonValue implements IValueNode, IValueActions
 	Component name;
 	Component tooltip;
 	IEntrySettings settings;
+	IRange range;
 	DataType type;
 	boolean forced;
 	Supplier<List<Suggestion>> suggestions;
@@ -35,12 +38,13 @@ public class CarbonValue implements IValueNode, IValueActions
 	String current;
 	String defaultValue;
 	
-	public CarbonValue(IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, DataType type, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
+	public CarbonValue(IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, IStructuredData data, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
 		this.mode = mode;
 		this.name = name;
 		this.tooltip = tooltip;
 		this.settings = settings;
-		this.type = type;
+		this.type =  DataType.bySimple(data.asSimple());
+		this.range = data.asSimple().getRange();
 		this.forced = forced;
 		this.suggestions = suggestions;
 		this.isValid = isValid;
@@ -73,6 +77,8 @@ public class CarbonValue implements IValueNode, IValueActions
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override
 	public IEntrySettings getSettings() { return settings; }
+	@Override
+	public IRange getRange() { return range; }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override

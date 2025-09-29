@@ -7,6 +7,9 @@ import org.apache.logging.log4j.util.Strings;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.google.common.collect.Iterables;
 
+import carbonconfiglib.api.IRange;
+import carbonconfiglib.api.IRange.DoubleRange;
+import carbonconfiglib.api.IRange.IntegerRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
@@ -19,6 +22,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
@@ -43,6 +47,7 @@ public class ForgeLeaf implements IConfigNode
 	CommentedConfig config;
 	ValueSpec spec;
 	ForgeDataType<?> type;
+	IRange range;
 	boolean isArray;
 	ForgeValue value;
 	ForgeArray array;
@@ -59,6 +64,7 @@ public class ForgeLeaf implements IConfigNode
 			tooltip = comp;
 		}
 		guessDataType();
+		loadRange();
 	}
 	
 	private void guessDataType() {
@@ -74,6 +80,26 @@ public class ForgeLeaf implements IConfigNode
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void loadRange() {
+		try {
+			Object obj = spec.getRange();
+			if(obj == null) return;
+			Class<?> clz = ObfuscationReflectionHelper.getPrivateValue((Class<Object>)obj.getClass(), obj, "clazz");
+			if(clz == Integer.class) {
+				Integer min = ObfuscationReflectionHelper.getPrivateValue((Class<Object>)obj.getClass(), obj, "min");
+				Integer max = ObfuscationReflectionHelper.getPrivateValue((Class<Object>)obj.getClass(), obj, "max");
+				range = new IntegerRange(min, max);
+			}
+			else if(clz == Double.class) {
+				Double min = ObfuscationReflectionHelper.getPrivateValue((Class<Object>)obj.getClass(), obj, "min");
+				Double max = ObfuscationReflectionHelper.getPrivateValue((Class<Object>)obj.getClass(), obj, "max");
+				range = new DoubleRange(min, max);
+			}
+		}
+		catch(Exception e) {e.printStackTrace();}
+	}
+	
 	public boolean isValid() { return type != null; }
 	@Override
 	public List<IConfigNode> getChildren() { return null; }
@@ -81,10 +107,10 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public INode asNode() {
 		if(isArray) {
-			if(array == null) array = new ForgeArray(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
+			if(array == null) array = new ForgeArray(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
 			return array;
 		}
-		if(value == null) value = new ForgeValue(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), getCurrent(), getDefault(), this::getSuggestions, type::parse, this::save);
+		if(value == null) value = new ForgeValue(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrent(), getDefault(), this::getSuggestions, type::parse, this::save);
 		return value;
 	}
 	

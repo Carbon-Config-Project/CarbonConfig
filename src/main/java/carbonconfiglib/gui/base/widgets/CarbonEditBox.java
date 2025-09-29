@@ -27,6 +27,9 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		state.setOwner(this);
 	}
 	
+	public TextState getState() {
+		return state;
+	}
 	
 	@Override
 	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
@@ -44,6 +47,7 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		String value = "";
 		String suggestion;
 		int maxLength = -1;
+		boolean silent;
 		CarbonEditBox owner;
 		
 		public TextState() {
@@ -126,7 +130,7 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		
 		void updateValue(String value) {
 			this.value = value;
-			if(callback != null) {
+			if(callback != null && !silent) {
 				callback.accept(value);
 			}
 			if(suggestion != null && owner != null) {
@@ -152,6 +156,17 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 			if(value == null) return this;
 			if(owner == null) this.value = value;
 			else owner.setValue(value);
+			return this;
+		}
+		
+		public TextState setSilentValue(String value) {
+			if(value == null) return this;
+			if(owner == null) this.value = value;
+			else {
+				silent = true;
+				owner.setValue(value);
+				silent = false;
+			}
 			return this;
 		}
 		
