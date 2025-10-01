@@ -3,27 +3,31 @@ package carbonconfiglib.gui.screens;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.IModInfo.ModVersion;
 
 public class ModListScreen extends BaseCarbonScreen {
-
 	List<ModElement> mods = new ArrayList<>();
 	List<ModButton> activeElements = new ArrayList<>();
-	float xOffset, yOffset, zoom;
+	float[] offset = new float[] {3.0f, 1.0f, 1.0f}; 
 	Screen parentScreen;
 
 	public ModListScreen(Screen parent) {
@@ -55,6 +59,32 @@ public class ModListScreen extends BaseCarbonScreen {
 
 		});
 	}
+	
+	@Override
+	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+		offset[2] = (float) Mth.clamp(offset[2]+pDelta*0.05, 0.5, 2.0);
+		return super.mouseScrolled(pMouseX, pMouseY, pDelta);
+	}
+	
+	@Override
+	public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
+		offset[0] += pDragX*0.01f/offset[2];
+		offset[1] += pDragY*0.01f/offset[2];
+		return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
+	}
+	
+	@Override
+	public void tick() {
+		super.tick();
+		ShaderInstance shader = CarbonConfig.modListBackground;
+		if(shader != null ) {
+			shader.apply();
+			Uniform offset = shader.getUniform("Offset");
+			offset.set(new Vector3f(this.offset));
+			offset.upload();
+			shader.clear();
+		}
+	}
 
 	@Override
 	public void renderBackground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
@@ -66,11 +96,13 @@ public class ModListScreen extends BaseCarbonScreen {
 		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		RenderSystem.setShader(CarbonConfig::getBackgroundShader);
+		if(Minecraft.getInstance().level == null) RenderSystem.setShaderGameTime(System.currentTimeMillis(), partialTicks);
+
 		bufferbuilder.begin(Mode.QUADS, CarbonConfig.BACKGROUND_SCREEN);
-		bufferbuilder.vertex(matrix, x, maxY, 2.f).endVertex();
-		bufferbuilder.vertex(matrix, maxX, maxY, 2.f).endVertex();
-		bufferbuilder.vertex(matrix, maxX, y, 2.f).endVertex();
-		bufferbuilder.vertex(matrix, x, y, 2.f).endVertex();
+		bufferbuilder.vertex(matrix, x, maxY, 2.f).uv(0.f, 1.f).endVertex();
+		bufferbuilder.vertex(matrix, maxX, maxY, 2.f).uv(1.f, 1.f).endVertex();
+		bufferbuilder.vertex(matrix, maxX, y, 2.f).uv(1.f, 0.f).endVertex();
+		bufferbuilder.vertex(matrix, x, y, 2.f).uv(0.f, 0.0f).endVertex();
 		tessellator.end();
 	}
 

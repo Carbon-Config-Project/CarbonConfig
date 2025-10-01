@@ -7,7 +7,8 @@
     "vertex": "carbonconfig:modlist_background",
     "fragment": "carbonconfig:modlist_background",
     "attributes": [
-        "Position"
+        "Position",
+        "UV"
     ],
     "samplers": [],
     "uniforms": [
@@ -44,6 +45,12 @@
             "type": "float",
             "count": 2,
             "values": [1.0, 1.0]
+          },
+          {
+            "name": "Offset",
+            "type": "float",
+            "count": 3,
+            "values": [3.0, 1.0, 1.0]
           }
     ]
 }

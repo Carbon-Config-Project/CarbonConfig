@@ -303,7 +303,7 @@ public class CarbonConfig {
 	@OnlyIn(Dist.CLIENT)
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (/**mc.player != null &&*/ MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
+		if (/* mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS*/ event.getKey() == GLFW.GLFW_KEY_I) {
 			mc.setScreen(new ModListScreen(mc.screen));
 		}
 	}
