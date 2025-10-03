@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.nodes;
+package carbonconfiglib.gui.nodes.base;
 
 import java.util.List;
 
@@ -9,6 +9,10 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.nodes.FolderElement;
+import carbonconfiglib.gui.nodes.IntegerElement;
+import carbonconfiglib.gui.nodes.StringElement;
+import carbonconfiglib.gui.nodes.TestElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import speiger.src.collections.objects.utils.ObjectLists;
@@ -43,7 +47,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 				right = true;
 				setRightComponentsVisible(true);
 			}
-			renderRightPart(poseStack, left+leftWidth+6, top, width-leftWidth-8, height, mouseX, mouseY, selected, partialTicks);
+			renderRightPart(poseStack, left+leftWidth+8, top, width-leftWidth-10, height, mouseX, mouseY, selected, partialTicks);
 		}
 		else if(right) {
 			right = false;
@@ -78,6 +82,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	protected BaseElement createFromType(IValueNode node, DataType type) {
 		if(type == DataType.INTEGER) return new IntegerElement(node);
+		if(type == DataType.STRING) return new StringElement(node);
 		return new TestElement(node);
 	}
 	

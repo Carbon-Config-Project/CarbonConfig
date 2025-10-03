@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
@@ -23,6 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 
 public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> implements ITooltipProvider {
 	ListState<T> state;
@@ -70,7 +72,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 	
 	@Override
 	protected boolean isSelectedItem(int index) {
-		return state.isFramed() || (state.isSelectable() && getEntry(index) == state.getSelected());
+		return state.isSelected(index);
 	}
 	
 	@Override
@@ -186,6 +188,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		boolean enabled = true;
 		boolean visible = true;
 		CarbonList<T> owner;
+		Runnable changeListener;
 				
 		@SafeVarargs
 		public ListState(T... nodes) {
@@ -206,7 +209,12 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			this.nodes.addAll(nodes);
 			this.itemHeight = height;
 		}
-
+		
+		public ListState<T> add(T node) {
+			this.nodes.add(node);
+			return this;
+		}
+		
 		@SuppressWarnings("unchecked")
 		public ListState<T> add(T... nodes) {
 			this.nodes.addAll(Arrays.asList(nodes));
@@ -230,7 +238,10 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		
 		public ListState<T> remove(T entry) {
 			nodes.remove(entry);
-			if(selectedElement == entry) selectedElement = null;
+			if(selectedElement == entry) {
+				selectedElement = null;
+				changeListener.run();
+			}
 			return this;
 		}
 		
@@ -296,6 +307,11 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			return this;
 		}
 		
+		public ListState<T> setChangeListener(Runnable run) {
+			this.changeListener = run;
+			return this;
+		}
+		
 		public ListState<T> setSelectable(boolean value) {
 			allowSelection = value;
 			return this;
@@ -303,6 +319,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		
 		public ListState<T> setSelected(T value) {
 			selectedElement = value;
+			if(changeListener != null) changeListener.run();
 			return this;
 		}
 		
@@ -363,6 +380,10 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			return frame; 
 		}
 		
+		public boolean isSelected(int index) {
+			return isFramed() || (isSelectable() && owner.getEntry(index) == getSelected());
+		}
+		
 		public boolean isEnabled() {
 			return enabled;
 		}
@@ -409,5 +430,46 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		public List<T> getNodes() {
 			return nodes;
 		}
+		public List<T> getSelectedItems() {
+			return selectedElement == null ? ObjectLists.emptyList() : ObjectLists.singleton(selectedElement);
+		}
+	}
+	
+	public static class ListMultiState<T extends ListEntry<T>> extends ListState<T> {
+		Set<T> selected = new ObjectLinkedOpenHashSet<>();
+		
+		@SafeVarargs
+		public ListMultiState(T... nodes) {
+			super(nodes);
+		}
+		
+		public ListMultiState(List<T> nodes) {
+			super(nodes);
+		}
+		
+		@SafeVarargs
+		public ListMultiState(int height, T... nodes) {
+			super(height, nodes);
+		}
+		
+		public ListMultiState(int height, List<T> nodes) {
+			super(height, nodes);
+		}
+		
+		@Override
+		public boolean isSelected(int index) {
+			return isFramed() || isSelectable() && selected.contains(owner.getEntry(index));
+		}
+		
+		@Override
+		public ListState<T> setSelected(T value) {
+			if(selected.contains(value)) selected.remove(value);
+			else selected.add(value);
+			if(changeListener != null) changeListener.run();
+			return this;
+		}
+		
+		@Override
+		public List<T> getSelectedItems() { return selected.isEmpty() ? ObjectLists.emptyList() : new ObjectArrayList<>(selected); }
 	}
 }

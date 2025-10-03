@@ -10,6 +10,8 @@ import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
+import carbonconfiglib.gui.nodes.base.BaseElement;
+import carbonconfiglib.gui.nodes.base.IFolderNode;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;

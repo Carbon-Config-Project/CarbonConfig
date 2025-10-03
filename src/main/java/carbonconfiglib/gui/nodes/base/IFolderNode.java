@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.nodes;
+package carbonconfiglib.gui.nodes.base;
 
 import java.util.function.ObjIntConsumer;
 

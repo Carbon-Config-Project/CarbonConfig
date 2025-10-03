@@ -45,6 +45,20 @@ public class GuiUtils
 {
 	private static final ScissorsStack STACK = new ScissorsStack();
 	
+	public static int brighter(int color, float factor) {
+		int r = (color >> 16) & 0xFF;
+		int g = (color >> 8) & 0xFF;
+		int b = color & 0xFF;
+		int i = (int)(1.0 / (1.0 - factor));
+		if(r == 0 && g == 0 && b == 0) {
+			return (color & 0xFF000000) | ((i & 0xFF) << 16) | ((i & 0xFF) << 8) | (i & 0xFF);
+		}
+		if(r > 0 && r < i) r = i;
+		if(g > 0 && g < i) g = i;
+		if(b > 0 && b < i) b = i;
+		return (color & 0xFF000000) | Math.min(255, (int)(r / factor)) << 16 | Math.min(255, (int)(g / factor)) << 8 | Math.min(255, (int)(b / factor));
+	}
+	
 	public static float calculateScrollOffset(float width, Font font, GuiAlign align, Component text, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
@@ -103,8 +117,6 @@ public class GuiUtils
 			return;
 		}
 		float offset = align.align(textWidth);
-//		GuiComponent.fill(stack, (int)x, (int)y, (int)(x+width), (int)(y+height), 0xFF00FF00);
-		
 		font.drawShadow(stack, text, x + 2 - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 	}
 	

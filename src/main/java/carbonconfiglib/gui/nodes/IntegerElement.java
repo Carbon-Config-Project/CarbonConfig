@@ -8,6 +8,7 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
+import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
 
 public class IntegerElement extends ValueElement
@@ -36,8 +37,7 @@ public class IntegerElement extends ValueElement
 	private boolean setSliderValue() {
 		int range = slider.getState().getRange();
 		if(range <= 0 || range > 99999) return false;
-		try
-		{
+		try {
 			slider.getState().setSilent(Integer.parseInt(node.get()));
 			return true;
 		}

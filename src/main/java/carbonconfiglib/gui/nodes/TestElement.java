@@ -3,6 +3,7 @@ package carbonconfiglib.gui.nodes;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.nodes.base.ValueElement;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 
