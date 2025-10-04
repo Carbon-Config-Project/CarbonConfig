@@ -5,7 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -40,7 +40,7 @@ public class CarbonSlider extends CarbonBaseButton {
 		return state;
 	}
 	
-	public int get() {
+	public long get() {
 		return state.get();
 	}
 	
@@ -50,7 +50,7 @@ public class CarbonSlider extends CarbonBaseButton {
 	
 	protected void setFromMouse(double mouseX) {
 		double progress = Math.max(0, Math.min(1, (mouseX - (x + 4D)) / (width - 8D)));
-		state.set((int)(state.getMin() + (state.getRange() * progress)));
+		state.set((long)(state.getMin() + (state.getRange() * progress)));
 	}
 	
 	@Override
@@ -67,7 +67,7 @@ public class CarbonSlider extends CarbonBaseButton {
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
 		if(state.stepSize != 0 && active && visible) {
-			state.set(get() + (int)(state.stepSize * scroll * (Screen.hasShiftDown() ? 10 : 1) * (Screen.hasControlDown() ? 100 : 1)));
+			state.set(get() + (long)(state.stepSize * scroll * (Screen.hasShiftDown() ? 10D : 1D) * (Screen.hasControlDown() ? 100D : 1D)));
 			return true;
 		}
 		return false;
@@ -76,7 +76,7 @@ public class CarbonSlider extends CarbonBaseButton {
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if(state.stepSize != 0 && active && visible && (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT)) {
-			state.set(get() +(state.stepSize * ((keyCode == GLFW.GLFW_KEY_LEFT ? -1 : 0) + (keyCode == GLFW.GLFW_KEY_RIGHT ? 1 : 0)) * (Screen.hasShiftDown() ? 10 : 1) * (Screen.hasControlDown() ? 100 : 1)));
+			state.set(get() + (state.stepSize * ((keyCode == GLFW.GLFW_KEY_LEFT ? -1L : 0L) + (keyCode == GLFW.GLFW_KEY_RIGHT ? 1L : 0L)) * (Screen.hasShiftDown() ? 10L : 1L) * (Screen.hasControlDown() ? 100L : 1L)));
 			return true;
 		}
 		return false;
@@ -98,30 +98,30 @@ public class CarbonSlider extends CarbonBaseButton {
 	
 	public static class SliderState {
 		private static final DecimalFormat NUMBERS = new DecimalFormat("###,###", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-		int minValue;
-		int maxValue;
-		int value;
-		int stepSize = 1;
-		IntFunction<Component> displayText = T -> Component.literal(NUMBERS.format(T));
+		long minValue;
+		long maxValue;
+		long value;
+		long stepSize = 1L;
+		LongFunction<Component> displayText = T -> Component.literal(NUMBERS.format(T));
 		Component prefix = Component.empty();
 		Component suffix = Component.empty();
 		Consumer<CarbonSlider> listener;
 		CarbonSlider owner;
 		
-		public SliderState(int value, int minValue, int maxValue) {
+		public SliderState(long value, long minValue, long maxValue) {
 			this.minValue = minValue;
 			this.maxValue = maxValue;
 			this.value = value;
 		}
 
-		public SliderState(int value, int minValue, int maxValue, IntFunction<Component> displayText) {
+		public SliderState(long value, long minValue, long maxValue, LongFunction<Component> displayText) {
 			this.minValue = minValue;
 			this.maxValue = maxValue;
 			this.value = value;
 			this.displayText = Objects.requireNonNull(displayText);
 		}
 		
-		public SliderState(int value, int minValue, int maxValue, Component prefix, Component suffix) {
+		public SliderState(long value, long minValue, long maxValue, Component prefix, Component suffix) {
 			this.minValue = minValue;
 			this.maxValue = maxValue;
 			this.value = value;
@@ -129,7 +129,7 @@ public class CarbonSlider extends CarbonBaseButton {
 			this.suffix = Objects.requireNonNull(suffix);
 		}
 		
-		public SliderState(int value, int minValue, int maxValue, IntFunction<Component> displayText, Component prefix, Component suffix) {
+		public SliderState(long value, long minValue, long maxValue, LongFunction<Component> displayText, Component prefix, Component suffix) {
 			this.minValue = minValue;
 			this.maxValue = maxValue;
 			this.value = value;
@@ -148,15 +148,15 @@ public class CarbonSlider extends CarbonBaseButton {
 			return this;
 		}
 		
-		public SliderState setStepSize(int value) {
+		public SliderState setStepSize(long value) {
 			this.stepSize = value;
 			return this;
 		}
 		
-		public SliderState setMaxValue(int maxValue) {
+		public SliderState setMaxValue(long maxValue) {
 			if(maxValue < minValue) return this;
 			this.maxValue = maxValue;
-			int oldValue = value;
+			long oldValue = value;
 			this.value = Math.min(maxValue, value);
 			if(owner != null) {
 				if(oldValue != value) owner.onValueChanged();
@@ -165,10 +165,10 @@ public class CarbonSlider extends CarbonBaseButton {
 			return this;
 		}
 		
-		public SliderState setMinValue(int minValue) {
+		public SliderState setMinValue(long minValue) {
 			if(maxValue < minValue) return this;
 			this.minValue = minValue;
-			int oldValue = value;
+			long oldValue = value;
 			this.value = Math.max(minValue, value);
 			if(owner != null) {
 				if(oldValue != value) owner.onValueChanged();
@@ -177,8 +177,8 @@ public class CarbonSlider extends CarbonBaseButton {
 			return this;
 		}
 		
-		public SliderState set(int value) {
-			int newValue = Math.max(minValue, Math.min(maxValue, value));
+		public SliderState set(long value) {
+			long newValue = Math.max(minValue, Math.min(maxValue, value));
 			if(this.value != newValue) {
 				this.value = newValue;
 				if(owner != null) {
@@ -189,8 +189,8 @@ public class CarbonSlider extends CarbonBaseButton {
 			return this;
 		}
 		
-		public SliderState setSilent(int value) {
-			int newValue = Math.max(minValue, Math.min(maxValue, value));
+		public SliderState setSilent(long value) {
+			long newValue = Math.max(minValue, Math.min(maxValue, value));
 			if(this.value != newValue) {
 				this.value = newValue;
 				if(owner != null) owner.updateMessage();
@@ -216,10 +216,10 @@ public class CarbonSlider extends CarbonBaseButton {
 		public Component getCurrentDisplayText() {
 			return Component.empty().append(prefix).append(displayText.apply(value)).append(suffix);
 		}
-		public int getMin() { return minValue; }
-		public int getMax() { return maxValue; }
-		public int getRange() { return maxValue - minValue; }
-		public int get() { return value; }
+		public long getMin() { return minValue; }
+		public long getMax() { return maxValue; }
+		public long getRange() { return maxValue - minValue; }
+		public long get() { return value; }
 		public CarbonSlider getOwner() { return owner; }
 	}
 }

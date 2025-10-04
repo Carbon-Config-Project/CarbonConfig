@@ -78,6 +78,8 @@ public class JEIValue implements IValueNode
 	@Override
 	public Component getTooltip() { return tooltip; }
 	@Override
+	public String getDefault() { return defaultValue; }
+	@Override
 	public String get() { return current; }
 	@Override
 	public void set(String value) { current = value; }

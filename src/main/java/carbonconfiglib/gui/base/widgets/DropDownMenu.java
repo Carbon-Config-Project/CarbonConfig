@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -46,7 +47,7 @@ public class DropDownMenu<T> extends CarbonButton {
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if(button == 2 && clicked(mouseY, button)) {
+		if(button == 2 && clicked(mouseX, mouseY)) {
 			state.reset();
 			return true;
 		}
@@ -76,11 +77,10 @@ public class DropDownMenu<T> extends CarbonButton {
 		boolean open = mc.screen instanceof DropDownScreen && ((DropDownScreen)mc.screen).owner == this;
 		boolean up = open && ((DropDownScreen)mc.screen).isUp();
 		int k = this.getYImage(this.isHovered || open);
-		super.renderButton(poseStack, mouseX, mouseY, partialTick);
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width-14, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x+width-15, this.y, 0, 46 + k * 20, 15, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		GuiUtils.drawScrollingShadowText(poseStack, mc.font, getMessage(), x+2, y, width-18, height, GuiAlign.CENTER, getFGColor(), hash);
-		GuiUtils.drawScrollingShadowText(poseStack, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), x+width-13, y, 11, height, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(poseStack, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), x+width-15, y, 11, height, GuiAlign.CENTER, getFGColor(), hash);
 	}
 	
 	public static class DropDownScreen<T> extends BaseCarbonScreen {
@@ -208,7 +208,7 @@ public class DropDownMenu<T> extends CarbonButton {
 	public static class DropDownState<T> {
 		Function<T, Component> displayFunction;
 		Function<T, ListEntry<?>> renderFunction;
-		List<T> values;
+		List<T> values = new ObjectArrayList<>();
 		List<T> selected = new ObjectArrayList<>();
 		List<T> defaultSelected = new ObjectArrayList<>();
 		DropDownMenu<T> owner;
@@ -235,7 +235,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		public DropDownState(Function<T, Component> displayFunction, List<T> values) {
 			this.displayFunction = displayFunction;
-			this.values = values;
+			this.values.addAll(values);
 			this.multiSelection = false;
 		}
 		
@@ -246,7 +246,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		public DropDownState(T selected, Function<T, Component> displayFunction, List<T> values) {
 			this.displayFunction = displayFunction;
-			this.values = values;
+			this.values.addAll(values);
 			this.selected.add(selected);
 			this.defaultSelected.add(selected);
 			this.multiSelection = false;
@@ -259,7 +259,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		public DropDownState(List<T> selection, Function<T, Component> displayFunction, List<T> values) {
 			this.displayFunction = displayFunction;
-			this.values = values;
+			this.values.addAll(values);
 			this.selected.addAll(selection);
 			this.defaultSelected.addAll(selection);
 			this.multiSelection = true;
@@ -335,6 +335,11 @@ public class DropDownMenu<T> extends CarbonButton {
 			return this;
 		}
 		
+		public DropDownState<T> allowEmpty(boolean value) {
+			allowEmpty = value;
+			return this;
+		}
+		
 		public DropDownState<T> valueOnly(boolean value) {
 			this.valueOnly = value;
 			return this;
@@ -375,10 +380,37 @@ public class DropDownMenu<T> extends CarbonButton {
 			return multiSelection;
 		}
 		
+		public DropDownState<T> findDefaultSelected(Predicate<T> filter) {
+			defaultSelected.clear();
+			for(int i = 0,m=this.values.size();i<m;i++) {
+				T value = values.get(i);
+				if(filter.test(value)) defaultSelected.add(value);
+			}
+			selected.addAll(defaultSelected);
+			if(!multiSelection) {
+				ensureSingle(defaultSelected);
+				ensureSingle(selected);
+			}
+			updateText();
+			return this;
+		}
+		
+		public DropDownState<T> findSelected(Predicate<T> filter) {
+			selected.clear();
+			for(int i = 0,m=this.values.size();i<m;i++) {
+				T value = values.get(i);
+				if(filter.test(value)) selected.add(value);
+			}
+			if(!multiSelection) ensureSingle(selected);
+			updateText();
+			return this;
+		}
+		
 		public DropDownState<T> replaceSelection(List<T> values) {
 			selected.clear();
 			selected.addAll(values);
 			if(!multiSelection) ensureSingle(selected);
+			if(listener != null) listener.accept(new ObjectArrayList<>(selected));
 			updateText();
 			return this;
 		}
@@ -391,14 +423,34 @@ public class DropDownMenu<T> extends CarbonButton {
 			return this;
 		}
 		
+		public DropDownState<T> setValues(List<T> values) {
+			this.values.clear();
+			this.values.addAll(values);
+			return this;
+		}
+		
+		public DropDownState<T> setDefaultValues(List<T> values) {
+			this.defaultSelected.clear();
+			this.defaultSelected.addAll(values);
+			this.selected.clear();
+			this.selected.addAll(values);
+			if(!multiSelection) {
+				ensureSingle(defaultSelected);
+				ensureSingle(selected);
+			}
+			return this;
+		}
+		
 		public DropDownState<T> setSelected(T value, boolean set) {
 			if(set) {
 				if(!multiSelection) selected.clear();
 				selected.add(value);
+				if(listener != null) listener.accept(new ObjectArrayList<>(selected));
 				updateText();
 				return this;
 			}
 			selected.remove(value);
+			if(listener != null) listener.accept(new ObjectArrayList<>(selected));
 			updateText();
 			return this;
 		}

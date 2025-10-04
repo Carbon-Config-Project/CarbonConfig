@@ -10,11 +10,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTexture;
 import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
-import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.config.ArrayElement;
 import carbonconfiglib.gui.config.CompoundElement;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
@@ -110,9 +110,9 @@ public class ConfigScreen extends ListScreen
 			addRenderableWidget(new CarbonButton(x-1, y-27, 100, 20, Component.translatable("gui.carbonconfig.home"), this::goToRoot));
 		}
 		if(shouldHaveSearch()) {
-			deepSearch = addRenderableWidget(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH_SELECTED, Icon.SEARCH, false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
+			deepSearch = addRenderableWidget(new CarbonIconCheckbox(x+205, 25, 20, 20, Icon.SEARCH.active(), Icon.SEARCH.inactive(), false).withListener(this::onDeepSearch).setTooltip(this, "gui.carbonconfig.deepsearch"));
 			onlyChanged = addRenderableWidget(new CarbonIconCheckbox(x+227, 25, 20, 20, Icon.SET_DEFAULT, Icon.REVERT, false).withListener(this::onChangedButton).setTooltip(this, "gui.carbonconfig.changed_only"));
-			onlyNonDefault = addRenderableWidget(new CarbonIconCheckbox(x+249, 25, 20, 20, Icon.NOT_DEFAULT_SELECTED, Icon.NOT_DEFAULT, false).withListener(this::onDefaultButton).setTooltip(this, "gui.carbonconfig.default_only"));
+			onlyNonDefault = addRenderableWidget(new CarbonIconCheckbox(x+249, 25, 20, 20, Icon.NOT_DEFAULT.active(), Icon.NOT_DEFAULT.inactive(), false).withListener(this::onDefaultButton).setTooltip(this, "gui.carbonconfig.default_only"));
 		}
 		String walkNode = nav.getWalkNode();
 		if(walkNode != null) {

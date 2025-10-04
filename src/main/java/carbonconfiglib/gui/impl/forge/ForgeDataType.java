@@ -35,8 +35,8 @@ public class ForgeDataType<T>
 	private static final Map<Class<?>, ForgeDataType<?>> DATA_TYPES = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 	public static final ForgeDataType<Boolean> BOOLEAN = new ForgeDataType<>(Boolean.class, DataType.BOOLEAN, ForgeHelpers::parseBoolean, Object::toString, null);
 	public static final ForgeDataType<Integer> INTEGER = new ForgeDataType<>(Integer.class, DataType.INTEGER, Helpers::parseInt, Object::toString, ForgeHelpers::getIntLimit);
-	public static final ForgeDataType<Long> LONG = new ForgeDataType<>(Long.class, DataType.INTEGER, ForgeHelpers::parseLong, Object::toString, ForgeHelpers::getLongLimit);
-	public static final ForgeDataType<Float> FLOAT = new ForgeDataType<>(Float.class, DataType.DOUBLE, ForgeHelpers::parseFloat, Object::toString, ForgeHelpers::getFloatLimit);
+	public static final ForgeDataType<Long> LONG = new ForgeDataType<>(Long.class, DataType.LONG, Helpers::parseLong, Object::toString, ForgeHelpers::getLongLimit);
+	public static final ForgeDataType<Float> FLOAT = new ForgeDataType<>(Float.class, DataType.FLOAT, Helpers::parseFloat, Object::toString, ForgeHelpers::getFloatLimit);
 	public static final ForgeDataType<Double> DOUBLE = new ForgeDataType<>(Double.class, DataType.DOUBLE, Helpers::parseDouble, Object::toString, ForgeHelpers::getDoubleLimit);
 	public static final ForgeDataType<String> STRING = new ForgeDataType<>(String.class, DataType.STRING, ForgeHelpers::parseString, Object::toString, null);
 	

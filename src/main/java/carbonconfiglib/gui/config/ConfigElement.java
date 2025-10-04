@@ -7,13 +7,13 @@ import java.util.Map;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.EntrySettingTypes.ArrayRenamer;
-import carbonconfiglib.gui.base.helpers.GuiUtils;
-import carbonconfiglib.gui.screen.ListSelectionScreen;
-import carbonconfiglib.gui.screen.ListSelectionScreen.NodeSupplier;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
+import carbonconfiglib.gui.screen.ListSelectionScreen;
+import carbonconfiglib.gui.screen.ListSelectionScreen.NodeSupplier;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton;
 import carbonconfiglib.gui.widgets.CarbonHoverIconButton.IconInfo;
 import carbonconfiglib.gui.widgets.CarbonIconButton;
@@ -121,9 +121,9 @@ public class ConfigElement extends Element
 			if(isArray()) {
 				setReset = addChild(new CarbonIconButton(0, 0, 18, 18, Icon.DELETE, Component.empty(), this::onDeleted).setIconOnly(), -51);
 				setReset.active = isReset();
-				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN, Icon.MOVE_DOWN_HOVERED, this::onMoveDown);
+				moveDown = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_DOWN.inactive(), Icon.MOVE_DOWN.active(), this::onMoveDown);
 				listeners.add(moveDown);
-				moveUp = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_UP, Icon.MOVE_UP_HOVERED, this::onMoveUp);
+				moveUp = new CarbonHoverIconButton(0, 0, 15, 8, new IconInfo(0, -3, 16, 16), Icon.MOVE_UP.inactive(), Icon.MOVE_UP.active(), this::onMoveUp);
 				listeners.add(moveUp);
 			}
 			else {

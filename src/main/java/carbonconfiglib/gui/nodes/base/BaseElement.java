@@ -9,8 +9,12 @@ import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.nodes.BooleanElement;
+import carbonconfiglib.gui.nodes.DoubleElement;
+import carbonconfiglib.gui.nodes.EnumElement;
 import carbonconfiglib.gui.nodes.FolderElement;
-import carbonconfiglib.gui.nodes.IntegerElement;
+import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
+import carbonconfiglib.gui.nodes.NumberElement.LongElement;
 import carbonconfiglib.gui.nodes.StringElement;
 import carbonconfiglib.gui.nodes.TestElement;
 import net.minecraft.client.Minecraft;
@@ -81,8 +85,12 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	protected BaseElement createFromType(IValueNode node, DataType type) {
+		if(type == DataType.BOOLEAN) return new BooleanElement(node);
 		if(type == DataType.INTEGER) return new IntegerElement(node);
+		if(type == DataType.LONG) return new LongElement(node);
+		if(type == DataType.DOUBLE || type == DataType.FLOAT) return new DoubleElement(node);
 		if(type == DataType.STRING) return new StringElement(node);
+		if(type == DataType.ENUM) return new EnumElement(node);
 		return new TestElement(node);
 	}
 	

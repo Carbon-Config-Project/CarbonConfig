@@ -22,43 +22,37 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class Icon
 {
-	private static final ResourceLocation LOGO_TEXTURE = new ResourceLocation("carbonconfig:textures/gui/logo.png");
-	public static final Icon LOGO = new Icon(LOGO_TEXTURE, 0, 0, 400, 400);
+	public static final IconSheet LOGO_SHEET = new IconSheet(new ResourceLocation("carbonconfig:textures/gui/logo.png"), 400, 400);
+	public static final Icon LOGO = LOGO_SHEET.create(0, 0);
 	
-	private static final ResourceLocation ICONS = new ResourceLocation("carbonconfig:textures/gui/icons.png");
-	public static final Icon DELETE = new Icon(ICONS, 0, 16, 80, 64);
-	public static final Icon REVERT = new Icon(ICONS, 0, 0, 80, 64);
-	public static final Icon SET_DEFAULT = new Icon(ICONS, 16, 0, 80, 64);
-	public static final Icon RELOAD = new Icon(ICONS, 16, 16, 80, 64);
-	public static final Icon RESTART = new Icon(ICONS, 32, 16, 80, 64);
-	public static final Icon SEARCH = new Icon(ICONS, 48, 16, 80, 64);
-	public static final Icon SEARCH_SELECTED = new Icon(ICONS, 48, 32, 80, 64);
-	public static final Icon NOT_DEFAULT = new Icon(ICONS, 32, 0, 80, 64);
-	public static final Icon NOT_DEFAULT_SELECTED = new Icon(ICONS, 48, 0, 80, 64);
-	public static final Icon MOVE_DOWN = new Icon(ICONS, 64, 0, 80, 64);
-	public static final Icon MOVE_DOWN_HOVERED = new Icon(ICONS, 64, 16, 80, 64);
-	public static final Icon MOVE_UP = new Icon(ICONS, 64, 32, 80, 64);
-	public static final Icon MOVE_UP_HOVERED = new Icon(ICONS, 64, 48, 80, 64);
-	public static final Icon SUGGESTIONS = new Icon(ICONS, 48, 48, 80, 64);
-	public static final EnumMap<ConfigType, Icon> TYPE_ICON = create(new Icon(ICONS, 0, 32, 80, 64), new Icon(ICONS, 16, 32, 80, 64), new Icon(ICONS, 32, 32, 80, 64));
-	public static final EnumMap<ConfigType, Icon> MULTITYPE_ICON = create(new Icon(ICONS, 0, 48, 80, 64), new Icon(ICONS, 16, 48, 80, 64), new Icon(ICONS, 32, 48, 80, 64));
+	public static final IconSheet ICONS = new IconSheet(new ResourceLocation("carbonconfig:textures/gui/icons.png"), 80, 80);
 
-	ResourceLocation texture;
+	public static final Icon DELETE = ICONS.create(0, 16);
+	public static final Icon REVERT = ICONS.create(0, 0);
+	public static final Icon SET_DEFAULT = ICONS.create(16, 0);
+	public static final Icon RELOAD = ICONS.create(16, 16);
+	public static final Icon RESTART = ICONS.create(32, 16);
+	public static final IconPair SELECTED = ICONS.horizontalActivityIcon(0, 16, 64);
+	public static final IconPair SEARCH = ICONS.verticalActivityIcon(48, 32, 16);
+	public static final IconPair NOT_DEFAULT = ICONS.horizontalActivityIcon(48, 32, 0);
+	public static final IconPair MOVE_DOWN = ICONS.verticalActivityIcon(64, 16, 0);
+	public static final IconPair MOVE_UP = ICONS.verticalActivityIcon(64, 48, 32);
+	public static final Icon SUGGESTIONS = ICONS.create(48, 48);
+	public static final EnumMap<ConfigType, Icon> TYPE_ICON = create(ICONS.create(0, 32), ICONS.create(16, 32), ICONS.create(32, 32));
+	public static final EnumMap<ConfigType, Icon> MULTITYPE_ICON = create(ICONS.create(0, 48), ICONS.create(16, 48), ICONS.create(32, 48));
+
+	IconSheet sheet;
 	int x;
 	int y;
-	int sheetWidth;
-	int sheetHeight;
 
-	public Icon(ResourceLocation texture, int x, int y, int sheetWidth, int sheetHeight) {
-		this.texture = texture;
+	public Icon(IconSheet sheet, int x, int y) {
+		this.sheet = sheet;
 		this.x = x;
 		this.y = y;
-		this.sheetWidth = sheetWidth;
-		this.sheetHeight = sheetHeight;
 	}
 
 	public ResourceLocation getTexture() {
-		return texture;
+		return sheet.texture();
 	}
 	
 	public float getX() {
@@ -70,11 +64,11 @@ public class Icon
 	}
 
 	public float getSheetWidth() {
-		return sheetWidth;
+		return sheet.width();
 	}
 
 	public float getSheetHeight() {
-		return sheetHeight;
+		return sheet.height();
 	}
 	
 	private static EnumMap<ConfigType, Icon> create(Icon first, Icon second, Icon third) {
@@ -83,5 +77,63 @@ public class Icon
 		icons.put(ConfigType.SHARED, second);
 		icons.put(ConfigType.SERVER, third);
 		return icons;
+	}
+	
+	public static class IconSheet {
+		ResourceLocation texture;
+		int width;
+		int height;
+		
+		public IconSheet(ResourceLocation texture, int width, int height) {
+			this.texture = texture;
+			this.width = width;
+			this.height = height;
+		}
+		
+		public Icon create(int x, int y) {
+			return new Icon(this, x, y);
+		}
+		
+		public IconPair createActivityIcon(int x, int y, int x2, int y2) {
+			return new IconPair(new Icon(this, x, y), new Icon(this, x2, y2));
+		}
+		
+		public IconPair verticalActivityIcon(int x, int y1, int y2) {
+			return new IconPair(new Icon(this, x, y1), new Icon(this, x, y2));
+		}
+		
+		public IconPair horizontalActivityIcon(int x1, int x2, int y) {
+			return new IconPair(new Icon(this, x1, y), new Icon(this, x2, y));
+		}
+		
+		public ResourceLocation texture() {
+			return texture;
+		}
+		
+		public int width() {
+			return width;
+		}
+		
+		public int height() {
+			return height;
+		}
+	}
+	
+	public static class IconPair {
+		Icon active;
+		Icon inactive;
+		
+		public IconPair(Icon active, Icon inactive) {
+			this.active = active;
+			this.inactive = inactive;
+		}
+		
+		public Icon active() {
+			return active; 
+		}
+		
+		public Icon inactive() {
+			return inactive;
+		}
 	}
 }

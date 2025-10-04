@@ -37,6 +37,8 @@ public class DataType
 {
 	public static final DataType BOOLEAN = new DataType(false, "false", BooleanElement::new, BooleanElement::new, BooleanElement::new);
 	public static final DataType INTEGER = new DataType(false, "0", NumberElement::new, NumberElement::new, NumberElement::new);
+	public static final DataType LONG = new DataType(false, "0", NumberElement::new, NumberElement::new, NumberElement::new);
+	public static final DataType FLOAT = new DataType(false, "0.0", NumberElement::new, NumberElement::new, NumberElement::new);
 	public static final DataType DOUBLE = new DataType(false, "0.0", NumberElement::new, NumberElement::new, NumberElement::new);
 	public static final DataType STRING = new DataType(true, " ", StringElement::new, StringElement::new, StringElement::new);
 	public static final DataType ENUM = new DataType(true, " ", EnumElement::new, EnumElement::new, EnumElement::new);
@@ -93,6 +95,8 @@ public class DataType
 		switch(type) {
 			case BOOLEAN: return BOOLEAN;
 			case INTEGER: return INTEGER;
+			case LONG: return LONG;
+			case FLOAT: return FLOAT;
 			case DOUBLE: return DOUBLE;
 			case STRING: return STRING;
 			case ENUM: return ENUM;

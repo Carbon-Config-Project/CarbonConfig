@@ -9,9 +9,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
-import carbonconfiglib.gui.widgets.Icon;
+import carbonconfiglib.gui.widgets.Icon.IconPair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,13 +23,16 @@ public class CarbonCheckBox extends Checkbox implements ITooltipProvider {
 
 	public CarbonCheckBox(int x, int y, int width, int height, CheckBoxState state) {
 		super(x, y, width, height, Component.empty(), state.value);
+		this.state = state;
 	}
 
 	@Override
 	public void onPress() {
-		if (state.callback != null) {
-			this.state.callback.accept(state);
-		}
+		state.updateValue(!state.getValue());
+	}
+	
+	public CheckBoxState getState() {
+		return state;
 	}
 
 	@Override
@@ -59,21 +61,17 @@ public class CarbonCheckBox extends Checkbox implements ITooltipProvider {
 
 	@Override
 	public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-		Minecraft minecraft = Minecraft.getInstance();
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		RenderSystem.enableDepthTest();
-		Font font = minecraft.font;
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		blit(pPoseStack, this.x, this.y, this.isFocused() ? 20.0F : 0.0F, state.value && state.selectedIcon == null ? 20.0F : 0.0F, 20, this.height, 64, 64);
-		if (this.state.selectedIcon != null) {
-			GuiUtils.drawTextureRegion(pPoseStack, x + 2, y + 2, width - 4, height - 4, state.value ? state.selectedIcon : state.unselectedIcon, 16, 16);
-		}
-		renderBg(pPoseStack, minecraft, pMouseX, pMouseY);
+		
+		GuiUtils.drawTextureRegion(pPoseStack, x, y, isMouseOver(pMouseX, pMouseY) ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
+		GuiUtils.drawTextureRegion(pPoseStack, x+2, y+2, width-4, height-4, selected() ? state.getIcon().active() : state.getIcon().inactive(), 16, 16);
 		if (state.label != null) {
-			drawString(pPoseStack, font, state.label, this.x + 24, this.y + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
+			drawString(pPoseStack, Minecraft.getInstance().font, state.label, this.x + 24, this.y + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
 		}
 	}
 
@@ -82,8 +80,7 @@ public class CarbonCheckBox extends Checkbox implements ITooltipProvider {
 		Consumer<CheckBoxState> callback;
 		boolean value = true;
 		Component label;
-		Icon selectedIcon;
-		Icon unselectedIcon;
+		IconPair icon;
 		CarbonCheckBox owner;
 
 		public CheckBoxState() {
@@ -102,13 +99,13 @@ public class CarbonCheckBox extends Checkbox implements ITooltipProvider {
 			this.label = label;
 		}
 		
-		public CheckBoxState(Icon active, Icon inactive) {
-			withIcons(active, inactive);
+		public CheckBoxState(IconPair icon) {
+			withIcons(icon);
 		}
 		
-		public CheckBoxState(boolean value, Icon active, Icon inactive) {
+		public CheckBoxState(boolean value, IconPair icon) {
 			this.value = value;
-			withIcons(active, inactive);
+			withIcons(icon);
 		}
 
 		void setOwner(CarbonCheckBox owner) {
@@ -129,21 +126,16 @@ public class CarbonCheckBox extends Checkbox implements ITooltipProvider {
 			return label;
 		}
 
-		public CheckBoxState withIcons(Icon active, Icon inactive) {
-			this.selectedIcon = active;
-			this.unselectedIcon = inactive;
-			if((selectedIcon != null) != (unselectedIcon != null)) throw new IllegalStateException("You need to set the state properly");
+		public CheckBoxState withIcons(IconPair pair) {
+			this.icon = pair;
+			if(icon != null && (icon.active() == null || icon.inactive() == null)) throw new IllegalStateException("You need to set the state properly");
 			return this;
 		}
-
-		public Icon getActiveIcon() {
-			return selectedIcon;
+		
+		public IconPair getIcon() {
+			return icon;
 		}
-
-		public Icon getInactiveIcon() {
-			return unselectedIcon;
-		}
-
+		
 		public CheckBoxState setTooltip(Component tooltip) {
 			this.tooltip = T -> tooltip;
 			return this;

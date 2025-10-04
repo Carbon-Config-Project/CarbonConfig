@@ -24,6 +24,7 @@ import carbonconfiglib.utils.ParseResult;
 public interface IValueNode extends INode
 {
 	public String get();
+	public String getDefault();
 	public void set(String value);
 	
 	public ParseResult<Boolean> isValid(String value);
