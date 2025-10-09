@@ -40,7 +40,7 @@ void main()
     vec3 p0 = vec3(uvs / Offset.z, 0.0);
     vec4 finalColor = vec4(0.0f);
     for(int i = 0, n = 3; i<n; i++) {
-        vec3 px = p0 + nrand3(vec2(i * 16, i + 48)) + ( i == 0 ? (Offset * 0.01) : (i == 1 ? Offset * 0.32 : Offset * -0.13));
+        vec3 px = p0 + nrand3(vec2(i * 16, i + 48)) + ( i == 0 ? (Offset * 0.01) : (i == 1 ? atan(Offset.xyz * vec3(0.35)) : tan(Offset.xyz * vec3(0.13))));
         finalColor += starLayer(px.xy, iTime, colors[i]);
     }
     fragColor = finalColor;
