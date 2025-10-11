@@ -26,8 +26,13 @@ public class EnumElement extends ValueElement
 		state.setValues(node.getSuggestions());
 		state.findDefaultSelected(T -> T.getValue().equals(node.getDefault()));
 		state.findSelected(T -> T.getValue().equals(node.get()));
-		text.getState().setValue(node.get());
+		readValue();
 		text.getState().setCallback(this::onTextChanged);
+	}
+	
+	@Override
+	protected void readValue() {
+		text.getState().setValue(node.get());		
 	}
 	
 	private void onTextChanged(String value) {

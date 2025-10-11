@@ -2,6 +2,7 @@ package carbonconfiglib.plugins.jei.configs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -64,6 +65,12 @@ public class JEILeaf implements IConfigNode
 	public boolean isLeaf() { return true; }
 	@Override
 	public boolean isRoot() { return false; }
+	@Override
+	public boolean isDefault() {
+		if(value != null && value.isDefault()) return true;
+		if(array != null && array.isDefault()) 	return true;
+		return Objects.equals(JEIHelpers.getValue(entry), JEIHelpers.getDefault(entry));
+	}
 	
 	@Override
 	public boolean isChanged() {
@@ -86,6 +93,7 @@ public class JEILeaf implements IConfigNode
 	
 	@Override
 	public void setDefault() {
+		if(isDefault()) return;
 		asNode();
 		if(isArray) array.setDefault();
 		else value.setDefault();

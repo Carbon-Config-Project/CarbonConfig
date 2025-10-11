@@ -135,5 +135,9 @@ public class Icon
 		public Icon inactive() {
 			return inactive;
 		}
+		
+		public IconPair invert() {
+			return new IconPair(inactive, active);
+		}
 	}
 }

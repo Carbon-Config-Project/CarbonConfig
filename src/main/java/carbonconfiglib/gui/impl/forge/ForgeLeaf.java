@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.logging.log4j.util.Strings;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
+import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 
 import carbonconfiglib.api.IRange;
@@ -159,6 +160,12 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() {
+		if(value != null && value.isDefault()) return true;
+		if(array != null && array.isDefault()) return true;
+		return Objects.equal(getDefault(), getCurrent());
+	}
+	@Override
 	public boolean isChanged() {
 		if(value != null && value.isChanged()) return true;
 		if(array != null && array.isChanged()) 	return true;
@@ -179,6 +186,7 @@ public class ForgeLeaf implements IConfigNode
 	
 	@Override
 	public void setDefault() {
+		if(isDefault()) return;
 		asNode();
 		if(isArray) array.setDefault();
 		else value.setDefault();

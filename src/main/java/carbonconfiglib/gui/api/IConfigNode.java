@@ -32,6 +32,7 @@ public interface IConfigNode
 	public boolean isRoot();
 	
 	public boolean isChanged();
+	public boolean isDefault();
 	public void setPrevious();
 	public void setDefault();
 	public void save();

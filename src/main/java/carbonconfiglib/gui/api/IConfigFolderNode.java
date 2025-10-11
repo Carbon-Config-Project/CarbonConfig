@@ -29,13 +29,29 @@ public interface IConfigFolderNode extends IConfigNode
 	@Override
 	public default boolean isRoot() { return false; }
 	@Override
-	public default boolean isChanged() { return false; }
+	public default boolean isChanged() {
+		for(IConfigNode node : getChildren()) {
+			if(node.isChanged()) return true;
+		}
+		return false; 
+	}
+	@Override
+	public default boolean isDefault() {
+		for(IConfigNode node : getChildren()) {
+			if(!node.isDefault()) return false;
+		}
+		return true;
+	}
 	@Override
 	public default void save() {}
 	@Override
-	public default void setPrevious() {}
+	public default void setPrevious() {
+		getChildren().forEach(IConfigNode::setPrevious);
+	}
 	@Override
-	public default void setDefault() {}
+	public default void setDefault() {
+		getChildren().forEach(IConfigNode::setDefault);
+	}
 	@Override
 	public default boolean requiresRestart() { return false; }
 	@Override

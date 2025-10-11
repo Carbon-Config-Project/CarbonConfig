@@ -20,9 +20,14 @@ public abstract class NumberElement extends ValueElement
 	
 	public NumberElement(IValueNode node) {
 		super(node);
-		text.getState().setValue(node.get());
+		readValue();
 		text.getState().setCallback(this::onTextChanged);
 		generateSlider(node.getRange(), slider.getState());
+	}
+	
+	@Override
+	protected void readValue() {
+		text.getState().setValue(node.get());		
 	}
 		
 	protected boolean setSliderValue() {

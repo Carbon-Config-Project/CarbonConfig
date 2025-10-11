@@ -4,5 +4,5 @@ import java.util.function.ObjIntConsumer;
 
 public interface IFolderNode
 {
-	public void setCallbacks(ObjIntConsumer<BaseElement> nodes);
+	public void setCallbacks(ObjIntConsumer<BaseElement> listener);
 }

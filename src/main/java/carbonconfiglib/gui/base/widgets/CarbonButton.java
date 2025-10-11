@@ -42,9 +42,7 @@ public class CarbonButton extends CarbonBaseButton {
 	public void renderIcon(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
 		int j = getFGColor();
 		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		float minX = x + 4 + (this.width / 2) - (width / 2);
-		GuiUtils.drawTextureRegion(pPoseStack, minX, y + (height - 8) / 2, 11, 11, icon.get(), 16, 16);
-//		GuiUtils.drawTextureRegion(pPoseStack, x + (width / 2) - 5.5F, y + height / 2 - 5.5F, 11, 11, icon.get(), 16, 16);
+		GuiUtils.drawTextureRegion(pPoseStack, x + (width >> 1) - 6, y + (height >> 1) - 6, 11, 11, icon.get(), 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 

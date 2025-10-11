@@ -66,6 +66,8 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() { return value == null ? entry.isDefault() : value.isDefault(); }
+	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
 	@Override
 	public void setPrevious() {
@@ -73,7 +75,7 @@ public class ConfigLeaf implements IConfigNode
 	}
 	@Override
 	public void setDefault() {
-		if(value != null) value.setDefault();		
+		if(!isDefault()) asNode().setDefault();
 	}
 	@Override
 	public void save() {

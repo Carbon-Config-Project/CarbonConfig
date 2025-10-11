@@ -419,6 +419,7 @@ public class DropDownMenu<T> extends CarbonButton {
 			selected.clear();
 			selected.addAll(defaultSelected);
 			if(!multiSelection) ensureSingle(selected);
+			if(listener != null) listener.accept(new ObjectArrayList<>(selected));
 			updateText();
 			return this;
 		}

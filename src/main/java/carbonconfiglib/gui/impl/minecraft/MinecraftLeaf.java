@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
+import java.util.Objects;
 
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
@@ -51,6 +52,8 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() { return value == null ? Objects.equals(entry.get(), entry.getDefault()) : value.isDefault(); }
+	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
 	@Override
 	public void setPrevious() {
@@ -59,7 +62,7 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public void setDefault() {
-		if(value != null) value.setDefault();
+		if(!isDefault()) asNode().setDefault();
 	}
 	
 	@Override

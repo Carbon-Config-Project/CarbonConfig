@@ -1,33 +1,60 @@
 package carbonconfiglib.gui.nodes.base;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.DataType;
+import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.base.widgets.CarbonButton;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.nodes.ArrayElement;
 import carbonconfiglib.gui.nodes.BooleanElement;
+import carbonconfiglib.gui.nodes.CompoundElement;
 import carbonconfiglib.gui.nodes.DoubleElement;
 import carbonconfiglib.gui.nodes.EnumElement;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
 import carbonconfiglib.gui.nodes.NumberElement.LongElement;
 import carbonconfiglib.gui.nodes.StringElement;
-import carbonconfiglib.gui.nodes.TestElement;
+import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 public abstract class BaseElement extends ListEntry<BaseElement>
 {
 	protected IElementContext context;
+	private IArrayNode array;
 	private boolean right;
 	protected int layer;
+	private CarbonButton revert;
+	private CarbonButton reset;
+	private CarbonButton suggestion;
+	private CarbonCheckBox edit;
 	
 	public BaseElement() {
+		if(showControls()) {
+			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onRevert()).withIcon(Optional.of(Icon.REVERT)));
+			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)));
+			if(isValue()) {
+				suggestion = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> showSuggestions()).withIcon(Optional.of(Icon.SUGGESTIONS)));
+				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> setEditing(right))));
+			}
+		}
+	}
+	
+	public final void setArray(IArrayNode array) {
+		this.array = array;
 	}
 	
 	public final void setContext(IElementContext context) {
@@ -51,7 +78,14 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 				right = true;
 				setRightComponentsVisible(true);
 			}
-			renderRightPart(poseStack, left+leftWidth+8, top, width-leftWidth-10, height, mouseX, mouseY, selected, partialTicks);
+			if(!showControls()) {
+				renderRightPart(poseStack, left+leftWidth+8, top, width-leftWidth-10, height, mouseX, mouseY, selected, partialTicks);
+				return;
+			}
+			int newWidth = width-leftWidth-10-80;
+			int renderWidth = Math.min((newWidth + 80) >> 1, newWidth);
+			renderControls(poseStack, left+width-78, top, 78, height, mouseX, mouseY, selected, partialTicks);
+			renderRightPart(poseStack, left+leftWidth+8, top, renderWidth, height, mouseX, mouseY, selected, partialTicks);
 		}
 		else if(right) {
 			right = false;
@@ -60,11 +94,44 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	protected abstract void setRightComponentsVisible(boolean value);
+	protected abstract boolean isValue();
+	protected boolean showControls() { return true; }
+	protected boolean shouldRenderIndex() { return array != null; }
+	protected int index(INode node) { return array == null ? -1 : array.indexOf(node); }
 	
 	public abstract void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	
 	public abstract void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
-
+	
+	public void renderControls(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		left-=1;
+		render(revert, left+60, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
+		render(reset, left+40, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
+		render(suggestion, left+20, top, null, stack, mouseX, mouseY, partialTicks);
+		render(edit, left, top, null, stack, mouseX, mouseY, partialTicks);
+	}
+	
+	private void render(AbstractWidget widget, int x, int y, BooleanSupplier active, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+		if(widget == null) return;
+		widget.x = x;
+		widget.y = y;
+		if(active != null) widget.active = active.getAsBoolean();
+		widget.render(stack, mouseX, mouseY, partialTicks);
+	}
+	
+	
+	protected abstract boolean isChanged();
+	protected abstract boolean isNotDefault();
+	protected abstract void onRevert();
+	protected abstract void onReset();
+	
+	protected void showSuggestions() {
+		
+	}
+	
+	protected void setEditing(boolean value) {
+		
+	}
 	
 	public List<BaseElement> getChildNodes() {
 		return ObjectLists.empty();
@@ -76,12 +143,12 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	protected BaseElement createNode(INode node) {
-		return switch(node.getNodeType()) {
-			case COMPOUND -> null;
-			case LIST -> null;
-			case SIMPLE -> createFromType(node.asValue(), node.asValue().getDataType());
-			default -> throw new IllegalStateException("Unknown Node Type");
-		};
+		switch(node.getNodeType()) {
+			case COMPOUND: return new CompoundElement(node.asCompound());
+			case LIST: return new ArrayElement(node.asArray());
+			case SIMPLE: return createFromType(node.asValue(), node.asValue().getDataType());
+			default: throw new IllegalStateException("Unknown Node Type");
+		}
 	}
 	
 	protected BaseElement createFromType(IValueNode node, DataType type) {
@@ -91,7 +158,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		if(type == DataType.DOUBLE || type == DataType.FLOAT) return new DoubleElement(node);
 		if(type == DataType.STRING) return new StringElement(node);
 		if(type == DataType.ENUM) return new EnumElement(node);
-		return new TestElement(node);
+		return null;
 	}
 	
 	protected final Font getFont() {

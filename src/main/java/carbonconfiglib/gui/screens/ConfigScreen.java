@@ -7,9 +7,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
-import carbonconfiglib.gui.config.ElementList;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IElementContext;
@@ -83,12 +83,13 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
 		BackgroundTypes background = BackgroundTypes.AMETHYST;
-		ElementList.renderBackground(0, width, 0, height, 0F, background.getTexture());
-		ElementList.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, background.getTexture());
+		GuiUtils.renderBackground(0, width, 0, height, 0F, background.getTexture());
+		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, BackgroundTypes.AMETHYST.getTexture());
 	}
 	
 	@Override
 	public void renderForeground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
+		GuiUtils.renderListShadow(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
 		int widthOne = calculateWidth(0);
 		if(!rowOne.isScrollbarVisible() && !rowTwo.isEmpty()) {
 			GuiComponent.fill(matrix, widthOne, (int)(height * 0.15F), widthOne+4, (int)(height * 0.8F), 0xFF000000);
@@ -98,7 +99,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 			GuiComponent.fill(matrix, widthTwo, (int)(height * 0.15F), widthTwo+4, (int)(height * 0.8F), 0xFF000000);
 		}
 		int widthThree = (int)(width * 0.42F) - 4;
-		if(rowThree.isVisible() && !rowThree.isScrollbarVisible()) {
+		if(rowThree.isVisible()) {
 			GuiComponent.fill(matrix, widthThree, (int)(height * 0.15F), widthThree+4, (int)(height * 0.8F), 0xFF000000);
 		}
 	}

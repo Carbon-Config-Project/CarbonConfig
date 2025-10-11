@@ -13,8 +13,13 @@ public class DoubleElement extends ValueElement
 	ParseResult<Boolean> result;
 	public DoubleElement(IValueNode node) {
 		super(node);
-		text.getState().setValue(node.get());
+		readValue();
 		text.getState().setCallback(this::onTextChanged);
+	}
+	
+	@Override
+	protected void readValue() {
+		text.getState().setValue(node.get());
 	}
 	
 	private void onTextChanged(String value) {

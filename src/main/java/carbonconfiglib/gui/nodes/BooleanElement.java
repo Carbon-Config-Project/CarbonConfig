@@ -14,9 +14,15 @@ public class BooleanElement extends ValueElement
 	
 	public BooleanElement(IValueNode node) {
 		super(node);
+		readValue();
+	}
+	
+	
+	@Override
+	protected void readValue() {
 		box.getState().setValue(Boolean.parseBoolean(node.get()));
 	}
-
+	
 	@Override
 	protected void setRightComponentsVisible(boolean value) {
 		box.visible = value;
