@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.impl.carbon;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -130,6 +131,17 @@ public class CarbonArray implements IArrayNode, IValueActions
 		swapValues(index, index-1);
 	}
 	
+	@Override
+	public void swap(int oldIndex, int newIndex) {
+		if(oldIndex >= values.size() || oldIndex < 0) return;
+		if(newIndex >= values.size() || newIndex < 0) return;
+		int start = oldIndex < newIndex ? oldIndex : newIndex;
+		int end = oldIndex < newIndex ? newIndex : oldIndex;
+		boolean inverse = newIndex < oldIndex;
+		Collections.rotate(currentValues.subList(start, end+1), inverse ? 1 : -1);
+		Collections.rotate(values.subList(start, end+1), inverse ? 1 : -1);
+	}
+	
 	private void swapValues(int from, int to) {
 		if(from >= values.size() || from < 0) return;
 		if(to >= values.size() || to < 0) return;
@@ -154,11 +166,13 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 
 	@Override
-	public void createNode() {
-		String defaultString = defaults.isEmpty() ? inner.generateDefaultValue(this::getDefaultValue) : defaults.get(0);
+	public void createNode(String value) {
+		if(value == null) {
+			value = defaults.isEmpty() ? inner.generateDefaultValue(this::getDefaultValue) : defaults.get(0);
+		}
 		int index = currentValues.size();
-		currentValues.add(defaultString);
-		values.add(addEntry(defaultString, "", index));
+		currentValues.add(value);
+		values.add(addEntry(value, "", index));
 	}
 	
 	private String getDefaultValue(SimpleData data) {

@@ -2,10 +2,12 @@ package carbonconfiglib.gui.nodes.base;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.BooleanSupplier;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.IConfigNode;
@@ -15,14 +17,16 @@ import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.base.widgets.DropDownMenu;
+import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.nodes.ArrayElement;
 import carbonconfiglib.gui.nodes.BooleanElement;
 import carbonconfiglib.gui.nodes.CompoundElement;
 import carbonconfiglib.gui.nodes.DoubleElement;
-import carbonconfiglib.gui.nodes.EnumElement;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
 import carbonconfiglib.gui.nodes.NumberElement.LongElement;
+import carbonconfiglib.gui.nodes.SelectionElement;
 import carbonconfiglib.gui.nodes.StringElement;
 import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.Minecraft;
@@ -39,7 +43,8 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	protected int layer;
 	private CarbonButton revert;
 	private CarbonButton reset;
-	private CarbonButton suggestion;
+	protected DropDownState<Suggestion> suggestionState = new DropDownState<Suggestion>(T -> Component.literal(T.getName())).allowEmpty(false).withDynamicValues(this::getSuggestions).withCustomWidth(OptionalInt.of(200)).withXOffset(-180).withIcon(Icon.SUGGESTIONS).asSimpleButton(true);
+	private DropDownMenu<Suggestion> suggestion;
 	private CarbonCheckBox edit;
 	
 	public BaseElement() {
@@ -47,8 +52,8 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onRevert()).withIcon(Optional.of(Icon.REVERT)));
 			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)));
 			if(isValue()) {
-				suggestion = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> showSuggestions()).withIcon(Optional.of(Icon.SUGGESTIONS)));
-				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> setEditing(right))));
+				suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState));
+				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> setEditable(T.getValue()))));
 			}
 		}
 	}
@@ -60,6 +65,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	public final void setContext(IElementContext context) {
 		this.context = context;
 		setRightComponentsVisible(false);
+		setEditable(false);
 	}
 	
 	public final void setLayer(int layer) {
@@ -93,6 +99,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		}
 	}
 	
+	public abstract void setEditable(boolean value);
 	protected abstract void setRightComponentsVisible(boolean value);
 	protected abstract boolean isValue();
 	protected boolean showControls() { return true; }
@@ -105,9 +112,15 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public void renderControls(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		left-=1;
-		render(revert, left+60, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
-		render(reset, left+40, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
-		render(suggestion, left+20, top, null, stack, mouseX, mouseY, partialTicks);
+		left+=60;
+		render(revert, left, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
+		left -=20;
+		render(reset, left, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
+		if(!getSuggestions().isEmpty()) {
+			left -=20;
+			render(suggestion, left, top, null, stack, mouseX, mouseY, partialTicks);
+		}
+		left -=20;
 		render(edit, left, top, null, stack, mouseX, mouseY, partialTicks);
 	}
 	
@@ -119,17 +132,13 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		widget.render(stack, mouseX, mouseY, partialTicks);
 	}
 	
-	
+	protected abstract List<Suggestion> getSuggestions();
 	protected abstract boolean isChanged();
 	protected abstract boolean isNotDefault();
 	protected abstract void onRevert();
 	protected abstract void onReset();
 	
 	protected void showSuggestions() {
-		
-	}
-	
-	protected void setEditing(boolean value) {
 		
 	}
 	
@@ -152,12 +161,12 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	protected BaseElement createFromType(IValueNode node, DataType type) {
+		if(type == DataType.ENUM || node.isForcingSuggestions()) return new SelectionElement(node);
 		if(type == DataType.BOOLEAN) return new BooleanElement(node);
 		if(type == DataType.INTEGER) return new IntegerElement(node);
 		if(type == DataType.LONG) return new LongElement(node);
 		if(type == DataType.DOUBLE || type == DataType.FLOAT) return new DoubleElement(node);
 		if(type == DataType.STRING) return new StringElement(node);
-		if(type == DataType.ENUM) return new EnumElement(node);
 		return null;
 	}
 	

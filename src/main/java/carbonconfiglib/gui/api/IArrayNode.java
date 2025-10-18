@@ -28,9 +28,10 @@ public interface IArrayNode extends INode
 	
 	public List<Suggestion> getSuggestions();
 	
-	public void createNode();
+	public void createNode(String value);
 	public void removeNode(int index);
 	public int indexOf(INode value);
+	public default void swap(int oldIndex, int newIndex) {}
 	public void moveUp(int index);
 	public void moveDown(int index);
 }

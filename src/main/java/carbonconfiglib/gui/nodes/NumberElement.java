@@ -29,6 +29,13 @@ public abstract class NumberElement extends ValueElement
 	protected void readValue() {
 		text.getState().setValue(node.get());		
 	}
+	
+	@Override
+	public void setEditable(boolean value) {
+		slider.active = value;
+		text.active = value;
+		if(!value) text.setFocus(false);
+	}
 		
 	protected boolean setSliderValue() {
 		if(slider.getState().getRange() <= 0) return false;

@@ -5,18 +5,23 @@ import java.util.function.ObjIntConsumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
+import carbonconfiglib.gui.base.widgets.DropDownMenu;
+import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
+import carbonconfiglib.gui.nodes.base.ISortableNode;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.utils.ObjectLists;
 
-public class ArrayElement extends NodeElement implements IFolderNode
+public class ArrayElement extends NodeElement implements IFolderNode, ISortableNode
 {
 	IArrayNode node;
 	CarbonButton button;
@@ -32,6 +37,8 @@ public class ArrayElement extends NodeElement implements IFolderNode
 	protected void setRightComponentsVisible(boolean value) {}
 	@Override
 	protected boolean isValue() { return false; }
+	@Override
+	public void setEditable(boolean value) {}
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.x = left;
@@ -62,6 +69,11 @@ public class ArrayElement extends NodeElement implements IFolderNode
 	}
 	
 	@Override
+	public void onSwapped(int oldIndex, int newIndex) {
+		node.swap(oldIndex, newIndex);
+	}
+	
+	@Override
 	public void setCallbacks(ObjIntConsumer<BaseElement> listener) {
 		this.listener = listener;
 	}
@@ -71,22 +83,23 @@ public class ArrayElement extends NodeElement implements IFolderNode
 		listener.accept(this, layer);
 	}
 	
-	private void addElement() {
-		node.createNode();
+	private void addElement(String value) {
+		node.createNode(value);
 		listener.accept(this, layer);
 	}
 	
 	public static class AddElement extends BaseElement {
 		ArrayElement owner;
-		CarbonButton button = addChild(new CarbonButton(0, 0, 120, 20, Component.literal("New Element"), this::addNewElement));
+		DropDownMenu<Suggestion> selector = addChild(new DropDownMenu<>(0, 0, 120, 20, new DropDownState<Suggestion>(T -> Component.literal(T.getName())).allowEmpty(true).withEmpty(Component.literal("Default")).asSimpleButton(true).withListener(this::onElementSelected)));
 		
 		public AddElement(ArrayElement owner) {
 			this.owner = owner;
+			selector.getState().setValues(owner.node.getSuggestions());
 		}
 
 		@Override
 		protected void setRightComponentsVisible(boolean value) {
-			button.visible = value;
+			selector.visible = value;
 		}
 
 		@Override
@@ -100,17 +113,30 @@ public class ArrayElement extends NodeElement implements IFolderNode
 		}
 		
 		@Override
+		public boolean isDraggable() {
+			return false;
+		}
+		
+		@Override
+		protected List<Suggestion> getSuggestions() {
+			return ObjectLists.empty();
+		}
+		
+		@Override
+		public void setEditable(boolean value) {}
+		
+		@Override
 		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {}
 
 		@Override
 		public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.x = left + (width >> 1) - (button.getWidth() >> 1);
-			button.y = top;
-			button.render(stack, mouseX, mouseY, partialTicks);
+			selector.x = left + (int)(width * 0.18F);
+			selector.y = top;
+			selector.render(stack, mouseX, mouseY, partialTicks);
 		}
 		
-		protected void addNewElement(Button button) {
-			owner.addElement();
+		protected void onElementSelected(List<Suggestion> elements) {
+			owner.addElement(elements.isEmpty() ? null : elements.get(0).getValue());
 		}
 		
 		@Override

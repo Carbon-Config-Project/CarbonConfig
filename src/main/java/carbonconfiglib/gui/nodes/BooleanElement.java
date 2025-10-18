@@ -17,10 +17,14 @@ public class BooleanElement extends ValueElement
 		readValue();
 	}
 	
-	
 	@Override
 	protected void readValue() {
 		box.getState().setValue(Boolean.parseBoolean(node.get()));
+	}
+	
+	@Override
+	public void setEditable(boolean value) {
+		box.active = value;
 	}
 	
 	@Override

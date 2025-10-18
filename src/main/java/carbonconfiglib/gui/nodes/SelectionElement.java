@@ -14,14 +14,14 @@ import carbonconfiglib.utils.ParseResult;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.utils.ObjectLists;
 
-public class EnumElement extends ValueElement
+public class SelectionElement extends ValueElement
 {
 	DropDownState<Suggestion> state = new DropDownState<Suggestion>(T -> Component.literal(T.getName()), ObjectLists.empty()).valueOnly(true).allowEmpty(false).withListener(this::onSelectionChanged);
 	DropDownMenu<Suggestion> values = addChild(new DropDownMenu<>(0, 0, 0, 0, state));
 	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
 	ParseResult<Boolean> result;
 	
-	public EnumElement(IValueNode node) {
+	public SelectionElement(IValueNode node) {
 		super(node);
 		state.setValues(node.getSuggestions());
 		state.findDefaultSelected(T -> T.getValue().equals(node.getDefault()));
@@ -33,6 +33,13 @@ public class EnumElement extends ValueElement
 	@Override
 	protected void readValue() {
 		text.getState().setValue(node.get());		
+	}
+	
+	@Override
+	public void setEditable(boolean value) {
+		text.active = value;
+		values.active = value;
+		if(!value) text.setFocus(false);
 	}
 	
 	private void onTextChanged(String value) {

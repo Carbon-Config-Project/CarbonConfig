@@ -151,8 +151,10 @@ public class ForgeArray implements IArrayNode
 	public List<Suggestion> getSuggestions() { return suggestions.get(); }
 	
 	@Override
-	public void createNode() {
-		String value = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);
+	public void createNode(String value) {
+		if(value == null) {
+			value = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);			
+		}
 		currentValues.add(value);
 		values.add(new ForgeValue(name, tooltip, mode, type, range, value, null, () -> ObjectLists.empty(), isValid::apply, this::save));
 	}

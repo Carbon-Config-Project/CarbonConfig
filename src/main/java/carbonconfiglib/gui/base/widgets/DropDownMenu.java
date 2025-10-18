@@ -7,6 +7,7 @@ import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -61,7 +62,7 @@ public class DropDownMenu<T> extends CarbonButton {
 			Icon icon = state.getIcon();
 			if(icon != null) {
 				int k = this.getYImage(this.isHovered);
-				ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width-14, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+				ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 				RenderSystem.enableDepthTest();
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
 				RenderSystem.enableBlend();
@@ -106,7 +107,7 @@ public class DropDownMenu<T> extends CarbonButton {
 				selections.add(value);
 				if(ownerState.getSelected().isEmpty()) selections.setSelected(value);
 			}
-			for(T entry : ownerState.values) {
+			for(T entry : ownerState.getValues()) {
 				DropDownEntry<T> value = new DropDownEntry<>(entry, text.apply(entry), render.apply(entry));
 				selections.add(value);
 				if(ownerState.isSelected(entry)) selections.setSelected(value);
@@ -208,6 +209,7 @@ public class DropDownMenu<T> extends CarbonButton {
 	public static class DropDownState<T> {
 		Function<T, Component> displayFunction;
 		Function<T, ListEntry<?>> renderFunction;
+		Supplier<List<T>> dynamicValues;
 		List<T> values = new ObjectArrayList<>();
 		List<T> selected = new ObjectArrayList<>();
 		List<T> defaultSelected = new ObjectArrayList<>();
@@ -289,6 +291,15 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		public boolean isSimpleButton() {
 			return simpleButtonOnly;
+		}
+		
+		public DropDownState<T> withDynamicValues(Supplier<List<T>> dynamicValues) {
+			this.dynamicValues = dynamicValues;
+			return this;
+		}
+		
+		protected List<T> getValues() {
+			return dynamicValues != null ? dynamicValues.get() : values;
 		}
 		
 		public DropDownState<T> withIcon(Icon icon) {

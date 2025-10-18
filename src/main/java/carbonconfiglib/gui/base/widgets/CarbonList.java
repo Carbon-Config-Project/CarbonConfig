@@ -24,6 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import speiger.src.collections.ints.functions.consumer.IntIntConsumer;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 
 public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> implements ITooltipProvider {
@@ -47,6 +48,18 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			if(entry instanceof ITooltipProvider) {
 				((ITooltipProvider)entry).provideTooltips(mouseX, mouseY, tooltips);
 			}
+		}
+	}
+	
+	@Override
+	protected boolean areChildrenDraggable() {
+		return state.draggable;
+	}
+	
+	@Override
+	protected void onElementsSwapped(int oldIndex, int newIndex) {
+		if(state.draggingListener != null) {
+			state.draggingListener.accept(oldIndex, newIndex);
 		}
 	}
 	
@@ -111,8 +124,12 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 	
 	@Override
 	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+		boolean finished = state.scrollAmount.isDone();
 		state.scrollAmount.update(partialTicks);
 		super.setScrollAmount(state.scrollAmount.getValue());
+		if(!finished) {
+			handleDragging(mouseX, mouseY);
+		}
 		super.render(stack, mouseX, mouseY, partialTicks);
 	}
 	
@@ -189,6 +206,8 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		boolean visible = true;
 		CarbonList<T> owner;
 		Runnable changeListener;
+		boolean draggable;
+		IntIntConsumer draggingListener;
 				
 		@SafeVarargs
 		public ListState(T... nodes) {
@@ -345,6 +364,16 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		
 		public ListState<T> setScrollAmount(double value) {
 			scrollAmount.setTarget(value);
+			return this;
+		}
+		
+		public ListState<T> setDragListener(IntIntConsumer listener) {
+			this.draggingListener = listener;
+			return this;
+		}
+		
+		public ListState<T> setDraggable(boolean value) {
+			draggable = value;
 			return this;
 		}
 		

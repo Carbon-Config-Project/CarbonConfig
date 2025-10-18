@@ -22,6 +22,12 @@ public class DoubleElement extends ValueElement
 		text.getState().setValue(node.get());
 	}
 	
+	@Override
+	public void setEditable(boolean value) {
+		text.active = value;
+		if(!value) text.setFocus(false);
+	}
+	
 	private void onTextChanged(String value) {
 		text.setTextColor(0xE0E0E0);
 		result = null;

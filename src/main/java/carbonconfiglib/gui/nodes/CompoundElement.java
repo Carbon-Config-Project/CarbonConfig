@@ -30,10 +30,9 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	}
 	
 	@Override
-	protected void setRightComponentsVisible(boolean value) {
-		button.visible = value;
-	}
-	
+	protected void setRightComponentsVisible(boolean value) {}
+	@Override
+	public void setEditable(boolean value) {}
 	@Override
 	protected boolean isValue() { return false; }
 	

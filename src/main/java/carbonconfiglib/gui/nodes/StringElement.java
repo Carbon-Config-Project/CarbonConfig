@@ -24,6 +24,12 @@ public class StringElement extends ValueElement
 	}
 	
 	@Override
+	public void setEditable(boolean value) {
+		text.active = value;
+		if(!value) text.setFocus(false);
+	}
+	
+	@Override
 	protected void setRightComponentsVisible(boolean value) {
 		text.visible = value;
 	}

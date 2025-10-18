@@ -136,7 +136,7 @@ public class ArrayScreen extends ListScreen
 	
 	public void createEntry(Button button) {
 		int size = array.size();
-		array.createNode();
+		array.createNode(null);
 		if(array.getSuggestions().size() > 0) {
 			ListSelectionScreen screen = new ListSelectionScreen(this, array.get(size), innerType == StructureType.COMPOUND ? NodeSupplier.ofCompound(array) : NodeSupplier.ofValue(), getCustomTexture());
 			screen.withListener(() -> postCreate(size, true), () -> array.removeNode(size)).disableAbortWarning();

@@ -37,6 +37,7 @@ import carbonconfiglib.impl.entries.RegistryValue;
 import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.CarbonNetwork;
+import carbonconfiglib.test.FullTestCase;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -120,6 +121,7 @@ public class CarbonConfig {
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
 		}
+		new FullTestCase().init(false);
 	}
 
 	/**

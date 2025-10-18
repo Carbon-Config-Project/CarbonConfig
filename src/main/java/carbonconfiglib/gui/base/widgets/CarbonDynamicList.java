@@ -21,9 +21,19 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	protected boolean scrolling;
 	protected boolean renderSelection = true;
 	protected E hovered;
+	protected boolean draggingStarted = false;
+	protected E dragging;
 	
 	public CarbonDynamicList(Minecraft minecraft, int width, int height, int startY, int endY, int itemHeight) {
 		super(minecraft, width, height, startY, endY, itemHeight);
+	}
+	
+	protected boolean areChildrenDraggable() {
+		return false;
+	}
+	
+	protected void onElementsSwapped(int oldIndex, int newIndex) {
+		
 	}
 	
 	public E getHovered(double mouseX, double mouseY) {
@@ -122,6 +132,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 				prev.changeFocus(false);
 				if(getFocused() == prev) setFocused(null);
 			}
+			if(areChildrenDraggable() && element.isDraggable()) {
+				dragging = element;
+				return true;
+			}
 		}
 		else if(button == 0) {
 			this.clickedHeader((int)(mouseX - (double)(this.x0 + this.width / 2 - this.getRowWidth() / 2)), (int)(mouseY - (double)this.y0) + (int)this.getScrollAmount() - 4);
@@ -138,8 +152,30 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	}
 	
 	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int pButton, double pDragX, double pDragY) {
+		if(dragging != null) draggingStarted = true;
+		handleDragging(mouseX, mouseY);
+		return super.mouseDragged(mouseX, mouseY, pButton, pDragX, pDragY);
+	}
+	
+	protected void handleDragging(double mouseX, double mouseY) {
+		if(draggingStarted) {
+			E newElement = getEntryAtPos(mouseX, mouseY);
+			if(newElement != null && newElement != dragging && newElement.isDraggable()) {
+				int dragginIndex = children().indexOf(dragging);
+				int newIndex = children().indexOf(newElement);
+				if(dragginIndex == -1 || newIndex == -1) return;
+				children().set(dragginIndex, children().set(newIndex, dragging));
+				onElementsSwapped(dragginIndex, newIndex);
+			}
+		}
+	}
+	
+	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
 		if(!enabled()) return false;
+		dragging = null;
+		draggingStarted = false;
 		scrolling = false;
 		return super.mouseReleased(mouseX, mouseY, button);
 	}
@@ -152,14 +188,8 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		
 		scrolling = false;
 		scroll(-(int)(scroll * this.itemHeight * 2D));
+		handleDragging(mouseX, mouseY);
 		return true;
-	}
-	
-	@Override
-	public boolean changeFocus(boolean pFocus)
-	{
-		// TODO Auto-generated method stub
-		return super.changeFocus(pFocus);
 	}
 	
 	public boolean isScrolling() { return scrolling; }
@@ -190,13 +220,18 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			int height = entry.getItemHeight();
 			int minY = yOffset + yOff;
 			int maxY = minY + height;
-			if (maxY >= y0 && minY <= y1) {
+			if (maxY >= y0 && minY <= y1 && (entry != dragging || !draggingStarted)) {
 				hasRendered = true;
 				this.renderItem(matrix, mouseX, mouseY, particalTicks, i, minX, minY, width, height-4);
 			}
-			else if(hasRendered) break;
+			else if(hasRendered && (entry != dragging || !draggingStarted)) break;
 			yOffset += height;
 		}
+		if(draggingStarted && dragging != null) {
+			int ySize = dragging.getItemHeight();
+			this.renderItem(matrix, mouseX, mouseY, particalTicks, children().indexOf(dragging), minX, mouseY - (ySize >> 1), width, ySize-4);
+		}
+		
 		GuiUtils.popScissors();
 	}
 	
@@ -281,6 +316,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		
 		public boolean isInView() {
 			return (owner.x0 < location[0] && owner.x1 >= location[0]) && owner.y0 < location[1] && owner.y1 >= location[1] + location[3];
+		}
+		
+		public boolean isDraggable() {
+			return true;
 		}
 		
 		protected boolean isRenderingSelection() {

@@ -40,6 +40,23 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		}
 	}
 	
+	@Override
+	public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+		return isActive() && super.keyPressed(pKeyCode, pScanCode, pModifiers);
+	}
+
+	@Override
+	public boolean charTyped(char pCodePoint, int pModifiers) {
+		return isActive() && super.charTyped(pCodePoint, pModifiers);
+	}
+
+	@Override
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+		return isActive() && super.mouseClicked(pMouseX, pMouseY, pButton);
+	}
+
+
+
 	public static class TextState {
 		Predicate<String> filter = Objects::nonNull;
 		Function<TextState, Component> tooltip;

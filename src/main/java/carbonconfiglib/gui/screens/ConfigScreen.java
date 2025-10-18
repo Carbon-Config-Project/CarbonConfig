@@ -14,6 +14,7 @@ import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IElementContext;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
+import carbonconfiglib.gui.nodes.base.ISortableNode;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -26,9 +27,9 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 //		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName(), V.getName());
 	};
 	
-	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth();
-	ListState<BaseElement> rowTwo = new ListState<BaseElement>().setParentRowWidth();
-	ListState<BaseElement> rowThree = new ListState<BaseElement>().setParentRowWidth();
+	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
+	ListState<BaseElement> rowTwo = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
+	ListState<BaseElement> rowThree = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	@SuppressWarnings("unchecked")
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
 	List<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
@@ -135,6 +136,13 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 		visibleChildren.add(nodes);
 	}
 	
+	protected void onSwapped(int oldIndex, int newIndex) {
+		BaseElement root = pickedNode.get(pickedNode.size()-1);
+		if(root instanceof ISortableNode) {
+			((ISortableNode)root).onSwapped(oldIndex, newIndex);
+		}
+	}
+	
 	@Override
 	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton)
 	{
@@ -143,13 +151,22 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 	
 	private void recalculateNode() {
 		for(int i = 0;i<3;i++) {
-			all[i].clear();
+			all[i].setDraggable(false).clear();
 		}
 		int max = twoLayerMode ? 2 : 3;
 		for(int i = 0, offset = Math.max(visibleChildren.size()-max, 0);i<max && offset < visibleChildren.size();i++) {
 			all[i].replace(processElements(i, visibleChildren.get(offset)));
 			offset++;
 		}
+		for(int i = 2;i>=0;i--) {
+			if(!all[i].isEmpty()) {
+				if(pickedNode.get(pickedNode.size()-1) instanceof ISortableNode) {
+					all[i].setDraggable(true);
+				}
+				break;
+			}
+		}
+		
 		//Lets pull a Skyrim. Because reloading the GUI from scratch simply works better than applying the new Positions
 		//LIKE WHAT THE FUCK....
 		//But this doesn't matter as Carbons new API is state-less within the components and the state is stored in the screen itself.

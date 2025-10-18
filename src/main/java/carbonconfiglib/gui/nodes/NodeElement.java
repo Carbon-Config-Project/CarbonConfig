@@ -1,7 +1,13 @@
 package carbonconfiglib.gui.nodes;
 
+import java.util.List;
+
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.nodes.base.BaseElement;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 public abstract class NodeElement extends BaseElement
 {
@@ -9,6 +15,13 @@ public abstract class NodeElement extends BaseElement
 	
 	public NodeElement(INode node) {
 		this.node = node;
+	}
+	
+	@Override
+	protected List<Suggestion> getSuggestions() {
+		if(node instanceof IArrayNode) return ((IArrayNode)node).getSuggestions();
+		if(node instanceof IValueNode && !((IValueNode)node).isForcingSuggestions()) return ((IValueNode)node).getSuggestions();
+		return ObjectLists.empty();
 	}
 	
 	protected void readValue() {}

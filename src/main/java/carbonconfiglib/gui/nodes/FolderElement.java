@@ -5,6 +5,7 @@ import java.util.function.ObjIntConsumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
@@ -15,6 +16,7 @@ import carbonconfiglib.gui.nodes.base.IFolderNode;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 public class FolderElement extends BaseElement implements IFolderNode
 {
@@ -32,6 +34,8 @@ public class FolderElement extends BaseElement implements IFolderNode
 		this.listener = listener;
 	}
 	
+	@Override
+	public void setEditable(boolean value) {}
 	@Override
 	protected void setRightComponentsVisible(boolean value) {}
 	@Override
@@ -66,6 +70,11 @@ public class FolderElement extends BaseElement implements IFolderNode
 			result.add(element);
 		}
 		return result;
+	}
+	
+	@Override
+	protected List<Suggestion> getSuggestions() {
+		return ObjectLists.empty();
 	}
 	
 	@Override
