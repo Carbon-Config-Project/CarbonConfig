@@ -1,7 +1,6 @@
 package carbonconfiglib.gui.nodes;
 
 import java.util.List;
-import java.util.function.ObjIntConsumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -21,7 +20,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 {
 	ICompoundNode node;
 	CarbonButton button;
-	ObjIntConsumer<BaseElement> listener;
+	IFolderController listener;
 	
 	public CompoundElement(ICompoundNode node) {
 		super(node);
@@ -37,7 +36,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	protected boolean isValue() { return false; }
 	
 	@Override
-	public void setCallbacks(ObjIntConsumer<BaseElement> listener) {
+	public void setCallbacks(IFolderController listener) {
 		this.listener = listener;
 	}
 
@@ -59,7 +58,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	
 	protected void onClick(Button button) {
 		if(listener == null) return;
-		listener.accept(this, layer);
+		listener.pushNode(this, layer, false);
 	}
 	
 	@Override

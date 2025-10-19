@@ -32,6 +32,7 @@ public class ForgeValue implements IValueNode
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
 	String defaultValue;
+	boolean autosave;
 	
 	public ForgeValue(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, ForgeValue> saved) {
 		this.name = name;
@@ -46,17 +47,26 @@ public class ForgeValue implements IValueNode
 		this.suggestions = suggestions;
 		this.saved = saved;
 	}
+	public ForgeValue withAutosave() {
+		autosave = true;
+		return this;
+	}
+	
 	public void save() { saved.accept(current, this); }
 	@Override
 	public boolean isDefault() { return Objects.equals(defaultValue, current); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public void setDefault() { current = defaultValue; }
+	public void setDefault() {
+		current = defaultValue; 
+		if(autosave) save();
+	}
 	@Override
 	public void setPrevious() {
 		current = previous.top();
 		if(previous.size() > 1) previous.pop();
+		if(autosave) save();
 	}
 	@Override
 	public void createTemp() { previous.push(current); }
@@ -83,7 +93,10 @@ public class ForgeValue implements IValueNode
 	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { current = value; }
+	public void set(String value) {
+		current = value;
+		if(autosave) save();
+	}
 	@Override
 	public ParseResult<Boolean> isValid(String value) {
 		ParseResult<?> parse = isValid.apply(value); 

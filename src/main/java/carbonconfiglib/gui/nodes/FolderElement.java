@@ -1,7 +1,6 @@
 package carbonconfiglib.gui.nodes;
 
 import java.util.List;
-import java.util.function.ObjIntConsumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -22,7 +21,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 {
 	CarbonButton button;
 	IConfigNode node;
-	ObjIntConsumer<BaseElement> listener;
+	IFolderController listener;
 
 	public FolderElement(IConfigNode node) {
 		this.node = node;
@@ -30,7 +29,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	@Override
-	public void setCallbacks(ObjIntConsumer<BaseElement> listener) {
+	public void setCallbacks(IFolderController listener) {
 		this.listener = listener;
 	}
 	
@@ -58,7 +57,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	
 	protected void onClick(Button button) {
 		if(listener == null) return;
-		listener.accept(this, layer);
+		listener.pushNode(this, layer, false);
 	}
 	
 	@Override
@@ -77,6 +76,10 @@ public class FolderElement extends BaseElement implements IFolderNode
 		return ObjectLists.empty();
 	}
 	
+	@Override
+	protected void onArrayDelete() {
+	}
+
 	@Override
 	protected boolean isChanged() {
 		return node.isChanged();

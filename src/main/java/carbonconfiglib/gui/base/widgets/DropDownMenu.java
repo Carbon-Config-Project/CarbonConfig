@@ -137,7 +137,7 @@ public class DropDownMenu<T> extends CarbonButton {
 			if(isUp()) {
 				y = owner.y - maxHeight - 1;
 			}
-			if(ownerState.searchable) text(x+1, y+1, width-1, 18, state);
+			if(ownerState.searchable) text(x+1, y+1, width-2, 18, state);
 			listArea(x, y+(ownerState.searchable ? 20 : 0), width, height, selections);
 			selections.setScrollOffset(1);
 		}
@@ -146,7 +146,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
 			int x = owner.x + ownerState.xOffset;
 			int y = owner.y + owner.getHeight();
-			int width = ownerState.customWidth.orElse(owner.getWidth())+1;
+			int width = ownerState.customWidth.orElse(owner.getWidth());
 			int height = ownerState.getElementHeight() * ownerState.getDisplayedElements()+(ownerState.searchable ? 20 : 0);
 			if(isUp()) {
 				y = owner.y - height - 1;
@@ -408,7 +408,8 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		public DropDownState<T> findSelected(Predicate<T> filter) {
 			selected.clear();
-			for(int i = 0,m=this.values.size();i<m;i++) {
+			List<T> values = getValues();
+			for(int i = 0,m=values.size();i<m;i++) {
 				T value = values.get(i);
 				if(filter.test(value)) selected.add(value);
 			}
@@ -465,6 +466,11 @@ public class DropDownMenu<T> extends CarbonButton {
 			if(listener != null) listener.accept(new ObjectArrayList<>(selected));
 			updateText();
 			return this;
+		}
+		
+		public void clearSelection() {
+			selected.clear();
+			updateText();
 		}
 		
 		public boolean isSelected(T value) {

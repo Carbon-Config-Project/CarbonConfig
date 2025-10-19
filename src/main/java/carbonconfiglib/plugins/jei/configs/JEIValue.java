@@ -31,6 +31,7 @@ public class JEIValue implements IValueNode
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
 	String defaultValue;
+	boolean autosave;
 	
 	public JEIValue(Component name, Component tooltip, ReloadMode mode, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
 		this.name = name;
@@ -45,17 +46,31 @@ public class JEIValue implements IValueNode
 		this.saved = saved;
 	}
 	
+	public JEIValue withAutosave() {
+		autosave = true;
+		return this;
+	}
+	
+	private void autosave() {
+		if(!autosave) return;
+		save();
+	}
+	
 	public void save() { saved.accept(current, this); }
 	@Override
 	public boolean isDefault() { return Objects.equals(defaultValue, current); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public void setDefault() { current = defaultValue; }
+	public void setDefault() {
+		current = defaultValue; 
+		autosave();
+	}
 	@Override
 	public void setPrevious() {
 		current = previous.top();
 		if(previous.size() > 1) previous.pop();
+		autosave();
 	}
 	@Override
 	public void createTemp() { previous.push(current); }
@@ -82,7 +97,10 @@ public class JEIValue implements IValueNode
 	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { current = value; }
+	public void set(String value) {
+		current = value; 
+		autosave();
+	}
 	@Override
 	public ParseResult<Boolean> isValid(String value) {
 		ParseResult<?> parse = isValid.apply(value); 

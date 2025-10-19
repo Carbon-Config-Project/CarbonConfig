@@ -60,7 +60,7 @@ public abstract class NumberElement extends ValueElement
 				text.setTextColor(0xFF0000);
 				return;
 			}
-			node.set(value);
+			setValue(value);
 			setSliderValue();
 		}
 	}
@@ -73,7 +73,7 @@ public abstract class NumberElement extends ValueElement
 			text.setTextColor(0xFF0000);
 			return;
 		}
-		node.set(value);
+		setValue(value);
 		text.getState().setSilentValue(value);
 	}
 	

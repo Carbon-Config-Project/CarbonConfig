@@ -37,7 +37,7 @@ public class DoubleElement extends ValueElement
 				text.setTextColor(0xFF0000);
 				return;
 			}
-			node.set(value);
+			setValue(value);
 		}
 	}
 	

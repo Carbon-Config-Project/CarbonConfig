@@ -51,7 +51,7 @@ public class SelectionElement extends ValueElement
 				text.setTextColor(0xFF0000);
 				return;
 			}
-			node.set(value);
+			setValue(value);
 			state.findSelected(T -> T.getValue().equals(value));
 		}
 	}
@@ -66,8 +66,14 @@ public class SelectionElement extends ValueElement
 			text.setTextColor(0xFF0000);
 			return;
 		}
-		node.set(value);
+		setValue(value);
 		text.getState().setSilentValue(value);
+	}
+	
+	//We disable this because selection already includes suggestions
+	@Override
+	protected List<Suggestion> getSuggestions() {
+		return ObjectLists.empty();
 	}
 	
 	@Override

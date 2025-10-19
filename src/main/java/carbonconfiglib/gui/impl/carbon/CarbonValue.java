@@ -37,6 +37,7 @@ public class CarbonValue implements IValueNode, IValueActions
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
 	String defaultValue;
+	boolean autosave;
 	
 	public CarbonValue(IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, IStructuredData data, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
 		this.mode = mode;
@@ -53,6 +54,11 @@ public class CarbonValue implements IValueNode, IValueActions
 		this.defaultValue = defaultValue;
 		previous.push(current);
 	}
+	
+	public CarbonValue withAutosave() {
+		autosave = true;
+		return this;
+	}
 
 	public void save() { saveAction.accept(current, this); }
 	@Override
@@ -60,11 +66,15 @@ public class CarbonValue implements IValueNode, IValueActions
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public void setDefault() { current = defaultValue; }
+	public void setDefault() {
+		current = defaultValue; 
+		if(autosave) save();
+	}
 	@Override
 	public void setPrevious() {
 		current = previous.top();
 		if(previous.size() > 1) previous.pop();
+		if(autosave) save();
 	}
 	@Override
 	public void createTemp() { previous.push(current); }
@@ -92,7 +102,10 @@ public class CarbonValue implements IValueNode, IValueActions
 	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { this.current = value; }
+	public void set(String value) {
+		this.current = value;
+		if(autosave) save();
+	}
 	@Override
 	public ParseResult<Boolean> isValid(String value) { return isValid.apply(value); }
 	@Override

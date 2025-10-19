@@ -42,6 +42,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	Stack<Map<String, String>> previous = new ObjectArrayList<>();
 	Map<String, String> current = Object2ObjectMap.builder().linkedMap();
 	Map<String, String> defaultValue = Object2ObjectMap.builder().linkedMap();
+	boolean autosave;
 	
 	public CarbonCompound(IReloadMode mode, CompoundData data, Component name, Component tooltip, String value, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
 		this.mode = mode;
@@ -56,7 +57,17 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 		this.saveAction = saveAction;
 		reload();
 	}
-
+	
+	public CarbonCompound withAutosave() {
+		autosave = true;
+		return this;
+	}
+	
+	private void autosave() {
+		if(!autosave) return;
+		save();
+	}
+	
 	private void reload() {
 		values.clear();
 		Map<String, IStructuredData> structure = data.getFormat();
@@ -64,13 +75,14 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 			String key = entry.getKey();
 			values.add(addEntry(Helpers.removeLayer(entry.getValue(), 0), Helpers.removeLayer(defaultValue.getOrDefault(key, ""), 0), structure.get(key), key, data.getTranslationKey(key)));
 		}
+		autosave();
 	}
 	
 	protected IValueActions addEntry(String value, String defaultValue, IStructuredData type, String key, String translationKey) {
 		switch(type.getDataType()) {
-			case COMPOUND: return new CarbonCompound(mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
-			case LIST: return new CarbonArray(mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T));
-			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), data.getEntrySetting(key), type, data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T));
+			case COMPOUND: return new CarbonCompound(mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).withAutosave();
+			case LIST: return new CarbonArray(mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).withAutosave();
+			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), data.getEntrySetting(key), type, data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T)).withAutosave();
 			default: return null;
 		}
 	}
@@ -81,6 +93,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	
 	protected void save(String key, String value) {
 		current.put(key, value);
+		autosave();
 	}
 	
 	protected boolean isSuggestionValid(String key, String value) {
@@ -140,10 +153,14 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	
 	@Override
 	public void apply() {
+		boolean last = autosave;
+		autosave = false;
 		if(previous.size() > 1) previous.pop();
 		for(int i = 0,m=values.size();i<m;i++) {
 			values.get(i).save();
 		}
+		autosave = last;
+		autosave();
 	}
 	
 	@Override
@@ -158,6 +175,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	public void set(String value) {
 		current.clear();
 		current.putAll(Helpers.splitArguments(Helpers.splitCompound(value), data.getKeys(), true));
+		autosave();
 	}
 
 	@Override

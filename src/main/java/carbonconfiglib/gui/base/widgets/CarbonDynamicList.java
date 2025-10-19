@@ -222,14 +222,14 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			int maxY = minY + height;
 			if (maxY >= y0 && minY <= y1 && (entry != dragging || !draggingStarted)) {
 				hasRendered = true;
-				this.renderItem(matrix, mouseX, mouseY, particalTicks, i, minX, minY, width, height-4);
+				this.renderItem(matrix, mouseX, mouseY, particalTicks, i, minX, minY, width-2, height-4);
 			}
 			else if(hasRendered && (entry != dragging || !draggingStarted)) break;
 			yOffset += height;
 		}
 		if(draggingStarted && dragging != null) {
 			int ySize = dragging.getItemHeight();
-			this.renderItem(matrix, mouseX, mouseY, particalTicks, children().indexOf(dragging), minX, mouseY - (ySize >> 1), width, ySize-4);
+			this.renderItem(matrix, mouseX, mouseY, particalTicks, children().indexOf(dragging), minX, mouseY - (ySize >> 1), width-2, ySize-4);
 		}
 		
 		GuiUtils.popScissors();

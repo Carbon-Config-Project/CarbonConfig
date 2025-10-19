@@ -2,6 +2,7 @@ package carbonconfiglib.gui.nodes.base;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
@@ -19,6 +20,13 @@ public abstract class ValueElement extends NodeElement
 	
 	@Override
 	protected boolean isValue() { return true; }
+	@Override
+	protected abstract void readValue();
+	
+	protected void setValue(String value) {
+		node.set(value);
+		onValueChanged();
+	}
 	
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
@@ -31,5 +39,14 @@ public abstract class ValueElement extends NodeElement
 	}
 	
 	@Override
-	protected abstract void readValue();
+	protected void setSuggestion(Suggestion suggestion) {
+		node.set(suggestion.getValue());
+		readValue();
+	}
+	
+	@Override
+	protected void onValueChanged() {
+		String value = node.get();
+		suggestionState.findSelected(T -> value.equals(T.getValue()));
+	}
 }

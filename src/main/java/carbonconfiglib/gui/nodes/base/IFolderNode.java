@@ -1,8 +1,10 @@
 package carbonconfiglib.gui.nodes.base;
 
-import java.util.function.ObjIntConsumer;
-
 public interface IFolderNode
 {
-	public void setCallbacks(ObjIntConsumer<BaseElement> listener);
+	public void setCallbacks(IFolderController listener);
+	
+	public static interface IFolderController {
+		public void pushNode(BaseElement element, int index, boolean reload);
+	}
 }

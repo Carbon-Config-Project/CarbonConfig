@@ -105,8 +105,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 		}
 	}
 	
-	public void pushNode(BaseElement node, int index) {
-		if(index == 0 && pickedNode.size() > 1 && pickedNode.get(pickedNode.size()-1) == node) {
+	public void pushNode(BaseElement node, int index, boolean reload) {
+		if(!reload && pickedNode.size() > 1 && pickedNode.get(pickedNode.size()-1) == node) {
 			visibleChildren.remove(visibleChildren.size()-1);
 			pickedNode.remove(pickedNode.size()-1);
 		}

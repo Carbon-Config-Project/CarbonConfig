@@ -40,11 +40,22 @@ public abstract class NodeElement extends BaseElement
 	protected void onRevert() {
 		node.setPrevious();
 		readValue();
+		onValueChanged();
 	}
 	
 	@Override
 	protected void onReset() {
 		node.setDefault();
 		readValue();
+		onValueChanged();
+	}
+	
+	@Override
+	protected void onArrayDelete() {
+		deleteNode(node);
+	}
+	
+	protected void onValueChanged() {
+		
 	}
 }

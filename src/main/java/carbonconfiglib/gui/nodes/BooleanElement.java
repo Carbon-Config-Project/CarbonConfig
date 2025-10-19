@@ -33,7 +33,7 @@ public class BooleanElement extends ValueElement
 	}
 	
 	private void onCallback(CheckBoxState state) {
-		node.set(Boolean.toString(state.getValue()));
+		setValue(Boolean.toString(state.getValue()));
 	}
 	
 	@Override

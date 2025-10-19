@@ -1,7 +1,6 @@
 package carbonconfiglib.gui.nodes;
 
 import java.util.List;
-import java.util.function.ObjIntConsumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -16,7 +15,9 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
+import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
@@ -25,7 +26,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 {
 	IArrayNode node;
 	CarbonButton button;
-	ObjIntConsumer<BaseElement> listener;
+	IFolderController listener;
 
 	public ArrayElement(IArrayNode node) {
 		super(node);
@@ -61,7 +62,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		for(int i = 0,m = node.size();i<m;i++) {
 			BaseElement element = createNode(node.get(i));
 			if(element == null) continue;
-			element.setArray(node);
+			element.setArray(node, this::reloadElements);
 			result.add(element);
 		}
 		result.add(new AddElement(this));
@@ -74,18 +75,27 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	}
 	
 	@Override
-	public void setCallbacks(ObjIntConsumer<BaseElement> listener) {
+	public void setCallbacks(IFolderController listener) {
 		this.listener = listener;
 	}
 	
 	protected void onClick(Button button) {
 		if(listener == null) return;
-		listener.accept(this, layer);
+		listener.pushNode(this, layer, false);
+	}
+	
+	private void reloadElements() {
+		if(listener == null) return;
+		listener.pushNode(this, layer, true);
 	}
 	
 	private void addElement(String value) {
 		node.createNode(value);
-		listener.accept(this, layer);
+		if(node.getInnerType() == StructureType.SIMPLE) listener.pushNode(this, layer, true);
+		else {
+			List<BaseElement> children = getChildNodes();
+			listener.pushNode(children.get(children.size()-2), layer, false);
+		}
 	}
 	
 	public static class AddElement extends BaseElement {
@@ -95,6 +105,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		public AddElement(ArrayElement owner) {
 			this.owner = owner;
 			selector.getState().setValues(owner.node.getSuggestions());
+			selector.setMessage(Component.literal("New Entry"));
+			selector.withTooltip(Component.literal("Shift to Skip"));
 		}
 
 		@Override
@@ -123,8 +135,9 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		}
 		
 		@Override
+		protected void onArrayDelete() {}
+		@Override
 		public void setEditable(boolean value) {}
-		
 		@Override
 		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {}
 
@@ -137,6 +150,15 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		
 		protected void onElementSelected(List<Suggestion> elements) {
 			owner.addElement(elements.isEmpty() ? null : elements.get(0).getValue());
+		}
+		
+		@Override
+		public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+			if(pButton == 0 && Screen.hasShiftDown() && selector.isMouseOver(pMouseX, pMouseY)) {
+				owner.addElement(null);
+				return true;
+			}
+			return super.mouseClicked(pMouseX, pMouseY, pButton);
 		}
 		
 		@Override

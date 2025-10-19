@@ -39,11 +39,20 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 {
 	protected IElementContext context;
 	private IArrayNode array;
+	private Runnable reloader;
 	private boolean right;
 	protected int layer;
+	private CarbonButton delete;
 	private CarbonButton revert;
 	private CarbonButton reset;
-	protected DropDownState<Suggestion> suggestionState = new DropDownState<Suggestion>(T -> Component.literal(T.getName())).allowEmpty(false).withDynamicValues(this::getSuggestions).withCustomWidth(OptionalInt.of(200)).withXOffset(-180).withIcon(Icon.SUGGESTIONS).asSimpleButton(true);
+	protected DropDownState<Suggestion> suggestionState = new DropDownState<Suggestion>(T -> Component.literal(T.getName()))
+			.allowEmpty(false)
+			.withDynamicValues(this::getSuggestions)
+			.withCustomWidth(OptionalInt.of(200))
+			.withXOffset(-180)
+			.withIcon(Icon.SUGGESTIONS)
+			.asSimpleButton(true)
+			.withListener(this::onSuggestionPicked);
 	private DropDownMenu<Suggestion> suggestion;
 	private CarbonCheckBox edit;
 	
@@ -58,8 +67,10 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		}
 	}
 	
-	public final void setArray(IArrayNode array) {
+	public final void setArray(IArrayNode array, Runnable reloader) {
 		this.array = array;
+		this.reloader = reloader;
+		delete = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onArrayDelete()).withIcon(Optional.of(Icon.DELETE)));
 	}
 	
 	public final void setContext(IElementContext context) {
@@ -88,9 +99,11 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 				renderRightPart(poseStack, left+leftWidth+8, top, width-leftWidth-10, height, mouseX, mouseY, selected, partialTicks);
 				return;
 			}
-			int newWidth = width-leftWidth-10-80;
-			int renderWidth = Math.min((newWidth + 80) >> 1, newWidth);
-			renderControls(poseStack, left+width-78, top, 78, height, mouseX, mouseY, selected, partialTicks);
+			int controlWidth = delete != null ? 100 : 80;
+			int newWidth = width-leftWidth-10-controlWidth;
+			int renderWidth = Math.min((newWidth + controlWidth) >> 1, newWidth);
+			controlWidth-=2;
+			renderControls(poseStack, left+width-controlWidth, top, controlWidth, height, mouseX, mouseY, selected, partialTicks);
 			renderRightPart(poseStack, left+leftWidth+8, top, renderWidth, height, mouseX, mouseY, selected, partialTicks);
 		}
 		else if(right) {
@@ -105,6 +118,14 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	protected boolean showControls() { return true; }
 	protected boolean shouldRenderIndex() { return array != null; }
 	protected int index(INode node) { return array == null ? -1 : array.indexOf(node); }
+	protected boolean deleteNode(INode node) {
+		if(array == null) return false;
+		int index = array.indexOf(node);
+		if(index == -1) return false;
+		array.removeNode(index);
+		reloader.run();
+		return true;
+	}
 	
 	public abstract void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	
@@ -113,6 +134,11 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	public void renderControls(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		left-=1;
 		left+=60;
+		if(delete != null) {
+			left+=20;
+			render(delete, left, top, null, stack, mouseX, mouseY, partialTicks);			
+			left-=20;
+		}
 		render(revert, left, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
 		left -=20;
 		render(reset, left, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
@@ -132,15 +158,18 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		widget.render(stack, mouseX, mouseY, partialTicks);
 	}
 	
+	private void onSuggestionPicked(List<Suggestion> result) {
+		if(result.isEmpty()) return;
+		setSuggestion(result.get(0));
+	}
+	
+	protected void setSuggestion(Suggestion suggestion) {}
 	protected abstract List<Suggestion> getSuggestions();
 	protected abstract boolean isChanged();
 	protected abstract boolean isNotDefault();
 	protected abstract void onRevert();
 	protected abstract void onReset();
-	
-	protected void showSuggestions() {
-		
-	}
+	protected abstract void onArrayDelete();
 	
 	public List<BaseElement> getChildNodes() {
 		return ObjectLists.empty();

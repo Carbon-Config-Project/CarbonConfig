@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.impl.forge;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,6 +35,7 @@ public class ForgeArray implements IArrayNode
 	Stack<List<String>> previous = new ObjectArrayList<>();
 	List<String> currentValues;
 	List<String> defaults;
+	boolean autosave;
 	
 	public ForgeArray(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
 		this.name = name;
@@ -50,10 +52,21 @@ public class ForgeArray implements IArrayNode
 		reload();
 	}
 	
+	public ForgeArray withAutosave() {
+		autosave = true;
+		return this;
+	}
+	
+	private void autosave() {
+		if(!autosave) return;
+		save();
+	}
+	
 	private void save(String value, ForgeValue entry) {
 		int index = values.indexOf(entry);
 		if(index == -1) return;
 		currentValues.set(0, value);
+		autosave();
 	}
 	
 	public void save() { saved.accept(currentValues); }
@@ -61,8 +74,9 @@ public class ForgeArray implements IArrayNode
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new ForgeValue(name, tooltip, mode, type, range, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save));
+			values.add(new ForgeValue(name, tooltip, mode, type, range, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save).withAutosave());
 		}
+		autosave();
 	}
 	
 	protected List<String> getPrev() {
@@ -96,21 +110,24 @@ public class ForgeArray implements IArrayNode
 	
 	@Override
 	public void moveDown(int index) {
-		swapValues(index, index+1);
+		swap(index, index+1);
 	}
 	
 	@Override
 	public void moveUp(int index) {
-		swapValues(index, index-1);
+		swap(index, index-1);
 	}
 	
-	private void swapValues(int from, int to) {
-		if(from >= values.size() || from < 0) return;
-		if(to >= values.size() || to < 0) return;
-		currentValues.set(from, currentValues.set(to, currentValues.get(from)));
-		
-		values.get(from).set(currentValues.get(from));
-		values.get(to).set(currentValues.get(to));
+	@Override
+	public void swap(int oldIndex, int newIndex) {
+		if(oldIndex >= values.size() || oldIndex < 0) return;
+		if(newIndex >= values.size() || newIndex < 0) return;
+		int start = oldIndex < newIndex ? oldIndex : newIndex;
+		int end = oldIndex < newIndex ? newIndex : oldIndex;
+		boolean inverse = newIndex < oldIndex;
+		Collections.rotate(currentValues.subList(start, end+1), inverse ? 1 : -1);
+		Collections.rotate(values.subList(start, end+1), inverse ? 1 : -1);
+		autosave();
 	}
 	
 	@Override
@@ -121,10 +138,14 @@ public class ForgeArray implements IArrayNode
 
 	@Override
 	public void apply() {
+		boolean temp = autosave;
+		autosave = false;
 		if(previous.size() > 1) previous.pop();
 		for(int i = 0,m=currentValues.size();i<m;i++) {
 			values.get(i).save();
 		}
+		autosave = temp;
+		autosave();
 	}
 	
 	@Override
@@ -137,10 +158,8 @@ public class ForgeArray implements IArrayNode
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
 	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
-	
 	@Override
 	public Component getName() { return name; }
-	
 	@Override
 	public Component getTooltip() { return tooltip; }
 	@Override
@@ -152,17 +171,20 @@ public class ForgeArray implements IArrayNode
 	
 	@Override
 	public void createNode(String value) {
+		String defaultValue = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);
 		if(value == null) {
-			value = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);			
+			value = defaultValue;			
 		}
 		currentValues.add(value);
-		values.add(new ForgeValue(name, tooltip, mode, type, range, value, null, () -> ObjectLists.empty(), isValid::apply, this::save));
+		values.add(new ForgeValue(name, tooltip, mode, type, range, value, defaultValue, () -> ObjectLists.empty(), isValid::apply, this::save).withAutosave());
+		autosave();
 	}
 	
 	@Override
 	public void removeNode(int index) {
 		values.remove(index); 
 		currentValues.remove(index);
+		autosave();
 	}
 	@Override
 	public int indexOf(INode value) { return values.indexOf(value); }

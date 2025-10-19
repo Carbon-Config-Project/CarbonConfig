@@ -39,12 +39,18 @@ public class MinecraftValue implements IValueNode
 	IGameRuleValue entry;
 	String defaultValue;
 	String current;
+	boolean autosave;
 	
 	public MinecraftValue(IGameRuleValue entry) {
 		this.entry = entry;
 		this.defaultValue = entry.getDefault(); 
 		this.current = entry.get();
 		this.previous.push(current);
+	}
+	
+	public MinecraftValue withAutosave() {
+		autosave = true;
+		return this;
 	}
 	
 	public void save() { entry.set(current); }
@@ -54,11 +60,15 @@ public class MinecraftValue implements IValueNode
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public void setDefault() { current = defaultValue; }
+	public void setDefault() {
+		current = defaultValue; 
+		if(autosave) save();
+	}
 	@Override
 	public void setPrevious() {
 		current = previous.top();
 		if(previous.size() > 1) previous.pop();
+		if(autosave) save();
 	}
 	@Override
 	public void createTemp() { previous.push(current); }
@@ -71,7 +81,10 @@ public class MinecraftValue implements IValueNode
 	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { this.current = value; }
+	public void set(String value) {
+		this.current = value; 
+		if(autosave) save();
+	}
 	@Override
 	public ParseResult<Boolean> isValid(String value) { return entry.isValid(value); }
 	@Override
