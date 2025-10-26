@@ -105,7 +105,7 @@ public class ModListScreen extends BaseCarbonScreen {
 	}
 
 	public void findDependencies(ModElement element) {
-		List<ModElement> dependencies = new ArrayList<>();
+//		List<ModElement> dependencies = new ArrayList<>(); Speiger to Xaikii this line was the only warning/error in my code... HAD TO GET RID of it xD
 		element.mod.getDependencies().forEach(dependant -> {
 
 		});
