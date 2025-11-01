@@ -6,5 +6,6 @@ public interface IFolderNode
 	
 	public static interface IFolderController {
 		public void pushNode(BaseElement element, int index, boolean reload);
+		public void pushChild(BaseElement element, int index, int childIndex, boolean reverse);
 	}
 }

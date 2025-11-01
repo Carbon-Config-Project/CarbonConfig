@@ -132,7 +132,14 @@ public class JEIArray implements IArrayNode
 		previous.push(new ObjectArrayList<>(currentValues));
 		reload();
 	}
-
+	
+	@Override
+	public void deleteTempIfNeeded() {
+		if(previous.size() > 1 && getPrev().equals(currentValues)) {
+			previous.pop();
+		}
+	}
+	
 	@Override
 	public void apply() {
 		boolean temp = autosave;

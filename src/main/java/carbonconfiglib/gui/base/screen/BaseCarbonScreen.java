@@ -161,7 +161,7 @@ public class BaseCarbonScreen extends Screen
 	}
 	
 	public CarbonCheckBox checkbox(int x, int y, int width, int height, Align horizontal, Align vertical, CheckBoxState state) {
-		return addRenderableWidget(new CarbonCheckBox(getAlignedX(horizontal) + x, getAlignedY(vertical), width, height, state));
+		return addRenderableWidget(new CarbonCheckBox(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, state));
 	}
 	
 	public CarbonEditBox text(int x, int y, int width, int height, TextState state) {

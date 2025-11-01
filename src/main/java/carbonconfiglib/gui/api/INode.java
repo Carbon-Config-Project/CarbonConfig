@@ -28,6 +28,7 @@ public interface INode
 	public void setPrevious();
 	public void createTemp();
 	public void apply();
+	public void deleteTempIfNeeded();
 	
 	
 	public StructureType getNodeType();

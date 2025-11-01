@@ -62,7 +62,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)));
 			if(isValue()) {
 				suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState));
-				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> setEditable(T.getValue()))));
+				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onEditButtonPressed(T.getValue(), false))));
 			}
 		}
 	}
@@ -112,7 +112,16 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		}
 	}
 	
-	public abstract void setEditable(boolean value);
+	private void onEditButtonPressed(boolean state, boolean bulk) {
+		setEditable(state);
+		if(state) createTemp();
+		else deleteTempIfNeeded();
+		if(context != null && !bulk) context.setTooltipFocused(state ? this : null);
+	}
+	
+	protected abstract void createTemp();
+	protected abstract void deleteTempIfNeeded();
+	protected abstract void setEditable(boolean value);
 	protected abstract void setRightComponentsVisible(boolean value);
 	protected abstract boolean isValue();
 	protected boolean showControls() { return true; }
@@ -126,6 +135,8 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		reloader.run();
 		return true;
 	}
+	public abstract Component getName();
+	public abstract Component getTooltip();
 	
 	public abstract void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	

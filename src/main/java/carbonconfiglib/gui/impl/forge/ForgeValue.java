@@ -71,6 +71,12 @@ public class ForgeValue implements IValueNode
 	@Override
 	public void createTemp() { previous.push(current); }
 	@Override
+	public void deleteTempIfNeeded() {
+		if(previous.size() > 1 && previous.top().equals(current)) {
+			previous.pop();
+		}
+	}
+	@Override
 	public void apply() {
 		if(previous.size() > 1) previous.pop();
 	}

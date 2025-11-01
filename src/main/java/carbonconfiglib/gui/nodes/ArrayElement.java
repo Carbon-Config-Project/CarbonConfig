@@ -93,8 +93,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		node.createNode(value);
 		if(node.getInnerType() == StructureType.SIMPLE) listener.pushNode(this, layer, true);
 		else {
-			List<BaseElement> children = getChildNodes();
-			listener.pushNode(children.get(children.size()-2), layer, false);
+			listener.pushNode(this, layer, true);
+			listener.pushChild(this, layer, 1, true);
 		}
 	}
 	
@@ -130,8 +130,26 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		}
 		
 		@Override
+		protected void createTemp() {
+		}
+		
+		@Override
+		protected void deleteTempIfNeeded() {
+		}
+		
+		@Override
 		protected List<Suggestion> getSuggestions() {
 			return ObjectLists.empty();
+		}
+		
+		@Override
+		public Component getName() {
+			return Component.literal("New Entry");
+		}
+		
+		@Override
+		public Component getTooltip() {
+			return Component.literal("Adds a new Element\nPress Shift while Pressing the button to Skip the Dropdown and simply add the default");
 		}
 		
 		@Override

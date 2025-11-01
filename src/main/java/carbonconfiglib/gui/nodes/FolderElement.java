@@ -72,10 +72,28 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	@Override
+	public Component getName() {
+		return node.getName();
+	}
+	
+	@Override
+	public Component getTooltip() {
+		return node.getTooltip();
+	}
+	
+	@Override
 	protected List<Suggestion> getSuggestions() {
 		return ObjectLists.empty();
 	}
 	
+	@Override
+	protected void createTemp() {
+	}
+	
+	@Override
+	protected void deleteTempIfNeeded() {
+	}
+
 	@Override
 	protected void onArrayDelete() {
 	}

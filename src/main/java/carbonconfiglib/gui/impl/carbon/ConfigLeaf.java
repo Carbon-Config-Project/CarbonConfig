@@ -92,21 +92,19 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();
-		String key = entry.getTranslationKey();
-		comp.append((key != null && I18n.exists(key) ? Component.translatable(key) : Component.literal(entry.getKey())).withStyle(ChatFormatting.YELLOW));
-		key = entry.getTranslationComment();
+		String key = entry.getTranslationComment();
 		if(key != null && I18n.exists(key)) {
 			comp.append("\n").append(Component.translatable(key).withStyle(ChatFormatting.GRAY));
 		}
 		else {
 			String[] array = entry.getComment();
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+				for(int i = 0;i<array.length;comp.append(array[i++]).append("\n").withStyle(ChatFormatting.GRAY));
 			}
 		}
 		
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) comp.append("\n").append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
+		if(!Strings.isBlank(limit)) comp.append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
 		return comp;
 	}
 	@Override

@@ -61,7 +61,7 @@ public class ForgeLeaf implements IConfigNode
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
 			MutableComponent comp = Component.empty();
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.append(array[i++]).withStyle(ChatFormatting.GRAY).append("\n"));
 			tooltip = comp;
 		}
 		guessDataType();
@@ -203,11 +203,10 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(Iterables.getLast(data.getPath(), "")).withStyle(ChatFormatting.YELLOW));
 		if(tooltip != null) comp.append(tooltip);
 		String limit = type.getLimitations(spec);
 		if(limit != null && !Strings.isBlank(limit)) {
-			comp.append("\n").append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
+			comp.append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
 		}
 		return comp;
 	}

@@ -109,9 +109,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	
 	private Component createTooltip(String key) {
 		MutableComponent comp = Component.empty();
-		String entryKey = data.getTranslationKey(key);
-		comp.append((entryKey != null && I18n.exists(entryKey) ? Component.translatable(entryKey) : Component.literal(key)).withStyle(ChatFormatting.YELLOW));
-		entryKey = data.getTranslationComment(key);
+		String entryKey = data.getTranslationComment(key);
 		if(entryKey != null && I18n.exists(entryKey)) {
 			comp.append("\n").append(Component.translatable(entryKey).withStyle(ChatFormatting.GRAY));
 		}
@@ -149,6 +147,13 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	public void createTemp() {
 		previous.push(Object2ObjectMap.builder().linkedMap(current));
 		reload();
+	}
+	
+	@Override
+	public void deleteTempIfNeeded() {
+		if(previous.size() > 1 && getPrev().equals(current)) {
+			previous.pop();
+		}
 	}
 	
 	@Override

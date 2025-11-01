@@ -73,6 +73,12 @@ public class MinecraftValue implements IValueNode
 	@Override
 	public void createTemp() { previous.push(current); }
 	@Override
+	public void deleteTempIfNeeded() {
+		if(previous.size() > 1 && previous.top().equals(current)) {
+			previous.pop();
+		}
+	}
+	@Override
 	public void apply() {
 		if(previous.size() > 1) previous.pop();
 	}
@@ -103,7 +109,6 @@ public class MinecraftValue implements IValueNode
 	public Component getTooltip() {
 		String id = entry.getDescriptionId();
 		MutableComponent result = Component.empty();
-		result.append(Component.translatable(id).withStyle(ChatFormatting.YELLOW));
 		id += ".description";
 		if(I18n.exists(id)) {
 			result.append("\n").append(Component.translatable(id).withStyle(ChatFormatting.GRAY));

@@ -6,4 +6,6 @@ public interface IElementContext
 	
 	public boolean isAtTop(int layer);
 	public int calculateSegmentWidth();
+	
+	public void setTooltipFocused(BaseElement element);
 }

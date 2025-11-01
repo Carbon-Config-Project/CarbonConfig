@@ -7,24 +7,27 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IElementContext;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
+import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
+import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
-public class ConfigScreen extends BaseCarbonScreen implements IElementContext
+public class ConfigScreen extends BaseCarbonScreen implements IElementContext, IFolderController
 {
 	private static final Comparator<BaseElement> SORTER = (K, V) -> {
 		int sort = (V instanceof FolderElement ? 1 : 0) - (K instanceof FolderElement ? 1 : 0);
-		return sort;
-//		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName(), V.getName());
+		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName().getString(), V.getName().getString());
 	};
 	
 	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
@@ -34,6 +37,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
 	List<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
 	List<BaseElement> pickedNode = new ObjectArrayList<>();
+	BaseElement tooltipFocused;
 	boolean twoLayerMode = false;
 	
 	public ConfigScreen(IConfigNode root) {
@@ -52,11 +56,13 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 		listArea(0, minY, widthOne, maxY, rowOne);
 		listArea(widthOne+4, minY, widthTwo, maxY, rowTwo);
 		listArea(widthTwo + 8 + widthOne, minY, widthThree, maxY, rowThree);
-		button(5, 10, 40, 20, Component.literal("Toggle"), T-> {
+		checkbox(5, minY - 22, 20, 20, Align.START, Align.START, new CheckBoxState(Icon.SEARCH));
+		button(28, minY - 22, 40, 20, Component.literal("Toggle"), T-> {
 			twoLayerMode = !twoLayerMode;
 			recalculateNode();
 		});
-		
+		checkbox(-50, minY - 22, 20, 20, Align.END, Align.START, new CheckBoxState(Icon.SEARCH));
+		checkbox(-25, minY - 22, 20, 20, Align.END, Align.START, new CheckBoxState(Icon.NOT_DEFAULT));
 	}
 	
 	private int calculateWidth(int index) {
@@ -103,8 +109,51 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 		if(rowThree.isVisible()) {
 			GuiComponent.fill(matrix, widthThree, (int)(height * 0.15F), widthThree+4, (int)(height * 0.8F), 0xFF000000);
 		}
+		GuiComponent.fill(matrix, 0, (int)(height * 0.8F), width, height, 0xFF1C1C1C);
+		boolean found = false;
+		for(int i = 2;i>=0;i--) {
+			if(all[i].isVisible()) {
+				if(all[i].getOwner() != null && all[i].getOwner().getHovered() != null) {
+					drawTooltip(all[i].getOwner().getHovered(), matrix);
+					found = true;
+					break;
+				}
+			}
+		}
+		if(!found && tooltipFocused != null) {
+			drawTooltip(tooltipFocused, matrix);
+		}
+		GuiComponent.fill(matrix, 0, (int)(height * 0.85F), width, (int)(height * 0.85F+2), 0xFF000000);
 	}
 	
+	private void drawTooltip(BaseElement element, PoseStack matrix) {
+		int scale = (int)((height * 0.85F) - (height * 0.8F)) / font.lineHeight;
+		Component text = element.getName();
+
+		if(text != null) {
+			float minY = (height * 0.8F);
+			float diff = (height * 0.85F - minY) * 0.5F;
+			matrix.pushPose();
+			matrix.translate(2F, minY + diff - (font.lineHeight * scale * 0.5F), 0F);
+			matrix.scale(scale, scale, 1F);
+			GuiUtils.drawText(matrix, font, text, 0F, 0F, Align.START, -1);
+			matrix.popPose();
+		}
+		text = element.getTooltip();
+		if(text != null) {
+			GuiUtils.drawSplitText(matrix, font, text, 2F, height * 0.85F+2F, Align.START, -1, width-4);
+		}
+	}
+	
+	@Override
+	public void pushChild(BaseElement element, int index, int childIndex, boolean reverse) {
+		if(pickedNode.get(pickedNode.size()-1) != element) return;
+		List<BaseElement> children = visibleChildren.get(visibleChildren.size()-1);
+		if(childIndex < 0 || childIndex >= children.size()) return;
+		pushNode(children.get(reverse ? (children.size()-1)-childIndex : childIndex), index+1, false);
+	}
+	
+	@Override
 	public void pushNode(BaseElement node, int index, boolean reload) {
 		if(!reload && pickedNode.size() > 1 && pickedNode.get(pickedNode.size()-1) == node) {
 			visibleChildren.remove(visibleChildren.size()-1);
@@ -130,7 +179,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 			BaseElement element = nodes.get(i);
 			element.setContext(this);
 			if(element instanceof IFolderNode) {
-				((IFolderNode)element).setCallbacks(this::pushNode);
+				((IFolderNode)element).setCallbacks(this);
 			}
 		}
 		visibleChildren.add(nodes);
@@ -144,8 +193,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 	}
 	
 	@Override
-	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton)
-	{
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
 		return super.mouseClicked(pMouseX, pMouseY, pButton);
 	}
 	
@@ -193,6 +241,11 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext
 	@Override
 	public boolean isAtTop(int index) {
 		return index == 2 || all[index+1].isEmpty();
+	}
+	
+	@Override
+	public void setTooltipFocused(BaseElement element) {
+		tooltipFocused = element;
 	}
 	
 //	protected List<BaseElement> collectNodes(IConfigNode node) {

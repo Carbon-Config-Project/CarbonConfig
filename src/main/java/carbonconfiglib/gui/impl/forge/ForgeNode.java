@@ -11,7 +11,6 @@ import com.google.common.collect.Iterables;
 import carbonconfiglib.gui.api.IConfigFolderNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -59,7 +58,7 @@ public class ForgeNode implements IConfigFolderNode
 		String[] array = value.split("\n");
 		if(array != null && array.length > 0) {
 			MutableComponent comp = Component.empty();
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]));
+			for(int i = 0;i<array.length;comp.append(array[i++]).append("\n"));
 			tooltip = comp;
 		}
  	}
@@ -92,7 +91,6 @@ public class ForgeNode implements IConfigFolderNode
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();
-		comp.append(Component.literal(Iterables.getLast(paths, "Root")).withStyle(ChatFormatting.YELLOW));
 		if(tooltip != null) comp.append(tooltip);
 		return comp;
 	}
