@@ -104,7 +104,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 		validationTemp.clear();
 		validationTemp.putAll(current);
 		validationTemp.put(key, value);
-		return isValid.apply(Helpers.mergeCompound(current, false, 0));
+		return isValid.apply(Helpers.mergeCompound(validationTemp, false, 0));
 	}
 	
 	private Component createTooltip(String key) {

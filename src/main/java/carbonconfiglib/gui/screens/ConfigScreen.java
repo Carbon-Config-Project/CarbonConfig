@@ -11,6 +11,7 @@ import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
+import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
@@ -20,27 +21,34 @@ import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
 import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.utils.Stack;
 
 public class ConfigScreen extends BaseCarbonScreen implements IElementContext, IFolderController
 {
-	private static final Comparator<BaseElement> SORTER = (K, V) -> {
+	private static final Comparator<BaseElement> SORTER = (K, V) -> (V instanceof FolderElement ? 1 : 0) - (K instanceof FolderElement ? 1 : 0);
+	private static final Comparator<BaseElement> SPECIAL_SORTER = (K, V) -> {
 		int sort = (V instanceof FolderElement ? 1 : 0) - (K instanceof FolderElement ? 1 : 0);
 		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName().getString(), V.getName().getString());
 	};
 	
+	Screen parent;
+	TextState searchState = new TextState().setCallback(this::applySearch).setMaxLength(255);
 	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	ListState<BaseElement> rowTwo = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	ListState<BaseElement> rowThree = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	@SuppressWarnings("unchecked")
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
-	List<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
-	List<BaseElement> pickedNode = new ObjectArrayList<>();
+	Stack<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
+	Stack<BaseElement> pickedNode = new ObjectArrayList<>();
+	Stack<String> search = new ObjectArrayList<>();
 	BaseElement tooltipFocused;
 	boolean twoLayerMode = false;
 	
-	public ConfigScreen(IConfigNode root) {
+	public ConfigScreen(IConfigNode root, Screen parent) {
+		this.parent = parent;
 		addElement(new FolderElement(root));
 		recalculateNode();
 	}
@@ -50,17 +58,22 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		super.init();
 		int minY = (int)(height * 0.15F);
 		int maxY = (int)(height * 0.8F) - minY;
+		
+		int searchWidth = (int)(width * 0.25F);
+		
 		int widthOne = calculateWidth(0);
 		int widthTwo = calculateWidth(1);
 		int widthThree = calculateWidth(2);
 		listArea(0, minY, widthOne, maxY, rowOne);
 		listArea(widthOne+4, minY, widthTwo, maxY, rowTwo);
 		listArea(widthTwo + 8 + widthOne, minY, widthThree, maxY, rowThree);
-		checkbox(5, minY - 22, 20, 20, Align.START, Align.START, new CheckBoxState(Icon.SEARCH));
-		button(28, minY - 22, 40, 20, Component.literal("Toggle"), T-> {
+		checkbox(minY, minY - 22, 20, 20, Align.START, Align.START, new CheckBoxState(Icon.SEARCH));
+		button(minY + 22, minY - 22, 40, 20, Component.literal("Toggle"), T -> {
 			twoLayerMode = !twoLayerMode;
 			recalculateNode();
 		});
+		
+		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		checkbox(-50, minY - 22, 20, 20, Align.END, Align.START, new CheckBoxState(Icon.SEARCH));
 		checkbox(-25, minY - 22, 20, 20, Align.END, Align.START, new CheckBoxState(Icon.NOT_DEFAULT));
 	}
@@ -88,10 +101,17 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	}
 	
 	@Override
+	public void onClose() {
+		setScreen(parent);
+	}
+	
+	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
-		BackgroundTypes background = BackgroundTypes.AMETHYST;
+		int minY = (int)(height * 0.15F);
+		BackgroundTypes background = BackgroundTypes.CYAN_CONCRETE_POWDER;
 		GuiUtils.renderBackground(0, width, 0, height, 0F, background.getTexture());
-		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, BackgroundTypes.AMETHYST.getTexture());
+		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, background.getTexture());
+		GuiUtils.drawTextureRegion(matrix, 2, 2, minY - 4, minY - 4, Icon.LOGO, 400, 400);
 	}
 	
 	@Override
@@ -127,12 +147,13 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	}
 	
 	private void drawTooltip(BaseElement element, PoseStack matrix) {
-		int scale = (int)((height * 0.85F) - (height * 0.8F)) / font.lineHeight;
 		Component text = element.getName();
-
+		boolean big = false;
 		if(text != null) {
+			int scale = (int)((height * 0.85F) - (height * 0.8F)) / font.lineHeight;
 			float minY = (height * 0.8F);
 			float diff = (height * 0.85F - minY) * 0.5F;
+			big = scale > 1;
 			matrix.pushPose();
 			matrix.translate(2F, minY + diff - (font.lineHeight * scale * 0.5F), 0F);
 			matrix.scale(scale, scale, 1F);
@@ -141,39 +162,48 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		}
 		text = element.getTooltip();
 		if(text != null) {
-			GuiUtils.drawSplitText(matrix, font, text, 2F, height * 0.85F+2F, Align.START, -1, width-4);
+			int lines = font.split(text, width>>1).size();
+			int scale = ((int)(height - (height * 0.85F)) / (font.lineHeight << 1)) >= lines && big ? 2 : 1;
+			float minY = (height * 0.85F) + 2F;
+			matrix.pushPose();
+			matrix.translate(2F, minY, 0F);
+			matrix.scale(scale, scale, 1F);
+			GuiUtils.drawSplitText(matrix, font, text, 0F, 0F, Align.START, -1, (width / scale) - 4);
+			matrix.popPose();
 		}
 	}
 	
 	@Override
 	public void pushChild(BaseElement element, int index, int childIndex, boolean reverse) {
-		if(pickedNode.get(pickedNode.size()-1) != element) return;
-		List<BaseElement> children = visibleChildren.get(visibleChildren.size()-1);
+		if(pickedNode.top() != element) return;
+		List<BaseElement> children = visibleChildren.top();
 		if(childIndex < 0 || childIndex >= children.size()) return;
 		pushNode(children.get(reverse ? (children.size()-1)-childIndex : childIndex), index+1, false);
 	}
 	
 	@Override
 	public void pushNode(BaseElement node, int index, boolean reload) {
-		if(!reload && pickedNode.size() > 1 && pickedNode.get(pickedNode.size()-1) == node) {
-			visibleChildren.remove(visibleChildren.size()-1);
-			pickedNode.remove(pickedNode.size()-1);
+		if(!reload && pickedNode.size() > 1 && pickedNode.top() == node) {
+			visibleChildren.pop();
+			pickedNode.pop();
+			search.pop();
 		}
 		else {
 			int max = twoLayerMode ? 1 : 2;
 			if(index != max && visibleChildren.size() > 1+index) {
 				for(int i = 0,m=max-index;i<m && visibleChildren.size() > 1;i++) {
-					visibleChildren.remove(visibleChildren.size()-1);
-					pickedNode.remove(pickedNode.size()-1);
+					visibleChildren.pop();
+					pickedNode.pop();
+					search.pop();
 				}
 			}
 			addElement(node);
 		}
-		recalculateNode();			
+		recalculateNode();
 	}
 	
 	private void addElement(BaseElement node) {
-		pickedNode.add(node);
+		pickedNode.push(node);
 		List<BaseElement> nodes = node.getChildNodes();
 		for(int i = 0,m=nodes.size();i<m;i++) {
 			BaseElement element = nodes.get(i);
@@ -182,11 +212,22 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 				((IFolderNode)element).setCallbacks(this);
 			}
 		}
-		visibleChildren.add(nodes);
+		visibleChildren.push(nodes);
+		search.push("");
+	}
+	
+	private void applySearch(String value) {
+		search.pop();
+		search.push(value);
+		for(int i = 2;i>=0;i--) {
+			if(all[i].isEmpty()) continue;
+			all[i].search(value);
+			break;
+		}
 	}
 	
 	protected void onSwapped(int oldIndex, int newIndex) {
-		BaseElement root = pickedNode.get(pickedNode.size()-1);
+		BaseElement root = pickedNode.top();
 		if(root instanceof ISortableNode) {
 			((ISortableNode)root).onSwapped(oldIndex, newIndex);
 		}
@@ -199,22 +240,22 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	private void recalculateNode() {
 		for(int i = 0;i<3;i++) {
-			all[i].setDraggable(false).clear();
+			all[i].setDraggable(false).clear().search("");
 		}
 		int max = twoLayerMode ? 2 : 3;
-		for(int i = 0, offset = Math.max(visibleChildren.size()-max, 0);i<max && offset < visibleChildren.size();i++) {
-			all[i].replace(processElements(i, visibleChildren.get(offset)));
-			offset++;
+		for(int i = 0,offset = Math.min(visibleChildren.size()-1, max-1);i<max && i < visibleChildren.size();i++) {
+			all[i].replace(processElements(i, pickedNode.peek(offset), visibleChildren.peek(offset))).search(search.peek(offset));
+			offset--;
 		}
 		for(int i = 2;i>=0;i--) {
 			if(!all[i].isEmpty()) {
-				if(pickedNode.get(pickedNode.size()-1) instanceof ISortableNode) {
+				if(pickedNode.top() instanceof ISortableNode) {
 					all[i].setDraggable(true);
 				}
 				break;
 			}
 		}
-		
+		searchState.setSilentValue(search.top());
 		//Lets pull a Skyrim. Because reloading the GUI from scratch simply works better than applying the new Positions
 		//LIKE WHAT THE FUCK....
 		//But this doesn't matter as Carbons new API is state-less within the components and the state is stored in the screen itself.
@@ -222,18 +263,18 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		init();
 	}
 	
-	private List<BaseElement> processElements(int index, List<BaseElement> data) {
+	private List<BaseElement> processElements(int index, BaseElement owner, List<BaseElement> data) {
 		for(int i = 0,m=data.size();i<m;i++) {
 			data.get(i).setLayer(index);
 		}
-		data.sort(SORTER);
+		data.sort(owner instanceof ISortableNode ? SORTER : SPECIAL_SORTER);
 		return data;
 	}
 	
 	@Override
 	public boolean isElementActive(BaseElement base) {
-		for(int i = pickedNode.size()-1;i>=0;i--) {
-			if(pickedNode.get(i) == base) return true;
+		for(int i = 0,m=pickedNode.size();i<m;i++) {
+			if(pickedNode.peek(i) == base) return true;
 		}
 		return false;
 	}

@@ -137,7 +137,6 @@ public class EventHandler implements IConfigChangeListener
 			V.applyConfigs(K, configs::add);
 			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
 		});
-		
 		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
 	}
 	

@@ -157,7 +157,9 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		@Override
 		public void setEditable(boolean value) {}
 		@Override
-		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {}
+		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			GuiUtils.drawScrollingShadowText(stack, font, Component.literal("Next: "), left, top, width, height, GuiAlign.LEFT, -1, owner.hashCode());
+		}
 
 		@Override
 		public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {

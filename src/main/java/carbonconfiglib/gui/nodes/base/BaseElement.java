@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.nodes.base;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.BooleanSupplier;
@@ -84,7 +85,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	@Override
-	protected boolean containsSearch(String searchString) { return false; }
+	protected boolean containsSearch(String searchString) { return getName().getString().toLowerCase(Locale.ROOT).contains(searchString); }
 	
 	@Override
 	public final void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {

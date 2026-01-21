@@ -231,7 +231,7 @@ public class ConfigSelectorScreen extends ListScreen
 		private void onEdit(Button button) {
 			if(isInWorldConfig() && !mc.hasSingleplayerServer()) mc.setScreen(new RequestScreen(owner.getCustomTexture(), nav.add(type), parent, handler));
 //			else mc.setScreen(new ConfigScreen(nav.add(type), handler, parent, owner.getCustomTexture()));
-			else mc.setScreen(new carbonconfiglib.gui.screens.ConfigScreen(this.handler.getRootNode()));
+			else mc.setScreen(new carbonconfiglib.gui.screens.ConfigScreen(this.handler.getRootNode(), parent));
 		}
 	}
 }
