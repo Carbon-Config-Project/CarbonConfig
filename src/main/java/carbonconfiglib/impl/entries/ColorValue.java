@@ -189,6 +189,11 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 		public float floatValue() { return (float)color; }
 		public double doubleValue() { return (double)color; }
 		
+		@Override
+		public boolean equals(Object obj) {
+			return obj == this || (obj instanceof ColorWrapper && ((ColorWrapper)obj).color == color);
+		}
+		
 		public String serialize() {
 			return serialize(color);
 		}
