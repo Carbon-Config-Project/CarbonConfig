@@ -46,6 +46,7 @@ public abstract class ValueElement extends NodeElement
 	
 	@Override
 	protected void onValueChanged() {
+		super.onValueChanged();
 		String value = node.get();
 		suggestionState.findSelected(T -> value.equals(T.getValue()));
 	}

@@ -54,7 +54,7 @@ public class RegistryElement extends ConfigElement
 	
 	public static DataType createForType(Class<?> clz, String defaultValue) {
 		ISuggestionRenderer renderer = ISuggestionRenderer.Registry.getRendererForType(clz);
-		return new DataType(false, defaultValue, K -> new RegistryElement(K, renderer), (K, V) -> new RegistryElement(K, V, renderer), (K, V) -> new RegistryElement(K, V, renderer));
+		return new DataType(false, defaultValue, null, K -> new RegistryElement(K, renderer), (K, V) -> new RegistryElement(K, V, renderer), (K, V) -> new RegistryElement(K, V, renderer));
 	}
 	
 	@Override

@@ -42,8 +42,11 @@ public interface IConfigFolderNode extends IConfigNode
 		}
 		return true;
 	}
+	
 	@Override
-	public default void save() {}
+	public default void save() {
+		getChildren().forEach(IConfigNode::save);
+	}
 	@Override
 	public default void setPrevious() {
 		getChildren().forEach(IConfigNode::setPrevious);

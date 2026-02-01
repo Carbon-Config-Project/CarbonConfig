@@ -8,4 +8,5 @@ public interface IElementContext
 	public int calculateSegmentWidth();
 	
 	public void setTooltipFocused(BaseElement element);
+	public void onNodeChanged();
 }

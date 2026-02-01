@@ -162,16 +162,16 @@ public class JEIArray implements IArrayNode
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
 	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
-	
 	@Override
 	public Component getName() { return name; }
-	
 	@Override
 	public Component getTooltip() { return tooltip; }
 	@Override
 	public int size() { return values.size(); }
 	@Override
 	public INode get(int index) { return values.get(index); }
+	@Override
+	public boolean isForcedSuggestion() { return false; }
 	@Override
 	public List<Suggestion> getSuggestions() { return suggestions.get(); }
 	

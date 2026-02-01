@@ -56,8 +56,8 @@ public class CarbonArray implements IArrayNode, IValueActions
 		reload();
 	}
 	
-	public CarbonArray withAutosave() {
-		autoSave = true;
+	public CarbonArray setAutosave(boolean value) {
+		autoSave = value;
 		return this;
 	}
 	
@@ -71,9 +71,9 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	protected IValueActions addEntry(String value, String defaultValue, int index) {
 		switch(inner.getDataType()) {
-			case COMPOUND: return new CarbonCompound(mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).withAutosave();
-			case LIST: return new CarbonArray(mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).withAutosave();
-			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, inner, false, () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save).withAutosave();
+			case COMPOUND: return new CarbonCompound(mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
+			case LIST: return new CarbonArray(mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
+			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, inner, data.isForced(), () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save).setAutosave(true);
 			default: return null;
 		}
 	}
@@ -184,7 +184,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	@Override
 	public void createNode(String value) {
-		String defaultValue = defaults.isEmpty() ? inner.generateDefaultValue(this::getDefaultValue) : defaults.get(0);
+		String defaultValue = defaults.isEmpty() ? value != null ? value : inner.generateDefaultValue(this::getDefaultValue) : defaults.get(0);
 		if(value == null) {
 			value = defaultValue;
 		}
@@ -225,6 +225,8 @@ public class CarbonArray implements IArrayNode, IValueActions
 	public Component getName() { return name; }
 	@Override
 	public Component getTooltip() { return tooltip; }
+	@Override
+	public boolean isForcedSuggestion() { return data.isForced(); }
 	@Override
 	public List<Suggestion> getSuggestions() { return suggestions.get(); }
 

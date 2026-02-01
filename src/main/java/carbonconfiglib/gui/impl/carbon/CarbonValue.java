@@ -55,8 +55,8 @@ public class CarbonValue implements IValueNode, IValueActions
 		previous.push(current);
 	}
 	
-	public CarbonValue withAutosave() {
-		autosave = true;
+	public CarbonValue setAutosave(boolean value) {
+		autosave = value;
 		return this;
 	}
 

@@ -58,6 +58,6 @@ public class InternalFeatures
 		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:empty"));
 		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
 		DataType.registerType(MobEffect.class, RegistryElement.createForType(MobEffect.class, "minecraft:luck"));
-		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new, ColorElement::new));
+		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", null, ColorElement::new, ColorElement::new, ColorElement::new));
 	}
 }

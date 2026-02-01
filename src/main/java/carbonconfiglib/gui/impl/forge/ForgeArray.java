@@ -174,6 +174,8 @@ public class ForgeArray implements IArrayNode
 	@Override
 	public INode get(int index) { return values.get(index); }
 	@Override
+	public boolean isForcedSuggestion() { return false; }
+	@Override
 	public List<Suggestion> getSuggestions() { return suggestions.get(); }
 	
 	@Override

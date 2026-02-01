@@ -9,8 +9,10 @@ import java.util.function.BooleanSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import carbonconfiglib.gui.api.CompoundType;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
+import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
@@ -21,14 +23,9 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.DropDownMenu;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.nodes.ArrayElement;
-import carbonconfiglib.gui.nodes.BooleanElement;
 import carbonconfiglib.gui.nodes.CompoundElement;
-import carbonconfiglib.gui.nodes.DoubleElement;
 import carbonconfiglib.gui.nodes.FolderElement;
-import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
-import carbonconfiglib.gui.nodes.NumberElement.LongElement;
 import carbonconfiglib.gui.nodes.SelectionElement;
-import carbonconfiglib.gui.nodes.StringElement;
 import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -113,6 +110,11 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		}
 	}
 	
+	public void setBulkEdit(boolean state) {
+		if(edit == null || edit.getState().getValue() == state) return;
+		edit.getState().setValue(state);
+		onEditButtonPressed(state, true);
+	}
 	private void onEditButtonPressed(boolean state, boolean bulk) {
 		setEditable(state);
 		if(state) createTemp();
@@ -194,24 +196,25 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	protected BaseElement createNode(INode node) {
 		switch(node.getNodeType()) {
-			case COMPOUND: return new CompoundElement(node.asCompound());
+			case COMPOUND: return createCompound(node.asCompound());
 			case LIST: return new ArrayElement(node.asArray());
 			case SIMPLE: return createFromType(node.asValue(), node.asValue().getDataType());
 			default: throw new IllegalStateException("Unknown Node Type");
 		}
 	}
 	
+	protected BaseElement createCompound(ICompoundNode node) {
+		CompoundType override = CompoundType.by(node);
+		return override != null ? override.create(node) : new CompoundElement(node);
+	}
+	
 	protected BaseElement createFromType(IValueNode node, DataType type) {
-		if(type == DataType.ENUM || node.isForcingSuggestions()) return new SelectionElement(node);
-		if(type == DataType.BOOLEAN) return new BooleanElement(node);
-		if(type == DataType.INTEGER) return new IntegerElement(node);
-		if(type == DataType.LONG) return new LongElement(node);
-		if(type == DataType.DOUBLE || type == DataType.FLOAT) return new DoubleElement(node);
-		if(type == DataType.STRING) return new StringElement(node);
-		return null;
+		if(node.isForcingSuggestions()) return new SelectionElement(node);
+		return type.createElement(node);
 	}
 	
 	protected final Font getFont() {
 		return Minecraft.getInstance().font;
 	}
+
 }

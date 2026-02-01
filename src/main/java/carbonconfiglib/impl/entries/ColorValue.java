@@ -180,6 +180,11 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 			this.color = color;
 		}
 		
+		@Override
+		public boolean equals(Object obj) {
+			return obj == this || (obj instanceof ColorWrapper && ((ColorWrapper)obj).color == color);
+		}
+		
 		public int getColor() {
 			return color;
 		}

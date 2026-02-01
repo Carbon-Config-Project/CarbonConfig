@@ -19,6 +19,7 @@ import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
@@ -54,6 +55,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	@Override
 	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.size()+" Elements"), left, top, width-2, height, GuiAlign.RIGHT, -1, 32);
+		GuiUtils.drawText(stack, font, Component.literal("◀-"), left, top + (height >> 1) - (font.lineHeight >> 1), Align.START, -1);
 	}
 	
 	@Override
@@ -104,7 +106,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		
 		public AddElement(ArrayElement owner) {
 			this.owner = owner;
-			selector.getState().setValues(owner.node.getSuggestions());
+			selector.getState().setValues(owner.node.getSuggestions())
+			.allowEmpty(!owner.node.isForcedSuggestion());
 			selector.setMessage(Component.literal("New Entry"));
 			selector.withTooltip(Component.literal("Shift to Skip"));
 		}
@@ -175,7 +178,12 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		@Override
 		public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
 			if(pButton == 0 && Screen.hasShiftDown() && selector.isMouseOver(pMouseX, pMouseY)) {
-				owner.addElement(null);
+				if(!owner.node.isForcedSuggestion()) {
+					owner.addElement(null);					
+					return true;
+				}
+				List<Suggestion> values = owner.node.getSuggestions();
+				owner.addElement(values.isEmpty() ? null : values.get(RandomSource.create().nextInt(values.size())).getValue());
 				return true;
 			}
 			return super.mouseClicked(pMouseX, pMouseY, pButton);

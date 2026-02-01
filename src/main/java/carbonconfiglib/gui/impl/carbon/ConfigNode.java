@@ -58,7 +58,7 @@ public class ConfigNode implements IConfigFolderNode
 		MutableComponent comp = Component.empty();
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.append(array[i++]).append("\n").withStyle(ChatFormatting.GRAY));
 		}
 		return comp;
 	}

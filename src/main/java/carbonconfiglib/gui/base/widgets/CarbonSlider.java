@@ -91,7 +91,7 @@ public class CarbonSlider extends CarbonBaseButton {
 	protected void renderBg(PoseStack stack, Minecraft mc, int mouseX, int mouseY) {
 		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		int i = (this.isHoveredOrFocused() ? 2 : 1) * 20;
+		int i = !isActive() ? 0 : (this.isHoveredOrFocused() ? 2 : 1) * 20;
 		double range = getProgress();
 		ScreenUtils.blitWithBorder(stack, WIDGETS_LOCATION, this.x + (int)(range * (float)(this.width - 8)), this.y, 0, 46 + i, 8, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 	}

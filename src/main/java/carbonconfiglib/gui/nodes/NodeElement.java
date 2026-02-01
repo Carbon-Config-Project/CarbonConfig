@@ -67,7 +67,7 @@ public abstract class NodeElement extends BaseElement
 	}
 	
 	protected void onValueChanged() {
-		
+		context.onNodeChanged();
 	}
 	
 	@Override

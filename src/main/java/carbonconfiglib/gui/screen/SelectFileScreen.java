@@ -16,9 +16,9 @@ import carbonconfiglib.gui.api.IModConfig.IConfigTarget;
 import carbonconfiglib.gui.api.IModConfig.WorldConfigTarget;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
-import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.config.Element;
 import carbonconfiglib.gui.config.ListScreen;
+import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
 import carbonconfiglib.gui.widgets.CarbonButton;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.ChatFormatting;
@@ -180,7 +180,8 @@ public class SelectFileScreen extends ListScreen
 				mc.setScreen(parent);
 				return;
 			}
-			mc.setScreen(new ConfigScreen(nav.add(path.copy().withStyle(ChatFormatting.WHITE)), config, parent, owner.getCustomTexture()));
+			mc.setScreen(new carbonconfiglib.gui.screens.ConfigScreen(config, parent));
+//			mc.setScreen(new ConfigScreen(nav.add(path.copy().withStyle(ChatFormatting.WHITE)), config, parent, owner.getCustomTexture()));
 		}
 		
 		private void cleanup() {

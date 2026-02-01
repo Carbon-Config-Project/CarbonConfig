@@ -6,7 +6,7 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.BackgroundTypes;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
@@ -34,6 +34,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName().getString(), V.getName().getString());
 	};
 	
+	IModConfig configs;
+	FolderElement rootElement;
 	Screen parent;
 	TextState searchState = new TextState().setCallback(this::applySearch).setMaxLength(255);
 	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
@@ -41,15 +43,18 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	ListState<BaseElement> rowThree = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	@SuppressWarnings("unchecked")
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
+	CheckBoxState bulkEdit = new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onBulkEdit(T.getValue())).setTooltip(Component.literal("Bulk Edit"));
+	CheckBoxState autoSave = new CheckBoxState(false, Icon.SEARCH).setCallback(T -> onNodeChanged()).setTooltip(Component.literal("Auto Save"));
 	Stack<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
 	Stack<BaseElement> pickedNode = new ObjectArrayList<>();
 	Stack<String> search = new ObjectArrayList<>();
 	BaseElement tooltipFocused;
 	boolean twoLayerMode = false;
 	
-	public ConfigScreen(IConfigNode root, Screen parent) {
+	public ConfigScreen(IModConfig configs, Screen parent) {
 		this.parent = parent;
-		addElement(new FolderElement(root));
+		this.configs = configs;
+		addElement(rootElement = new FolderElement(configs.getRootNode()));
 		recalculateNode();
 	}
 
@@ -75,7 +80,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		checkbox(-50, minY - 22, 20, 20, Align.END, Align.START, new CheckBoxState(Icon.SEARCH));
-		checkbox(-25, minY - 22, 20, 20, Align.END, Align.START, new CheckBoxState(Icon.NOT_DEFAULT));
+		checkbox(-25, minY - 22, 20, 20, Align.END, Align.START, bulkEdit);
 	}
 	
 	private int calculateWidth(int index) {
@@ -208,6 +213,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		for(int i = 0,m=nodes.size();i<m;i++) {
 			BaseElement element = nodes.get(i);
 			element.setContext(this);
+			if(bulkEdit.getValue()) element.setBulkEdit(true);
 			if(element instanceof IFolderNode) {
 				((IFolderNode)element).setCallbacks(this);
 			}
@@ -236,6 +242,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	@Override
 	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
 		return super.mouseClicked(pMouseX, pMouseY, pButton);
+	}
+	
+	private void onBulkEdit(boolean value) {
+		for(BaseElement element : visibleChildren.top()) {
+			element.setBulkEdit(value);
+		}
 	}
 	
 	private void recalculateNode() {
@@ -289,18 +301,10 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		tooltipFocused = element;
 	}
 	
-//	protected List<BaseElement> collectNodes(IConfigNode node) {
-//		List<BaseElement> elements = new ObjectArrayList<>();
-//		for(IConfigNode entry : node.getChildren()) {
-//			elements.add(createElement(entry));
-//		}
-//		return elements;
-//	}
-	
-//	protected BaseElement createElement(IConfigNode node) {
-//		if(node.isLeaf()) {
-//			return new TestElement(node.asNode());
-//		}
-//		return new FolderElement(node);
-//	}
+	@Override
+	public void onNodeChanged() {
+		if(!autoSave.getValue()) return;
+		rootElement.save();
+		configs.save();
+	}
 }

@@ -58,7 +58,6 @@ public class ConfigLeaf implements IConfigNode
 		}
 		entry.deserializeValue(value);
 	}
-	
 	@Override
 	public List<IConfigNode> getChildren() { return null; }
 	@Override

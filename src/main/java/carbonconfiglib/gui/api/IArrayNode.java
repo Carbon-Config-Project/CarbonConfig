@@ -27,6 +27,7 @@ public interface IArrayNode extends INode
 	public StructureType getInnerType();
 	
 	public List<Suggestion> getSuggestions();
+	public boolean isForcedSuggestion();
 	
 	public void createNode(String value);
 	public void removeNode(int index);

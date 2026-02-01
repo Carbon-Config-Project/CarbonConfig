@@ -117,4 +117,8 @@ public class FolderElement extends BaseElement implements IFolderNode
 	protected void onReset() {
 		node.setDefault();
 	}
+	
+	public void save() {
+		node.save();
+	}
 }

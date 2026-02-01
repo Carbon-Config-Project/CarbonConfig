@@ -391,6 +391,10 @@ public class DropDownMenu<T> extends CarbonButton {
 			return multiSelection;
 		}
 		
+		public boolean isAllowingEmpty() {
+			return allowEmpty;
+		}
+		
 		public DropDownState<T> findDefaultSelected(Predicate<T> filter) {
 			defaultSelected.clear();
 			for(int i = 0,m=this.values.size();i<m;i++) {

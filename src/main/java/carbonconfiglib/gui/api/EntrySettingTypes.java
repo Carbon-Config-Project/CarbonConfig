@@ -26,4 +26,16 @@ public class EntrySettingTypes
 			return new ArrayRenamer(compound);
 		}
 	}
+	
+	public static class CompoundOverride implements IEntrySettings {
+		Class<?> clz;
+
+		public CompoundOverride(Class<?> clz) {
+			this.clz = clz;
+		}
+		
+		public Class<?> getType() {
+			return clz;
+		}
+	}
 }

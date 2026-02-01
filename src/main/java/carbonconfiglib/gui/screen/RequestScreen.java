@@ -65,7 +65,7 @@ public class RequestScreen extends ListScreen implements IRequestScreen
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
-			minecraft.setScreen(new ConfigScreen(nav, config, parent, getCustomTexture()));
+			minecraft.setScreen(new carbonconfiglib.gui.screens.ConfigScreen(config, parent));
 			return;
 		}
 		minecraft.setScreen(parent);

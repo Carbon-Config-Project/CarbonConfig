@@ -1,6 +1,5 @@
 package carbonconfiglib.gui.api;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -10,13 +9,15 @@ import carbonconfiglib.gui.config.ConfigElement;
 import carbonconfiglib.gui.config.EnumElement;
 import carbonconfiglib.gui.config.NumberElement;
 import carbonconfiglib.gui.config.StringElement;
-import carbonconfiglib.utils.structure.IStructuredData;
+import carbonconfiglib.gui.nodes.DoubleElement;
+import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
+import carbonconfiglib.gui.nodes.NumberElement.LongElement;
+import carbonconfiglib.gui.nodes.SelectionElement;
+import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.IStructuredData.SimpleData;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import speiger.src.collections.objects.utils.ObjectIterables;
-import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -35,24 +36,26 @@ import speiger.src.collections.objects.utils.ObjectLists;
  */
 public class DataType
 {
-	public static final DataType BOOLEAN = new DataType(false, "false", BooleanElement::new, BooleanElement::new, BooleanElement::new);
-	public static final DataType INTEGER = new DataType(false, "0", NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType LONG = new DataType(false, "0", NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType FLOAT = new DataType(false, "0.0", NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType DOUBLE = new DataType(false, "0.0", NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType STRING = new DataType(true, " ", StringElement::new, StringElement::new, StringElement::new);
-	public static final DataType ENUM = new DataType(true, " ", EnumElement::new, EnumElement::new, EnumElement::new);
+	public static final DataType BOOLEAN = new DataType(false, "false", carbonconfiglib.gui.nodes.BooleanElement::new, BooleanElement::new, BooleanElement::new, BooleanElement::new);
+	public static final DataType INTEGER = new DataType(false, "0", IntegerElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
+	public static final DataType LONG = new DataType(false, "0", LongElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
+	public static final DataType FLOAT = new DataType(false, "0.0", DoubleElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
+	public static final DataType DOUBLE = new DataType(false, "0.0", DoubleElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
+	public static final DataType STRING = new DataType(true, " ", carbonconfiglib.gui.nodes.StringElement::new, StringElement::new, StringElement::new, StringElement::new);
+	public static final DataType ENUM = new DataType(true, " ", SelectionElement::new, EnumElement::new, EnumElement::new, EnumElement::new);
 	private static final Map<Class<?>, DataType> AUTO_DATA_TYPES = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 	
 	boolean allowsEmptyValue;
 	String defaultValue;
+	Function<IValueNode, BaseElement> creatorFunction; 
 	Function<IValueNode, ConfigElement> creator;
 	BiFunction<IArrayNode, IValueNode, ConfigElement> arrayCreator;
 	BiFunction<ICompoundNode, IValueNode, ConfigElement> compoundCreator;
 	
-	public DataType(boolean allowsEmptyValue, String defaultValue, Function<IValueNode, ConfigElement> creator, BiFunction<IArrayNode, IValueNode, ConfigElement> arrayCreator, BiFunction<ICompoundNode, IValueNode, ConfigElement> compoundCreator) {
+	public DataType(boolean allowsEmptyValue, String defaultValue, Function<IValueNode, BaseElement> creatorFunction, Function<IValueNode, ConfigElement> creator, BiFunction<IArrayNode, IValueNode, ConfigElement> arrayCreator, BiFunction<ICompoundNode, IValueNode, ConfigElement> compoundCreator) {
 		this.allowsEmptyValue = allowsEmptyValue;
 		this.defaultValue = defaultValue;
+		this.creatorFunction = creatorFunction;
 		this.creator = creator;
 		this.arrayCreator = arrayCreator;
 		this.compoundCreator = compoundCreator;
@@ -69,22 +72,17 @@ public class DataType
 	public ConfigElement create(ICompoundNode compound, IValueNode node) {
 		return compoundCreator.apply(compound, node);
 	}
-		
+	
+	public BaseElement createElement(IValueNode node) {
+		return creatorFunction.apply(node);
+	}
+	
 	public String getDefaultValue() {
 		return defaultValue;
 	}
 	
 	public boolean isAllowEmptyValue() {
 		return allowsEmptyValue;
-	}
-	
-	public static List<DataType> resolve(IStructuredData data) {
-		switch(data.getDataType()) {
-			case COMPOUND: return ObjectIterables.flatMap(data.asCompound().getFormat().values(), DataType::resolve).pourAsList();
-			case LIST: return resolve(data.asList().getType());
-			case SIMPLE: return ObjectLists.singleton(bySimple(data.asSimple()));
-			default: return ObjectLists.empty();
-		}
 	}
 	
 	public static DataType bySimple(SimpleData type) {
