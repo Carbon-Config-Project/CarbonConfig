@@ -9,6 +9,7 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.DropDownMenu;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
+import carbonconfiglib.gui.nodes.base.SuggestionEntry;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.network.chat.Component;
@@ -16,16 +17,20 @@ import speiger.src.collections.objects.utils.ObjectLists;
 
 public class SelectionElement extends ValueElement
 {
-	DropDownState<Suggestion> state = new DropDownState<Suggestion>(T -> Component.literal(T.getName()), ObjectLists.empty()).valueOnly(true).allowEmpty(false).withListener(this::onSelectionChanged);
-	DropDownMenu<Suggestion> values = addChild(new DropDownMenu<>(0, 0, 0, 0, state));
-	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
-	ParseResult<Boolean> result;
+	protected DropDownState<Suggestion> state = new DropDownState<Suggestion>(T -> Component.literal(T.getName()), ObjectLists.empty()).valueOnly(true).allowEmpty(false).withListener(this::onSelectionChanged);
+	protected DropDownMenu<Suggestion> values = addChild(new DropDownMenu<>(0, 0, 0, 0, state));
+	protected CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
+	protected ParseResult<Boolean> result;
 	
 	public SelectionElement(IValueNode node) {
 		super(node);
-		state.setValues(node.getSuggestions());
+		List<Suggestion> suggestions = node.getSuggestions();
+		state.setValues(suggestions);
 		state.findDefaultSelected(T -> T.getValue().equals(node.getDefault()));
 		state.findSelected(T -> T.getValue().equals(node.get()));
+		if(!suggestions.isEmpty() && suggestions.get(0).getType() != null) {
+			state.withCustomRenderer(SuggestionEntry::new).setElementHeight(22);
+		}
 		readValue();
 		text.getState().setCallback(this::onTextChanged);
 	}

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import carbonconfiglib.api.ISuggestionProvider;
@@ -21,7 +22,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 
 /**
@@ -41,13 +41,13 @@ import net.minecraftforge.registries.IForgeRegistry;
  */
 public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Set<ResourceLocation>>
 {
-	ForgeRegistry<?> registry;
+	NamedForgeRegistry<?> registry;
 	Class<?> clz;
 	Predicate<ResourceLocation> filter;
 	
-	public RegistryKeyValue(String key, IForgeRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
+	public RegistryKeyValue(String key, NamedForgeRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (ForgeRegistry<?>)registry;
+		this.registry = registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistryKeySuggestions(this));
@@ -67,7 +67,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		String[] result = new String[value.size()];
 		int i = 0;
 		for(ResourceLocation entry : value) {
-			result[i] = entry.toString();
+			result[i++] = entry.toString();
 		}
 		return serializeArray(policy, result);
 	}
@@ -89,7 +89,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		ParseResult<Boolean> result = super.canSet(value);
 		if(result.hasError()) return result;
 		for(ResourceLocation entry : value) {
-			if(!registry.containsKey(entry)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
+			if(!registry.getRegistry().containsKey(entry)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(entry)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entry+"] isn't allowed");
 		}
 		return ParseResult.success(true);
@@ -98,7 +98,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	private ParseResult<ResourceLocation> parseEntry(String value) {
 		ResourceLocation location = ResourceLocation.tryParse(value);
 		if(location == null) return ParseResult.error(value, "Id ["+value+"] isn't a valid resource location");
-		if(!registry.containsKey(location) || (filter != null && !filter.test(location))) return ParseResult.error(value, "Id ["+value+"] isn't valid");
+		if(!registry.getRegistry().containsKey(location) || (filter != null && !filter.test(location))) return ParseResult.error(value, "Id ["+value+"] isn't valid");
 		return ParseResult.success(location);
 	}
 	
@@ -152,9 +152,8 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		
 		@Override
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(ResourceLocation entry : value.registry.getKeys()) {
-				String key = entry.toString();
-				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
+			for(ResourceLocation entry : value.registry.getRegistry().getKeys()) {
+				Suggestion suggestion = Suggestion.namedTypeValue(value.registry.getName(entry), entry.toString(), value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
 			}
 		}
@@ -165,6 +164,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		String key;
 		Set<E> unparsedValues = new ObjectLinkedOpenHashSet<>();
 		Set<ResourceLocation> values = new ObjectLinkedOpenHashSet<>();
+		Function<ResourceLocation, String> namingFunction;
 		Predicate<ResourceLocation> filter;
 		String[] comments;
 		
@@ -214,11 +214,21 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		
 		public RegistryKeyValue build(IForgeRegistry<E> registry) {
 			parseValues(registry);
-			return new RegistryKeyValue(key, registry, clz, values, filter, comments);
+			return new RegistryKeyValue(key, new NamedForgeRegistry<>(registry, null), clz, values, filter, comments);
 		}
 		
 		public RegistryKeyValue build(IForgeRegistry<E> registry, ConfigSection section) {
 			parseValues(registry);
+			return section.add(new RegistryKeyValue(key, new NamedForgeRegistry<>(registry, null), clz, values, filter, comments));
+		}
+		
+		public RegistryKeyValue build(NamedForgeRegistry<E> registry) {
+			parseValues(registry.getRegistry());
+			return new RegistryKeyValue(key, registry, clz, values, filter, comments);
+		}
+		
+		public RegistryKeyValue build(NamedForgeRegistry<E> registry, ConfigSection section) {
+			parseValues(registry.getRegistry());
 			return section.add(new RegistryKeyValue(key, registry, clz, values, filter, comments));
 		}
 	}

@@ -32,6 +32,7 @@ public class ForgeValue implements IValueNode
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
 	String defaultValue;
+	String savedValue;
 	boolean autosave;
 	
 	public ForgeValue(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, ForgeValue> saved) {
@@ -42,6 +43,7 @@ public class ForgeValue implements IValueNode
 		this.range = range;
 		this.type = type;
 		this.current = value;
+		this.savedValue = value;
 		previous.push(current);
 		this.defaultValue = defaultValue;
 		this.suggestions = suggestions;
@@ -52,11 +54,17 @@ public class ForgeValue implements IValueNode
 		return this;
 	}
 	
-	public void save() { saved.accept(current, this); }
+	public void save() {
+		saved.accept(current, this); 
+		savedValue = current;
+	}
+	
 	@Override
 	public boolean isDefault() { return Objects.equals(defaultValue, current); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
+	@Override
+	public boolean isUnsaved() { return !Objects.equals(savedValue, current); }
 	@Override
 	public void setDefault() {
 		current = defaultValue; 

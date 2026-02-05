@@ -15,6 +15,8 @@ import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
+import carbonconfiglib.gui.nodes.base.SuggestionEntry;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -39,6 +41,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	protected void setRightComponentsVisible(boolean value) {}
 	@Override
 	protected boolean isValue() { return false; }
+	@Override
+	protected ReloadMode getReloadState() { return node.requiresRestart() ? ReloadMode.GAME : (node.requiresReload() ? ReloadMode.WORLD : null); }
 	@Override
 	public void setEditable(boolean value) {}
 	@Override
@@ -74,11 +78,17 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	@Override
 	public void onSwapped(int oldIndex, int newIndex) {
 		node.swap(oldIndex, newIndex);
+		onValueChanged();
 	}
 	
 	@Override
 	public void setCallbacks(IFolderController listener) {
 		this.listener = listener;
+	}
+	
+	@Override
+	public String getNodeName() {
+		return node.getNodeName();
 	}
 	
 	protected void onClick(Button button) {
@@ -98,28 +108,42 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 			listener.pushNode(this, layer, true);
 			listener.pushChild(this, layer, 1, true);
 		}
+		onValueChanged();
 	}
 	
 	public static class AddElement extends BaseElement {
 		ArrayElement owner;
 		DropDownMenu<Suggestion> selector = addChild(new DropDownMenu<>(0, 0, 120, 20, new DropDownState<Suggestion>(T -> Component.literal(T.getName())).allowEmpty(true).withEmpty(Component.literal("Default")).asSimpleButton(true).withListener(this::onElementSelected)));
+		boolean skip;
 		
 		public AddElement(ArrayElement owner) {
 			this.owner = owner;
-			selector.getState().setValues(owner.node.getSuggestions())
+			List<Suggestion> suggestions = owner.node.getSuggestions();
+			skip = suggestions.isEmpty();
+			selector.getState().setValues(suggestions)
 			.allowEmpty(!owner.node.isForcedSuggestion());
 			selector.setMessage(Component.literal("New Entry"));
-			selector.withTooltip(Component.literal("Shift to Skip"));
+			if(!suggestions.isEmpty()) {
+				selector.withTooltip(Component.literal("Shift to Quick Add"));
+				if(suggestions.get(0).getType() != null) {
+					selector.getState().withCustomRenderer(SuggestionEntry::new).setElementHeight(22);
+				}
+			}
 		}
-
+		
 		@Override
 		protected void setRightComponentsVisible(boolean value) {
 			selector.visible = value;
 		}
-
+		
 		@Override
 		protected boolean isValue() {
 			return false;
+		}
+		
+		@Override
+		protected ReloadMode getReloadState() {
+			return null;
 		}
 		
 		@Override
@@ -131,7 +155,6 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		public boolean isDraggable() {
 			return false;
 		}
-		
 		@Override
 		protected void createTemp() {
 		}
@@ -177,7 +200,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		
 		@Override
 		public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-			if(pButton == 0 && Screen.hasShiftDown() && selector.isMouseOver(pMouseX, pMouseY)) {
+			if(pButton == 0 && (Screen.hasShiftDown() || skip) && selector.isMouseOver(pMouseX, pMouseY)) {
 				if(!owner.node.isForcedSuggestion()) {
 					owner.addElement(null);					
 					return true;

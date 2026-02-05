@@ -38,6 +38,7 @@ public class MinecraftValue implements IValueNode
 	ObjectArrayList<String> previous = new ObjectArrayList<>();
 	IGameRuleValue entry;
 	String defaultValue;
+	String savedValue;
 	String current;
 	boolean autosave;
 	
@@ -45,6 +46,7 @@ public class MinecraftValue implements IValueNode
 		this.entry = entry;
 		this.defaultValue = entry.getDefault(); 
 		this.current = entry.get();
+		this.savedValue = current;
 		this.previous.push(current);
 	}
 	
@@ -53,12 +55,17 @@ public class MinecraftValue implements IValueNode
 		return this;
 	}
 	
-	public void save() { entry.set(current); }
+	public void save() {
+		entry.set(current); 
+		savedValue = current;
+	}
 	
 	@Override
 	public boolean isDefault() { return Objects.equals(current, defaultValue); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
+	@Override
+	public boolean isUnsaved() { return !Objects.equals(current, savedValue); }
 	@Override
 	public void setDefault() {
 		current = defaultValue; 

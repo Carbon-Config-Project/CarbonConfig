@@ -2,6 +2,7 @@ package carbonconfiglib.gui.base.widgets;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.Consumer;
@@ -184,7 +185,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		@Override
 		protected boolean containsSearch(String searchString) {
-			return text.getString().contains(searchString);
+			return text.getString().toLowerCase(Locale.ROOT).contains(searchString);
 		}
 		
 		@Override

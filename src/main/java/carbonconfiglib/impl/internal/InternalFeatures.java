@@ -3,8 +3,7 @@ package carbonconfiglib.impl.internal;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.ISuggestionRenderer;
-import carbonconfiglib.gui.config.ColorElement;
-import carbonconfiglib.gui.config.RegistryElement;
+import carbonconfiglib.gui.nodes.RegistryElement;
 import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
@@ -58,6 +57,6 @@ public class InternalFeatures
 		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:empty"));
 		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
 		DataType.registerType(MobEffect.class, RegistryElement.createForType(MobEffect.class, "minecraft:luck"));
-		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", null, ColorElement::new, ColorElement::new, ColorElement::new));
+		DataType.registerType(ColorWrapper.class, new DataType("0xFFFFFFFF", null));
 	}
 }

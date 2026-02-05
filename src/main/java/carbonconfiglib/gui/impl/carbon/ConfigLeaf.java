@@ -38,10 +38,10 @@ public class ConfigLeaf implements IConfigNode
 		if(value == null) {
 			switch(type) {
 				case COMPOUND:
-					value = new CarbonCompound(mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonCompound(entry.getKey(), mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case LIST:
-					value = new CarbonArray(mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonArray(entry.getKey(), mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case SIMPLE:
 					value = new CarbonValue(mode, getName(), getTooltip(), entry.getSettings(), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
@@ -68,6 +68,8 @@ public class ConfigLeaf implements IConfigNode
 	public boolean isDefault() { return value == null ? entry.isDefault() : value.isDefault(); }
 	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
+	@Override
+	public boolean isUnsaved() { return value != null && value.isUnsaved(); }
 	@Override
 	public void setPrevious() {
 		if(value != null) value.setPrevious();

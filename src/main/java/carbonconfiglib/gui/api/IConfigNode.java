@@ -33,6 +33,7 @@ public interface IConfigNode
 	
 	public boolean isChanged();
 	public boolean isDefault();
+	public boolean isUnsaved();
 	public void setPrevious();
 	public void setDefault();
 	public void save();

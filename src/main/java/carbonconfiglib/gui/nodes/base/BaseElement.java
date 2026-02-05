@@ -19,6 +19,7 @@ import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
+import carbonconfiglib.gui.base.widgets.CarbonLabel;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.DropDownMenu;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
@@ -27,6 +28,7 @@ import carbonconfiglib.gui.nodes.CompoundElement;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.SelectionElement;
 import carbonconfiglib.gui.widgets.Icon;
+import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -40,6 +42,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	private Runnable reloader;
 	private boolean right;
 	protected int layer;
+	private CarbonLabel reload;
 	private CarbonButton delete;
 	private CarbonButton revert;
 	private CarbonButton reset;
@@ -59,7 +62,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onRevert()).withIcon(Optional.of(Icon.REVERT)));
 			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)));
 			if(isValue()) {
-				suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState));
+				if(allowSuggestions()) suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState));
 				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onEditButtonPressed(T.getValue(), false))));
 			}
 		}
@@ -73,6 +76,10 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public final void setContext(IElementContext context) {
 		this.context = context;
+		if(array == null && reload == null) {
+			ReloadMode mode = getReloadState();
+			if(mode != null) reload = addChild(new CarbonLabel(0, 0, 18, 18, mode == ReloadMode.GAME ? Icon.RESTART : Icon.RELOAD).withTooltip(Component.literal(mode == ReloadMode.GAME ? "Requires Game Restart" : "Requires World Reload")));
+		}
 		setRightComponentsVisible(false);
 		setEditable(false);
 	}
@@ -97,7 +104,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 				renderRightPart(poseStack, left+leftWidth+8, top, width-leftWidth-10, height, mouseX, mouseY, selected, partialTicks);
 				return;
 			}
-			int controlWidth = delete != null ? 100 : 80;
+			int controlWidth = 60 + (delete != null ? 20 : 0) + (reload != null ? 20 : 0);
 			int newWidth = width-leftWidth-10-controlWidth;
 			int renderWidth = Math.min((newWidth + controlWidth) >> 1, newWidth);
 			controlWidth-=2;
@@ -127,8 +134,10 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	protected abstract void setEditable(boolean value);
 	protected abstract void setRightComponentsVisible(boolean value);
 	protected abstract boolean isValue();
+	protected abstract ReloadMode getReloadState();
 	protected boolean showControls() { return true; }
 	protected boolean shouldRenderIndex() { return array != null; }
+	protected boolean allowSuggestions() { return true; }
 	protected int index(INode node) { return array == null ? -1 : array.indexOf(node); }
 	protected boolean deleteNode(INode node) {
 		if(array == null) return false;
@@ -147,29 +156,34 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public void renderControls(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		left-=1;
-		left+=60;
-		if(delete != null) {
-			left+=20;
-			render(delete, left, top, null, stack, mouseX, mouseY, partialTicks);			
-			left-=20;
+		left+= 60 + (reload != null ? 20 : 0);
+		if(render(delete, left, top, null, stack, mouseX, mouseY, partialTicks)); {
+			left-=20;			
 		}
-		render(revert, left, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
-		left -=20;
-		render(reset, left, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
-		if(!getSuggestions().isEmpty()) {
+		if(render(revert, left, top, this::isChanged, stack, mouseX, mouseY, partialTicks)) {
 			left -=20;
-			render(suggestion, left, top, null, stack, mouseX, mouseY, partialTicks);
 		}
-		left -=20;
-		render(edit, left, top, null, stack, mouseX, mouseY, partialTicks);
+		if(render(reset, left, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks)) {
+			left -=20;
+		}
+		if(render(edit, left, top, null, stack, mouseX, mouseY, partialTicks)) {
+			left -= 20;
+		}
+		if(!getSuggestions().isEmpty() && allowSuggestions()) {
+			if(render(suggestion, left, top, null, stack, mouseX, mouseY, partialTicks)) {
+				left-=20;
+			}
+		}
+		render(reload, left, top, null, stack, mouseX, mouseY, partialTicks);
 	}
 	
-	private void render(AbstractWidget widget, int x, int y, BooleanSupplier active, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-		if(widget == null) return;
+	private boolean render(AbstractWidget widget, int x, int y, BooleanSupplier active, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+		if(widget == null) return false;
 		widget.x = x;
 		widget.y = y;
 		if(active != null) widget.active = active.getAsBoolean();
 		widget.render(stack, mouseX, mouseY, partialTicks);
+		return true;
 	}
 	
 	private void onSuggestionPicked(List<Suggestion> result) {

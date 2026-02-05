@@ -22,6 +22,7 @@ import speiger.src.collections.utils.Stack;
 
 public class ForgeArray implements IArrayNode
 {
+	String nodeName;
 	Component name;
 	Component tooltip;
 	DataType type;
@@ -34,10 +35,12 @@ public class ForgeArray implements IArrayNode
 	List<ForgeValue> values = new ObjectArrayList<>();
 	Stack<List<String>> previous = new ObjectArrayList<>();
 	List<String> currentValues;
+	List<String> savedValues = new ObjectArrayList<>();
 	List<String> defaults;
 	boolean autosave;
 	
-	public ForgeArray(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
+	public ForgeArray(String nodeName, Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
+		this.nodeName = nodeName;
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
@@ -45,6 +48,7 @@ public class ForgeArray implements IArrayNode
 		this.type = type;
 		this.range = range;
 		this.currentValues = value;
+		this.savedValues.addAll(value);
 		previous.push(new ObjectArrayList<>(currentValues));
 		this.defaults = defaultValue;
 		this.suggestions = suggestions;
@@ -69,7 +73,11 @@ public class ForgeArray implements IArrayNode
 		autosave();
 	}
 	
-	public void save() { saved.accept(currentValues); }
+	public void save() {
+		saved.accept(currentValues); 
+		savedValues.clear();
+		savedValues.addAll(currentValues);
+	}
 	
 	protected void reload() {
 		values.clear();
@@ -91,6 +99,11 @@ public class ForgeArray implements IArrayNode
 	@Override
 	public boolean isDefault() {
 		return currentValues.equals(defaults);
+	}
+	
+	@Override
+	public boolean isUnsaved() {
+		return !currentValues.equals(savedValues);
 	}
 	
 	@Override
@@ -165,6 +178,8 @@ public class ForgeArray implements IArrayNode
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
 	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	@Override
+	public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override

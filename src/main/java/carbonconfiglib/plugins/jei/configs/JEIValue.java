@@ -24,22 +24,26 @@ public class JEIValue implements IValueNode
 	Component tooltip;
 	DataType type;
 	ReloadMode mode;
+	IRange range;
 	Function<String, ParseResult<?>> isValid;
 	Supplier<List<Suggestion>> suggestions;
 	BiConsumer<String, JEIValue> saved;
 	
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
+	String savedValue;
 	String defaultValue;
 	boolean autosave;
 	
-	public JEIValue(Component name, Component tooltip, ReloadMode mode, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
+	public JEIValue(Component name, Component tooltip, ReloadMode mode, IRange range, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
 		this.mode = mode;
+		this.range = range;
 		this.type = type;
 		this.current = value;
+		this.savedValue = value;
 		previous.push(current);
 		this.defaultValue = defaultValue;
 		this.suggestions = suggestions;
@@ -56,11 +60,17 @@ public class JEIValue implements IValueNode
 		save();
 	}
 	
-	public void save() { saved.accept(current, this); }
+	public void save() {
+		saved.accept(current, this);
+		savedValue = current;
+	}
 	@Override
 	public boolean isDefault() { return Objects.equals(defaultValue, current); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
+	@Override
+	public boolean isUnsaved() { return !Objects.equals(savedValue, current); }
+	
 	@Override
 	public void setDefault() {
 		current = defaultValue; 
@@ -89,7 +99,7 @@ public class JEIValue implements IValueNode
 	@Override
 	public IEntrySettings getSettings() { return null; }
 	@Override
-	public IRange getRange() { return null; }
+	public IRange getRange() { return range; }
 	@Override
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override

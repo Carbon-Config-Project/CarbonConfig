@@ -19,6 +19,7 @@ import java.util.List;
  */
 public interface ICompoundNode extends INode
 {
+	public String getNodeName();
 	public List<? extends INode> getValues();
 	public boolean isValid();
 	public String get();

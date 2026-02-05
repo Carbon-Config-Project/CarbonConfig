@@ -23,6 +23,7 @@ public interface INode
 {	
 	public boolean isDefault();
 	public boolean isChanged();
+	public boolean isUnsaved();
 	
 	public void setDefault();
 	public void setPrevious();

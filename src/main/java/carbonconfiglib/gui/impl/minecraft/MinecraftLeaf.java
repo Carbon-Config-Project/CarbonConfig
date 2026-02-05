@@ -56,6 +56,8 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
 	@Override
+	public boolean isUnsaved() { return value != null && value.isUnsaved(); }
+	@Override
 	public void setPrevious() {
 		if(value != null) value.setPrevious();
 	}

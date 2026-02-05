@@ -39,6 +39,11 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	public void setCallbacks(IFolderController listener) {
 		this.listener = listener;
 	}
+	
+	@Override
+	public String getNodeName() {
+		return node.getNodeName();
+	}
 
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {

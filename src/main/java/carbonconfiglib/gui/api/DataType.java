@@ -1,18 +1,15 @@
 package carbonconfiglib.gui.api;
 
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import carbonconfiglib.gui.config.BooleanElement;
 import carbonconfiglib.gui.config.ConfigElement;
-import carbonconfiglib.gui.config.EnumElement;
-import carbonconfiglib.gui.config.NumberElement;
-import carbonconfiglib.gui.config.StringElement;
+import carbonconfiglib.gui.nodes.BooleanElement;
 import carbonconfiglib.gui.nodes.DoubleElement;
 import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
 import carbonconfiglib.gui.nodes.NumberElement.LongElement;
 import carbonconfiglib.gui.nodes.SelectionElement;
+import carbonconfiglib.gui.nodes.StringElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.IStructuredData.SimpleData;
@@ -36,41 +33,35 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
  */
 public class DataType
 {
-	public static final DataType BOOLEAN = new DataType(false, "false", carbonconfiglib.gui.nodes.BooleanElement::new, BooleanElement::new, BooleanElement::new, BooleanElement::new);
-	public static final DataType INTEGER = new DataType(false, "0", IntegerElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType LONG = new DataType(false, "0", LongElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType FLOAT = new DataType(false, "0.0", DoubleElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType DOUBLE = new DataType(false, "0.0", DoubleElement::new, NumberElement::new, NumberElement::new, NumberElement::new);
-	public static final DataType STRING = new DataType(true, " ", carbonconfiglib.gui.nodes.StringElement::new, StringElement::new, StringElement::new, StringElement::new);
-	public static final DataType ENUM = new DataType(true, " ", SelectionElement::new, EnumElement::new, EnumElement::new, EnumElement::new);
+	public static final DataType BOOLEAN = new DataType("false", BooleanElement::new);
+	public static final DataType INTEGER = new DataType("0", IntegerElement::new);
+	public static final DataType LONG = new DataType("0", LongElement::new);
+	public static final DataType FLOAT = new DataType("0.0", DoubleElement::new);
+	public static final DataType DOUBLE = new DataType("0.0", DoubleElement::new);
+	public static final DataType STRING = new DataType("", StringElement::new);
+	public static final DataType ENUM = new DataType("", SelectionElement::new);
 	private static final Map<Class<?>, DataType> AUTO_DATA_TYPES = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 	
 	boolean allowsEmptyValue;
 	String defaultValue;
 	Function<IValueNode, BaseElement> creatorFunction; 
-	Function<IValueNode, ConfigElement> creator;
-	BiFunction<IArrayNode, IValueNode, ConfigElement> arrayCreator;
-	BiFunction<ICompoundNode, IValueNode, ConfigElement> compoundCreator;
+
 	
-	public DataType(boolean allowsEmptyValue, String defaultValue, Function<IValueNode, BaseElement> creatorFunction, Function<IValueNode, ConfigElement> creator, BiFunction<IArrayNode, IValueNode, ConfigElement> arrayCreator, BiFunction<ICompoundNode, IValueNode, ConfigElement> compoundCreator) {
-		this.allowsEmptyValue = allowsEmptyValue;
+	public DataType(String defaultValue, Function<IValueNode, BaseElement> creatorFunction) {
 		this.defaultValue = defaultValue;
 		this.creatorFunction = creatorFunction;
-		this.creator = creator;
-		this.arrayCreator = arrayCreator;
-		this.compoundCreator = compoundCreator;
 	}
 	
 	public ConfigElement create(IValueNode node) {
-		return creator.apply(node);
+		return null;
 	}
 	
 	public ConfigElement create(IArrayNode array, IValueNode node) {
-		return arrayCreator.apply(array, node);
+		return null;
 	}
 	
 	public ConfigElement create(ICompoundNode compound, IValueNode node) {
-		return compoundCreator.apply(compound, node);
+		return null;
 	}
 	
 	public BaseElement createElement(IValueNode node) {
@@ -79,10 +70,6 @@ public class DataType
 	
 	public String getDefaultValue() {
 		return defaultValue;
-	}
-	
-	public boolean isAllowEmptyValue() {
-		return allowsEmptyValue;
 	}
 	
 	public static DataType bySimple(SimpleData type) {

@@ -2,7 +2,6 @@ package carbonconfiglib.gui.config;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.ICompoundNode;
 import carbonconfiglib.gui.api.ISuggestionRenderer;
@@ -50,11 +49,6 @@ public class RegistryElement extends ConfigElement
 	public RegistryElement(ICompoundNode compound, IValueNode value, ISuggestionRenderer renderer) {
 		super(compound, value);
 		this.renderer = renderer;
-	}
-	
-	public static DataType createForType(Class<?> clz, String defaultValue) {
-		ISuggestionRenderer renderer = ISuggestionRenderer.Registry.getRendererForType(clz);
-		return new DataType(false, defaultValue, null, K -> new RegistryElement(K, renderer), (K, V) -> new RegistryElement(K, V, renderer), (K, V) -> new RegistryElement(K, V, renderer));
 	}
 	
 	@Override

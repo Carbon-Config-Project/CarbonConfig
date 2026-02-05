@@ -12,6 +12,7 @@ import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
+import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -34,11 +35,18 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	@Override
+	public String getNodeName() {
+		return node.getNodeName();
+	}
+	
+	@Override
 	public void setEditable(boolean value) {}
 	@Override
 	protected void setRightComponentsVisible(boolean value) {}
 	@Override
 	protected boolean isValue() { return false; }
+	@Override
+	protected ReloadMode getReloadState() { return null; }
 	
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.x = left;
@@ -118,7 +126,15 @@ public class FolderElement extends BaseElement implements IFolderNode
 		node.setDefault();
 	}
 	
-	public void save() {
-		node.save();
+	public boolean needsSaving() {
+		return node.isUnsaved();
+	}
+	
+	public boolean save() {
+		if(node.isUnsaved()) {
+			node.save();
+			return true;
+		}
+		return false;
 	}
 }

@@ -26,6 +26,7 @@ import speiger.src.collections.utils.Stack;
 
 public class CarbonArray implements IArrayNode, IValueActions
 {
+	String nodeName;
 	IReloadMode mode;
 	ListData data;
 	IStructuredData inner;
@@ -38,10 +39,12 @@ public class CarbonArray implements IArrayNode, IValueActions
 	List<IValueActions> values = new ObjectArrayList<>();
 	Stack<List<String>> previous = new ObjectArrayList<>();
 	ObjectList<String> currentValues;
+	ObjectList<String> savedValues;
 	List<String> defaults;
 	boolean autoSave = false;
 	
-	public CarbonArray(IReloadMode mode, ListData data, Component name, Component tooltip, String currentValue, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
+	public CarbonArray(String nodeName, IReloadMode mode, ListData data, Component name, Component tooltip, String currentValue, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
+		this.nodeName = nodeName;
 		this.mode = mode;
 		this.data = data;
 		this.inner = data.getType();
@@ -49,6 +52,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 		this.tooltip = tooltip;
 		this.currentValues = ObjectArrayList.wrap(Helpers.splitCompoundArray(currentValue));
 		this.defaults = ObjectArrayList.wrap(Helpers.splitCompoundArray(defaultValue));
+		this.savedValues = ObjectArrayList.wrap(Helpers.splitCompoundArray(currentValue));
 		this.previous.push(new ObjectArrayList<>(currentValues));
 		this.isValid = isValid;
 		this.suggestions = suggestions;
@@ -71,8 +75,8 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	protected IValueActions addEntry(String value, String defaultValue, int index) {
 		switch(inner.getDataType()) {
-			case COMPOUND: return new CarbonCompound(mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
-			case LIST: return new CarbonArray(mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
+			case COMPOUND: return new CarbonCompound(Integer.toString(index), mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
+			case LIST: return new CarbonArray(Integer.toString(index), mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
 			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, inner, data.isForced(), () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save).setAutosave(true);
 			default: return null;
 		}
@@ -108,6 +112,8 @@ public class CarbonArray implements IArrayNode, IValueActions
 	@Override
 	public void save() {
 		saveAction.accept(inner.getDataType() == StructureType.COMPOUND ? Helpers.mergeCompoundArray(currentValues, false, 0) : String.join(", ", currentValues), this);
+		savedValues.clear();
+		savedValues.addAll(currentValues);
 	}
 	
 	@Override
@@ -118,6 +124,11 @@ public class CarbonArray implements IArrayNode, IValueActions
 	@Override
 	public boolean isDefault() {
 		return currentValues.equals(defaults);
+	}
+	
+	@Override
+	public boolean isUnsaved() {
+		return !currentValues.equals(savedValues);
 	}
 	
 	@Override
@@ -184,7 +195,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	@Override
 	public void createNode(String value) {
-		String defaultValue = defaults.isEmpty() ? value != null ? value : inner.generateDefaultValue(this::getDefaultValue) : defaults.get(0);
+		String defaultValue = defaults.isEmpty() ? value != null && isValid(value).getValue() ? value : inner.generateDefaultValue(this::getDefaultValue) : defaults.get(0);
 		if(value == null) {
 			value = defaultValue;
 		}
@@ -221,6 +232,8 @@ public class CarbonArray implements IArrayNode, IValueActions
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
 	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	@Override
+	public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override

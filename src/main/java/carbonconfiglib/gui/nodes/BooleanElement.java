@@ -23,6 +23,11 @@ public class BooleanElement extends ValueElement
 	}
 	
 	@Override
+	protected boolean allowSuggestions() {
+		return false;
+	}
+	
+	@Override
 	public void setEditable(boolean value) {
 		box.active = value;
 	}

@@ -29,6 +29,7 @@ import speiger.src.collections.utils.Stack;
 
 public class CarbonCompound implements ICompoundNode, IValueActions
 {
+	String nodeName;
 	IReloadMode mode;
 	CompoundData data;
 	Component name;
@@ -41,15 +42,18 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	List<IValueActions> values = new ObjectArrayList<>();
 	Stack<Map<String, String>> previous = new ObjectArrayList<>();
 	Map<String, String> current = Object2ObjectMap.builder().linkedMap();
+	Map<String, String> savedValues = Object2ObjectMap.builder().linkedMap();
 	Map<String, String> defaultValue = Object2ObjectMap.builder().linkedMap();
 	boolean autosave;
 	
-	public CarbonCompound(IReloadMode mode, CompoundData data, Component name, Component tooltip, String value, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
+	public CarbonCompound(String nodeName, IReloadMode mode, CompoundData data, Component name, Component tooltip, String value, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
+		this.nodeName = nodeName;
 		this.mode = mode;
 		this.data = data;
 		this.name = name;
 		this.current.putAll(Helpers.splitArguments(Helpers.splitCompound(value), data.getKeys(), true));
 		this.defaultValue.putAll(Helpers.splitArguments(Helpers.splitCompound(defaultValue), data.getKeys(), true));
+		this.savedValues.putAll(current);
 		this.previous.push(Object2ObjectMap.builder().linkedMap(current));
 		this.tooltip = tooltip;
 		this.isValid = isValid;
@@ -80,8 +84,8 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	
 	protected IValueActions addEntry(String value, String defaultValue, IStructuredData type, String key, String translationKey) {
 		switch(type.getDataType()) {
-			case COMPOUND: return new CarbonCompound(mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).setAutosave(true);
-			case LIST: return new CarbonArray(mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).setAutosave(true);
+			case COMPOUND: return new CarbonCompound(key, mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).setAutosave(true);
+			case LIST: return new CarbonArray(key, mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).setAutosave(true);
 			case SIMPLE: return new CarbonValue(mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), data.getEntrySetting(key), type, data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T)).setAutosave(true);
 			default: return null;
 		}
@@ -123,11 +127,17 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	}
 	
 	@Override
-	public void save() { saveAction.accept(Helpers.mergeCompound(current, false, 0), this); }
+	public void save() {
+		saveAction.accept(Helpers.mergeCompound(current, false, 0), this); 
+		savedValues.clear();
+		savedValues.putAll(current);
+	}
 	@Override
 	public boolean isDefault() { return Objects.equals(defaultValue, current); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(getPrev(), current); }
+	@Override
+	public boolean isUnsaved() { return !Objects.equals(savedValues, current); }
 	@Override
 	public void setDefault() {
 		current.clear();
@@ -193,6 +203,8 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
 	@Override
 	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	@Override
+	public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override

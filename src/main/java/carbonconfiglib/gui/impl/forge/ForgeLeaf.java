@@ -108,7 +108,7 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public INode asNode() {
 		if(isArray) {
-			if(array == null) array = new ForgeArray(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
+			if(array == null) array = new ForgeArray(Iterables.getLast(data.getPath(), ""), getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
 			return array;
 		}
 		if(value == null) value = new ForgeValue(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrent(), getDefault(), this::getSuggestions, type::parse, this::save);
@@ -171,6 +171,12 @@ public class ForgeLeaf implements IConfigNode
 		if(array != null && array.isChanged()) 	return true;
 		return false;
 	}
+	@Override
+	public boolean isUnsaved() {
+		if(value != null && value.isUnsaved()) return true;
+		if(array != null && array.isUnsaved()) 	return true;
+		return false;
+	}
 	
 	@Override
 	public void save() {
@@ -197,7 +203,7 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public boolean requiresReload() { return spec.needsWorldRestart(); }
 	@Override
-	public String getNodeName() { return null; }
+	public String getNodeName() { return Iterables.getLast(data.getPath(), ""); }
 	@Override
 	public Component getName() { return IConfigNode.createLabel(Iterables.getLast(data.getPath(), "")); }
 	@Override

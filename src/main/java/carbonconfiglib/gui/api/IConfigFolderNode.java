@@ -44,6 +44,14 @@ public interface IConfigFolderNode extends IConfigNode
 	}
 	
 	@Override
+	public default boolean isUnsaved() {
+		for(IConfigNode node : getChildren()) {
+			if(node.isUnsaved()) return true;
+		}
+		return false;
+	}
+	
+	@Override
 	public default void save() {
 		getChildren().forEach(IConfigNode::save);
 	}

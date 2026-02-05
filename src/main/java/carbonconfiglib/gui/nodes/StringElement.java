@@ -4,17 +4,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
+import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
 
 public class StringElement extends ValueElement
 {
-	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
+	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0, new TextState().setMaxLength(Integer.MAX_VALUE)));
 	ParseResult<Boolean> result;
 
 	public StringElement(IValueNode node) {
 		super(node);
 		readValue();
+		text.moveCursorToStart();
 		text.getState().setCallback(this::onTextChanged);
 	}
 	

@@ -22,6 +22,7 @@ import carbonconfiglib.utils.structure.IStructuredData.StructureType;
  */
 public interface IArrayNode extends INode
 {
+	public String getNodeName();
 	public int size();
 	public INode get(int index);
 	public StructureType getInnerType();

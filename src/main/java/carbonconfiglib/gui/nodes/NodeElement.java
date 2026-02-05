@@ -7,6 +7,7 @@ import carbonconfiglib.gui.api.IArrayNode;
 import carbonconfiglib.gui.api.INode;
 import carbonconfiglib.gui.api.IValueNode;
 import carbonconfiglib.gui.nodes.base.BaseElement;
+import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.utils.ObjectLists;
 
@@ -23,6 +24,11 @@ public abstract class NodeElement extends BaseElement
 		if(node instanceof IArrayNode) return ((IArrayNode)node).getSuggestions();
 		if(node instanceof IValueNode && !((IValueNode)node).isForcingSuggestions()) return ((IValueNode)node).getSuggestions();
 		return ObjectLists.empty();
+	}
+	
+	@Override
+	protected ReloadMode getReloadState() {
+		return node.requiresRestart() ? ReloadMode.GAME : (node.requiresReload() ? ReloadMode.WORLD : null); 
 	}
 	
 	protected void readValue() {}
@@ -64,6 +70,7 @@ public abstract class NodeElement extends BaseElement
 	@Override
 	protected void onArrayDelete() {
 		deleteNode(node);
+		onValueChanged();
 	}
 	
 	protected void onValueChanged() {

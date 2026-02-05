@@ -9,12 +9,14 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.impl.entries.NamedForgeRegistry;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.ParsedCollections.ParsedList;
 import carbonconfiglib.utils.ParsedCollections.ParsedMap;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.StructureCompound.CompoundBuilder;
 import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.Block;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 public class CompoundListTest
@@ -22,6 +24,7 @@ public class CompoundListTest
 	public static void initCompoundList() {
 		Config config = new Config("compoundlisttest");
 		config.add("general").addParsedArray("testing", ObjectLists.empty(), TestObject.createPermission());
+		config.add("special").add(CarbonConfig.createRegistryBuilder("testing", Block.class).build(NamedForgeRegistry.BLOCKS));
 		ConfigHandler handler = CarbonConfig.CONFIGS.createConfig(config);
 		handler.register();
 	}

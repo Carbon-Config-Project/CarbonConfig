@@ -25,18 +25,22 @@ public class Icon
 	public static final IconSheet LOGO_SHEET = new IconSheet(new ResourceLocation("carbonconfig:textures/gui/logo.png"), 400, 400);
 	public static final Icon LOGO = LOGO_SHEET.create(0, 0);
 	
-	public static final IconSheet ICONS = new IconSheet(new ResourceLocation("carbonconfig:textures/gui/icons.png"), 80, 80);
+	public static final IconSheet ICONS = new IconSheet(new ResourceLocation("carbonconfig:textures/gui/icons.png"), 80, 96);
 
 	public static final Icon DELETE = ICONS.create(0, 16);
 	public static final Icon REVERT = ICONS.create(0, 0);
 	public static final Icon SET_DEFAULT = ICONS.create(16, 0);
 	public static final Icon RELOAD = ICONS.create(16, 16);
 	public static final Icon RESTART = ICONS.create(32, 16);
+	public static final Icon SAVE = ICONS.create(64, 64);
+	public static final Icon HOME = ICONS.create(32, 80);
 	public static final IconPair SELECTED = ICONS.horizontalActivityIcon(0, 16, 64);
+	public static final IconPair AUTO_SAVE = ICONS.horizontalActivityIcon(32, 48, 64);
 	public static final IconPair SEARCH = ICONS.verticalActivityIcon(48, 32, 16);
 	public static final IconPair NOT_DEFAULT = ICONS.horizontalActivityIcon(48, 32, 0);
 	public static final IconPair MOVE_DOWN = ICONS.verticalActivityIcon(64, 16, 0);
 	public static final IconPair MOVE_UP = ICONS.verticalActivityIcon(64, 48, 32);
+	public static final IconPair PAGE_MODE = ICONS.horizontalActivityIcon(0, 16, 80);
 	public static final Icon SUGGESTIONS = ICONS.create(48, 48);
 	public static final EnumMap<ConfigType, Icon> TYPE_ICON = create(ICONS.create(0, 32), ICONS.create(16, 32), ICONS.create(32, 32));
 	public static final EnumMap<ConfigType, Icon> MULTITYPE_ICON = create(ICONS.create(0, 48), ICONS.create(16, 48), ICONS.create(32, 48));
