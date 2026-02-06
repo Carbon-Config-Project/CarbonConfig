@@ -82,7 +82,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		listArea(0, minY, widthOne, maxY, rowOne);
 		listArea(widthOne+4, minY, widthTwo, maxY, rowTwo);
 		listArea(widthTwo + 8 + widthOne, minY, widthThree, maxY, rowThree);
-		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> {});
+		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> onClose());
 		checkbox(minY + 22, minY - 22, 20, 20, layerMode);		
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		checkbox(-70, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
