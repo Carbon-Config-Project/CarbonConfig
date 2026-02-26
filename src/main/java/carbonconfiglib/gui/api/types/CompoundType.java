@@ -10,6 +10,21 @@ import carbonconfiglib.gui.nodes.base.BaseElement;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
+/**
+ * Copyright 2026 Speiger, Meduris
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 public class CompoundType
 {
 	private static final Map<Class<?>, CompoundType> AUTO_COMPOUND_TYPES = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
