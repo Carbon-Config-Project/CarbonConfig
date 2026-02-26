@@ -1,6 +1,6 @@
 package carbonconfiglib.gui.impl.carbon;
 
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.INode;
 
 public interface IValueActions extends INode
 {

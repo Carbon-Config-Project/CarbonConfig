@@ -5,7 +5,7 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.DropDownMenu;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;

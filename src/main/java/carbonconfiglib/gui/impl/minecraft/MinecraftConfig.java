@@ -13,8 +13,8 @@ import com.mojang.serialization.Dynamic;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;

@@ -14,14 +14,14 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
+import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListMultiState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
-import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
-import carbonconfiglib.gui.widgets.Icon;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -81,8 +81,8 @@ public class DropDownMenu<T> extends CarbonButton {
 		int k = this.getYImage(this.isHovered || open);
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width-14, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x+width-15, this.y, 0, 46 + k * 20, 15, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
-		GuiUtils.drawScrollingShadowText(poseStack, mc.font, getMessage(), x+2, y, width-18, height, GuiAlign.CENTER, getFGColor(), hash);
-		GuiUtils.drawScrollingShadowText(poseStack, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), x+width-15, y, 11, height, GuiAlign.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(poseStack, mc.font, getMessage(), x+2, y, width-18, height, Align.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(poseStack, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), x+width-15, y, 11, height, Align.CENTER, getFGColor(), hash);
 	}
 	
 	public static class DropDownScreen<T> extends BaseCarbonScreen {
@@ -139,7 +139,11 @@ public class DropDownMenu<T> extends CarbonButton {
 				y = owner.y - maxHeight - 1;
 			}
 			if(ownerState.searchable) text(x+1, y+1, width-2, 18, state);
-			listArea(x, y+(ownerState.searchable ? 20 : 0), width, height, selections);
+			boolean wasOwned = selections.getOwner() != null;
+			CarbonList<DropDownEntry<T>> list = listArea(x, y+(ownerState.searchable ? 20 : 0), width, height, selections);
+			if(!wasOwned && selections.getSelected() != null) {
+				list.centerScrollOn(selections.getSelected());
+			}
 			selections.setScrollOffset(1);
 		}
 		
@@ -197,7 +201,7 @@ public class DropDownMenu<T> extends CarbonButton {
 				renderer.render(poseStack, x, top+1, left+1, width-2, height-2, mouseX, mouseY, selected, partialTicks);
 				return;
 			}
-			GuiUtils.drawScrollingShadowText(poseStack, font, text, left, top, width, height, GuiAlign.CENTER, -1, Objects.hashCode(data));
+			GuiUtils.drawScrollingShadowText(poseStack, font, text, left, top, width, height, Align.CENTER, -1, Objects.hashCode(data));
 		}
 		
 		@Override

@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.IRange.IntegerRange;
 import carbonconfiglib.api.IRange.LongRange;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;

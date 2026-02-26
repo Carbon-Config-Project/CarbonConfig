@@ -3,10 +3,10 @@ package carbonconfiglib.impl.internal;
 import java.util.List;
 
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.BackgroundTexture;
-import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import net.minecraftforge.fml.ModContainer;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 

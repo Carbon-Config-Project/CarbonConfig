@@ -9,7 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
-import carbonconfiglib.gui.widgets.Icon.IconPair;
+import carbonconfiglib.gui.base.helpers.Icon.IconPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.network.chat.Component;
@@ -68,8 +68,11 @@ public class CarbonCheckBox extends Checkbox implements ITooltipProvider {
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		
-		GuiUtils.drawTextureRegion(pPoseStack, x, y, isMouseOver(pMouseX, pMouseY) ? 20F : 0F, 0F, width, height, 20F, 20F, 64F, 64F);
-		GuiUtils.drawTextureRegion(pPoseStack, x+2, y+2, width-4, height-4, selected() ? state.getIcon().active() : state.getIcon().inactive(), 16, 16);
+		boolean notVanilla = state.getIcon() != null;
+		GuiUtils.drawTextureRegion(pPoseStack, x, y, isMouseOver(pMouseX, pMouseY) ? 20F : 0F, !notVanilla && selected() ? 20F : 0F, width, height, 20F, 20F, 64F, 64F);
+		if(notVanilla) {
+			GuiUtils.drawTextureRegion(pPoseStack, x+2, y+2, width-4, height-4, selected() ? state.getIcon().active() : state.getIcon().inactive(), 16, 16);
+		}
 		if (state.label != null) {
 			drawString(pPoseStack, Minecraft.getInstance().font, state.label, this.x + 24, this.y + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
 		}

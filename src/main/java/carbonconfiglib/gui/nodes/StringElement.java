@@ -2,7 +2,7 @@ package carbonconfiglib.gui.nodes;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.nodes.base.ValueElement;

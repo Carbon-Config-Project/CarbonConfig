@@ -7,8 +7,8 @@ import org.apache.logging.log4j.util.Strings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.ParsedArray;
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.structure.IStructuredData;
@@ -105,7 +105,20 @@ public class ConfigLeaf implements IConfigNode
 		}
 		
 		String limit = entry.getLimitations();
-		if(!Strings.isBlank(limit)) comp.append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
+		if(!Strings.isBlank(limit)) {
+			if(limit.contains("\nExample:")) {
+				MutableComponent result = Component.empty();
+				ChatFormatting current = ChatFormatting.DARK_GREEN;
+				for(String entry : limit.split("\n")) {
+					if(current == ChatFormatting.DARK_GREEN && entry.startsWith("Example")) {
+						current = ChatFormatting.BLUE;
+					}
+					result.append(Component.literal(entry).withStyle(current)).append("\n");
+				}
+				comp.append(result);
+			}
+			else comp.append(Component.literal(limit).withStyle(ChatFormatting.BLUE));
+		}
 		return comp;
 	}
 	@Override

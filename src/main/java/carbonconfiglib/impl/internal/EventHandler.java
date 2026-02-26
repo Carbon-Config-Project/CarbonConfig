@@ -7,9 +7,10 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
-import carbonconfiglib.gui.screen.ConfigSelectorScreen;
+import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
@@ -142,7 +143,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@OnlyIn(Dist.CLIENT)
 	private Screen create(Screen screen, IModConfigs configs) {	
-		return new ConfigSelectorScreen(configs, screen);
+		return new ConfigListScreen(screen, configs);
 	}
 	
 	public void onServerJoinPacket(Player player) {

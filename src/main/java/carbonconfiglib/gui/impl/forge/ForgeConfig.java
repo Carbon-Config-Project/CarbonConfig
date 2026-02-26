@@ -18,8 +18,8 @@ import com.electronwill.nightconfig.toml.TomlFormat;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.networking.forge.RequestConfigPacket;

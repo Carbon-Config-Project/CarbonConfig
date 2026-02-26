@@ -6,9 +6,9 @@ import java.util.Objects;
 
 import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.IRange.IntegerRange;
-import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mezz.jei.api.runtime.config.IJeiConfigListValueSerializer;

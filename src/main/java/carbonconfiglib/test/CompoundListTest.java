@@ -9,6 +9,7 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.NamedForgeRegistry;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.ParsedCollections.ParsedList;
@@ -25,6 +26,8 @@ public class CompoundListTest
 		Config config = new Config("compoundlisttest");
 		config.add("general").addParsedArray("testing", ObjectLists.empty(), TestObject.createPermission());
 		config.add("special").add(CarbonConfig.createRegistryBuilder("testing", Block.class).build(NamedForgeRegistry.BLOCKS));
+		config.add("color").add(new ColorValue("color", 0xFF00FF, false));
+		config.add("color").add(new ColorValue("color-alpha", 0xFFFF00FF, true));
 		ConfigHandler handler = CarbonConfig.CONFIGS.createConfig(config);
 		handler.register();
 	}

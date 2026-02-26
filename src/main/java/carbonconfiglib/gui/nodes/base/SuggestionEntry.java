@@ -5,11 +5,10 @@ import java.util.Objects;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.ISuggestionRenderer;
+import carbonconfiglib.gui.api.suggestion.ISuggestionRenderer;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
-import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.network.chat.Component;
 
 public class SuggestionEntry extends ListEntry<SuggestionEntry> {
@@ -34,6 +33,6 @@ public class SuggestionEntry extends ListEntry<SuggestionEntry> {
 			left += 20;
 			width -= 20;
 		}
-		GuiUtils.drawScrollingShadowText(poseStack, font, text, left, top, width, height, GuiAlign.CENTER, -1, Objects.hashCode(suggestion));
+		GuiUtils.drawScrollingShadowText(poseStack, font, text, left, top, width, height, Align.CENTER, -1, Objects.hashCode(suggestion));
 	}
 }

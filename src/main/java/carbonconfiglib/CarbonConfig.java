@@ -22,13 +22,11 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
 import carbonconfiglib.config.HashSetCache;
-import carbonconfiglib.gui.api.BackgroundTexture;
-import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.gui.api.IModConfig;
-import carbonconfiglib.gui.screen.ConfigScreen;
-import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
-import carbonconfiglib.gui.screen.RequestScreen;
-import carbonconfiglib.gui.screens.ModListScreen;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
+import carbonconfiglib.gui.api.background.BackgroundTypes;
+import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
+import carbonconfiglib.gui.screens.ConfigRequestScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -77,6 +75,10 @@ import net.minecraftforge.server.ServerLifecycleHooks;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/**
+ * TODO Text scrolling text should always begin at left side. HOW THE F I AM GOING TO DO THAT DUNNO. But its a good idea anyways
+ */
+
 @Mod("carbonconfig")
 public class CarbonConfig {
 	public static final Logger LOGGER = LogUtils.getLogger();
@@ -110,14 +112,10 @@ public class CarbonConfig {
 			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], 
 					"Disables these mods from carbon configs Gui System.",
 					"This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored",
-					"List of Blacklisted ModIds").setRequiredReload(ReloadMode.GAME);
-			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
+					"List of Blacklisted ModIds").setRequiredReload(ReloadMode.GAME).addSuggestionProvider(ModProvider.INSTANCE);
+			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.RAW_IRON, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
 			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
-			ConfigSection test = config.add("test").addSubSection("test2").addSubSection("test3").addSubSection("test4").addSubSection("test5");
-			test.addSubSection("test5-1");
-			test.addSubSection("Test5-2").addBool("TestValue", false);
-
 			handler = CONFIGS.createConfig(config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
@@ -238,7 +236,7 @@ public class CarbonConfig {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");
 			return;
 		}
-		mc.setScreen(new RequestScreen(texture.asHolder(), Navigator.create(config).withWalker(path), mc.screen, config));
+		mc.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.screen, config));
 	}
 
 	/**
@@ -273,8 +271,9 @@ public class CarbonConfig {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config in the Local Opener");
 			return;
 		}
-		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
+		//TODO implement
+//		Minecraft mc = Minecraft.getInstance();
+//		mc.setScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
 	}
 
 	public static boolean hasPermission(Player player, int permissionLevel) {
@@ -307,7 +306,7 @@ public class CarbonConfig {
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (/* mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS*/ event.getKey() == GLFW.GLFW_KEY_I && (mc.screen instanceof TitleScreen)) {
-			mc.setScreen(new ModListScreen(mc.screen));
+//			mc.setScreen(new ModListScreen(mc.screen));
 		}
 	}
 

@@ -12,10 +12,14 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.ScreenUtils;
+import net.minecraft.util.Mth;
 
 public class CarbonSlider extends CarbonBaseButton {
 	SliderState state;
@@ -88,12 +92,31 @@ public class CarbonSlider extends CarbonBaseButton {
 	}
 	
 	@Override
+	public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+	      Minecraft minecraft = Minecraft.getInstance();
+	      Font font = minecraft.font;
+	      RenderSystem.setShader(GameRenderer::getPositionTexShader);
+	      RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
+	      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+	      int i = this.getYImage(this.isHoveredOrFocused());
+	      RenderSystem.enableBlend();
+	      RenderSystem.defaultBlendFunc();
+	      RenderSystem.enableDepthTest();
+	      GuiUtils.blitWithBorder(pPoseStack, WIDGETS_LOCATION, x, y, 0, 46 + i * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset(), false);
+
+	      this.renderBg(pPoseStack, minecraft, pMouseX, pMouseY);
+	      int j = getFGColor();
+	      GuiUtils.drawScrollingText(pPoseStack, font, getMessage(), x, y+1, width, height, Align.CENTER, j | Mth.ceil(this.alpha * 255.0F) << 24, 0);
+	}
+	
+	@Override
 	protected void renderBg(PoseStack stack, Minecraft mc, int mouseX, int mouseY) {
 		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		int i = !isActive() ? 0 : (this.isHoveredOrFocused() ? 2 : 1) * 20;
+		if(isActive()) RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		else RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
+		int i = !isActive() ? 20 : (this.isHoveredOrFocused() ? 2 : 1) * 20;
 		double range = getProgress();
-		ScreenUtils.blitWithBorder(stack, WIDGETS_LOCATION, this.x + (int)(range * (float)(this.width - 8)), this.y, 0, 46 + i, 8, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
+		GuiUtils.blitWithBorder(stack, WIDGETS_LOCATION, this.x + (int)(range * (float)(this.width - 8)), this.y, 0, 46 + i, 8, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset(), true);
 	}
 	
 	public static class SliderState {

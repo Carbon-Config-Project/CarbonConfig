@@ -9,13 +9,14 @@ import java.util.function.BooleanSupplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.CompoundType;
-import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.gui.api.IArrayNode;
-import carbonconfiglib.gui.api.ICompoundNode;
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IArrayNode;
+import carbonconfiglib.gui.api.node.ICompoundNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.gui.api.types.CompoundType;
+import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
@@ -27,7 +28,6 @@ import carbonconfiglib.gui.nodes.ArrayElement;
 import carbonconfiglib.gui.nodes.CompoundElement;
 import carbonconfiglib.gui.nodes.FolderElement;
 import carbonconfiglib.gui.nodes.SelectionElement;
-import carbonconfiglib.gui.widgets.Icon;
 import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -156,25 +156,17 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public void renderControls(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		left-=1;
-		left+= 60 + (reload != null ? 20 : 0);
-		if(render(delete, left, top, null, stack, mouseX, mouseY, partialTicks)); {
-			left-=20;			
+		left+= 40 + (reload != null || delete != null ? 20 : 0);
+		if(!render(delete, left, top, null, stack, mouseX, mouseY, partialTicks)) {
+			render(reload, left, top, null, stack, mouseX, mouseY, partialTicks);
 		}
-		if(render(revert, left, top, this::isChanged, stack, mouseX, mouseY, partialTicks)) {
-			left -=20;
+		
+		render(revert, left-20, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
+		render(reset, left-40, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
+		render(edit, left-60, top, null, stack, mouseX, mouseY, partialTicks);
+		if(allowSuggestions() && !getSuggestions().isEmpty()) {
+			render(suggestion, left-80, top, null, stack, mouseX, mouseY, partialTicks);
 		}
-		if(render(reset, left, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks)) {
-			left -=20;
-		}
-		if(render(edit, left, top, null, stack, mouseX, mouseY, partialTicks)) {
-			left -= 20;
-		}
-		if(!getSuggestions().isEmpty() && allowSuggestions()) {
-			if(render(suggestion, left, top, null, stack, mouseX, mouseY, partialTicks)) {
-				left-=20;
-			}
-		}
-		render(reload, left, top, null, stack, mouseX, mouseY, partialTicks);
 	}
 	
 	private boolean render(AbstractWidget widget, int x, int y, BooleanSupplier active, PoseStack stack, int mouseX, int mouseY, float partialTicks) {

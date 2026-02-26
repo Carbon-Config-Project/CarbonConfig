@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import carbonconfiglib.api.ISuggestionProvider;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.DataType;
+import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;

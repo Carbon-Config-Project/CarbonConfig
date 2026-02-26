@@ -4,9 +4,9 @@ import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.gui.api.ISuggestionRenderer;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.gui.api.suggestion.ISuggestionRenderer;
+import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.gui.base.helpers.Align;
 import net.minecraft.network.chat.Component;
 

@@ -318,6 +318,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			return (owner.x0 < location[0] && owner.x1 >= location[0]) && owner.y0 < location[1] && owner.y1 >= location[1] + location[3];
 		}
 		
+		public boolean isMouseOver(double pMouseX, double pMouseY) {
+			return Objects.equals(owner.getEntryAtPos(pMouseX, pMouseY), this);
+		}
+		
 		public boolean isDraggable() {
 			return true;
 		}

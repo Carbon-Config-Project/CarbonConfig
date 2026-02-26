@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
-import carbonconfiglib.gui.widgets.Icon;
+import carbonconfiglib.gui.base.helpers.Icon;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;

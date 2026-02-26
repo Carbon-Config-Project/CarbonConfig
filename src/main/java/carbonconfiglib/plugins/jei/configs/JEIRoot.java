@@ -2,8 +2,8 @@ package carbonconfiglib.plugins.jei.configs;
 
 import java.util.List;
 
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import mezz.jei.api.runtime.config.IJeiConfigCategory;
 import mezz.jei.api.runtime.config.IJeiConfigFile;
 import net.minecraft.network.chat.Component;

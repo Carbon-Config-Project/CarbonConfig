@@ -5,13 +5,12 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.IArrayNode;
+import carbonconfiglib.gui.api.node.IArrayNode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.DropDownMenu;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
-import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
@@ -34,7 +33,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	public ArrayElement(IArrayNode node) {
 		super(node);
 		this.node = node;
-		button = addChild(new CarbonButton(0, 0, 0, 0, node.getName(), this::onClick));
+		button = addChild(new CarbonButton(0, 0, 0, 0, Component.literal("▶"), this::onClick));
 	}
 	
 	@Override
@@ -47,19 +46,20 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	public void setEditable(boolean value) {}
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		button.x = left;
-		button.y = top;
+		GuiUtils.drawScrollingShadowText(stack, font, node.getName(), left, top, width-23, height, Align.START, -1, 32);
 		boolean active = context.isElementActive(this);
-		button.setWidth(width-2 - (active ? 8 : 0));
+		button.setMessage(Component.literal(active ? "◀" : "▶"));
+		button.setSelected(active);
+		button.x = left + width - 22;
+		button.y = top;
+		button.setWidth(20);
 		button.setHeight(height);
 		button.render(stack, mouseX, mouseY, partialTicks);
-		if(active) GuiUtils.drawText(stack, font, Component.literal("▶"), left + width-2, top + (height >> 1) - (font.lineHeight >> 1), Align.END, -1); 
 	}
 	
 	@Override
 	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.size()+" Elements"), left, top, width-2, height, GuiAlign.RIGHT, -1, 32);
-		GuiUtils.drawText(stack, font, Component.literal("◀-"), left, top + (height >> 1) - (font.lineHeight >> 1), Align.START, -1);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.size()+" Elements"), left, top, width-2, height, Align.END, -1, 32);
 	}
 	
 	@Override
@@ -184,7 +184,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		public void setEditable(boolean value) {}
 		@Override
 		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			GuiUtils.drawScrollingShadowText(stack, font, Component.literal("Next: "), left, top, width, height, GuiAlign.LEFT, -1, owner.hashCode());
+			GuiUtils.drawScrollingShadowText(stack, font, Component.literal("Next: "), left, top, width, height, Align.START, -1, owner.hashCode());
 		}
 
 		@Override

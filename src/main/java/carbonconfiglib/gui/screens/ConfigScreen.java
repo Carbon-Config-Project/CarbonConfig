@@ -7,10 +7,11 @@ import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
+import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
@@ -22,7 +23,6 @@ import carbonconfiglib.gui.nodes.base.IElementContext;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
-import carbonconfiglib.gui.widgets.Icon;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -40,11 +40,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName().getString(), V.getName().getString());
 	};
 	
+	BackgroundHolder holder;
 	Component display;
 	IModConfig configs;
 	FolderElement rootElement;
 	Screen parent;
-	TextState searchState = new TextState().setCallback(this::applySearch).setMaxLength(255);
+	TextState searchState = new TextState().setCallback(this::applySearch).setMaxLength(255).setSuggestion("Search...");
 	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	ListState<BaseElement> rowTwo = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	ListState<BaseElement> rowThree = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
@@ -60,8 +61,9 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	List<String> walker = null;
 	BaseElement tooltipFocused;
 	
-	public ConfigScreen(IModConfig configs, Screen parent) {
+	public ConfigScreen(IModConfig configs, BackgroundHolder holder, Screen parent) {
 		this.parent = parent;
+		this.holder = holder;
 		this.configs = configs;
 		display = Component.literal(ModList.get().getModContainerById(configs.getModId()).map(ModContainer::getModInfo).map(IModInfo::getDisplayName).orElse(configs.getModId())).append(" -> ").append(configs.getConfigName());
 		addElement(rootElement = new FolderElement(configs.getRootNode()));
@@ -74,7 +76,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		int minY = (int)(height * 0.15F);
 		int maxY = (int)(height * 0.8F) - minY;
 		
-		int searchWidth = (int)(width * 0.25F);
+		int searchWidth = (int)(width * 0.3F);
 		
 		int widthOne = calculateWidth(0);
 		int widthTwo = calculateWidth(1);
@@ -85,9 +87,9 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> onClose());
 		checkbox(minY + 22, minY - 22, 20, 20, layerMode);		
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
-		checkbox(-70, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
-		checkbox(-50, minY - 20, 18, 18, Align.END, Align.START, autoSave);
-		save = iconButton(-30, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).withTooltip(Component.literal("Save"));
+		checkbox(-90, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
+		checkbox(-70, minY - 20, 18, 18, Align.END, Align.START, autoSave);
+		save = iconButton(-50, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).withTooltip(Component.literal("Save"));
 		
 		if(walker != null) {
 			Deque<String> dequeue = new ArrayDeque<String>(walker);
@@ -147,11 +149,11 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
+		rowTwo.setFrame(false);
 		if(save != null) save.active = rootElement.needsSaving();
 		int minY = (int)(height * 0.15F);
-		BackgroundTypes background = BackgroundTypes.CYAN_CONCRETE_POWDER;
-		GuiUtils.renderBackground(0, width, 0, height, 0F, background.getTexture());
-		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, background.getTexture());
+		GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
+		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, holder.getTexture());
 		GuiUtils.drawTextureRegion(matrix, 2, 2, minY - 4, minY - 4, Icon.LOGO, 400, 400);
 	}
 	
@@ -225,10 +227,14 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	@Override
 	public void pushNode(BaseElement node, int index, boolean reload) {
-		if(!reload && pickedNode.size() > 1 && pickedNode.top() == node) {
-			visibleChildren.pop();
-			pickedNode.pop();
-			search.pop();
+		int toPop = 0;
+		if(!reload && pickedNode.size() > 1 && (toPop = findActiveElement(node)) >= 0) {
+			toPop = pickedNode.size() - toPop;
+			for(int i = 0;i<toPop;i++) {
+				visibleChildren.pop();
+				pickedNode.pop();
+				search.pop();
+			}
 		}
 		else {
 			int max = layerMode.getValue() ? 2 : 1;
@@ -318,6 +324,11 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		}
 		data.sort(owner instanceof ISortableNode ? SORTER : SPECIAL_SORTER);
 		return data;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private int findActiveElement(BaseElement base) {
+		return ((List<BaseElement>)pickedNode).indexOf(base);
 	}
 	
 	@Override

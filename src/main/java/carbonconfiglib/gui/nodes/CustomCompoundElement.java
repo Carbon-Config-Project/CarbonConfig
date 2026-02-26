@@ -5,11 +5,11 @@ import java.util.function.Function;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.CarbonConfig;
-import carbonconfiglib.gui.api.ICompoundNode;
+import carbonconfiglib.gui.api.node.ICompoundNode;
+import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
-import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -36,7 +36,7 @@ public class CustomCompoundElement extends NodeElement
 	
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, GuiAlign.LEFT, -1, node.hashCode());
+		GuiUtils.drawScrollingShadowText(stack, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, Align.START, -1, node.hashCode());
 	}
 	
 	@Override

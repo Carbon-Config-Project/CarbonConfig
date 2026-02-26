@@ -3,9 +3,9 @@ package carbonconfiglib.gui.nodes;
 import java.util.List;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.IArrayNode;
-import carbonconfiglib.gui.api.INode;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IArrayNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.network.chat.Component;

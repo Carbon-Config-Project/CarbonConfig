@@ -3,8 +3,8 @@ package carbonconfiglib.gui.impl.minecraft;
 import java.util.List;
 import java.util.Objects;
 
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;

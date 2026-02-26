@@ -7,8 +7,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import mezz.jei.api.runtime.config.IJeiConfigCategory;
 import mezz.jei.api.runtime.config.IJeiConfigFile;
 import mezz.jei.api.runtime.config.IJeiConfigValue;

@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy.IPotentialTarget;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.impl.carbon.ModConfig;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfig;

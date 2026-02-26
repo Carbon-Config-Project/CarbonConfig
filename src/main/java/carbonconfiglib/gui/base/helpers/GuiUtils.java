@@ -15,16 +15,16 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
 
-import carbonconfiglib.gui.api.BackgroundTexture;
-import carbonconfiglib.gui.config.ConfigElement.GuiAlign;
-import carbonconfiglib.gui.widgets.Icon;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraftforge.client.gui.ScreenUtils;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -59,7 +59,7 @@ public class GuiUtils
 		return (color & 0xFF000000) | Math.min(255, (int)(r / factor)) << 16 | Math.min(255, (int)(g / factor)) << 8 | Math.min(255, (int)(b / factor));
 	}
 	
-	public static float calculateScrollOffset(float width, Font font, GuiAlign align, Component text, int seed) {
+	public static float calculateScrollOffset(float width, Font font, Align align, Component text, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -88,7 +88,7 @@ public class GuiUtils
 		}
 	}
 	
-	public static void drawScrollingText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
+	public static void drawScrollingText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, Align align, int color, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -104,7 +104,7 @@ public class GuiUtils
 		font.draw(stack, text, x - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 	}
 	
-	public static void drawScrollingShadowText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, GuiAlign align, int color, int seed) {
+	public static void drawScrollingShadowText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, Align align, int color, int seed) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
@@ -117,7 +117,7 @@ public class GuiUtils
 			return;
 		}
 		float offset = align.align(textWidth);
-		font.drawShadow(stack, text, x + 2 - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
+		font.drawShadow(stack, text, x - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 	}
 	
 	public static void pushScissors(int x, int y, int width, int height) {
@@ -275,5 +275,46 @@ public class GuiUtils
 		builder.vertex(x1, y0, 0D).uv(x1 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
 		builder.vertex(x0, y0, 0D).uv(x0 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
 		tes.end();
+	}
+	
+	public static void blitWithBorder(PoseStack poseStack, ResourceLocation res, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel, boolean custom) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, res);
+		blitWithBorder(poseStack, x, y, u, v, width, height, textureWidth, textureHeight, topBorder, bottomBorder, leftBorder, rightBorder, zLevel, custom);
+	}
+	
+	public static void blitWithBorder(PoseStack poseStack, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel, boolean custom) {
+		if(!custom) {
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.enableBlend();
+			RenderSystem.defaultBlendFunc();
+		}
+		
+		int fillerWidth = textureWidth - leftBorder - rightBorder;
+		int fillerHeight = textureHeight - topBorder - bottomBorder;
+		int canvasWidth = width - leftBorder - rightBorder;
+		int canvasHeight = height - topBorder - bottomBorder;
+		int xPasses = canvasWidth / fillerWidth;
+		int remainderWidth = canvasWidth % fillerWidth;
+		int yPasses = canvasHeight / fillerHeight;
+		int remainderHeight = canvasHeight % fillerHeight;
+
+		ScreenUtils.drawTexturedModalRect(poseStack, x, y, u, v, leftBorder, topBorder, zLevel);
+		ScreenUtils.drawTexturedModalRect(poseStack, x + leftBorder + canvasWidth, y, u + leftBorder + fillerWidth, v, rightBorder, topBorder, zLevel);
+		ScreenUtils.drawTexturedModalRect(poseStack, x, y + topBorder + canvasHeight, u, v + topBorder + fillerHeight, leftBorder, bottomBorder, zLevel);
+		ScreenUtils.drawTexturedModalRect(poseStack, x + leftBorder + canvasWidth, y + topBorder + canvasHeight, u + leftBorder + fillerWidth, v + topBorder + fillerHeight, rightBorder, bottomBorder, zLevel);
+		for (int i = 0; i < xPasses + (remainderWidth > 0 ? 1 : 0); i++) {
+			ScreenUtils.drawTexturedModalRect(poseStack, x + leftBorder + (i * fillerWidth), y, u + leftBorder, v, (i == xPasses ? remainderWidth : fillerWidth), topBorder, zLevel);
+			ScreenUtils.drawTexturedModalRect(poseStack, x + leftBorder + (i * fillerWidth), y + topBorder + canvasHeight, u + leftBorder, v + topBorder + fillerHeight, (i == xPasses ? remainderWidth : fillerWidth), bottomBorder, zLevel);
+
+			for (int j = 0; j < yPasses + (remainderHeight > 0 ? 1 : 0); j++) {
+				ScreenUtils.drawTexturedModalRect(poseStack, x + leftBorder + (i * fillerWidth), y + topBorder + (j * fillerHeight), u + leftBorder, v + topBorder, (i == xPasses ? remainderWidth : fillerWidth), (j == yPasses ? remainderHeight : fillerHeight), zLevel);
+			}
+		}
+
+		for (int j = 0; j < yPasses + (remainderHeight > 0 ? 1 : 0); j++) {
+			ScreenUtils.drawTexturedModalRect(poseStack, x, y + topBorder + (j * fillerHeight), u, v + topBorder, leftBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel);
+			ScreenUtils.drawTexturedModalRect(poseStack, x + leftBorder + canvasWidth, y + topBorder + (j * fillerHeight), u + leftBorder + fillerWidth, v + topBorder, rightBorder, (j == yPasses ? remainderHeight : fillerHeight), zLevel);
+		}
 	}
 }
