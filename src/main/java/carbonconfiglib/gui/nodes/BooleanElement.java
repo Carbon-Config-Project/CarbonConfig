@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
@@ -25,7 +26,7 @@ import carbonconfiglib.gui.nodes.base.ValueElement;
  */
 public class BooleanElement extends ValueElement
 {
-	CarbonCheckBox box = addChild(new CarbonCheckBox(0, 0, 14, 14, new CheckBoxState().setCallback(this::onCallback)));
+	CarbonCheckBox box = addChild(new CarbonCheckBox(0, 0, 14, 14, new CheckBoxState(Icon.SELECTED).setCallback(this::onCallback)));
 	
 	public BooleanElement(IValueNode node) {
 		super(node);

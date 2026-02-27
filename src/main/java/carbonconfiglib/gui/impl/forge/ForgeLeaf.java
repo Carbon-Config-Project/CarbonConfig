@@ -199,9 +199,7 @@ public class ForgeLeaf implements IConfigNode
 	}
 	
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return spec.needsWorldRestart(); }
+	public ReloadMode getReloadState() { return spec.needsWorldRestart() ? ReloadMode.WORLD : null; }
 	@Override
 	public String getNodeName() { return Iterables.getLast(data.getPath(), ""); }
 	@Override

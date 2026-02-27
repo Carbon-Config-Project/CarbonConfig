@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.util.Strings;
 
-import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.ParsedArray;
 import carbonconfiglib.gui.api.node.IConfigNode;
@@ -38,14 +37,14 @@ public class ConfigLeaf implements IConfigNode
 	ConfigEntry<?> entry;
 	IStructuredData data;
 	StructureType type;
-	IReloadMode mode;
+	ReloadMode mode;
 	IValueActions value;
 	
 	public ConfigLeaf(ConfigEntry<?> entry) {
 		this.entry = entry;
 		this.data = entry.getDataType();
 		this.type = data.getDataType();
-		this.mode = entry.getReloadState();
+		mode = entry.getReloadState() instanceof ReloadMode? (ReloadMode)entry.getReloadState() : null;
 	}
 	
 	@Override
@@ -98,9 +97,7 @@ public class ConfigLeaf implements IConfigNode
 		if(value != null) value.save();
 	}
 	@Override
-	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
-	@Override
-	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	public ReloadMode getReloadState() { return mode; }
 	@Override
 	public String getNodeName() { return null; }
 	@Override

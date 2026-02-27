@@ -1,10 +1,13 @@
 package carbonconfiglib.gui.nodes;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
@@ -16,6 +19,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
+import speiger.src.collections.utils.Stack;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -76,7 +80,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.getChildren().size()+" Elements"), left, top, width-2, height, Align.END, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.getChildren().size()), left, top, width-2, height, Align.END, -1, 32);
 	}
 	
 	protected void onClick(Button button) {
@@ -146,11 +150,36 @@ public class FolderElement extends BaseElement implements IFolderNode
 		return node.isUnsaved();
 	}
 	
-	public boolean save() {
+	public boolean save(Consumer<ReloadMode> notification) {
 		if(node.isUnsaved()) {
+			findUnsavedState().ifPresent(notification);
 			node.save();
 			return true;
 		}
 		return false;
+	}
+	
+	private Optional<ReloadMode> findUnsavedState() {
+		ReloadMode result = null;
+		for(IConfigNode node : getUnsaved()) {
+			result = ReloadMode.or(result, node.getReloadState());
+		}
+		return Optional.ofNullable(result);
+	}
+	
+	private List<IConfigNode> getUnsaved() {
+		List<IConfigNode> allNodes = new ObjectArrayList<>();
+		Stack<IConfigNode> toScan = new ObjectArrayList<>(node);
+		while(!toScan.isEmpty()) {
+			IConfigNode node = toScan.pop();
+			if(node instanceof IConfigFolderNode) {
+				node.getChildren().forEach(toScan::push);
+				continue;
+			}
+			if(node.isUnsaved()) {
+				allNodes.add(node);
+			}
+		}
+		return allNodes;
 	}
 }

@@ -9,6 +9,7 @@ import carbonconfiglib.api.IRange.IntegerRange;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mezz.jei.api.runtime.config.IJeiConfigListValueSerializer;
@@ -142,9 +143,7 @@ public class JEILeaf implements IConfigNode
 	}
 	
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return false; }
+	public ReloadMode getReloadState() { return null; }
 	@Override
 	public String getNodeName() { return entry.getName(); }
 	@Override

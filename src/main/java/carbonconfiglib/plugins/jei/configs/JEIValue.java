@@ -116,9 +116,7 @@ public class JEIValue implements IValueNode
 	@Override
 	public IRange getRange() { return range; }
 	@Override
-	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
-	@Override
-	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	public ReloadMode getReloadState() { return mode; }
 	@Override
 	public Component getName() { return name; }
 	@Override

@@ -2,6 +2,7 @@ package carbonconfiglib.gui.api.node;
 
 import java.util.List;
 
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -38,8 +39,8 @@ public interface IConfigNode
 	public void setDefault();
 	public void save();
 	
-	public boolean requiresRestart();
-	public boolean requiresReload();
+	public ReloadMode getReloadState();
+
 	
 	public String getNodeName();
 	public Component getName();

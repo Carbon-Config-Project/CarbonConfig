@@ -153,7 +153,7 @@ public class BaseCarbonScreen extends Screen
 	}
 	
 	public void drawSplitText(PoseStack stack, Component text, float x, float y, Align align, int maxWidth, int color) {
-		GuiUtils.drawSplitText(stack, font, text, x + centerX, y + centerY, align, maxWidth, color);
+		GuiUtils.drawSplitText(stack, font, text, x + centerX, y + centerY, align, color, maxWidth);
 	}
 	
 	public CarbonButton button(int x, int y, int width, int height, Component text, OnPress listener) {

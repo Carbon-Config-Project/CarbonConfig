@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
@@ -73,9 +74,7 @@ public class MinecraftLeaf implements IConfigNode
 	}
 	
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return false; }
+	public ReloadMode getReloadState() { return null; }
 	@Override
 	public String getNodeName() { return null; }
 	@Override

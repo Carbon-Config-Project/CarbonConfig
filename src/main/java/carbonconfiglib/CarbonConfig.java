@@ -39,7 +39,6 @@ import carbonconfiglib.test.CompoundListTest;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -49,6 +48,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -305,8 +305,8 @@ public class CarbonConfig {
 	@OnlyIn(Dist.CLIENT)
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (/* mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS*/ event.getKey() == GLFW.GLFW_KEY_I && (mc.screen instanceof TitleScreen)) {
-//			mc.setScreen(new ModListScreen(mc.screen));
+		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
+			mc.setScreen(new ModListScreen(mc.screen));
 		}
 	}
 

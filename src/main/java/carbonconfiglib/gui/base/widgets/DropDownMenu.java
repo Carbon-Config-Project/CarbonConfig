@@ -245,8 +245,8 @@ public class DropDownMenu<T> extends CarbonButton {
 		Icon icon;
 		int iconWidth = 16;
 		int iconHeight = 16;
-		Component prefix = Component.literal("Selected");
-		Component empty = Component.literal("None");
+		Component prefix = Component.translatable("gui.carbonconfig.dropdown.selected");
+		Component empty = Component.translatable("gui.carbonconfig.dropdown.none");
 		Consumer<List<T>> listener;
 		int xOffset = 0;
 		OptionalInt customWidth = OptionalInt.empty();
@@ -344,7 +344,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		}
 		
 		protected Component generateText() {
-			return (valueOnly ? Component.empty() : prefix.copy().append(": ")).append(selected.size() == 0 ? empty : (selected.size() == 1 ? displayFunction.apply(selected.get(0)) : Component.literal(selected.size()+" Selected")));
+			return (valueOnly ? Component.empty() : prefix.copy().append(": ")).append(selected.size() == 0 ? empty : (selected.size() == 1 ? displayFunction.apply(selected.get(0)) : Component.translatable("gui.carbonconfig.dropdown.selected_elements", selected.size())));
 		}
 		
 		public DropDownState<T> withListener(Consumer<List<T>> listener) {

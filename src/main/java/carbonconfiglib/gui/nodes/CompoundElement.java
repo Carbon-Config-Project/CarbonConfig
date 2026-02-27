@@ -74,7 +74,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	
 	@Override
 	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.getValues().size()+" Elements"), left, top, width-2, height, Align.END, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.getValues().size()), left, top, width-2, height, Align.END, -1, 32);
 	}
 	
 	protected void onClick(Button button) {

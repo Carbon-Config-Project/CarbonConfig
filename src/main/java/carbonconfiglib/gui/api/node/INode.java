@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.api.node;
 
 import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.network.chat.Component;
 
@@ -39,8 +40,7 @@ public interface INode
 		IEntrySettings setting = getSettings();
 		return setting == null ? null : setting.get(clz);
 	}
-	public boolean requiresRestart();
-	public boolean requiresReload();
+	public ReloadMode getReloadState();
 	
 	public Component getName();
 	public Component getTooltip();

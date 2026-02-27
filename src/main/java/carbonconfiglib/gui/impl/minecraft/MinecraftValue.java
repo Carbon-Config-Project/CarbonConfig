@@ -9,6 +9,7 @@ import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -107,9 +108,7 @@ public class MinecraftValue implements IValueNode
 	@Override
 	public IRange getRange() { return null; }
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return false; }
+	public ReloadMode getReloadState() { return null; }
 	@Override
 	public Component getName() { return IConfigNode.createLabel(I18n.get(entry.getDescriptionId())); }
 	@Override

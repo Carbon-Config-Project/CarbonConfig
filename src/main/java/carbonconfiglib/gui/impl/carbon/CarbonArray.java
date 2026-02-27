@@ -244,9 +244,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 	@Override
 	public IEntrySettings getSettings() { return data.getSettings(); }
 	@Override
-	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
-	@Override
-	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	public ReloadMode getReloadState() { return mode instanceof ReloadMode ? (ReloadMode)mode : null; }
 	@Override
 	public String getNodeName() { return nodeName; }
 	@Override

@@ -43,7 +43,7 @@ public abstract class NodeElement extends BaseElement
 	
 	@Override
 	protected ReloadMode getReloadState() {
-		return node.requiresRestart() ? ReloadMode.GAME : (node.requiresReload() ? ReloadMode.WORLD : null); 
+		return node.getReloadState(); 
 	}
 	
 	protected void readValue() {}

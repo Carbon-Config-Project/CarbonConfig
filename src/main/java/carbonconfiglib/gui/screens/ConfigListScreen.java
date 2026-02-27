@@ -63,7 +63,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 		this.parent = parent;
 		this.holder = holder;
 		this.listState.add(generateModList(configs));
-		this.header = configs.size() > 1 ? Component.literal("Mod List") : Component.literal(configs.get(0).getModName());
+		this.header = configs.size() > 1 ? Component.translatable("gui.carbonconfig.modlist") : Component.literal(configs.get(0).getModName());
 	}
 	
 	@Override

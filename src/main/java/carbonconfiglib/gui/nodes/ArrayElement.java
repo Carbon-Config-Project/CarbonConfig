@@ -56,7 +56,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	@Override
 	protected boolean isValue() { return false; }
 	@Override
-	protected ReloadMode getReloadState() { return node.requiresRestart() ? ReloadMode.GAME : (node.requiresReload() ? ReloadMode.WORLD : null); }
+	protected ReloadMode getReloadState() { return node.getReloadState(); }
 	@Override
 	public void setEditable(boolean value) {}
 	@Override
@@ -74,7 +74,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	
 	@Override
 	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.literal(node.size()+" Elements"), left, top, width-2, height, Align.END, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.size()), left, top, width-2, height, Align.END, -1, 32);
 	}
 	
 	@Override
@@ -128,7 +128,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	
 	public static class AddElement extends BaseElement {
 		ArrayElement owner;
-		DropDownMenu<Suggestion> selector = addChild(new DropDownMenu<>(0, 0, 120, 20, new DropDownState<Suggestion>(T -> Component.literal(T.getName())).allowEmpty(true).withEmpty(Component.literal("Default")).asSimpleButton(true).withListener(this::onElementSelected)));
+		DropDownMenu<Suggestion> selector = addChild(new DropDownMenu<>(0, 0, 120, 20, new DropDownState<Suggestion>(T -> Component.literal(T.getName())).allowEmpty(true).withEmpty(Component.translatable("gui.carbonconfig.array.default")).asSimpleButton(true).withListener(this::onElementSelected)));
 		boolean skip;
 		
 		public AddElement(ArrayElement owner) {
@@ -137,9 +137,9 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 			skip = suggestions.isEmpty();
 			selector.getState().setValues(suggestions)
 			.allowEmpty(!owner.node.isForcedSuggestion());
-			selector.setMessage(Component.literal("New Entry"));
+			selector.setMessage(Component.translatable("gui.carbonconfig.array.new"));
 			if(!suggestions.isEmpty()) {
-				selector.withTooltip(Component.literal("Shift to Quick Add"));
+				selector.withTooltip(Component.translatable("gui.carbonconfig.array.quick"));
 				if(suggestions.get(0).getType() != null) {
 					selector.getState().withCustomRenderer(SuggestionEntry::new).setElementHeight(22);
 				}
@@ -185,12 +185,12 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		
 		@Override
 		public Component getName() {
-			return Component.literal("New Entry");
+			return Component.translatable("gui.carbonconfig.array.new");
 		}
 		
 		@Override
 		public Component getTooltip() {
-			return Component.literal("Adds a new Element\nPress Shift while Pressing the button to Skip the Dropdown and simply add the default");
+			return Component.translatable("gui.carbonconfig.array.tooltip");
 		}
 		
 		@Override
@@ -199,7 +199,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		public void setEditable(boolean value) {}
 		@Override
 		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			GuiUtils.drawScrollingShadowText(stack, font, Component.literal("Next: "), left, top, width, height, Align.START, -1, owner.hashCode());
+			GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.array.next"), left, top, width, height, Align.START, -1, owner.hashCode());
 		}
 
 		@Override

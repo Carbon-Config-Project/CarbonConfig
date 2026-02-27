@@ -23,6 +23,8 @@ import carbonconfiglib.gui.nodes.base.IElementContext;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
+import carbonconfiglib.impl.ReloadMode;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -75,6 +77,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	Stack<String> search = new ObjectArrayList<>();
 	List<String> walker = null;
 	BaseElement tooltipFocused;
+	ReloadMode notifiedMode;
 	
 	public ConfigScreen(IModConfig configs, BackgroundHolder holder, Screen parent) {
 		this.parent = parent;
@@ -371,8 +374,23 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	}
 	
 	private void save() {
-		if(rootElement.save()) {
+		if(rootElement.save(this::notifyChanges)) {
 			configs.save();
+		}
+	}
+	
+	private void notifyChanges(ReloadMode mode) {
+		if(autoSave.getValue()) {
+			if(ReloadMode.or(notifiedMode, mode) == notifiedMode) {
+				return;
+			}
+			notifiedMode = mode;
+		}
+		if(mode == ReloadMode.GAME) {
+			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(parent), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+		}
+		else if(mode == ReloadMode.WORLD && minecraft.level != null) {
+			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(parent), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 	}
 }

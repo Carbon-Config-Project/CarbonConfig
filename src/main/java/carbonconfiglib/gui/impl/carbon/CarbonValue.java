@@ -118,9 +118,7 @@ public class CarbonValue implements IValueNode, IValueActions
 	@Override
 	public IRange getRange() { return range; }
 	@Override
-	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
-	@Override
-	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	public ReloadMode getReloadState() { return mode instanceof ReloadMode ? (ReloadMode)mode : null; }
 	@Override
 	public Component getName() { return name; }
 	@Override

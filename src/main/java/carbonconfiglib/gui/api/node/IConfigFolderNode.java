@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.api.node;
 
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.network.chat.Component;
 
@@ -64,9 +65,7 @@ public interface IConfigFolderNode extends IConfigNode
 		getChildren().forEach(IConfigNode::setDefault);
 	}
 	@Override
-	public default boolean requiresRestart() { return false; }
-	@Override
-	public default boolean requiresReload() { return false; }
+	public default ReloadMode getReloadState() { return null; }
 	@Override
 	public default Component getTooltip() { return Component.empty(); }
 }

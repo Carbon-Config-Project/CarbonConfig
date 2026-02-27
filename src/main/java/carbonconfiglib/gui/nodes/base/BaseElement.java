@@ -93,7 +93,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		this.context = context;
 		if(array == null && reload == null) {
 			ReloadMode mode = getReloadState();
-			if(mode != null) reload = addChild(new CarbonLabel(0, 0, 18, 18, mode == ReloadMode.GAME ? Icon.RESTART : Icon.RELOAD).withTooltip(Component.literal(mode == ReloadMode.GAME ? "Requires Game Restart" : "Requires World Reload")));
+			if(mode != null) reload = addChild(new CarbonLabel(0, 0, 18, 18, mode == ReloadMode.GAME ? Icon.RESTART : Icon.RELOAD).withTooltip(mode.getState()));
 		}
 		setRightComponentsVisible(false);
 		setEditable(false);

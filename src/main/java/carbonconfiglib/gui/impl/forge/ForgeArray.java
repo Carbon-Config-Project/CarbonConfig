@@ -190,9 +190,7 @@ public class ForgeArray implements IArrayNode
 	@Override
 	public StructureType getNodeType() { return StructureType.LIST; }
 	@Override
-	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
-	@Override
-	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	public ReloadMode getReloadState() { return mode; }
 	@Override
 	public String getNodeName() { return nodeName; }
 	@Override
