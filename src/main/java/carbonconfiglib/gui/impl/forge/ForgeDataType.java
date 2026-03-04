@@ -8,6 +8,7 @@ import java.util.function.Function;
 import carbonconfiglib.api.ISuggestionProvider;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
@@ -39,6 +40,7 @@ public class ForgeDataType<T>
 	public static final ForgeDataType<Float> FLOAT = new ForgeDataType<>(Float.class, DataType.FLOAT, Helpers::parseFloat, Object::toString, ForgeHelpers::getFloatLimit);
 	public static final ForgeDataType<Double> DOUBLE = new ForgeDataType<>(Double.class, DataType.DOUBLE, Helpers::parseDouble, Object::toString, ForgeHelpers::getDoubleLimit);
 	public static final ForgeDataType<String> STRING = new ForgeDataType<>(String.class, DataType.STRING, ForgeHelpers::parseString, Object::toString, null);
+	public static final ForgeDataType<String> COLOR = new ForgeDataType<>(DataType.byClass(ColorWrapper.class), ForgeHelpers::parseString, Object::toString, null);
 	
 	DataType type;
 	Function<String, ParseResult<T>> parse;

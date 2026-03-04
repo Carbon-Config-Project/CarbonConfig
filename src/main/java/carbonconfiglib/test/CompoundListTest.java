@@ -9,8 +9,9 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigHandler;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ForceMode;
 import carbonconfiglib.impl.entries.ColorValue;
-import carbonconfiglib.impl.entries.NamedForgeRegistry;
+import carbonconfiglib.impl.entries.NamedRegistry;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.ParsedCollections.ParsedList;
 import carbonconfiglib.utils.ParsedCollections.ParsedMap;
@@ -25,9 +26,11 @@ public class CompoundListTest
 	public static void initCompoundList() {
 		Config config = new Config("compoundlisttest");
 		config.add("general").addParsedArray("testing", ObjectLists.empty(), TestObject.createPermission());
-		config.add("special").add(CarbonConfig.createRegistryBuilder("testing", Block.class).build(NamedForgeRegistry.BLOCKS));
-		config.add("color").add(new ColorValue("color", 0xFF00FF, false));
-		config.add("color").add(new ColorValue("color-alpha", 0xFFFF00FF, true));
+		config.add("special").add(CarbonConfig.createRegistryBuilder("testing", Block.class).build(NamedRegistry.BLOCKS));
+		config.add("test").addSubSection("color").add(new ColorValue("color", 0xFF00FF, false));
+		config.add("test").addSubSection("color").add(new ColorValue("color-alpha", 0xFFFF00FF, true));
+		config.add("test").addSubSection("color").add(new ColorValue("color-dis", 0xFF00FF, false).addSettings(new ForceMode(true)));
+		config.add("test").addSubSection("color").add(new ColorValue("color-alpha-dis", 0xFFFF00FF, true).addSettings(new ForceMode(true)));
 		ConfigHandler handler = CarbonConfig.CONFIGS.createConfig(config);
 		handler.register();
 	}

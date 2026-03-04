@@ -36,7 +36,7 @@ public class SuggestionEntry extends ListEntry<SuggestionEntry> {
 	}
 
 	@Override
-	protected boolean containsSearch(String searchString) {
+	public boolean containsSearch(String searchString) {
 		return false;
 	}
 

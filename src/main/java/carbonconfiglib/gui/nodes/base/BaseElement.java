@@ -16,6 +16,7 @@ import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.CompoundType;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
@@ -104,11 +105,11 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	@Override
-	protected boolean containsSearch(String searchString) { return getName().getString().toLowerCase(Locale.ROOT).contains(searchString); }
+	public boolean containsSearch(String searchString) { return getName().getString().toLowerCase(Locale.ROOT).contains(searchString); }
 	
 	@Override
 	public final void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		int leftWidth = context.calculateSegmentWidth()-4;
+		int leftWidth = context.calculateSegmentWidth(layer)-4;
 		renderLeftPart(poseStack, left, top, leftWidth, height, mouseX, mouseY, selected, partialTicks);
 		if(context.isAtTop(layer)) {
 			if(!right) {
@@ -116,15 +117,16 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 				setRightComponentsVisible(true);
 			}
 			if(!showControls()) {
-				renderRightPart(poseStack, left+leftWidth+8, top, width-leftWidth-10, height, mouseX, mouseY, selected, partialTicks);
+				int totalWidth = width-leftWidth-10;
+				int desiredWidth = Math.min(totalWidth >> 1, totalWidth);
+				renderRightPart(poseStack, left+leftWidth+8, top, desiredWidth, totalWidth, height, mouseX, mouseY, selected, partialTicks);
 				return;
 			}
-			int controlWidth = 60 + (delete != null ? 20 : 0) + (reload != null ? 20 : 0);
-			int newWidth = width-leftWidth-10-controlWidth;
-			int renderWidth = Math.min((newWidth + controlWidth) >> 1, newWidth);
-			controlWidth-=2;
+			int controlWidth = 80 + (allowSuggestions() && !getSuggestions().isEmpty() ? 20 : 0);
+			int totalWidth = width-leftWidth-10-controlWidth;
+			int desiredWidth = Math.min((totalWidth + controlWidth) >> 1, totalWidth);
 			renderControls(poseStack, left+width-controlWidth, top, controlWidth, height, mouseX, mouseY, selected, partialTicks);
-			renderRightPart(poseStack, left+leftWidth+8, top, renderWidth, height, mouseX, mouseY, selected, partialTicks);
+			renderRightPart(poseStack, left+leftWidth+8, top, desiredWidth, totalWidth, height, mouseX, mouseY, selected, partialTicks);
 		}
 		else if(right) {
 			right = false;
@@ -167,27 +169,26 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public abstract void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	
-	public abstract void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
+	public abstract void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	
 	public void renderControls(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		left-=1;
-		left+= 40 + (reload != null || delete != null ? 20 : 0);
-		if(!render(delete, left, top, null, stack, mouseX, mouseY, partialTicks)) {
-			render(reload, left, top, null, stack, mouseX, mouseY, partialTicks);
+		int right = left + width - 19;
+		if(!render(delete, right, top, height, null, stack, mouseX, mouseY, partialTicks)) {
+			render(reload, right, top, height, null, stack, mouseX, mouseY, partialTicks);
 		}
 		
-		render(revert, left-20, top, this::isChanged, stack, mouseX, mouseY, partialTicks);
-		render(reset, left-40, top, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
-		render(edit, left-60, top, null, stack, mouseX, mouseY, partialTicks);
+		render(revert, right-20, top, height, this::isChanged, stack, mouseX, mouseY, partialTicks);
+		render(reset, right-40, top, height, this::isNotDefault, stack, mouseX, mouseY, partialTicks);
+		render(edit, right-60, top, height, null, stack, mouseX, mouseY, partialTicks);
 		if(allowSuggestions() && !getSuggestions().isEmpty()) {
-			render(suggestion, left-80, top, null, stack, mouseX, mouseY, partialTicks);
+			render(suggestion, right-80, top, height, null, stack, mouseX, mouseY, partialTicks);
 		}
 	}
 	
-	private boolean render(AbstractWidget widget, int x, int y, BooleanSupplier active, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+	private boolean render(AbstractWidget widget, int x, int y, int height, BooleanSupplier active, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
 		if(widget == null) return false;
 		widget.x = x;
-		widget.y = y;
+		widget.y = (int)Align.CENTER.alignStart(y, height, widget.getHeight());
 		if(active != null) widget.active = active.getAsBoolean();
 		widget.render(stack, mouseX, mouseY, partialTicks);
 		return true;

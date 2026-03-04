@@ -15,6 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -46,11 +47,13 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestScr
 	UUID requestId;
 	BackgroundHolder texture;
 	Predicate<FriendlyByteBuf> result;
+	String[] walker;
 	int tick = 0;
 	
-	public ConfigRequestScreen(BackgroundHolder customTexture, Screen parent, IModConfig config) {
+	public ConfigRequestScreen(BackgroundHolder customTexture, Screen parent, IModConfig config, String...walker) {
 		this.texture = customTexture;
 		this.parent = parent;
+		this.walker = walker;
 		requestId = UUID.randomUUID();
 		this.config = config.loadFromNetworking(requestId, T -> result = T);
 	}
@@ -60,7 +63,7 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestScr
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
-			minecraft.setScreen(new ConfigScreen(config, texture, parent));
+			minecraft.setScreen(new ConfigScreen(config, texture, parent).withWalker(walker == null || walker.length <= 0 ? null : ObjectArrayList.wrap(walker)));
 			return;
 		}
 		minecraft.setScreen(parent);

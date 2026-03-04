@@ -45,6 +45,17 @@ public class EntrySettingTypes
 		}
 	}
 	
+	public static class ForceMode implements IEntrySettings {
+		boolean text;
+		
+		public ForceMode(boolean text) {
+			this.text = text;
+		}
+		
+		public boolean isForcingText() {
+			return text;
+		}
+	}
 	
 	public static class ColorType implements IEntrySettings {
 		boolean hasAlpha;

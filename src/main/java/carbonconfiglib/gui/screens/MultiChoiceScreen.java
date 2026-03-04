@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
-import carbonconfiglib.gui.base.widgets.CarbonButton;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -57,13 +56,12 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	@Override
 	protected void init() {
 		super.init();
-		this.addButtons(Mth.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24));
+		this.addButtons(Mth.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24) - centerY);
 	}
 	
 	protected void addButtons(int y) {
 		boolean singleOption = otherButton == null && cancelButton == null;
 		button(-50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, Align.CENTER, Align.CENTER, mainButton, T -> callback.accept(Result.MAIN));
-		addRenderableWidget(new CarbonButton(this.width / 2 - 50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, this.mainButton, T -> callback.accept(Result.MAIN)));
 		if(singleOption) return;
 		button(-50, y, 100, 20, Align.CENTER, Align.CENTER, otherButton, T -> callback.accept(Result.OTHER));
 		button(55, y, 100, 20, Align.CENTER, Align.CENTER, cancelButton, T -> callback.accept(Result.CANCEL));
@@ -71,6 +69,7 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	
 	@Override
 	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks){
+		init();
 		this.renderBackground(stack);
 		drawCenteredString(stack, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
 		drawSplitText(stack, message, 0, messageTop()-centerY, Align.CENTER, width-50, -1);

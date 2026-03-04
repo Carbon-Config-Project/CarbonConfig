@@ -20,6 +20,7 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
+import carbonconfiglib.gui.base.widgets.ModLogo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.components.Widget;
@@ -202,6 +203,14 @@ public class BaseCarbonScreen extends Screen
 	
 	public <T extends ListEntry<T>> CarbonList<T> list(ListState<T> state) {
 		return addRenderableWidget(new CarbonList<>(this, state));
+	}
+	
+	public ModLogo modlogo(int x, int y, int width, int height) {
+		return addRenderableWidget(new ModLogo(x, y, width, height, this));
+	}
+	
+	public ModLogo modlogo(int x, int y, int width, int height, Align horizontal, Align vertical) {
+		return addRenderableWidget(new ModLogo(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, this));
 	}
 	
 	public <T extends ListEntry<T>> CarbonList<T> listArea(int x, int y, int width, int height, ListState<T> state) {

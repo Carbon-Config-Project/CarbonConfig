@@ -86,10 +86,7 @@ public class MinecraftValue implements IValueNode
 			previous.pop();
 		}
 	}
-	@Override
-	public void apply() {
-		if(previous.size() > 1) previous.pop();
-	}
+	
 	@Override
 	public String getDefault() { return defaultValue; }
 	@Override

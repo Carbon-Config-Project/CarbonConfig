@@ -1,5 +1,6 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +61,7 @@ public class EventHandler implements IConfigChangeListener
 {
 	public static final EventHandler INSTANCE = new EventHandler();
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
+	List<IModConfigs> allKnownConfigs = new ObjectArrayList<>();
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
@@ -139,6 +141,12 @@ public class EventHandler implements IConfigChangeListener
 			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
 		});
 		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
+		mappedConfigs.forEach((M, C) -> allKnownConfigs.add(ModConfigList.createMultiIfApplicable(M, C)));
+		allKnownConfigs.sort(Comparator.comparing(IModConfigs::getModName));
+	}
+	
+	public List<IModConfigs> getAllConfigs() {
+		return new ObjectArrayList<>(allKnownConfigs);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

@@ -55,10 +55,10 @@ public class CustomCompoundElement extends NodeElement
 	}
 	
 	@Override
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		button.x = left;
 		button.y = top;
-		button.setWidth(width);
+		button.setWidth(desiredWidth);
 		button.setHeight(height);
 		button.render(stack, mouseX, mouseY, partialTicks);
 	}

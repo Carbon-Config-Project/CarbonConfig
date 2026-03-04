@@ -99,16 +99,16 @@ public abstract class NumberElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		slider.x = left;
 		slider.y = top;
-		slider.setWidth(width);
+		slider.setWidth(desiredWidth);
 		slider.setHeight(height);
 		slider.render(stack, mouseX, mouseY, partialTicks);
 		
 		text.x = left;
 		text.y = top;
-		text.setWidth(width);
+		text.setWidth(desiredWidth);
 		text.setHeight(height);
 		text.render(stack, mouseX, mouseY, partialTicks);
 	}
@@ -122,7 +122,7 @@ public abstract class NumberElement extends ValueElement
 		protected void generateSlider(IRange range, SliderState state) {			
 			if(!(range instanceof IntegerRange)) return;
 			IntegerRange ints = (IntegerRange)range;
-			if(ints.length() > 99999) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-1000
+			if(ints.length() > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-1000
 			state.setMinValue(ints.min()).setMaxValue(ints.max());
 			if(!setSliderValue()) {
 				state.setMinValue(0).setMaxValue(0);
@@ -150,7 +150,7 @@ public abstract class NumberElement extends ValueElement
 		protected void generateSlider(IRange range, SliderState state) {			
 			if(!(range instanceof LongRange)) return;
 			LongRange longs = (LongRange)range;
-			if(longs.length() > 99999) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-1000
+			if(longs.length() > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-1000
 			state.setMinValue(longs.min()).setMaxValue(longs.max());
 			if(!setSliderValue()) {
 				state.setMinValue(0).setMaxValue(0);

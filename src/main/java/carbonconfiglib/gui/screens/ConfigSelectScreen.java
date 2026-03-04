@@ -64,11 +64,13 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 	@Override
 	protected void init() {
 		super.init();
+		listState.forEach(WorldElement::init);
 		int searchWidth = (int)(width * 0.3F);
 		int minX = (int)(width * 0.15F);
 		int maxX = (int)(width * 0.8F) - minX;
 		int minY = (int)(height * 0.15F);
 		int maxY = (int)(height * 0.8F) - minY;
+		modlogo(2, 2, minY - 4, minY - 4);
 		listArea(minX, minY, maxX, maxY, listState);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
@@ -128,8 +130,15 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 			button = addChild(new CarbonButton(0, 0, 62, 20, Component.translatable(Files.exists(target.getConfigFile()) ? "gui.carbonconfig.pick" : "gui.carbonconfig.create"), T -> onPick()));
 		}
 		
+		public void init() {
+			if(texture != null) return;
+			if(target instanceof WorldConfigTarget) {
+				loadIcon(((WorldConfigTarget)target).getSummary().getIcon());
+			}
+		}
+		
 		@Override
-		protected boolean containsSearch(String searchString) {
+		public boolean containsSearch(String searchString) {
 			return false;
 		}
 

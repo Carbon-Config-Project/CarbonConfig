@@ -195,18 +195,6 @@ public class CarbonArray implements IArrayNode, IValueActions
 			previous.pop();
 		}
 	}
-
-	@Override
-	public void apply() {
-		boolean temp = autoSave;
-		autoSave = false;
-		if(previous.size() > 1) previous.pop();
-		for(int i = 0,m=currentValues.size();i<m;i++) {
-			values.get(i).save();
-		}
-		autoSave = temp;
-		autosave();
-	}
 	
 	@Override
 	public void createNode(String value) {

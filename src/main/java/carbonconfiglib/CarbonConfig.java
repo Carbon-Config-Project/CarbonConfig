@@ -1,15 +1,10 @@
 package carbonconfiglib;
 
-import java.io.IOException;
 import java.util.function.BooleanSupplier;
 
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.logging.LogUtils;
 
 import carbonconfiglib.api.ConfigType;
@@ -26,7 +21,9 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTypes;
 import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
+import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ConfigRequestScreen;
+import carbonconfiglib.gui.screens.ConfigScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -39,15 +36,13 @@ import carbonconfiglib.test.CompoundListTest;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -59,6 +54,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -92,9 +88,6 @@ public class CarbonConfig {
 	public static BoolValue INGAME_BACKGROUND;
 	public static HashSetCache<String> MODS_DISABLED;
 
-	public static ShaderInstance modListBackground;
-	public static final VertexFormat BACKGROUND_SCREEN = new VertexFormat(ImmutableMap.<String, VertexFormatElement>builder().put("Position", DefaultVertexFormat.ELEMENT_POSITION).build());
-
 	public CarbonConfig() {
 		NETWORK.init();
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonLoad);
@@ -104,7 +97,6 @@ public class CarbonConfig {
 		if (FMLEnvironment.dist.isClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
-			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShader);
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
@@ -122,7 +114,7 @@ public class CarbonConfig {
 		}
 		CompoundListTest.initCompoundList();
 	}
-
+		
 	/**
 	 * Creates a Setting with a PerWorld Proxy set by default.<br>
 	 * And sets the config to be loaded at the right time!
@@ -236,7 +228,7 @@ public class CarbonConfig {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");
 			return;
 		}
-		mc.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.screen, config));
+		mc.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.screen, config, path));
 	}
 
 	/**
@@ -271,9 +263,8 @@ public class CarbonConfig {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config in the Local Opener");
 			return;
 		}
-		//TODO implement
-//		Minecraft mc = Minecraft.getInstance();
-//		mc.setScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
+		Minecraft mc = Minecraft.getInstance();
+		mc.setScreen(new ConfigScreen(config, texture.asHolder(), mc.screen).withWalker(path == null || path.length <= 0 ? null : ObjectArrayList.wrap(path)));
 	}
 
 	public static boolean hasPermission(Player player, int permissionLevel) {
@@ -306,26 +297,8 @@ public class CarbonConfig {
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.setScreen(new ModListScreen(mc.screen));
+			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 		}
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public void registerShader(RegisterShadersEvent event) {
-		try {
-			ResourceLocation loc = new ResourceLocation("carbonconfig", "modlist_background");
-			event.registerShader(new ShaderInstance(event.getResourceManager(), loc, BACKGROUND_SCREEN), (obj) -> {
-				modListBackground = obj;
-			});
-		} catch (IOException e) {
-			LOGGER.warn("Failed loading Shader");
-			e.printStackTrace();
-		}
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public static ShaderInstance getBackgroundShader() {
-		return modListBackground;
 	}
 
 	public void load(ServerAboutToStartEvent event) {

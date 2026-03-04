@@ -29,8 +29,6 @@ public interface INode
 	public void setDefault();
 	public void setPrevious();
 	public void createTemp();
-	@Deprecated
-	public void apply();
 	public void deleteTempIfNeeded();
 	
 	

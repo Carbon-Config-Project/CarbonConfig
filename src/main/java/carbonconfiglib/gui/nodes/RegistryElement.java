@@ -36,14 +36,14 @@ public class RegistryElement extends SelectionElement
 	}
 	
 	@Override
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		bounds[0] = left;
 		bounds[1] = top;
 		if(renderer != null) {
 			last = renderer.renderSuggestion(stack, node.get(), left, (int)Align.CENTER.alignStart(top, height, 16));
 			left += 20;
 		}
-		super.renderRightPart(stack, left, top, width, height, mouseX, mouseY, selected, partialTicks);
+		super.renderRightPart(stack, left, top, desiredWidth, width, height, mouseX, mouseY, selected, partialTicks);
 	}
 	
 	@Override

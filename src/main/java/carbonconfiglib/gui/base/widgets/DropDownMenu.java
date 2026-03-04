@@ -102,6 +102,7 @@ public class DropDownMenu<T> extends CarbonButton {
 	}
 	
 	public static class DropDownScreen<T> extends BaseCarbonScreen {
+		boolean reOpen = false;
 		ListState<DropDownEntry<T>> selections;
 		TextState state = new TextState();
 		DropDownMenu<T> owner;
@@ -143,6 +144,10 @@ public class DropDownMenu<T> extends CarbonButton {
 			return yDiff < 0 && yDiff < owner.y - maxHeight;
 		}
 		
+		public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
+			reOpen = true;
+		}
+		
 		@Override
 		protected void init() {
 			int x = owner.x + ownerState.xOffset;
@@ -165,6 +170,11 @@ public class DropDownMenu<T> extends CarbonButton {
 		
 		@Override
 		public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
+			if(reOpen) {
+				reOpen = false;
+				Minecraft.getInstance().popGuiLayer();
+				owner.onPress();
+			}
 			int x = owner.x + ownerState.xOffset;
 			int y = owner.y + owner.getHeight();
 			int width = ownerState.customWidth.orElse(owner.getWidth());
@@ -204,7 +214,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		}
 		
 		@Override
-		protected boolean containsSearch(String searchString) {
+		public boolean containsSearch(String searchString) {
 			return text.getString().toLowerCase(Locale.ROOT).contains(searchString);
 		}
 		

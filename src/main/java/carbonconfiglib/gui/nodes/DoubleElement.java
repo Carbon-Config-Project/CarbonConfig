@@ -62,10 +62,10 @@ public class DoubleElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		text.x = left;
 		text.y = top;
-		text.setWidth(width);
+		text.setWidth(desiredWidth);
 		text.setHeight(height);
 		text.render(stack, mouseX, mouseY, partialTicks);
 	}

@@ -3,6 +3,7 @@ package carbonconfiglib.gui.base.helpers;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
 import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.platform.Window;
@@ -11,6 +12,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
@@ -275,6 +277,52 @@ public class GuiUtils
 		builder.vertex(x1, y0, 0D).uv(x1 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
 		builder.vertex(x0, y0, 0D).uv(x0 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
 		tes.end();
+	}
+	
+	public static void drawFrame(PoseStack stack, float minX, float minY, float maxX, float maxY, int color, float width) {
+		Tesselator tessellator = Tesselator.getInstance();
+		BufferBuilder bufferbuilder = tessellator.getBuilder();
+		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		drawQuadArea(stack, minX, minY, maxX, minY+width, bufferbuilder, color);
+		drawQuadArea(stack, minX, maxY, maxX, maxY+width, bufferbuilder, color);
+		drawQuadArea(stack, minX, minY, minX+width, maxY, bufferbuilder, color);
+		drawQuadArea(stack, maxX, minY, maxX+width, maxY+width, bufferbuilder, color);
+		GlStateManager._enableBlend();
+		GlStateManager._disableTexture();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		tessellator.end();
+		GlStateManager._enableTexture();
+		GlStateManager._disableBlend();
+	}
+	
+	public static void drawQuadArea(PoseStack matrix, float left, float top, float right, float bottom, VertexConsumer builder, int color) {
+		if(left < right) {
+			float i = left;
+			left = right;
+			right = i;
+		}
+		if(top < bottom) {
+			float j = top;
+			top = bottom;
+			bottom = j;
+		}
+		float f3 = (float)(color >> 24 & 255) / 255.0F;
+		float f = (float)(color >> 16 & 255) / 255.0F;
+		float f1 = (float)(color >> 8 & 255) / 255.0F;
+		float f2 = (float)(color & 255) / 255.0F;
+		if(matrix == null) {
+			builder.vertex(left, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
+			builder.vertex(right, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
+			builder.vertex(right, top, 0.0F).color(f, f1, f2, f3).endVertex();
+			builder.vertex(left, top, 0.0F).color(f, f1, f2, f3).endVertex();
+			return;
+		}
+		Matrix4f stack = matrix.last().pose();
+		builder.vertex(stack, left, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
+		builder.vertex(stack, right, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
+		builder.vertex(stack, right, top, 0.0F).color(f, f1, f2, f3).endVertex();
+		builder.vertex(stack, left, top, 0.0F).color(f, f1, f2, f3).endVertex();
 	}
 	
 	public static void blitWithBorder(PoseStack poseStack, ResourceLocation res, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel, boolean custom) {

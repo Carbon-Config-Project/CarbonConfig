@@ -106,10 +106,6 @@ public class JEIValue implements IValueNode
 		}
 	}
 	@Override
-	public void apply() {
-		if(previous.size() > 1) previous.pop();
-	}
-	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override
 	public IEntrySettings getSettings() { return null; }

@@ -57,6 +57,7 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 public class ForgeConfig implements IModConfig
 {
 	ModConfig config;
+	String fileName;
 	ForgeConfigSpec spec;
 	CommentedConfig data;
 	List<ConfigValue<?>> entries;
@@ -64,6 +65,7 @@ public class ForgeConfig implements IModConfig
 	
 	public ForgeConfig(ModConfig config) {
 		this.config = config;
+		this.fileName = validateString(config.getFileName());
 		spec = getSpec(config.getSpec());
 		data = config.getConfigData();
 		entries = collect();
@@ -71,6 +73,7 @@ public class ForgeConfig implements IModConfig
 	
 	public ForgeConfig(ModConfig config, CommentedConfig data, Path path) {
 		this.config = config;
+		this.fileName = validateString(config.getFileName());
 		this.data = data;
 		this.path = path;
 		spec = getSpec(config.getSpec());
@@ -99,14 +102,19 @@ public class ForgeConfig implements IModConfig
 		return null;
 	}
 	
+	protected static String validateString(String input) {
+		String sanitized = Path.of(input).getFileName().toString();
+		return input.equals(sanitized) ? input : sanitized;
+	}
+	
 	@Override
 	public String getFileName() {
-		return config.getFileName();
+		return fileName;
 	}
 	
 	@Override
 	public String getConfigName() {
-		return config.getFileName();
+		return fileName;
 	}
 	
 	@Override

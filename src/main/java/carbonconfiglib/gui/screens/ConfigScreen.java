@@ -99,15 +99,16 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		int widthOne = calculateWidth(0);
 		int widthTwo = calculateWidth(1);
 		int widthThree = calculateWidth(2);
+		modlogo(2, 2, minY - 4, minY - 4);
 		listArea(0, minY, widthOne, maxY, rowOne);
 		listArea(widthOne+4, minY, widthTwo, maxY, rowTwo);
 		listArea(widthTwo + 8 + widthOne, minY, widthThree, maxY, rowThree);
 		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> onClose());
 		checkbox(minY + 22, minY - 22, 20, 20, layerMode);		
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
-		checkbox(-90, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
-		checkbox(-70, minY - 20, 18, 18, Align.END, Align.START, autoSave);
-		save = iconButton(-50, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).withTooltip(Component.literal("Save"));
+		checkbox(-89, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
+		checkbox(-69, minY - 20, 18, 18, Align.END, Align.START, autoSave);
+		save = iconButton(-49, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).setPadding(0).withTooltip(Component.literal("Save"));
 		
 		if(walker != null) {
 			Deque<String> dequeue = new ArrayDeque<String>(walker);
@@ -133,13 +134,25 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		return this;
 	}
 	
+	private float totalWidth() {
+		return 0.42F;
+	}
+	
+	private float columnWidth(int index, int size) {
+		switch(size) {
+			case 2: return totalWidth() * (index == 0 ? 0.4F : 0.6F);
+			case 3: return totalWidth() / size;
+			default: return totalWidth();
+		}
+	}
+	
 	private int calculateWidth(int index) {
 		if(index == 2) {
 			if(rowThree.isEmpty()) return (int)(width - 8);
-			return (int)((width - (int)(width * 0.28F)) - 8);
+			return (int)((width - (int)(width * (columnWidth(index-2, 3) + columnWidth(index-2, 3)))) - 8);
 		}
-		if(!all[index+1].isEmpty()) return (int)(width * (0.42F / countFilledList()) - 4);
-		return (int)((width - (int)(width * (index == 0 ? 0F : 0.21F))) - 8);
+		if(!all[index+1].isEmpty()) return (int)(width * columnWidth(index, countFilledList()) - 3);
+		return (int)((width - (int)(width * (index == 0 ? 0F : columnWidth(index-1, 2)))) - 8);
 	}
 	
 	@Override
@@ -148,8 +161,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	}
 	
 	@Override
-	public int calculateSegmentWidth() {
-		return (int)(width * (0.42F / countFilledList()) - 4);
+	public int calculateSegmentWidth(int layer) {
+		return (int)(width * columnWidth(layer, countFilledList()) - 4);
 	}
 	
 	private int countFilledList() {
@@ -167,12 +180,10 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
-		rowTwo.setFrame(false);
 		if(save != null) save.active = rootElement.needsSaving();
 		int minY = (int)(height * 0.15F);
 		GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
 		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, holder.getTexture());
-		GuiUtils.drawTextureRegion(matrix, 2, 2, minY - 4, minY - 4, Icon.LOGO, 400, 400);
 	}
 	
 	@Override
@@ -187,8 +198,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		if(rowTwo.isVisible() && !rowTwo.isScrollbarVisible() && !rowThree.isEmpty()) {
 			GuiComponent.fill(matrix, widthTwo, (int)(height * 0.15F), widthTwo+4, (int)(height * 0.8F), 0xFF000000);
 		}
-		int widthThree = (int)(width * 0.42F) - 4;
 		if(rowThree.isVisible()) {
+			int widthThree = (int)(width * totalWidth()) - 4;
 			GuiComponent.fill(matrix, widthThree, (int)(height * 0.15F), widthThree+4, (int)(height * 0.8F), 0xFF000000);
 		}
 		GuiComponent.fill(matrix, 0, (int)(height * 0.8F), width, height, 0xFF1C1C1C);
@@ -298,11 +309,6 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		if(root instanceof ISortableNode) {
 			((ISortableNode)root).onSwapped(oldIndex, newIndex);
 		}
-	}
-	
-	@Override
-	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-		return super.mouseClicked(pMouseX, pMouseY, pButton);
 	}
 	
 	private void onBulkEdit(boolean value) {

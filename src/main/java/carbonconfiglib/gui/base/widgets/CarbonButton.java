@@ -32,6 +32,7 @@ import net.minecraft.network.chat.Component;
 public class CarbonButton extends CarbonBaseButton {
 	Optional<Icon> icon = Optional.empty();
 	int hash;
+	int padding = 3;
 	boolean selected = false;
 	boolean highlighted = false;
 
@@ -55,6 +56,11 @@ public class CarbonButton extends CarbonBaseButton {
 		return this;
 	}
 	
+	public CarbonButton setPadding(int value) {
+		this.padding = value;
+		return this;
+	}
+	
 	@Override
 	public int getFGColor() {
 		return super.getFGColor();
@@ -68,7 +74,7 @@ public class CarbonButton extends CarbonBaseButton {
 	public void renderIcon(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
 		int j = getFGColor();
 		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(pPoseStack, x + (width >> 1) - 6, y + (height >> 1) - 6, 11, 11, icon.get(), 16, 16);
+		GuiUtils.drawTextureRegion(pPoseStack, x + padding, y + padding, width-padding*2, height-padding*2, icon.get(), 16, 16);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 	

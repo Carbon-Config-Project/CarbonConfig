@@ -201,7 +201,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			return ObjectLists.emptyList();
 		}
 		
-		protected abstract boolean containsSearch(String searchString);
+		public abstract boolean containsSearch(String searchString);
 		@Override
 		public abstract void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	}

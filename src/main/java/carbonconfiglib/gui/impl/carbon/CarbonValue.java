@@ -106,10 +106,6 @@ public class CarbonValue implements IValueNode, IValueActions
 			previous.pop();
 		}
 	}
-	@Override
-	public void apply() {
-		if(previous.size() > 1) previous.pop();
-	}
 	
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }

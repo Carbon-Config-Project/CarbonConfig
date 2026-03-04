@@ -2,6 +2,7 @@ package carbonconfiglib.gui.screens;
 
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -70,10 +71,11 @@ public class ConfigListScreen extends BaseCarbonScreen
 	protected void init() {
 		super.init();
 		int searchWidth = (int)(width * 0.3F);
-		int minX = (int)(width * 0.15F);
-		int maxX = (int)(width * 0.8F) - minX;
+		int minX = (int)(width * 0.5F) - 150;
+		int maxX = 300;
 		int minY = (int)(height * 0.15F);
 		int maxY = (int)(height * 0.8F) - minY;
+		modlogo(2, 2, minY - 4, minY - 4);
 		listArea(minX, minY, maxX, maxY, listState);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
@@ -162,7 +164,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 		
 		@Override
 		public int getItemHeight() {
-			return 16;
+			return 20;
 		}
 
 		@Override
@@ -179,7 +181,6 @@ public class ConfigListScreen extends BaseCarbonScreen
 		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {			
 			GuiUtils.drawScrollingText(poseStack, font, label, left, top, width, height, Align.CENTER, -1, 0);
 		}
-		
 	}
 		
 	public static class ConfigEntry extends Element {
@@ -198,14 +199,14 @@ public class ConfigListScreen extends BaseCarbonScreen
 			this.modName = modName;
 			this.multiplayer = multiplayer;
 			this.type = Component.translatable("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase());
-			this.fileName = Component.literal(config.getConfigName()).withStyle(ChatFormatting.GRAY);
+			this.fileName = Component.literal(config.getFileName()).withStyle(ChatFormatting.GRAY);
 			this.open = addChild(new CarbonButton(0, 0, 50, 20, Component.translatable("gui.carbonconfig."+(shouldCreatePick() ? "pick_file" : "modify")), T -> open()));
-			if(!shouldCreatePick()) this.reset = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).withTooltip(Component.translatable("gui.carbonconfig.default")));
+			if(!shouldCreatePick()) this.reset = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.default")));
 		}
 		
 		@Override
 		public boolean containsSearch(String searchString) {
-			return config.getFileName().contains(searchString);
+			return config.getFileName().toLowerCase(Locale.ROOT).contains(searchString.toLowerCase(Locale.ROOT)) || config.getModId().toLowerCase(Locale.ROOT).contains(searchString.toLowerCase(Locale.ROOT));
 		}
 
 		@Override
@@ -214,12 +215,12 @@ public class ConfigListScreen extends BaseCarbonScreen
 			GuiUtils.drawText(poseStack, font, type, left+25, top+3, Align.START, -1);
 			GuiUtils.drawText(poseStack, font, fileName, left+25, top+12, Align.START, -1);
 			int right = left + width;
-			open.x = right - 71;
+			open.x = right - 80;
 			open.y = (int)Align.CENTER.alignStart(top, height, open.getHeight());
 			fixFocus(open);
 			open.render(poseStack, mouseX, mouseY, partialTicks);
 			if(reset != null) {
-				reset.x = right - 20;
+				reset.x = right - 29;
 				reset.y = (int)Align.CENTER.alignStart(top, height, reset.getHeight());
 				reset.active = !config.isDefault();
 				fixFocus(reset);

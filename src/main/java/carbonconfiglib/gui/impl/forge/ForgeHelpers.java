@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
+import carbonconfiglib.gui.nodes.ColorElement.FormatType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
@@ -39,6 +40,10 @@ public class ForgeHelpers
 		config.getConfigData().putAll(data);
 		config.save();
 		ModList.get().getModContainerById(config.getModId()).ifPresent(T -> T.dispatchConfigEvent(IConfigEvent.reloading(config)));
+	}
+	
+	public static boolean isColor(Object value) {
+		return value instanceof String && FormatType.guessType((String)value) != null;
 	}
 	
 	public static ParseResult<Boolean> parseBoolean(String value) {

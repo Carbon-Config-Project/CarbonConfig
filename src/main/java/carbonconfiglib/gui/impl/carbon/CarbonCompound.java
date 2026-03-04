@@ -182,18 +182,6 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	}
 	
 	@Override
-	public void apply() {
-		boolean last = autosave;
-		autosave = false;
-		if(previous.size() > 1) previous.pop();
-		for(int i = 0,m=values.size();i<m;i++) {
-			values.get(i).save();
-		}
-		autosave = last;
-		autosave();
-	}
-	
-	@Override
 	public boolean isValid() {
 		return isValid.apply(get()).getValue();
 	}

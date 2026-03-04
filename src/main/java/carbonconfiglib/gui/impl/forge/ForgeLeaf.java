@@ -79,6 +79,9 @@ public class ForgeLeaf implements IConfigNode
 			List<?> list = (List<?>)spec.getDefault();
 			type = list.isEmpty() ? ForgeDataType.STRING : ForgeDataType.getDataByType(list.get(0).getClass());
 		}
+		if(type == ForgeDataType.STRING && ForgeHelpers.isColor(spec.getDefault())) {
+			type = ForgeDataType.COLOR;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -172,18 +172,6 @@ public class ForgeArray implements IArrayNode
 	}
 	
 	@Override
-	public void apply() {
-		boolean temp = autosave;
-		autosave = false;
-		if(previous.size() > 1) previous.pop();
-		for(int i = 0,m=currentValues.size();i<m;i++) {
-			values.get(i).save();
-		}
-		autosave = temp;
-		autosave();
-	}
-	
-	@Override
 	public StructureType getInnerType() { return StructureType.SIMPLE; }
 	@Override
 	public IEntrySettings getSettings() { return null; }

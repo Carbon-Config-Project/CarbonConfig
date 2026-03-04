@@ -73,8 +73,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	}
 	
 	@Override
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.size()), left, top, width-2, height, Align.END, -1, 32);
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.size()), left, top, desiredWidth-2, height, Align.END, -1, 32);
 	}
 	
 	@Override
@@ -203,8 +203,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		}
 
 		@Override
-		public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			selector.x = left + (int)(width * 0.18F);
+		public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			selector.x = left + (int)(desiredWidth * 0.18F);
 			selector.y = top;
 			selector.render(stack, mouseX, mouseY, partialTicks);
 		}

@@ -99,10 +99,7 @@ public class ForgeValue implements IValueNode
 			previous.pop();
 		}
 	}
-	@Override
-	public void apply() {
-		if(previous.size() > 1) previous.pop();
-	}
+	
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override

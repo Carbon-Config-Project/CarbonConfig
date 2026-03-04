@@ -20,7 +20,7 @@ public interface IElementContext
 	public boolean isElementActive(BaseElement base);
 	
 	public boolean isAtTop(int layer);
-	public int calculateSegmentWidth();
+	public int calculateSegmentWidth(int layer);
 	
 	public void setTooltipFocused(BaseElement element);
 	public void onNodeChanged();

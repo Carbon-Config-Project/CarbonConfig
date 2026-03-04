@@ -79,8 +79,8 @@ public class FolderElement extends BaseElement implements IFolderNode
 		button.render(stack, mouseX, mouseY, partialTicks);
 	}
 	
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.getChildren().size()), left, top, width-2, height, Align.END, -1, 32);
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.getChildren().size()), left, top, desiredWidth-2, height, Align.END, -1, 32);
 	}
 	
 	protected void onClick(Button button) {

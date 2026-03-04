@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ForceMode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.nodes.NodeElement;
@@ -42,6 +43,16 @@ public abstract class ValueElement extends NodeElement
 	@Override
 	protected abstract void readValue();
 	
+	protected boolean isForcingText() {
+		ForceMode mode = node.getSetting(ForceMode.class);
+		return mode != null && mode.isForcingText();
+	}
+	
+	protected boolean isForcingAlternative() {
+		ForceMode mode = node.getSetting(ForceMode.class);
+		return mode != null && !mode.isForcingText();
+	}
+	
 	protected void setValue(String value) {
 		node.set(value);
 		onValueChanged();
@@ -53,7 +64,7 @@ public abstract class ValueElement extends NodeElement
 	}
 	
 	@Override
-	public void renderRightPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		
 	}
 	

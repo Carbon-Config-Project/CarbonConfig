@@ -41,11 +41,11 @@ import net.minecraftforge.registries.IForgeRegistry;
  */
 public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Set<ResourceLocation>>
 {
-	NamedForgeRegistry<?> registry;
+	NamedRegistry<?> registry;
 	Class<?> clz;
 	Predicate<ResourceLocation> filter;
 	
-	public RegistryKeyValue(String key, NamedForgeRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
+	public RegistryKeyValue(String key, NamedRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
 		super(key, defaultValue, comment);
 		this.registry = registry;
 		this.clz = clz;
@@ -89,7 +89,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		ParseResult<Boolean> result = super.canSet(value);
 		if(result.hasError()) return result;
 		for(ResourceLocation entry : value) {
-			if(!registry.getRegistry().containsKey(entry)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
+			if(!registry.containsKey(entry)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(entry)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entry+"] isn't allowed");
 		}
 		return ParseResult.success(true);
@@ -98,7 +98,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	private ParseResult<ResourceLocation> parseEntry(String value) {
 		ResourceLocation location = ResourceLocation.tryParse(value);
 		if(location == null) return ParseResult.error(value, "Id ["+value+"] isn't a valid resource location");
-		if(!registry.getRegistry().containsKey(location) || (filter != null && !filter.test(location))) return ParseResult.error(value, "Id ["+value+"] isn't valid");
+		if(!registry.containsKey(location) || (filter != null && !filter.test(location))) return ParseResult.error(value, "Id ["+value+"] isn't valid");
 		return ParseResult.success(location);
 	}
 	
@@ -152,7 +152,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		
 		@Override
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(ResourceLocation entry : value.registry.getRegistry().getKeys()) {
+			for(ResourceLocation entry : value.registry.getKeys()) {
 				Suggestion suggestion = Suggestion.namedTypeValue(value.registry.getName(entry), entry.toString(), value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
 			}
@@ -204,31 +204,31 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 			return this;
 		}
 		
-		private void parseValues(IForgeRegistry<E> registry) {
+		private void parseValues(Function<E, ResourceLocation> keyGetter) {
 			for(E entry : unparsedValues) {
-				ResourceLocation location = registry.getKey(entry);
+				ResourceLocation location = keyGetter.apply(entry);
 				if(location != null) values.add(location);
 			}
 			unparsedValues.clear();
 		}
 		
 		public RegistryKeyValue build(IForgeRegistry<E> registry) {
-			parseValues(registry);
-			return new RegistryKeyValue(key, new NamedForgeRegistry<>(registry, null), clz, values, filter, comments);
+			parseValues(registry::getKey);
+			return new RegistryKeyValue(key, NamedRegistry.ofForge(registry, null), clz, values, filter, comments);
 		}
 		
 		public RegistryKeyValue build(IForgeRegistry<E> registry, ConfigSection section) {
-			parseValues(registry);
-			return section.add(new RegistryKeyValue(key, new NamedForgeRegistry<>(registry, null), clz, values, filter, comments));
+			parseValues(registry::getKey);
+			return section.add(new RegistryKeyValue(key, NamedRegistry.ofForge(registry, null), clz, values, filter, comments));
 		}
 		
-		public RegistryKeyValue build(NamedForgeRegistry<E> registry) {
-			parseValues(registry.getRegistry());
+		public RegistryKeyValue build(NamedRegistry<E> registry) {
+			parseValues(registry::getKey);
 			return new RegistryKeyValue(key, registry, clz, values, filter, comments);
 		}
 		
-		public RegistryKeyValue build(NamedForgeRegistry<E> registry, ConfigSection section) {
-			parseValues(registry.getRegistry());
+		public RegistryKeyValue build(NamedRegistry<E> registry, ConfigSection section) {
+			parseValues(registry::getKey);
 			return section.add(new RegistryKeyValue(key, registry, clz, values, filter, comments));
 		}
 	}
