@@ -127,7 +127,7 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 				int index = folder.getNameCount();
 				path = Component.literal(folder.subpath(index-3, index).toString()).withStyle(ChatFormatting.GRAY);
 			}
-			button = addChild(new CarbonButton(0, 0, 62, 20, Component.translatable(Files.exists(target.getConfigFile()) ? "gui.carbonconfig.pick" : "gui.carbonconfig.create"), T -> onPick()));
+			button = addChild(new CarbonButton(0, 0, 52, 20, Component.translatable(Files.exists(target.getConfigFile()) ? "gui.carbonconfig.pick" : "gui.carbonconfig.create"), T -> onPick()));
 		}
 		
 		public void init() {

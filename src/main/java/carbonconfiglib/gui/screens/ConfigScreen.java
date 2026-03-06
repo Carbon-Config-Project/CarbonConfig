@@ -381,7 +381,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	private void save() {
 		if(rootElement.save(this::notifyChanges)) {
-			configs.save();
+			configs.save(false);
 		}
 	}
 	

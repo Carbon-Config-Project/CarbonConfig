@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.gui.api.IModConfig;
-import carbonconfiglib.gui.api.IRequestScreen;
+import carbonconfiglib.gui.api.IRequestReceiver;
 import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
@@ -32,7 +32,7 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestScreen
+public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestReceiver
 {
 	static final Component REQUEST = Component.translatable("gui.carbonconfig.requesting_config");
 	static final Component[] ANIMATION = new Component[] {
@@ -54,6 +54,7 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestScr
 		this.texture = customTexture;
 		this.parent = parent;
 		this.walker = walker;
+		IRequestReceiver.Impl.register(this);
 		requestId = UUID.randomUUID();
 		this.config = config.loadFromNetworking(requestId, T -> result = T);
 	}
@@ -74,6 +75,12 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestScr
 		super.tick();
 		tick++;
 		if(tick > 400) minecraft.setScreen(parent);
+	}
+	
+	@Override
+	public void removed() {
+		IRequestReceiver.Impl.unregister(this);
+		super.removed();
 	}
 	
 	@Override

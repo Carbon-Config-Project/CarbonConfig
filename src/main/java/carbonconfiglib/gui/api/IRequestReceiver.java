@@ -1,8 +1,10 @@
 package carbonconfiglib.gui.api;
 
+import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.network.FriendlyByteBuf;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -19,7 +21,24 @@ import net.minecraft.network.FriendlyByteBuf;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface IRequestScreen
+public interface IRequestReceiver
 {
 	public void receiveConfigData(UUID requestId, FriendlyByteBuf buf);
+	
+	public static class Impl {
+		
+		private static final List<IRequestReceiver> RECEIVERS = new ObjectArrayList<>();
+		
+		public static void register(IRequestReceiver receiver) {
+			RECEIVERS.add(receiver);
+		}
+		
+		public static void unregister(IRequestReceiver receiver) {
+			RECEIVERS.remove(receiver);
+		}
+		
+		public static void receiveData(UUID requestId, FriendlyByteBuf buf) {
+			RECEIVERS.forEach(T -> T.receiveConfigData(requestId, buf));
+		}
+	}
 }

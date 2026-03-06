@@ -20,6 +20,9 @@ import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
+import carbonconfiglib.impl.internal.BackupManager;
+import carbonconfiglib.impl.internal.BackupManager.BulkRequest;
+import carbonconfiglib.impl.internal.BackupManager.Mode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -71,14 +74,16 @@ public class ConfigListScreen extends BaseCarbonScreen
 	protected void init() {
 		super.init();
 		int searchWidth = (int)(width * 0.3F);
-		int minX = (int)(width * 0.5F) - 150;
-		int maxX = 300;
+		int minX = (int)(width * 0.5F) - 180;
+		int maxX = 360;
 		int minY = (int)(height * 0.15F);
 		int maxY = (int)(height * 0.8F) - minY;
 		modlogo(2, 2, minY - 4, minY - 4);
 		listArea(minX, minY, maxX, maxY, listState);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
+		iconButton((searchWidth >> 1)+2, minY-21, 18, 18, Align.CENTER, Align.START, Icon.IMPORT, T -> bulkBackup(Mode.CREATE)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.create"));
+		iconButton((searchWidth >> 1)+22, minY-21, 18, 18, Align.CENTER, Align.START, Icon.EXPORT, T -> bulkBackup(Mode.LOAD)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.load"));
 	}
 	
 	@Override
@@ -96,6 +101,17 @@ public class ConfigListScreen extends BaseCarbonScreen
 	@Override
 	public void onClose() {
 		setScreen(parent);
+	}
+	
+	protected void bulkBackup(Mode mode) {
+		List<IModConfig> configs = new ObjectArrayList<>();
+		listState.forEach(T -> {
+			if(T instanceof ConfigEntry) {
+				((ConfigEntry)T).handleBulk(configs, mode);
+			}
+		});
+		if(configs.isEmpty()) return;
+		new BulkRequest(configs, mode);
 	}
 	
 	protected List<Element> generateModList(List<IModConfigs> configs) {
@@ -126,7 +142,9 @@ public class ConfigListScreen extends BaseCarbonScreen
 		if(mc.level != null && isMultiplayer()) {
 			config.getConfigInstances(ConfigType.SHARED).forEach(T -> serverConfigs.add(new ConfigEntry(T, holder, name, true)));
 		}
-		config.getConfigInstances(ConfigType.SERVER).forEach(T -> serverConfigs.add(new ConfigEntry(T, holder, name, true)));
+		if(mc.level == null || mc.hasSingleplayerServer() || isMultiplayer()) {
+			config.getConfigInstances(ConfigType.SERVER).forEach(T -> serverConfigs.add(new ConfigEntry(T, holder, name, true)));
+		}
 		if(serverConfigs.size() > 0) {
 			result.add(new Label(Component.translatable("gui.carbonconfig.configs."+(mc.level == null || !isMultiplayer() ? "world" : "multiplayer")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).withChildren(serverConfigs));
 			result.addAll(serverConfigs);
@@ -192,6 +210,9 @@ public class ConfigListScreen extends BaseCarbonScreen
 		protected boolean multiplayer;
 		protected CarbonButton open;
 		protected CarbonButton reset;
+		protected CarbonButton backup;
+		protected CarbonButton restore;
+		protected CarbonButton listBackups;
 		
 		public ConfigEntry(IModConfig config, BackgroundHolder holder, Component modName, boolean multiplayer) {
 			this.config = config;
@@ -200,8 +221,20 @@ public class ConfigListScreen extends BaseCarbonScreen
 			this.multiplayer = multiplayer;
 			this.type = Component.translatable("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase());
 			this.fileName = Component.literal(config.getFileName()).withStyle(ChatFormatting.GRAY);
-			this.open = addChild(new CarbonButton(0, 0, 50, 20, Component.translatable("gui.carbonconfig."+(shouldCreatePick() ? "pick_file" : "modify")), T -> open()));
-			if(!shouldCreatePick()) this.reset = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.default")));
+			boolean isLarge = shouldCreatePick();
+			this.open = addChild(new CarbonButton(0, 0, isLarge ? 50 : 40, 20, Component.translatable("gui.carbonconfig."+(shouldCreatePick() ? "pick_file" : "modify")), T -> open()));
+			if(!isLarge) {
+				this.reset = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.default")));
+				this.backup = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> createBackup()).withIcon(Optional.of(Icon.IMPORT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.create")));
+				this.restore = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> restoreBackup()).withIcon(Optional.of(Icon.EXPORT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.load_last")));
+				this.listBackups = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> selectBackups()).withIcon(Optional.of(Icon.LIST)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.select")));
+			}
+			
+		}
+		
+		@Override
+		public int getItemHeight() {
+			return super.getItemHeight();
 		}
 		
 		@Override
@@ -215,16 +248,34 @@ public class ConfigListScreen extends BaseCarbonScreen
 			GuiUtils.drawText(poseStack, font, type, left+25, top+3, Align.START, -1);
 			GuiUtils.drawText(poseStack, font, fileName, left+25, top+12, Align.START, -1);
 			int right = left + width;
-			open.x = right - 80;
+			open.x = right - (70 + (reset != null ? 60 : 0));
 			open.y = (int)Align.CENTER.alignStart(top, height, open.getHeight());
 			fixFocus(open);
 			open.render(poseStack, mouseX, mouseY, partialTicks);
 			if(reset != null) {
-				reset.x = right - 29;
+				reset.x = right - 89;
 				reset.y = (int)Align.CENTER.alignStart(top, height, reset.getHeight());
 				reset.active = !config.isDefault();
 				fixFocus(reset);
 				reset.render(poseStack, mouseX, mouseY, partialTicks);
+				backup.x = right - 68;
+				backup.y = (int)Align.CENTER.alignStart(top, height, backup.getHeight());
+				backup.active = true;
+				fixFocus(backup);
+				backup.render(poseStack, mouseX, mouseY, partialTicks);
+				
+				restore.x = right - 47;
+				restore.y = (int)Align.CENTER.alignStart(top, height, restore.getHeight());
+				restore.active = true;
+				fixFocus(restore);
+				restore.render(poseStack, mouseX, mouseY, partialTicks);
+				
+				listBackups.x = right - 26;
+				listBackups.y = (int)Align.CENTER.alignStart(top, height, listBackups.getHeight());
+				listBackups.active = true;
+				fixFocus(listBackups);
+				listBackups.render(poseStack, mouseX, mouseY, partialTicks);
+
 			}
 		}
 		
@@ -244,6 +295,50 @@ public class ConfigListScreen extends BaseCarbonScreen
 			return (shouldCreatePick() ? Icon.MULTITYPE_ICON : Icon.TYPE_ICON).get(config.getConfigType());
 		}
 		
+		public void handleBulk(List<IModConfig> download, Mode mode) {
+			Minecraft mc = Minecraft.getInstance();
+			if(shouldCreatePick()) return;
+			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
+				download.add(config);
+				return;
+			}
+			if(mode == Mode.LIST) throw new IllegalStateException("List Mode is unsupported");
+			if(mode == Mode.CREATE) BackupManager.createBackup(config);
+			if(mode == Mode.LOAD) BackupManager.loadLastBackup(config);
+		}
+		
+		public void createBulkBackup(List<IModConfig> downloaded) {
+			Minecraft mc = Minecraft.getInstance();
+			if(shouldCreatePick()) return;
+			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
+				downloaded.add(config);
+				return;
+			}
+			BackupManager.createBackup(config);			
+		}
+		
+		private void createBackup() {
+			Minecraft mc = Minecraft.getInstance();
+			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
+				new BulkRequest(ObjectLists.singleton(config), Mode.CREATE);
+				return;
+			}
+			BackupManager.createBackup(config);
+		}
+		
+		private void restoreBackup() {
+			Minecraft mc = Minecraft.getInstance();
+			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
+				new BulkRequest(ObjectLists.singleton(config), Mode.LOAD);
+				return;
+			}
+			BackupManager.loadLastBackup(config);
+		}
+		
+		private void selectBackups() {
+			pushExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, holder, config, BackupManager.listBackups(config)));
+		}
+		
 		public void open() {
 			Minecraft mc = Minecraft.getInstance();
 			if(shouldCreatePick()) {
@@ -259,7 +354,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 		
 		public void resetConfig() {
 			config.restoreDefault();
-			config.save();
+			config.save(false);
 		}
 	}
 }

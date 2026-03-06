@@ -49,7 +49,9 @@ public interface IModConfig
 	public boolean createConfig(Path path);
 	public IModConfig loadFromFile(Path path);
 	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network);
-	public void save();
+	public void save(boolean createBackup);
+	public byte[] createBackup();
+	public void loadBackup(byte[] data);
 	
 	public static IModConfig carbon(String modId, ConfigHandler handler) {
 		return new ModConfig(modId, handler);

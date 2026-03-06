@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.file.FileNotFoundAction;
 import com.electronwill.nightconfig.toml.TomlFormat;
 
@@ -22,6 +23,7 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
+import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.networking.forge.RequestConfigPacket;
 import carbonconfiglib.networking.forge.SaveForgeConfigPacket;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -60,6 +62,7 @@ public class ForgeConfig implements IModConfig
 	String fileName;
 	ForgeConfigSpec spec;
 	CommentedConfig data;
+	CommentedConfig original;
 	List<ConfigValue<?>> entries;
 	Path path;
 	
@@ -68,6 +71,7 @@ public class ForgeConfig implements IModConfig
 		this.fileName = validateString(config.getFileName());
 		spec = getSpec(config.getSpec());
 		data = config.getConfigData();
+		original = copy(data);
 		entries = collect();
 	}
 	
@@ -75,6 +79,7 @@ public class ForgeConfig implements IModConfig
 		this.config = config;
 		this.fileName = validateString(config.getFileName());
 		this.data = data;
+		this.original = copy(data);
 		this.path = path;
 		spec = getSpec(config.getSpec());
 		entries = collect();
@@ -105,6 +110,10 @@ public class ForgeConfig implements IModConfig
 	protected static String validateString(String input) {
 		String sanitized = Path.of(input).getFileName().toString();
 		return input.equals(sanitized) ? input : sanitized;
+	}
+	
+	protected static CommentedConfig copy(CommentedConfig original) {
+		return original == null ? null : CommentedConfig.copy(original);
 	}
 	
 	@Override
@@ -192,7 +201,9 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	@Override
-	public void save() {
+	public void save(boolean createBackup) {
+		if(createBackup) BackupManager.createBackup(this);
+		original = copy(data);
 		if(path != null) {
 			ForgeHelpers.saveConfig(path, data);
 			return;
@@ -200,6 +211,23 @@ public class ForgeConfig implements IModConfig
 		config.save();
         config.getSpec().afterReload();
         ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(new ModConfigEvent.Reloading(this.config));
+	}
+	
+	@Override
+	public byte[] createBackup() {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		original.configFormat().createWriter().write(original, output);
+		return output.toByteArray();
+	}
+	
+	@Override
+	public void loadBackup(byte[] data) {
+		UnmodifiableConfig config = this.data.configFormat().createParser().parse(new ByteArrayInputStream(data));
+		for(int i = 0,m=entries.size();i<m;i++) {
+			ConfigValue<?> entry = entries.get(i);
+			this.data.set(entry.getPath(), config.get(entry.getPath()));
+		}
+		save(false);
 	}
 	
 	private List<ConfigValue<?>> collect() {
@@ -245,6 +273,7 @@ public class ForgeConfig implements IModConfig
 		public boolean test(FriendlyByteBuf t) {
 			try {
 				this.data = TomlFormat.instance().createParser().parse(new ByteArrayInputStream(t.readByteArray()));
+				this.original = copy(data);
 				return true;
 			}
 			catch(Exception e) {
@@ -254,7 +283,9 @@ public class ForgeConfig implements IModConfig
 		}
 		
 		@Override
-		public void save() {
+		public void save(boolean createBackup) {
+			if(createBackup) BackupManager.createBackup(this);
+			original = copy(data);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			data.configFormat().createWriter().write(data, stream);
 			CarbonConfig.NETWORK.sendToServer(new SaveForgeConfigPacket(config.getType(), config.getModId(), stream.toByteArray()));

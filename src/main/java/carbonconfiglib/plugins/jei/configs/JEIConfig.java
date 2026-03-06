@@ -1,5 +1,6 @@
 package carbonconfiglib.plugins.jei.configs;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.function.Predicate;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.impl.internal.BackupManager;
 import mezz.jei.api.runtime.config.IJeiConfigCategory;
 import mezz.jei.api.runtime.config.IJeiConfigFile;
 import mezz.jei.api.runtime.config.IJeiConfigValue;
@@ -42,6 +44,7 @@ public class JEIConfig implements IModConfig
 			entries.addAll(cat.getConfigValues());
 		}
 	}
+	
 	@Override
 	public String getFileName() { return file.getPath().getFileName().toString(); }
 	@Override
@@ -53,7 +56,7 @@ public class JEIConfig implements IModConfig
 	@Override
 	public ConfigType getConfigType() { return ConfigType.CLIENT; }
 	@Override
-	public boolean isLocalConfig() { return false; }
+	public boolean isLocalConfig() { return true; }
 	@Override
 	public boolean canCreateConfigs() { return false; }
 	@Override
@@ -85,10 +88,24 @@ public class JEIConfig implements IModConfig
 	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<FriendlyByteBuf>> network) { return null; }
 	
 	@Override
-	public void save() {
+	public void save(boolean createBackup) {
+		if(createBackup) BackupManager.createBackup(this);
 		if(file instanceof IConfigSchema schema) {
 			schema.markDirty();
 		}
+	}
+	
+	@Override
+	public byte[] createBackup() {
+		try { return Files.readAllBytes(file.getPath()); }
+		catch(Exception e) { e.printStackTrace(); }
+		return new byte[0];
+	}
+	
+	@Override
+	public void loadBackup(byte[] data) {
+		try { Files.write(file.getPath(), data); }
+		catch(Exception e) { e.printStackTrace(); }
 	}
 	
 }

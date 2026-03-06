@@ -34,6 +34,9 @@ public class Icon
 	public static final Icon RESTART = ICONS.create(32, 16);
 	public static final Icon SAVE = ICONS.create(64, 64);
 	public static final Icon HOME = ICONS.create(32, 80);
+	public static final Icon IMPORT = ICONS.create(48, 80);
+	public static final Icon EXPORT = ICONS.create(64, 80);
+	public static final Icon LIST = ICONS.create(64, 48);
 	public static final IconPair SELECTED = ICONS.horizontalActivityIcon(0, 16, 64);
 	public static final IconPair AUTO_SAVE = ICONS.horizontalActivityIcon(32, 48, 64);
 	public static final IconPair SEARCH = ICONS.verticalActivityIcon(48, 32, 16);
