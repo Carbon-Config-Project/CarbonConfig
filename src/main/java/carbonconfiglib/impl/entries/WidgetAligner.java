@@ -1,5 +1,7 @@
 package carbonconfiglib.impl.entries;
 
+import java.util.Objects;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.IConfigSerializer;
@@ -35,6 +37,20 @@ public class WidgetAligner
 		this.scale = scale;
 	}
 	
+	@Override
+	public int hashCode() {
+		return Objects.hash(screenX, screenY, xOff, yOff, scale);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof WidgetAligner) {
+			WidgetAligner aligner = (WidgetAligner)obj;
+			return aligner.screenX == screenX && aligner.screenY == screenY && Float.compare(aligner.xOff, xOff) == 0 && Float.compare(aligner.yOff, yOff) == 0 && Float.compare(aligner.scale, scale) == 0;
+		}
+		return false;
+	}
+	
 	public Align horizontalAlignment() {
 		return screenX;
 	}
@@ -53,6 +69,14 @@ public class WidgetAligner
 	
 	public float scale() {
 		return scale;
+	}
+	
+	public double applyX(double screenWidth, double width) {
+		return screenX.alignStart(0F, screenWidth, width*scale)+xOff*screenWidth;
+	}
+	
+	public double applyY(double screenHeight, double height) {
+		return screenY.alignStart(0F, screenHeight, height*scale)+yOff*screenHeight;
 	}
 	
 	public void applyToPose(PoseStack stack, double screenWidth, double screenHeight, double width, double height) {

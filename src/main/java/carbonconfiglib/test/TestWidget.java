@@ -27,10 +27,10 @@ public class TestWidget
 	
 	public static class Renderer implements OverlayRenderer {
 		@Override
-		public void render(PoseStack stack, int screenWidth, int screenHeight, float partialTicks, WidgetAligner aligner) {
+		public void render(PoseStack stack, int screenWidth, int screenHeight, float partialTicks, WidgetAligner aligner, int color) {
 			stack.pushPose();
 			aligner.applyToPose(stack, screenWidth, screenHeight, 50, 50);
-			GuiUtils.drawFrame(stack, 0F, 0F, 50, 50, -1, 1F);
+			GuiUtils.drawFrame(stack, 0F, 0F, 50, 50, color, 1F);
 			
 			stack.popPose();
 		}

@@ -2,7 +2,6 @@ package carbonconfiglib.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.gui.api.node.ICompoundNode;
 import carbonconfiglib.gui.base.helpers.Align;
@@ -24,7 +23,6 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	ChunkPos pos = null;
 	float xScale;
 	float yScale;
-
 	
 	public WidgetAlignerScreen(ICompoundNode node, OverlayRenderer renderer, IConfigSerializer<WidgetAligner> serializer) {
 		this.node = node;
@@ -39,16 +37,12 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 		yScale = 1F / (height-50F);
 	}
 	
-	private float scale(SliderState state, float scale) {
-		return state.get() * scale;
-	}
-	
 	private long unscale(float value, float width) {
 		return (long)(value * (width-50));
 	}
 	
 	private void serialize() {
-		WidgetAligner aligner = new WidgetAligner(Align.CENTER, Align.CENTER, scale(xOff, xScale), scale(yOff, yScale), 1F);
+		WidgetAligner aligner = new WidgetAligner(Align.CENTER, Align.CENTER, xOff.get() * xScale, yOff.get() * yScale, 1F);
 		node.set(serializer.getFormat().serialize(serializer.serialize(aligner), false));
 		cached = aligner;
 	}
@@ -61,15 +55,7 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		WidgetAligner current = getCurrentValue();
-		double screenWidth = width-50;
-		double screenHeight = height-50;
-		double width = renderer.unscaledWidth();
-		double height = renderer.unscaledHeight();
-		double x = current.horizontalAlignment().alignStart(25, screenWidth, width) + (scale(xOff, xScale) * screenWidth);
-		double y = current.verticalAlignment().alignStart(25, screenHeight, height) + (scale(yOff, yScale) * screenHeight);
-		CarbonConfig.LOGGER.info("Testing: "+x+", "+y+", "+width+", "+height+", "+mouseX+", "+mouseY+", "+(x-mouseX)+", "+(y-mouseY));
-		if(mouseX >= x && mouseY >= y && mouseX <= x + width && mouseY <= y + height) {
+		if(isHoveringObject(mouseX, mouseY)) {
 			pos = new ChunkPos((int)mouseX, (int)mouseY);
 			return true;
 		}
@@ -82,12 +68,22 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 		return super.mouseReleased(mouseX, mouseY, button);
 	}
 	
+	protected boolean isHoveringObject(double mouseX, double mouseY) {
+		WidgetAligner current = getCurrentValue();
+		double screenWidth = width-50;
+		double screenHeight = height-50;
+		double width = renderer.unscaledWidth();
+		double height = renderer.unscaledHeight();
+		double x = 25 + current.applyX(screenWidth, width);
+		double y = 25 + current.applyY(screenHeight, height);
+		return mouseX >= x && mouseY >= y && mouseX <= x + width && mouseY <= y + height;
+	}
+	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
 		if(pos != null && (pos.x != mouseX || pos.z != mouseY)) {
 			long xOffset = unscale((pos.x - mouseX)*xScale, width);
 			long yOffset = unscale((pos.z - mouseY)*yScale, height);
-			CarbonConfig.LOGGER.info("Testing: "+xOffset+", "+yOffset+", "+xScale+", "+yScale+", "+(pos.x - mouseX)+", "+(pos.z - mouseY));
 			xOff.setSilent(xOff.get() - xOffset);
 			yOff.setSilent(yOff.get() - yOffset);
 			pos = new ChunkPos(mouseX, mouseY);
@@ -96,12 +92,12 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 		renderDirtBackground(0);
 		matrix.pushPose();
 		matrix.translate(25, 25, 0);
-		renderer.render(matrix, width-50, height-50, partialTicks, getCurrentValue());
+		renderer.render(matrix, width-50, height-50, partialTicks, getCurrentValue(), isHoveringObject(mouseX, mouseY) ? 0xFF00FF00 : -1);
 		matrix.popPose();
 	}
 	
 	public static interface OverlayRenderer {
-		public void render(PoseStack stack, int screenWidth, int screenHeight, float partialTicks, WidgetAligner aligner);
+		public void render(PoseStack stack, int screenWidth, int screenHeight, float partialTicks, WidgetAligner aligner, int color);
 		public double unscaledWidth();
 		public double unscaledHeight();
 	}
