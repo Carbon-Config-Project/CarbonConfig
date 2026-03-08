@@ -34,8 +34,8 @@ import speiger.src.collections.objects.utils.ObjectLists;
 import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 public class BackupManager {
-	private static final Predicate<Path> FILTER = ((Predicate<Path>)Files::isDirectory).negate();
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss");
+	private static final Predicate<Path> FILTER = ((Predicate<Path>)Files::isDirectory).negate().and(BackupManager::isValidFile);
 	
 	public static void createBackup(IModConfig config) {
 		createBackup(createPath(config), config);
@@ -141,8 +141,7 @@ public class BackupManager {
 	
 	private static Path getBasePath(String modId, ConfigType type, boolean multiplayer) {
 		return FMLPaths.GAMEDIR.get()
-				.resolve("backup")
-				.resolve("carbonconfig")
+				.resolve("configbackup")
 				.resolve(multiplayer ? "multiplayer" : (type == ConfigType.SERVER ? "world" : "local"))
 				.resolve(modId)
 				.resolve(type(type));
@@ -150,6 +149,11 @@ public class BackupManager {
 	
 	private static String type(ConfigType type) {
 		return type == ConfigType.CLIENT ? "client" : (type == ConfigType.SHARED ? "common" : "server");
+	}
+	
+	private static boolean isValidFile(Path path) {
+		try { return FORMATTER.parse(removeExtension(path.getFileName().toString())) != null; }
+		catch(Exception e){ return false; }
 	}
 	
 	public static class BackupEntry implements Comparable<BackupEntry> {

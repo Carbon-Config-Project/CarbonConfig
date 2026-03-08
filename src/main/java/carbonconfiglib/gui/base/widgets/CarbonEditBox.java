@@ -47,9 +47,13 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		return state;
 	}
 	
+	protected boolean canShowTooltip(double mouseX, double mouseY) {
+		return this.visible && mouseX >= (double)this.x && mouseY >= (double)this.y && mouseX < (double)(this.x + this.width) && mouseY < (double)(this.y + this.height);
+	}
+	
 	@Override
 	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
-		if(state.tooltip != null && isMouseOver(mouseX, mouseY)) {
+		if(state.tooltip != null && canShowTooltip(mouseX, mouseY)) {
 			Component result = state.tooltip.apply(state);
 			if(result == null) return;
 			tooltips.accept(result);

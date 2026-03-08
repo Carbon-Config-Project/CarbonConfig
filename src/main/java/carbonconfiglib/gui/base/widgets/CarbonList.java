@@ -184,6 +184,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		
 		@Override
 		public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
+			if(!isMouseOver(mouseX, mouseY)) return;
 			for(GuiEventListener listener : children) {
 				if(listener instanceof ITooltipProvider) {
 					((ITooltipProvider)listener).provideTooltips(mouseX, mouseY, tooltips);

@@ -3,10 +3,14 @@ package carbonconfiglib.gui.api.types;
 import java.util.Map;
 import java.util.function.Function;
 
+import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.gui.api.node.ICompoundNode;
 import carbonconfiglib.gui.api.types.EntrySettingTypes.CompoundOverride;
 import carbonconfiglib.gui.nodes.CustomCompoundElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
+import carbonconfiglib.gui.screens.WidgetAlignerScreen;
+import carbonconfiglib.gui.screens.WidgetAlignerScreen.OverlayRenderer;
+import carbonconfiglib.impl.entries.WidgetAligner;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
@@ -47,6 +51,8 @@ public class CompoundType
 		AUTO_COMPOUND_TYPES.putIfAbsent(clz, type);
 	}
 	
-	
+	public static void registerWidgetAligner(Class<?> type, OverlayRenderer renderer, IConfigSerializer<WidgetAligner> serializer) {
+		registerType(type, new CompoundType(T -> new CustomCompoundElement(T, E -> new WidgetAlignerScreen(E, renderer, serializer))));
+	}
 
 }

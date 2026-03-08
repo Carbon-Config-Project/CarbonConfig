@@ -27,6 +27,7 @@ import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
@@ -62,15 +63,15 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	IModConfig configs;
 	FolderElement rootElement;
 	Screen parent;
-	TextState searchState = new TextState().setCallback(this::applySearch).setMaxLength(255).setSuggestion("Search...");
+	TextState searchState = new TextState().setCallback(this::applySearch).setMaxLength(255).setSuggestion(I18n.get("gui.carbonconfig.search"));
 	ListState<BaseElement> rowOne = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	ListState<BaseElement> rowTwo = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	ListState<BaseElement> rowThree = new ListState<BaseElement>().setParentRowWidth().setDragListener(this::onSwapped);
 	@SuppressWarnings("unchecked")
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
-	CheckBoxState bulkEdit = new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onBulkEdit(T.getValue())).setTooltip(Component.literal("Bulk Edit"));
-	CheckBoxState autoSave = new CheckBoxState(false, Icon.AUTO_SAVE).setCallback(T -> onNodeChanged()).setTooltip(Component.literal("Auto Save"));
-	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(T -> recalculateNode()).withTooltip(T -> Component.literal(T.getState().getValue() ? "Normal Layout" : "Wide Layout"));
+	CheckBoxState bulkEdit = new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onBulkEdit(T.getValue())).setTooltip(Component.translatable("gui.carbonconfig.bulkedit"));
+	CheckBoxState autoSave = new CheckBoxState(false, Icon.AUTO_SAVE).setCallback(T -> onNodeChanged()).setTooltip(Component.translatable("gui.carbonconfig.autosave"));
+	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(T -> recalculateNode()).withTooltip(T -> Component.literal(T.getState().getValue() ? "gui.carbonconfig.layout.normal" : "gui.carbonconfig.layout.wide"));
 	CarbonButton save;
 	Stack<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
 	Stack<BaseElement> pickedNode = new ObjectArrayList<>();
@@ -103,12 +104,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		listArea(0, minY, widthOne, maxY, rowOne);
 		listArea(widthOne+4, minY, widthTwo, maxY, rowTwo);
 		listArea(widthTwo + 8 + widthOne, minY, widthThree, maxY, rowThree);
-		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> onClose());
-		checkbox(minY + 22, minY - 22, 20, 20, layerMode);		
+		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> onClose()).withTooltip(Component.translatable("gui.carbonconfig.home"));
+		checkbox(minY + 22, minY - 22, 20, 20, layerMode);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		checkbox(-89, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
 		checkbox(-69, minY - 20, 18, 18, Align.END, Align.START, autoSave);
-		save = iconButton(-49, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).setPadding(0).withTooltip(Component.literal("Save"));
+		save = iconButton(-49, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).setPadding(0).withTooltip(Component.translatable("gui.carbonconfig.save"));
 		
 		if(walker != null) {
 			Deque<String> dequeue = new ArrayDeque<String>(walker);

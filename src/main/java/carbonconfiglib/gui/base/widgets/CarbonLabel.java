@@ -66,9 +66,13 @@ public class CarbonLabel extends AbstractWidget implements ITooltipProvider
 		return (T)this;
 	} 
 	
+	protected boolean canShowTooltip(double mouseX, double mouseY) {
+		return this.visible && mouseX >= (double)this.x && mouseY >= (double)this.y && mouseX < (double)(this.x + this.width) && mouseY < (double)(this.y + this.height);
+	}
+	
 	@Override
 	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
-		if(tooltip != null && isMouseOver(mouseX, mouseY)) {
+		if(tooltip != null && canShowTooltip(mouseX, mouseY)) {
 			Component result = tooltip.apply(this);
 			if(result == null) return;
 			tooltips.accept(result);

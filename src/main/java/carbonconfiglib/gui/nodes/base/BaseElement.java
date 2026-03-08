@@ -75,11 +75,11 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public BaseElement() {
 		if(showControls()) {
-			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onRevert()).withIcon(Optional.of(Icon.REVERT)));
-			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)));
+			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onRevert()).withIcon(Optional.of(Icon.REVERT)).withTooltip(Component.translatable("gui.carbonconfig.revert")));
+			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)).withTooltip(Component.translatable("gui.carbonconfig.default")));
 			if(isValue()) {
-				if(allowSuggestions()) suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState));
-				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onEditButtonPressed(T.getValue(), false))));
+				if(allowSuggestions()) suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState).withTooltip(Component.translatable("gui.carbonconfig.suggestions")));
+				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setTooltip(Component.translatable("gui.carbonconfig.edit")).setCallback(T -> onEditButtonPressed(T.getValue(), false))));
 			}
 		}
 	}
@@ -87,7 +87,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	public final void setArray(IArrayNode array, Runnable reloader) {
 		this.array = array;
 		this.reloader = reloader;
-		delete = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onArrayDelete()).withIcon(Optional.of(Icon.DELETE)));
+		delete = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onArrayDelete()).withIcon(Optional.of(Icon.DELETE)).withTooltip(Component.translatable("gui.carbonconfig.delete")));
 	}
 	
 	public final void setContext(IElementContext context) {

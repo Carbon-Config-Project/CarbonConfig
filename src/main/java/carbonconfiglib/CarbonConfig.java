@@ -33,6 +33,7 @@ import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.test.CompoundListTest;
+import carbonconfiglib.test.TestWidget;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -113,6 +114,7 @@ public class CarbonConfig {
 			handler.register();
 		}
 		CompoundListTest.initCompoundList();
+		TestWidget.initTest();
 	}
 		
 	/**

@@ -39,7 +39,7 @@ public class CustomCompoundElement extends NodeElement
 		super(node);
 		this.node = node;
 		this.creator = creator;
-		button = addChild(new CarbonButton(0, 0, 0, 0, node.getName(), this::onClick));
+		button = addChild(new CarbonButton(0, 0, 0, 0, Component.translatable("gui.carbonconfig.edit"), this::onClick));
 	}
 	
 	@Override

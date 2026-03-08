@@ -71,10 +71,12 @@ public class TestUI extends BaseCarbonScreen
 			ModNode owner = mapped.get(mod.get("id").getAsString());
 			if(owner == null) continue;
 			for(JsonElement dep : mod.getAsJsonArray("dep")) {
-				ModNode dependency = mapped.get(dep.getAsString());
+				JsonObject modDep = dep.getAsJsonObject();
+				ModNode dependency = mapped.get(modDep.get("id").getAsString());
 				if(dependency == null || owner == dependency) continue;
-				dependency.dependants.put(owner, false);
-				owner.dependencies.put(dependency, false);
+				boolean optional = modDep.get("required").getAsBoolean();
+				dependency.dependants.put(owner, optional);
+				owner.dependencies.put(dependency, optional);
 			}
 		}
 		layout(vertexs, 0, 0, 200F, 150, 15);
@@ -100,8 +102,8 @@ public class TestUI extends BaseCarbonScreen
 			Tesselator tes = Tesselator.getInstance();
 			BufferBuilder builder = tes.getBuilder();
 			builder.begin(Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-			drawNode(matrix, focused, false, 0xFF0000FF, builder);
-			drawNode(matrix, focused, true, 0xFFFF0000, builder);
+			drawNode(matrix, focused, false, 0xFF0000FF, 0xFF00FFFF, builder);
+			drawNode(matrix, focused, true, 0xFFFF0000, 0xFFFFFF00, builder);
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			GlStateManager._disableTexture();
 			GlStateManager._enableBlend();
@@ -114,11 +116,12 @@ public class TestUI extends BaseCarbonScreen
 		matrix.popPose();
 	}
 	
-	private void drawNode(PoseStack stack, ModNode source, boolean dep, int color, VertexConsumer builder) {
+	private void drawNode(PoseStack stack, ModNode source, boolean dep, int requiredColor, int optionalColor, VertexConsumer builder) {
 		float radius = dep ? 5 : -5;
-		for(ModNode child : (dep ? source.dependencies : source.dependants).keySet()) {
-			drawLine(stack, (float)source.x+radius, (float)source.y+radius, (float)child.x+radius, (float)child.y+radius, 2F, builder, color);
-			drawNode(stack, child, dep, color, builder);
+		for(Object2BooleanMap.Entry<ModNode> entry : (dep ? source.dependencies : source.dependants).object2BooleanEntrySet()) {
+			ModNode child = entry.getKey();
+			drawLine(stack, (float)source.x+radius, (float)source.y+radius, (float)child.x+radius, (float)child.y+radius, 2F, builder, entry.getBooleanValue() ? requiredColor : optionalColor);
+			if(entry.getBooleanValue()) drawNode(stack, child, dep, requiredColor, optionalColor, builder);
 		}
 	}
 	

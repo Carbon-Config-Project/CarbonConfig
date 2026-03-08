@@ -4,6 +4,7 @@ package carbonconfiglib.gui.screens;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -84,6 +85,9 @@ public class ConfigListScreen extends BaseCarbonScreen
 		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
 		iconButton((searchWidth >> 1)+2, minY-21, 18, 18, Align.CENTER, Align.START, Icon.IMPORT, T -> bulkBackup(Mode.CREATE)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.create"));
 		iconButton((searchWidth >> 1)+22, minY-21, 18, 18, Align.CENTER, Align.START, Icon.EXPORT, T -> bulkBackup(Mode.LOAD)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.load"));
+		listState.forEach(T -> {
+			if(T instanceof ConfigEntry) ((ConfigEntry)T).updateBackup();
+		});
 	}
 	
 	@Override
@@ -111,7 +115,12 @@ public class ConfigListScreen extends BaseCarbonScreen
 			}
 		});
 		if(configs.isEmpty()) return;
-		new BulkRequest(configs, mode);
+		BulkRequest request = new BulkRequest(configs, mode);
+		listState.forEach(T -> {
+			if(T instanceof ConfigEntry) {
+				((ConfigEntry)T).pendingRequest = request;
+			}
+		});
 	}
 	
 	protected List<Element> generateModList(List<IModConfigs> configs) {
@@ -213,6 +222,8 @@ public class ConfigListScreen extends BaseCarbonScreen
 		protected CarbonButton backup;
 		protected CarbonButton restore;
 		protected CarbonButton listBackups;
+		protected BulkRequest pendingRequest;
+		protected OptionalInt hasBackups = OptionalInt.empty();
 		
 		public ConfigEntry(IModConfig config, BackgroundHolder holder, Component modName, boolean multiplayer) {
 			this.config = config;
@@ -229,7 +240,12 @@ public class ConfigListScreen extends BaseCarbonScreen
 				this.restore = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> restoreBackup()).withIcon(Optional.of(Icon.EXPORT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.load_last")));
 				this.listBackups = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> selectBackups()).withIcon(Optional.of(Icon.LIST)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.select")));
 			}
-			
+			updateBackup();
+		}
+		
+		private void updateBackup() {
+			if(shouldCreatePick()) return;
+			this.hasBackups = OptionalInt.of(BackupManager.listBackups(config).size());
 		}
 		
 		@Override
@@ -241,46 +257,54 @@ public class ConfigListScreen extends BaseCarbonScreen
 		public boolean containsSearch(String searchString) {
 			return config.getFileName().toLowerCase(Locale.ROOT).contains(searchString.toLowerCase(Locale.ROOT)) || config.getModId().toLowerCase(Locale.ROOT).contains(searchString.toLowerCase(Locale.ROOT));
 		}
-
+		
+		private boolean isNotRequesting() {
+			return pendingRequest == null;
+		}
+		
+		private boolean hasBackups() {
+			return !hasBackups.isEmpty() && hasBackups.getAsInt() > 0;
+		}
+		
 		@Override
 		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			if(pendingRequest != null && !pendingRequest.isStillWorking()) {
+				pendingRequest = null;
+				updateBackup();
+			}
 			GuiUtils.drawTextureRegion(poseStack, left, top, 22, 22, getIcon(), 16, 16);
 			GuiUtils.drawText(poseStack, font, type, left+25, top+3, Align.START, -1);
 			GuiUtils.drawText(poseStack, font, fileName, left+25, top+12, Align.START, -1);
 			int right = left + width;
 			open.x = right - (70 + (reset != null ? 60 : 0));
 			open.y = (int)Align.CENTER.alignStart(top, height, open.getHeight());
-			fixFocus(open);
-			open.render(poseStack, mouseX, mouseY, partialTicks);
+			fixFocus(open).render(poseStack, mouseX, mouseY, partialTicks);
 			if(reset != null) {
 				reset.x = right - 89;
 				reset.y = (int)Align.CENTER.alignStart(top, height, reset.getHeight());
 				reset.active = !config.isDefault();
-				fixFocus(reset);
-				reset.render(poseStack, mouseX, mouseY, partialTicks);
+				fixFocus(reset).render(poseStack, mouseX, mouseY, partialTicks);
+				
 				backup.x = right - 68;
 				backup.y = (int)Align.CENTER.alignStart(top, height, backup.getHeight());
-				backup.active = true;
-				fixFocus(backup);
-				backup.render(poseStack, mouseX, mouseY, partialTicks);
+				backup.active = isNotRequesting();
+				fixFocus(backup).render(poseStack, mouseX, mouseY, partialTicks);
 				
 				restore.x = right - 47;
 				restore.y = (int)Align.CENTER.alignStart(top, height, restore.getHeight());
-				restore.active = true;
-				fixFocus(restore);
-				restore.render(poseStack, mouseX, mouseY, partialTicks);
+				restore.active = isNotRequesting() && hasBackups();
+				fixFocus(restore).render(poseStack, mouseX, mouseY, partialTicks);
 				
 				listBackups.x = right - 26;
 				listBackups.y = (int)Align.CENTER.alignStart(top, height, listBackups.getHeight());
-				listBackups.active = true;
-				fixFocus(listBackups);
-				listBackups.render(poseStack, mouseX, mouseY, partialTicks);
-
+				listBackups.active = isNotRequesting() && hasBackups();
+				fixFocus(listBackups).render(poseStack, mouseX, mouseY, partialTicks);
 			}
 		}
 		
-		private void fixFocus(AbstractWidget widget) {
+		private AbstractWidget fixFocus(AbstractWidget widget) {
 			if(widget != null && widget.isFocused()) widget.changeFocus(false);
+			return widget;
 		}
 		
 		private boolean shouldCreatePick() {
@@ -307,36 +331,27 @@ public class ConfigListScreen extends BaseCarbonScreen
 			if(mode == Mode.LOAD) BackupManager.loadLastBackup(config);
 		}
 		
-		public void createBulkBackup(List<IModConfig> downloaded) {
-			Minecraft mc = Minecraft.getInstance();
-			if(shouldCreatePick()) return;
-			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
-				downloaded.add(config);
-				return;
-			}
-			BackupManager.createBackup(config);			
-		}
-		
 		private void createBackup() {
 			Minecraft mc = Minecraft.getInstance();
 			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
-				new BulkRequest(ObjectLists.singleton(config), Mode.CREATE);
+				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.CREATE);
 				return;
 			}
 			BackupManager.createBackup(config);
+			updateBackup();
 		}
 		
 		private void restoreBackup() {
 			Minecraft mc = Minecraft.getInstance();
 			if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
-				new BulkRequest(ObjectLists.singleton(config), Mode.LOAD);
+				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.LOAD);
 				return;
 			}
 			BackupManager.loadLastBackup(config);
 		}
 		
 		private void selectBackups() {
-			pushExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, holder, config, BackupManager.listBackups(config)));
+			setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, holder, config, BackupManager.listBackups(config)));
 		}
 		
 		public void open() {
