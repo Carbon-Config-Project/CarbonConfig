@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.base.helpers.Align;
@@ -24,6 +25,9 @@ import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.impl.internal.BackupManager.BackupEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.ModContainer;
@@ -110,6 +114,7 @@ public class BackupSelectionScreen extends BaseCarbonScreen
 		
 		private void load() {
 			BackupManager.loadBackup(config, entry);
+			if(CarbonConfig.BACKUP_TOASTS.get()) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
 			owner.onClose();
 		}
 		

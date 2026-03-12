@@ -1,10 +1,11 @@
 package carbonconfiglib.gui.nodes;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.node.ICompoundNode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
@@ -33,9 +34,9 @@ public class CustomCompoundElement extends NodeElement
 {
 	ICompoundNode node;
 	CarbonButton button;
-	Function<ICompoundNode, Screen> creator;
+	BiFunction<ICompoundNode, BackgroundHolder, Screen> creator;
 	
-	public CustomCompoundElement(ICompoundNode node, Function<ICompoundNode, Screen> creator) {
+	public CustomCompoundElement(ICompoundNode node, BiFunction<ICompoundNode, BackgroundHolder, Screen> creator) {
 		super(node);
 		this.node = node;
 		this.creator = creator;
@@ -68,7 +69,7 @@ public class CustomCompoundElement extends NodeElement
 			CarbonConfig.LOGGER.info("Custom Compound function isn't implemented");
 			return;
 		}
-		Screen screen = creator.apply(node);
+		Screen screen = creator.apply(node, context.getHolder());
 		if(screen == null) {
 			CarbonConfig.LOGGER.info("Custom Compound function created a null Object");
 			return;

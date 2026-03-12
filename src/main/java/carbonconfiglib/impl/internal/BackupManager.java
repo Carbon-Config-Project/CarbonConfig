@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 
+import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IRequestReceiver;
@@ -24,8 +25,11 @@ import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.screens.BackupSelectionScreen;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.fml.loading.FMLPaths;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -84,7 +88,7 @@ public class BackupManager {
 		try(FileSystem system = FileSystems.newFileSystem(path.resolve(result[0]), Object2ObjectMaps.singleton("create", "true"))) {
 			Optional<Path> potential = Files.walk(system.getPath(".")).filter(FILTER).sorted(Comparator.comparing((Path T) -> LocalDateTime.parse(removeExtension(T.getFileName().toString()), FORMATTER)).reversed()).findFirst();
 			if(potential.isEmpty()) return;
-			config.loadBackup(Files.readAllBytes(path));
+			config.loadBackup(Files.readAllBytes(potential.get()));
 		}
 		catch(Exception e) { e.printStackTrace(); }
 	}
@@ -249,7 +253,13 @@ public class BackupManager {
 						BaseCarbonScreen.pushExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, BackgroundTexture.DEFAULT.asHolder(), entry.getKey(), BackupManager.listBackups(entry.getKey())));
 						break;
 				}
-				if(toCheck.isEmpty()) IRequestReceiver.Impl.unregister(this);
+				if(toCheck.isEmpty()) {
+					if(CarbonConfig.BACKUP_TOASTS.get()) {
+						if(mode == Mode.CREATE) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+						else if(mode == Mode.LOAD) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.load")));
+					}
+					IRequestReceiver.Impl.unregister(this);
+				}
 				return;
 			}
 			if(toCheck.isEmpty()) IRequestReceiver.Impl.unregister(this);

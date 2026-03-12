@@ -512,6 +512,10 @@ public class DropDownMenu<T> extends CarbonButton {
 			return selected.contains(value);
 		}
 		
+		public T getSelectedElement() {
+			return selected.isEmpty() ? null : selected.get(0);
+		}
+		
 		public List<T> getSelected() {
 			return new ObjectArrayList<>(selected);
 		}

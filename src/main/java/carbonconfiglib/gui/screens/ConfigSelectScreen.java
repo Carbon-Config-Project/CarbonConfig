@@ -23,11 +23,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -47,7 +45,7 @@ import net.minecraftforge.forgespi.language.IModInfo;
 public class ConfigSelectScreen extends BaseCarbonScreen
 {
 	ListState<WorldElement> listState = new ListState<>();
-	TextState searchState = new TextState().setSuggestion("Search...").setCallback(listState::search);
+	TextState searchState = new TextState().setSuggestion(I18n.get("gui.carbonconfig.search")).setCallback(listState::search);
 	BackgroundHolder holder;
 	Component header;
 	Screen parent;
@@ -55,7 +53,7 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 	public ConfigSelectScreen(Screen parent, BackgroundHolder holder, IModConfig config) {
 		this.parent = parent;
 		this.holder = holder;
-		header = Component.literal(ModList.get().getModContainerById(config.getModId()).map(ModContainer::getModInfo).map(IModInfo::getDisplayName).orElse(config.getModId())).append(" -> ").append(config.getConfigName());
+		header = Component.translatable("gui.carbonconfig.select_world");
 		for(IConfigTarget target : config.getPotentialFiles()) {
 			listState.add(new WorldElement(config, target, holder, parent));
 		}

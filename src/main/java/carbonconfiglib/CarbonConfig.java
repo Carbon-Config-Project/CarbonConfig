@@ -21,9 +21,9 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTypes;
 import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
-import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ConfigRequestScreen;
 import carbonconfiglib.gui.screens.ConfigScreen;
+import carbonconfiglib.gui.screens.TestUI;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -37,17 +37,16 @@ import carbonconfiglib.test.TestWidget;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -87,6 +86,8 @@ public class CarbonConfig {
 	public static BoolValue FORCE_CUSTOM_BACKGROUND;
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
+	public static BoolValue AUTO_BACKUP;
+	public static BoolValue BACKUP_TOASTS;
 	public static HashSetCache<String> MODS_DISABLED;
 
 	public CarbonConfig() {
@@ -102,10 +103,12 @@ public class CarbonConfig {
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
+			AUTO_BACKUP = section.addBool("auto-backup", false, "Enables that a backup is created everytime a config is saved through the gui");
+			BACKUP_TOASTS = section.addBool("backup-toasts", true, "Show toasts when backups were created or loaded to give feedback");
 			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], 
 					"Disables these mods from carbon configs Gui System.",
 					"This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored",
-					"List of Blacklisted ModIds").setRequiredReload(ReloadMode.GAME).addSuggestionProvider(ModProvider.INSTANCE);
+					"List of Blacklisted ModIds").withFilter(ModList.get()::isLoaded).setRequiredReload(ReloadMode.GAME).forceSuggestions(true).addSuggestionProvider(ModProvider.INSTANCE);
 			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.RAW_IRON, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
 			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
 			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
@@ -116,7 +119,7 @@ public class CarbonConfig {
 		CompoundListTest.initCompoundList();
 		TestWidget.initTest();
 	}
-		
+	
 	/**
 	 * Creates a Setting with a PerWorld Proxy set by default.<br>
 	 * And sets the config to be loaded at the right time!
@@ -299,8 +302,8 @@ public class CarbonConfig {
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-//			mc.setScreen(new TestUI());
-			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+			mc.setScreen(new TestUI());
+//			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 		}
 	}
 

@@ -296,6 +296,32 @@ public class GuiUtils
 		GlStateManager._disableBlend();
 	}
 	
+	public static void fillDropArea(PoseStack stack, int x, int y, int width, int height, int color, boolean drop) {
+		Tesselator tessellator = Tesselator.getInstance();
+		BufferBuilder builder = tessellator.getBuilder();
+		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		int minX = x;
+		int minY = y;
+		int maxX = x + width;
+		int maxY = y + height;
+		if(drop) {
+			drawQuadArea(stack, minX - 1, minY - 1, maxX, maxY, builder, -13158601);
+			drawQuadArea(stack, minX, minY, maxX + 1, maxY + 1, builder, -1);
+		}
+		else {
+			drawQuadArea(stack, minX, minY, maxX + 1, maxY + 1, builder, -13158601);
+			drawQuadArea(stack, minX - 1, minY - 1, maxX, maxY, builder, -1);
+		}
+		drawQuadArea(stack, minX, minY, maxX, maxY, builder, color);
+		GlStateManager._enableBlend();
+		GlStateManager._disableTexture();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		tessellator.end();
+		GlStateManager._enableTexture();
+		GlStateManager._disableBlend();
+	}
+	
 	public static void drawQuadArea(PoseStack matrix, float left, float top, float right, float bottom, VertexConsumer builder, int color) {
 		if(left < right) {
 			float i = left;
@@ -323,6 +349,124 @@ public class GuiUtils
 		builder.vertex(stack, right, bottom, 0.0F).color(f, f1, f2, f3).endVertex();
 		builder.vertex(stack, right, top, 0.0F).color(f, f1, f2, f3).endVertex();
 		builder.vertex(stack, left, top, 0.0F).color(f, f1, f2, f3).endVertex();
+	}
+	
+	public static void drawCircle(PoseStack stack, float x, float y, float radius, int color, int borderColor, int segments, float borderWidth) {
+		Tesselator tes = Tesselator.getInstance();
+		BufferBuilder builder = tes.getBuilder();
+		builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+		float a = (color >> 24 & 255) / 255F;
+		float r = (color >> 16 & 255) / 255F;
+		float g = (color >> 8 & 255) / 255F;
+		float b = (color & 255) / 255F;
+		float innerRadius = radius - Math.max(0, borderWidth);
+		if (innerRadius < 0) innerRadius = 0F;
+		Matrix4f matrix = stack == null ? null : stack.last().pose();
+	    float spaceScale = (360.0F / segments) * Mth.DEG_TO_RAD;
+		for (int i = 0; i < segments; i++) {
+			float startAngle = i * spaceScale;
+			float endAngle = ((i+1) % segments) * spaceScale;
+			if(matrix != null) {
+				builder.vertex(matrix, x, y, 0).color(r, g, b, a).endVertex();
+				builder.vertex(matrix, (float)(x + Math.cos(endAngle) * innerRadius), (float)(y + Math.sin(endAngle) * innerRadius), 0).color(r, g, b, a).endVertex();
+				builder.vertex(matrix, (float)(x + Math.cos(startAngle) * innerRadius), (float)(y + Math.sin(startAngle) * innerRadius), 0).color(r, g, b, a).endVertex();
+				continue;
+			}
+			builder.vertex(x, y, 0).color(r, g, b, a).endVertex();
+			builder.vertex(x + Math.cos(endAngle) * innerRadius, y + Math.sin(endAngle) * innerRadius, 0).color(r, g, b, a).endVertex();
+			builder.vertex(x + Math.cos(startAngle) * innerRadius, y + Math.sin(startAngle) * innerRadius, 0).color(r, g, b, a).endVertex();
+		}
+		if (borderWidth > 0F) {
+			float ba = (borderColor >> 24 & 255) / 255F;
+			float br = (borderColor >> 16 & 255) / 255F;
+			float bg = (borderColor >> 8 & 255) / 255F;
+			float bb = (borderColor & 255) / 255F;
+			
+			for (int i = 0; i < segments; i++) {
+				float startAngle = i * spaceScale;
+				float endAngle = ((i+1) % segments) * spaceScale;
+				
+				float x1o = x + Mth.cos(startAngle) * radius;
+				float y1o = y + Mth.sin(startAngle) * radius;
+				float x2o = x + Mth.cos(endAngle) * radius;
+				float y2o = y + Mth.sin(endAngle) * radius;
+				
+				float x1i = x + Mth.cos(startAngle) * innerRadius;
+				float y1i = y + Mth.sin(startAngle) * innerRadius;
+				float x2i = x + Mth.cos(endAngle) * innerRadius;
+				float y2i = y + Mth.sin(endAngle) * innerRadius;
+				
+				if(matrix != null) {
+					builder.vertex(matrix, x2o, y2o, 0).color(br, bg, bb, ba).endVertex();
+					builder.vertex(matrix, x1o, y1o, 0).color(br, bg, bb, ba).endVertex();
+					builder.vertex(matrix, x1i, y1i, 0).color(br, bg, bb, ba).endVertex();
+					
+					builder.vertex(matrix, x2o, y2o, 0).color(br, bg, bb, ba).endVertex();
+					builder.vertex(matrix, x1i, y1i, 0).color(br, bg, bb, ba).endVertex();
+					builder.vertex(matrix, x2i, y2i, 0).color(br, bg, bb, ba).endVertex();
+					continue;
+				}
+				builder.vertex(x2o, y2o, 0).color(br, bg, bb, ba).endVertex();
+				builder.vertex(x1o, y1o, 0).color(br, bg, bb, ba).endVertex();
+				builder.vertex(x1i, y1i, 0).color(br, bg, bb, ba).endVertex();
+				
+				builder.vertex(x2o, y2o, 0).color(br, bg, bb, ba).endVertex();
+				builder.vertex(x1i, y1i, 0).color(br, bg, bb, ba).endVertex();
+				builder.vertex(x2i, y2i, 0).color(br, bg, bb, ba).endVertex();
+				
+			}
+		}
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		GlStateManager._disableTexture();
+		GlStateManager._enableBlend();
+		RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
+		tes.end();
+		GlStateManager._enableTexture();
+		GlStateManager._disableBlend();
+	}
+	
+	public static void drawLine(PoseStack stack, float startX, float startY, float endX, float endY, float width, VertexConsumer builder, int color) {
+		float f3 = (float)(color >> 24 & 255) / 255.0F;
+		float f = (float)(color >> 16 & 255) / 255.0F;
+		float f1 = (float)(color >> 8 & 255) / 255.0F;
+		float f2 = (float)(color & 255) / 255.0F;
+		float dx = endX - startX;
+		float dy = endY - startY;
+		float length = Mth.sqrt(dx*dx + dy*dy);
+		dx /= length;
+		dy /= length;
+		
+		float px = -dy * (width * 0.5F);
+		float py = dx * (width * 0.5F);
+		
+		float x1 = startX + px;
+		float y1 = startY + py;
+
+		float x2 = startX - px;
+		float y2 = startY - py;
+
+		float x3 = endX + px;
+		float y3 = endY + py;
+
+		float x4 = endX - px;
+		float y4 = endY - py;
+		
+		if(stack == null) {
+			builder.vertex(x3, y3, 0.0F).color(f, f1, f2, f3).endVertex(); 
+			builder.vertex(x2, y2, 0.0F).color(f, f1, f2, f3).endVertex();
+			builder.vertex(x1, y1, 0.0F).color(f, f1, f2, f3).endVertex();
+			builder.vertex(x4, y4, 0.0F).color(f, f1, f2, f3).endVertex();
+			builder.vertex(x2, y2, 0.0F).color(f, f1, f2, f3).endVertex(); 
+			builder.vertex(x3, y3, 0.0F).color(f, f1, f2, f3).endVertex();
+			return;
+		}
+		Matrix4f matrix = stack.last().pose();
+		builder.vertex(matrix, x3, y3, 0.0F).color(f, f1, f2, f3).endVertex(); 
+		builder.vertex(matrix, x2, y2, 0.0F).color(f, f1, f2, f3).endVertex();
+		builder.vertex(matrix, x1, y1, 0.0F).color(f, f1, f2, f3).endVertex();
+		builder.vertex(matrix, x4, y4, 0.0F).color(f, f1, f2, f3).endVertex();
+		builder.vertex(matrix, x2, y2, 0.0F).color(f, f1, f2, f3).endVertex(); 
+		builder.vertex(matrix, x3, y3, 0.0F).color(f, f1, f2, f3).endVertex();
 	}
 	
 	public static void blitWithBorder(PoseStack poseStack, ResourceLocation res, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int topBorder, int bottomBorder, int leftBorder, int rightBorder, float zLevel, boolean custom) {

@@ -26,9 +26,12 @@ import carbonconfiglib.impl.internal.BackupManager.BulkRequest;
 import carbonconfiglib.impl.internal.BackupManager.Mode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
@@ -53,7 +56,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 	Screen parent;
 	BackgroundHolder holder;
 	ListState<Element> listState = new ListState<Element>().setItemHeight(26);
-	TextState searchState = new TextState().setSuggestion("Search...").setCallback(listState::search);
+	TextState searchState = new TextState().setSuggestion(I18n.get("gui.carbonconfig.search")).setCallback(listState::search);
 	Component header;
 	
 	public ConfigListScreen(Screen parent, IModConfigs configs) {
@@ -235,7 +238,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 			boolean isLarge = shouldCreatePick();
 			this.open = addChild(new CarbonButton(0, 0, isLarge ? 50 : 40, 20, Component.translatable("gui.carbonconfig."+(shouldCreatePick() ? "pick_file" : "modify")), T -> open()));
 			if(!isLarge) {
-				this.reset = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.default")));
+				this.reset = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.reset")));
 				this.backup = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> createBackup()).withIcon(Optional.of(Icon.IMPORT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.create")));
 				this.restore = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> restoreBackup()).withIcon(Optional.of(Icon.EXPORT)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.load_last")));
 				this.listBackups = addChild(new CarbonButton(0, 0, 20, 20, Component.empty(), T -> selectBackups()).withIcon(Optional.of(Icon.LIST)).setPadding(3).withTooltip(Component.translatable("gui.carbonconfig.backup.select")));
@@ -278,33 +281,28 @@ public class ConfigListScreen extends BaseCarbonScreen
 			int right = left + width;
 			open.x = right - (70 + (reset != null ? 60 : 0));
 			open.y = (int)Align.CENTER.alignStart(top, height, open.getHeight());
-			fixFocus(open).render(poseStack, mouseX, mouseY, partialTicks);
+			open.render(poseStack, mouseX, mouseY, partialTicks);
 			if(reset != null) {
 				reset.x = right - 89;
 				reset.y = (int)Align.CENTER.alignStart(top, height, reset.getHeight());
 				reset.active = !config.isDefault();
-				fixFocus(reset).render(poseStack, mouseX, mouseY, partialTicks);
+				reset.render(poseStack, mouseX, mouseY, partialTicks);
 				
 				backup.x = right - 68;
 				backup.y = (int)Align.CENTER.alignStart(top, height, backup.getHeight());
 				backup.active = isNotRequesting();
-				fixFocus(backup).render(poseStack, mouseX, mouseY, partialTicks);
+				backup.render(poseStack, mouseX, mouseY, partialTicks);
 				
 				restore.x = right - 47;
 				restore.y = (int)Align.CENTER.alignStart(top, height, restore.getHeight());
 				restore.active = isNotRequesting() && hasBackups();
-				fixFocus(restore).render(poseStack, mouseX, mouseY, partialTicks);
+				restore.render(poseStack, mouseX, mouseY, partialTicks);
 				
 				listBackups.x = right - 26;
 				listBackups.y = (int)Align.CENTER.alignStart(top, height, listBackups.getHeight());
 				listBackups.active = isNotRequesting() && hasBackups();
-				fixFocus(listBackups).render(poseStack, mouseX, mouseY, partialTicks);
+				listBackups.render(poseStack, mouseX, mouseY, partialTicks);
 			}
-		}
-		
-		private AbstractWidget fixFocus(AbstractWidget widget) {
-			if(widget != null && widget.isFocused()) widget.changeFocus(false);
-			return widget;
 		}
 		
 		private boolean shouldCreatePick() {
@@ -339,6 +337,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 			}
 			BackupManager.createBackup(config);
 			updateBackup();
+			if(CarbonConfig.BACKUP_TOASTS.get()) mc.getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
 		}
 		
 		private void restoreBackup() {
@@ -348,6 +347,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 				return;
 			}
 			BackupManager.loadLastBackup(config);
+			if(CarbonConfig.BACKUP_TOASTS.get()) mc.getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
 		}
 		
 		private void selectBackups() {
@@ -368,8 +368,23 @@ public class ConfigListScreen extends BaseCarbonScreen
 		}
 		
 		public void resetConfig() {
-			config.restoreDefault();
-			config.save(false);
+			if(Screen.hasShiftDown()) {
+				config.restoreDefault();
+				config.save(false);
+				return;
+			}
+			Screen parent = Minecraft.getInstance().screen;
+			setExternalScreen(new ConfirmScreen(T -> {
+				if(T) {
+					config.restoreDefault();
+					config.save(false);
+				}
+				setExternalScreen(parent);
+			}, 
+			Component.translatable("gui.carbonconfig.reset_all.title"), 
+			Component.translatable("gui.carbonconfig.reset_all.message"), 
+			Component.translatable("gui.carbonconfig.reset_all.default"),
+			Component.translatable("gui.carbonconfig.reset_all.cancel")));
 		}
 	}
 }

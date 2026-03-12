@@ -57,6 +57,7 @@ public class CarbonBaseButton extends Button implements ITooltipProvider
 	@Override
 	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
 		if(tooltip != null && canShowTooltip(mouseX, mouseY)) {
+			isHovered = false;
 			Component result = tooltip.apply(this);
 			if(result == null) return;
 			tooltips.accept(result);

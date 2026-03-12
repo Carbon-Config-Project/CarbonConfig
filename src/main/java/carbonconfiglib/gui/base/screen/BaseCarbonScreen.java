@@ -20,6 +20,8 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
+import carbonconfiglib.gui.base.widgets.DropDownMenu;
+import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.base.widgets.ModLogo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button.OnPress;
@@ -153,6 +155,10 @@ public class BaseCarbonScreen extends Screen
 		GuiUtils.drawText(stack, font, text, x + centerX, y + centerY, align, color);
 	}
 	
+	public void drawUnalignedText(PoseStack stack, Component text, float x, float y, Align align, int color) {
+		GuiUtils.drawText(stack, font, text, x, y, align, color);
+	}
+	
 	public void drawSplitText(PoseStack stack, Component text, float x, float y, Align align, int maxWidth, int color) {
 		GuiUtils.drawSplitText(stack, font, text, x + centerX, y + centerY, align, color, maxWidth);
 	}
@@ -203,6 +209,14 @@ public class BaseCarbonScreen extends Screen
 	
 	public <T extends ListEntry<T>> CarbonList<T> list(ListState<T> state) {
 		return addRenderableWidget(new CarbonList<>(this, state));
+	}
+	
+	public <T> DropDownMenu<T> dropDown(int x, int y, int width, int height, DropDownState<T> state) {
+		return addRenderableWidget(new DropDownMenu<T>(x, y, width, height, state));
+	}
+	
+	public <T> DropDownMenu<T> dropDown(int x, int y, int width, int height, Align horizontal, Align vertical, DropDownState<T> state) {
+		return addRenderableWidget(new DropDownMenu<T>(getAlignedX(horizontal) + x, getAlignedY(vertical) + y, width, height, state));
 	}
 	
 	public ModLogo modlogo(int x, int y, int width, int height) {

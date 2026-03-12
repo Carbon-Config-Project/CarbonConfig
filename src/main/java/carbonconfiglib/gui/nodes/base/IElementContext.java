@@ -1,5 +1,7 @@
 package carbonconfiglib.gui.nodes.base;
 
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
+
 /**
  * Copyright 2026 Speiger, Meduris
  * 
@@ -18,6 +20,7 @@ package carbonconfiglib.gui.nodes.base;
 public interface IElementContext
 {
 	public boolean isElementActive(BaseElement base);
+	public BackgroundHolder getHolder();
 	
 	public boolean isAtTop(int layer);
 	public int calculateSegmentWidth(int layer);

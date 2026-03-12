@@ -11,7 +11,9 @@ import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.widgets.CarbonDynamicList.DynamicEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.util.Mth;
@@ -140,12 +142,12 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 				this.setFocused(element);
 				this.setDragging(true);
 				if(prev != null && prev != element) {
-					prev.changeFocus(false);
+					prev.clearFocus();
 				}
 				return true;
 			}
 			if(prev != null && prev != element) {
-				prev.changeFocus(false);
+				prev.clearFocus();
 				if(getFocused() == prev) setFocused(null);
 			}
 			if(areChildrenDraggable() && element.isDraggable()) {
@@ -336,6 +338,22 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		
 		public boolean isMouseOver(double pMouseX, double pMouseY) {
 			return Objects.equals(owner.getEntryAtPos(pMouseX, pMouseY), this);
+		}
+		
+		public void clearFocus() {
+			children().forEach(this::clearFocus);
+			setFocused(null);
+		}
+		
+		private void clearFocus(GuiEventListener listener) {
+			if(listener instanceof ContainerEventHandler) {
+				ContainerEventHandler container = ((ContainerEventHandler)listener);
+				container.children().forEach(this::clearFocus);
+				container.setFocused(null);
+			}
+			if(listener instanceof AbstractWidget && ((AbstractWidget)listener).isFocused()) {
+				listener.changeFocus(false);
+			}
 		}
 		
 		public boolean isDraggable() {

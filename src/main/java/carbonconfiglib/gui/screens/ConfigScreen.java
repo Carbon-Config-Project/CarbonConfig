@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.base.helpers.Align;
@@ -176,6 +177,23 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	@Override
 	public void onClose() {
+		if(rootElement.needsSaving()) {
+			Screen current = this;
+			setScreen(new MultiChoiceScreen(T -> {
+				if(T.isMain()) {
+					save();
+					setScreen(parent);
+				}
+				else if(T.isOther()) setScreen(parent);
+				else if(T.isCancel()) setScreen(current);
+			}, 
+			Component.translatable("gui.carbonconfig.warn.changed"), 
+			Component.translatable("gui.carbonconfig.warn.changed.desc"),
+			Component.translatable("gui.carbonconfig.warn.changed.save"),
+			Component.translatable("gui.carbonconfig.warn.changed.discard"),
+			Component.translatable("gui.carbonconfig.warn.changed.back")));
+			return;
+		}
 		setScreen(parent);
 	}
 	
@@ -357,6 +375,11 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	}
 	
 	@Override
+	public BackgroundHolder getHolder() {
+		return holder;
+	}
+	
+	@Override
 	public boolean isElementActive(BaseElement base) {
 		for(int i = 0,m=pickedNode.size();i<m;i++) {
 			if(pickedNode.peek(i) == base) return true;
@@ -382,7 +405,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	private void save() {
 		if(rootElement.save(this::notifyChanges)) {
-			configs.save(false);
+			configs.save(CarbonConfig.AUTO_BACKUP.get());
 		}
 	}
 	
@@ -393,11 +416,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 			}
 			notifiedMode = mode;
 		}
+		Screen owner = this;
 		if(mode == ReloadMode.GAME) {
-			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(parent), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 		else if(mode == ReloadMode.WORLD && minecraft.level != null) {
-			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(parent), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 	}
 }

@@ -52,7 +52,7 @@ public class CompoundType
 	}
 	
 	public static void registerWidgetAligner(Class<?> type, OverlayRenderer renderer, IConfigSerializer<WidgetAligner> serializer) {
-		registerType(type, new CompoundType(T -> new CustomCompoundElement(T, E -> new WidgetAlignerScreen(E, renderer, serializer))));
+		registerType(type, new CompoundType(T -> new CustomCompoundElement(T, (K, V) -> new WidgetAlignerScreen(K, V, renderer, serializer))));
 	}
 
 }
