@@ -68,6 +68,7 @@ public class ForgeLeaf implements IConfigNode
 		loadRange();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void guessDataType() {
 		Class<?> clz = spec.getClazz();
 		if(clz == Object.class) {
@@ -80,7 +81,15 @@ public class ForgeLeaf implements IConfigNode
 			type = list.isEmpty() ? ForgeDataType.STRING : ForgeDataType.getDataByType(list.get(0).getClass());
 		}
 		if(type == ForgeDataType.STRING && ForgeHelpers.isColor(spec.getDefault())) {
-			type = ForgeDataType.COLOR;
+			if(!isArray && ForgeHelpers.isColor(spec.getDefault())) {
+				type = ForgeDataType.COLOR;
+			}
+			else if(isArray) {
+				List<String> list = (List<String>)spec.getDefault();
+				if(!list.isEmpty() && ForgeHelpers.isColor(list.get(0))) {
+					type = ForgeDataType.COLOR;
+				}
+			}
 		}
 	}
 	

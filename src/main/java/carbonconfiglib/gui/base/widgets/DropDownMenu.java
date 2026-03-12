@@ -214,7 +214,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		}
 		
 		@Override
-		public boolean containsSearch(String searchString) {
+		protected boolean containsSearch(String searchString) {
 			return text.getString().toLowerCase(Locale.ROOT).contains(searchString);
 		}
 		

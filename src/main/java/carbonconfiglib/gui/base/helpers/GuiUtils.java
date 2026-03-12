@@ -265,6 +265,10 @@ public class GuiUtils
 	}
 	
 	public static void renderBackground(int x0, int x1, int y0, int y1, float scroll, BackgroundTexture texture) {
+		renderBackground(x0, x1, y0, y1, 0F, scroll, texture);
+	}
+	
+	public static void renderBackground(int x0, int x1, int y0, int y1, float xScroll, float yScroll, BackgroundTexture texture) {
 		Tesselator tes = Tesselator.getInstance();
 		BufferBuilder builder = tes.getBuilder();
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -272,10 +276,10 @@ public class GuiUtils
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		int color = texture.getBackgroundBrightness();
 		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		builder.vertex(x0, y1, 0D).uv(x0 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x1, y1, 0D).uv(x1 / 32F, (y1 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x1, y0, 0D).uv(x1 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
-		builder.vertex(x0, y0, 0D).uv(x0 / 32F, (y0 + scroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.vertex(x0, y1, 0D).uv((x0 + xScroll) / 32F, (y1 + yScroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.vertex(x1, y1, 0D).uv((x1 + xScroll) / 32F, (y1 + yScroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.vertex(x1, y0, 0D).uv((x1 + xScroll) / 32F, (y0 + yScroll) / 32F).color(color, color, color, 255).endVertex();
+		builder.vertex(x0, y0, 0D).uv((x0 + xScroll) / 32F, (y0 + yScroll) / 32F).color(color, color, color, 255).endVertex();
 		tes.end();
 	}
 	

@@ -25,18 +25,29 @@ import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
+import carbonconfiglib.gui.menu.MenuScreen;
+import carbonconfiglib.gui.menu.SubMenuItem;
 import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.FurnaceScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 
 public class TestUI extends BaseCarbonScreen
 {
+	int[] dependencyColors = new int[] {
+			0xFFFF0000, //Required Dependency
+			0xFFFFFF00, //Optional Dependency
+			0xFF0000FF, //Required Dependent (Mod requires ME)
+			0xFF00FFFF //Optional Dependent
+	};
 	float scale = 0.32F;
 	float x;
 	float y;
@@ -76,6 +87,13 @@ public class TestUI extends BaseCarbonScreen
 			ModNode owner = mapped.get(mod.get("id").getAsString());
 			if(owner == null) continue;
 			for(JsonElement dep : mod.getAsJsonArray("dep")) {
+				if(!dep.isJsonObject()) {
+					ModNode dependency = mapped.get(dep.getAsString());
+					if(dependency == null || owner == dependency) continue;
+					dependency.dependants.put(owner, true);
+					owner.dependencies.put(dependency, true);
+					continue;
+				}				
 				JsonObject modDep = dep.getAsJsonObject();
 				ModNode dependency = mapped.get(modDep.get("id").getAsString());
 				if(dependency == null || owner == dependency) continue;
@@ -100,10 +118,28 @@ public class TestUI extends BaseCarbonScreen
 			pos = new ChunkPos(mouseX, mouseY);
 		}
 		renderDirtBackground(0);
+		int bottomSpace = 70;
+		int legendenY = 50;
+		
 		GuiUtils.fillDropArea(matrix, 10, 10, width-20, height-20, -3750202, false);
-		GuiUtils.fillDropArea(matrix, 15, 15, width-30, height-30, -7631989, true);
-		GuiUtils.renderBackground(15, width-15, 15, height-15, 0F, BackgroundTexture.DEFAULT);
-		GuiUtils.pushScissors(15, 15, width-30, height-30);
+		GuiUtils.fillDropArea(matrix, 15, 15, width-30, height-bottomSpace, -7631989, true);
+		fill(matrix, 14, height-legendenY, 30, height-(legendenY-font.lineHeight), dependencyColors[0] | 0xFF000000);
+		fill(matrix, 14, height-(legendenY-font.lineHeight-1), 30, height-(legendenY-font.lineHeight*2), dependencyColors[1] | 0xFF000000);
+		fill(matrix, 14, height-(legendenY-font.lineHeight*2-1), 30, height-(legendenY-font.lineHeight*3), dependencyColors[2] | 0xFF000000);
+		fill(matrix, 14, height-(legendenY-font.lineHeight*3-1), 30, height-(legendenY-font.lineHeight*4), dependencyColors[3] | 0xFF000000);
+		
+		GuiUtils.drawFrame(matrix, 14, height-legendenY, 29, height-(legendenY-font.lineHeight)-1, 0xFF404040, 1);
+		GuiUtils.drawFrame(matrix, 14, height-(legendenY-font.lineHeight-1), 29, height-(legendenY-font.lineHeight*2)-1, 0xFF404040, 1);
+		GuiUtils.drawFrame(matrix, 14, height-(legendenY-font.lineHeight*2-1), 29, height-(legendenY-font.lineHeight*3)-1, 0xFF404040, 1);
+		GuiUtils.drawFrame(matrix, 14, height-(legendenY-font.lineHeight*3-1), 29, height-(legendenY-font.lineHeight*4)-1, 0xFF404040, 1);
+
+		drawUnalignedText(matrix, Component.literal("Required Dependency"), 31, height-legendenY, Align.START, 4210752);
+		drawUnalignedText(matrix, Component.literal("Optional Dependency"), 31, height-(legendenY-font.lineHeight-1), Align.START, 4210752);
+		drawUnalignedText(matrix, Component.literal("Required Dependent"), 31, height-(legendenY-font.lineHeight*2-1), Align.START, 4210752);
+		drawUnalignedText(matrix, Component.literal("Required Dependent"), 31, height-(legendenY-font.lineHeight*3-1), Align.START, 4210752);
+
+		GuiUtils.pushScissors(15, 15, width-30, height-bottomSpace);
+		GuiUtils.renderBackground(15, width-15, 15, height-15, -x*0.2F*(scale*2), -y*0.2F*scale*2, BackgroundTexture.DEFAULT);
 		matrix.pushPose();
 		matrix.translate(centerX, centerY, 0F);
 		matrix.scale(scale, scale, 1F);
@@ -116,7 +152,6 @@ public class TestUI extends BaseCarbonScreen
 			matrix.pushPose();
 			matrix.translate(x, y, 0F);
 			matrix.scale(quadScale, quadScale, 1F);
-//			fill(matrix, (int)-radius, (int)-radius, (int)+radius, (int)+radius, vertex.modId.hashCode() | 0xFF000000);
 			GuiUtils.drawCircle(matrix, 0, 0, radius, vertex.modId.hashCode() | 0xFF000000, 0xFF000000, 128, 1F);
 			matrix.popPose();
 		}
@@ -124,8 +159,8 @@ public class TestUI extends BaseCarbonScreen
 			Tesselator tes = Tesselator.getInstance();
 			BufferBuilder builder = tes.getBuilder();
 			builder.begin(Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-			drawNode(matrix, focused, false, 0xFF0000FF, 0xFF00FFFF, builder);
-			drawNode(matrix, focused, true, 0xFFFF0000, 0xFFFFFF00, builder);
+			drawNode(matrix, focused, false, dependencyColors[2], dependencyColors[3], builder);
+			drawNode(matrix, focused, true, dependencyColors[0], dependencyColors[1], builder);
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			GlStateManager._disableTexture();
 			GlStateManager._enableBlend();
@@ -191,6 +226,14 @@ public class TestUI extends BaseCarbonScreen
 			pos = new ChunkPos((int)mouseX, (int)mouseY);
 			return true;
 		}
+		if(focused == null) {
+			SubMenuItem item = new SubMenuItem("Root");
+			item.addNode("Testing", null);
+			item.addNode("Testing2", null);
+			item.addNode("Testing3", null);
+			pushScreen(new MenuScreen(item, (int)mouseX+5, (int)mouseY-5));
+			return true;
+		}
 		focused = null;
 		return false;
 	}
@@ -207,7 +250,7 @@ public class TestUI extends BaseCarbonScreen
 	
 	@Override
 	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-		scale = Mth.clamp(scale - (float)pDelta * 0.01F, 0.025F, 2F);
+		scale = Mth.clamp(scale - (float)pDelta * 0.01F * (Screen.hasShiftDown() ? 10 : 1F), 0.025F, 2F);
 		return true;
 	}
 	

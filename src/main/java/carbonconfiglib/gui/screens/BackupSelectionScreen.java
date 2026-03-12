@@ -119,7 +119,7 @@ public class BackupSelectionScreen extends BaseCarbonScreen
 		}
 		
 		@Override
-		public boolean containsSearch(String searchString) {
+		protected boolean containsSearch(String searchString) {
 			return false;
 		}
 		

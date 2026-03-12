@@ -176,7 +176,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 	
 	public static abstract class Element extends ListEntry<Element> {
 		@Override
-		public boolean containsSearch(String searchString) { return false; }
+		protected boolean containsSearch(String searchString) { return false; }
 	}
 	
 	public static class Label extends Element {
@@ -198,7 +198,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 		}
 
 		@Override
-		public boolean containsSearch(String searchString) {
+		protected boolean containsSearch(String searchString) {
 			if(children != null) {
 				for(int i = 0,m=children.size();i<m;i++) {
 					if(children.get(i).containsSearch(searchString)) return true;

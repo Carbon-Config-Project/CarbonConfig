@@ -105,7 +105,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	}
 	
 	@Override
-	public boolean containsSearch(String searchString) { return getName().getString().toLowerCase(Locale.ROOT).contains(searchString); }
+	protected boolean containsSearch(String searchString) { return getName().getString().toLowerCase(Locale.ROOT).contains(searchString); }
 	
 	@Override
 	public final void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
