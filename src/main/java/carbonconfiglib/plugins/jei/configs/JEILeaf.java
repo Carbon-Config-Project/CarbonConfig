@@ -66,7 +66,7 @@ public class JEILeaf implements IConfigNode
 			if(array == null) array = new JEIArray(entry.getName(), getName(), getTooltip(), null, getRange(), type, JEIHelpers.getArrayValue(entry), JEIHelpers.getArrayDefault(entry), () -> JEIHelpers.getSuggestions(serializer), T -> JEIHelpers.parse(T, serializer), this::save);
 			return array;
 		}
-		if(value == null) value = new JEIValue(getName(), getTooltip(), null, getRange(), type, JEIHelpers.getValue(entry), JEIHelpers.getDefault(entry), () -> JEIHelpers.getSuggestions(serializer), T -> JEIHelpers.parse(T, serializer), (K, V) -> save(K, V, entry));
+		if(value == null) value = new JEIValue(entry.getName(), getName(), getTooltip(), null, getRange(), type, JEIHelpers.getValue(entry), JEIHelpers.getDefault(entry), () -> JEIHelpers.getSuggestions(serializer), T -> JEIHelpers.parse(T, serializer), (K, V) -> save(K, V, entry));
 		return value;
 	}
 	

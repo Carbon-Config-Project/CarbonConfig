@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.menu;
+package carbonconfiglib.gui.base.menu;
 
 import java.util.List;
 
@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 
+import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonList;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
@@ -22,6 +23,22 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.client.ForgeHooksClient;
 
+/**
+ * Copyright 2026 Speiger, Meduris
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
 public class MenuScreen extends BaseCarbonScreen {
 	ListState<MenuEntry> menuState = new ListState<MenuEntry>(10).setScrollOffset(-1);
 	SubMenuItem item;
@@ -177,7 +194,7 @@ public class MenuScreen extends BaseCarbonScreen {
 		}
 		
 		private static int height(IMenuItem item, Font font) {
-			return height(font.split(item.name(), 120).size());
+			return height(font.split(item.name(), 180).size());
 		}
 		
 		private static int height(int count) {
@@ -208,14 +225,15 @@ public class MenuScreen extends BaseCarbonScreen {
 		public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			lastY = top;
 			List<FormattedCharSequence> sequence = font.split(item.name(), 180);
-			int baseY = top + (height >> 1) - (height(sequence.size()) >> 1);
+			int baseY = Align.CENTER.alignStart(top, height, height(sequence.size()));
 			int entryHeight = height(1);
+			int offset = Align.CENTER.alignStart(0, entryHeight, font.lineHeight);
 			for(FormattedCharSequence entry : sequence) {
-				font.draw(poseStack, entry, left+1, baseY + (entryHeight >> 1) - (font.lineHeight >> 1), -1);
+				font.draw(poseStack, entry, left+1, baseY+offset, -1);
 				baseY += entryHeight;
 			}
 			if(item instanceof SubMenuItem) {
-				font.draw(poseStack, ">", left + width - 7, top + (height >> 1) - (font.lineHeight >> 1)+1, -1);
+				font.draw(poseStack, ">", left + width - 7, Align.CENTER.alignStart(top, height, font.lineHeight)+1, -1);
 
 			}
 		}
@@ -238,7 +256,7 @@ public class MenuScreen extends BaseCarbonScreen {
 		
 		@Override
 		public void mouseMoved(double mouseX, double mouseY) {
-			if(owner.getHovered(mouseX, mouseY) == this) {
+			if(owner.getHovered(mouseX, mouseY) == this && item.hoverable()) {
 				if(owner.getSelected() != null && owner.getSelected() != this) {
 					owner.getSelected().close();
 				}
@@ -248,12 +266,12 @@ public class MenuScreen extends BaseCarbonScreen {
 					int width = Math.min(180, Math.max(80, MenuScreen.countWidth(menu, font)));
 			        int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
 			        if(x + width >= screenWidth) {
-			        	x = owner.getLeft() - width - 1;
+			        	x = owner.getLeft() - width - 5;
 			        }
 					Minecraft.getInstance().pushGuiLayer((child = new MenuScreen(menu, x, lastY - 5).setParent(screen)));
 				}
 			}
-			else if(child != null) {
+			else if(child != null && item.hoverable()) {
 				child.onClose();
 				child = null;
 			}

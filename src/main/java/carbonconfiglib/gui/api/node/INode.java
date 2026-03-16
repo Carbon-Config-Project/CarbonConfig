@@ -40,6 +40,7 @@ public interface INode
 	}
 	public ReloadMode getReloadState();
 	
+	public String getNodeName();
 	public Component getName();
 	public Component getTooltip();
 	

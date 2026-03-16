@@ -9,10 +9,12 @@ import java.util.function.Supplier;
 import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.IReloadMode;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IArrayNode;
 import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.impl.ReloadMode;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData;
@@ -42,6 +44,7 @@ import speiger.src.collections.utils.Stack;
 public class CarbonArray implements IArrayNode, IValueActions
 {
 	String nodeName;
+	ConfigPath path;
 	IReloadMode mode;
 	ListData data;
 	IStructuredData inner;
@@ -58,8 +61,9 @@ public class CarbonArray implements IArrayNode, IValueActions
 	List<String> defaults;
 	boolean autoSave = false;
 	
-	public CarbonArray(String nodeName, IReloadMode mode, ListData data, Component name, Component tooltip, String currentValue, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
+	public CarbonArray(String nodeName, ConfigPath path, IReloadMode mode, ListData data, Component name, Component tooltip, String currentValue, String defaultValue, Function<String, ParseResult<Boolean>> isValid, Supplier<List<Suggestion>> suggestions, BiConsumer<String, IValueActions> saveAction) {
 		this.nodeName = nodeName;
+		this.path = path;
 		this.mode = mode;
 		this.data = data;
 		this.inner = data.getType();
@@ -90,9 +94,9 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	protected IValueActions addEntry(String value, String defaultValue, int index) {
 		switch(inner.getDataType()) {
-			case COMPOUND: return new CarbonCompound(Integer.toString(index), mode, inner.asCompound(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
-			case LIST: return new CarbonArray(Integer.toString(index), mode, inner.asList(), name.copy().append(" "+index+":"), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
-			case SIMPLE: return new CarbonValue(mode, name.copy().append(" "+index+":"), tooltip, null, inner, data.isForced(), () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save).setAutosave(true);
+			case COMPOUND: return new CarbonCompound(Integer.toString(index), path.append("array"), mode, inner.asCompound(), name.copy().append(index+": "), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
+			case LIST: return new CarbonArray(Integer.toString(index), path.append("array"), mode, inner.asList(), name.copy().append(index+": "), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
+			case SIMPLE: return new CarbonValue(null, mode, name.copy().append(index+": "), tooltip, null, inner, data.isForced(), () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save).setAutosave(true);
 			default: return null;
 		}
 	}
@@ -230,7 +234,7 @@ public class CarbonArray implements IArrayNode, IValueActions
 	@Override
 	public StructureType getNodeType() { return StructureType.LIST; }
 	@Override
-	public IEntrySettings getSettings() { return data.getSettings(); }
+	public IEntrySettings getSettings() { return IEntrySettings.copyMerge(data.getSettings(), SettingsLoader.INSTANCE.getOverride(path)); }
 	@Override
 	public ReloadMode getReloadState() { return mode instanceof ReloadMode ? (ReloadMode)mode : null; }
 	@Override

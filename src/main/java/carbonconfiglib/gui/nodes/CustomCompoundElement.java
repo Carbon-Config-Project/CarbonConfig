@@ -11,6 +11,7 @@ import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
+import carbonconfiglib.gui.nodes.base.NodeElement;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -52,7 +53,7 @@ public class CustomCompoundElement extends NodeElement
 	
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, Align.START, -1, node.hashCode());
+		GuiUtils.drawScrollingShadowText(stack, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, Align.START, -1, sinceFullyVisible);
 	}
 	
 	@Override

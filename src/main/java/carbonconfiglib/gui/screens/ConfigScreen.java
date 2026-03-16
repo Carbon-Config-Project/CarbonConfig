@@ -71,7 +71,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	@SuppressWarnings("unchecked")
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
 	CheckBoxState bulkEdit = new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onBulkEdit(T.getValue())).setTooltip(Component.translatable("gui.carbonconfig.bulkedit"));
-	CheckBoxState autoSave = new CheckBoxState(false, Icon.AUTO_SAVE).setCallback(T -> onNodeChanged()).setTooltip(Component.translatable("gui.carbonconfig.autosave"));
+	CheckBoxState autoSave = new CheckBoxState(CarbonConfig.AUTO_SAVE.get(), Icon.AUTO_SAVE).setCallback(T -> onNodeChanged()).setTooltip(Component.translatable("gui.carbonconfig.autosave"));
 	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(T -> recalculateNode()).withTooltip(T -> Component.literal(T.getState().getValue() ? "gui.carbonconfig.layout.normal" : "gui.carbonconfig.layout.wide"));
 	CarbonButton save;
 	Stack<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
@@ -201,7 +201,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
 		if(save != null) save.active = rootElement.needsSaving();
 		int minY = (int)(height * 0.15F);
-		GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
+		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
 		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, holder.getTexture());
 	}
 	
@@ -242,6 +242,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		Component text = element.getName();
 		boolean big = false;
 		if(text != null) {
+			String raw = element.getNodeName();
+			if(raw != null) text = text.copy().append("("+raw+")");
 			int scale = (int)((height * 0.85F) - (height * 0.8F)) / font.lineHeight;
 			float minY = (height * 0.8F);
 			float diff = (height * 0.85F - minY) * 0.5F;

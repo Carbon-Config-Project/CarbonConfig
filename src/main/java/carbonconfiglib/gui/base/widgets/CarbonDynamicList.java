@@ -165,7 +165,7 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	@Override
 	public void mouseMoved(double mouseX, double mouseY) {
 		for(E element : children()) {
-			if(element.isInView()) element.mouseMoved(mouseX, mouseY);
+			if(element.isInFullView()) element.mouseMoved(mouseX, mouseY);
 		}
 	}
 	
@@ -240,14 +240,14 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			int maxY = minY + height;
 			if (maxY >= y0 && minY <= y1 && (entry != dragging || !draggingStarted)) {
 				hasRendered = true;
-				this.renderItem(matrix, mouseX, mouseY, particalTicks, i, minX, minY, width-2, height-4);
+				this.renderItem(matrix, mouseX, mouseY, particalTicks, i, minX, minY, width-2, height);
 			}
 			else if(hasRendered && (entry != dragging || !draggingStarted)) break;
 			yOffset += height;
 		}
 		if(draggingStarted && dragging != null) {
 			int ySize = dragging.getItemHeight();
-			this.renderItem(matrix, mouseX, mouseY, particalTicks, children().indexOf(dragging), minX, mouseY - (ySize >> 1), width-2, ySize-4);
+			this.renderItem(matrix, mouseX, mouseY, particalTicks, children().indexOf(dragging), minX, mouseY - (ySize >> 1), width-2, ySize);
 		}
 		
 		GuiUtils.popScissors();
@@ -260,10 +260,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			this.renderSelection(matrix, left, top, width, height, color, e.getSelectionBackgroundColor());
 		}
 		e.location[0] = left;
-		e.location[1] = top;
+		e.location[1] = top+2;
 		e.location[2] = width;
-		e.location[3] = height;
-		e.render(matrix, index, top, left, width, height, mouseX, mouseY, Objects.equals(this.getHovered(), e), particalTicks);
+		e.location[3] = height-4;
+		e.render(matrix, index, top+2, left, width, height-4, mouseX, mouseY, Objects.equals(this.getHovered(), e), particalTicks);
 	}
 	
 	public void renderSelection(PoseStack matrix, int left, int top, int width, int height, int frameColor, int backgroundColor) {
@@ -332,7 +332,7 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			return mouseX >= location[0] && mouseX <= location[0] + location[2] && mouseY >= location[1] && mouseY <= location[1] + location[3];
 		}
 		
-		public boolean isInView() {
+		public boolean isInFullView() {
 			return (owner.x0 < location[0] && owner.x1 >= location[0]) && owner.y0 < location[1] && owner.y1 >= location[1] + location[3];
 		}
 		

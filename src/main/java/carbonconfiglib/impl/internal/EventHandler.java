@@ -12,6 +12,7 @@ import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screens.ConfigListScreen;
+import carbonconfiglib.gui.screens.ModConfigList;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
@@ -61,7 +62,7 @@ public class EventHandler implements IConfigChangeListener
 {
 	public static final EventHandler INSTANCE = new EventHandler();
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
-	List<IModConfigs> allKnownConfigs = new ObjectArrayList<>();
+	Map<String, IModConfigs> allKnownConfigs = new Object2ObjectLinkedOpenHashMap<>();
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
@@ -141,12 +142,17 @@ public class EventHandler implements IConfigChangeListener
 			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
 		});
 		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ConfigScreenFactory.class, () -> new ConfigScreenFactory((U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C)))));
-		mappedConfigs.forEach((M, C) -> allKnownConfigs.add(ModConfigList.createMultiIfApplicable(M, C)));
-		allKnownConfigs.sort(Comparator.comparing(IModConfigs::getModName));
+		mappedConfigs.forEach((M, C) -> allKnownConfigs.put(M.getModId(), ModConfigList.createMultiIfApplicable(M, C)));
 	}
 	
 	public List<IModConfigs> getAllConfigs() {
-		return new ObjectArrayList<>(allKnownConfigs);
+		List<IModConfigs> result = new ObjectArrayList<IModConfigs>(allKnownConfigs.values());
+		result.sort(Comparator.comparing(IModConfigs::getModName));
+		return result;
+	}
+	
+	public IModConfigs getConfigsForMod(String id) {
+		return allKnownConfigs.get(id);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

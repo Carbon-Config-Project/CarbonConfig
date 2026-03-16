@@ -36,6 +36,15 @@ public enum Align {
 		}
 	}
 	
+	
+	public int alignStart(int startPos, int width, int size) {
+		switch(this) {
+			case CENTER: return startPos + (width >> 1) - (size >> 1);
+			case END: return startPos + width - size;
+			default: return startPos;
+		}
+	}
+	
 	public float alignStart(float startPos, float width, float size) {
 		switch(this) {
 			case CENTER: return startPos + (width * 0.5F) - (size * 0.5F);

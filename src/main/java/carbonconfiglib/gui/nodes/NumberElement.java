@@ -1,16 +1,29 @@
 package carbonconfiglib.gui.nodes;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.function.Consumer;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.IRange;
+import carbonconfiglib.api.IRange.DoubleRange;
+import carbonconfiglib.api.IRange.FloatRange;
 import carbonconfiglib.api.IRange.IntegerRange;
 import carbonconfiglib.api.IRange.LongRange;
 import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.FloatingSlider;
+import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.Icon;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
+import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
+import net.minecraft.network.chat.Component;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -29,8 +42,10 @@ import carbonconfiglib.utils.ParseResult;
  */
 public abstract class NumberElement extends ValueElement
 {
-	CarbonSlider slider = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 0).setListener(this::onSliderChanged)));
+	private static final DecimalFormat FLOATING_SLIDER_VALUE = new DecimalFormat("0.0#####", DecimalFormatSymbols.getInstance(Locale.ROOT));
+	CarbonSlider slider = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 0)));
 	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
+	CarbonCheckBox subMode = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(Icon.SUB_MODE).setCallback(T -> updateState()).withTooltip(T -> Component.translatable("gui.carbonconfig.mode."+(T.selected() ? "slider" : "text")))));
 	ParseResult<Boolean> result;
 	
 	public NumberElement(IValueNode node) {
@@ -38,6 +53,10 @@ public abstract class NumberElement extends ValueElement
 		readValue();
 		text.getState().setCallback(this::onTextChanged);
 		generateSlider(node.getRange(), slider.getState());
+		slider.getState().setListener(this::onSliderChanged);
+		if(slider.getState().getRange() > 0) {
+			subMode.getState().setValue(true);
+		}
 	}
 	
 	@Override
@@ -50,6 +69,13 @@ public abstract class NumberElement extends ValueElement
 		slider.active = value;
 		text.active = value;
 		if(!value) text.setFocus(false);
+	}
+	
+	private void updateState() {
+		if(!isRightSideEnabled()) return;
+		if(slider.getState().getRange() <= 0) return;
+		slider.visible = subMode.selected();
+		text.visible = !slider.visible;
 	}
 		
 	protected boolean setSliderValue() {
@@ -94,8 +120,9 @@ public abstract class NumberElement extends ValueElement
 	
 	@Override
 	protected void setRightComponentsVisible(boolean value) {
-		slider.visible = value && slider.getState().getRange() != 0;
+		slider.visible = value && slider.getState().getRange() != 0 && subMode.selected();
 		text.visible = value && !slider.visible;
+		subMode.visible = value && slider.getState().getRange() != 0;
 	}
 	
 	@Override
@@ -111,6 +138,83 @@ public abstract class NumberElement extends ValueElement
 		text.setWidth(desiredWidth);
 		text.setHeight(height);
 		text.render(stack, mouseX, mouseY, partialTicks);
+		if(slider.getState().getRange() > 0 && width - (desiredWidth+2) >= height) {
+			subMode.x = left + desiredWidth+2;
+			subMode.y = Align.CENTER.alignStart(top, height, subMode.getHeight());
+			subMode.setWidth(height);
+			subMode.setHeight(height);
+			subMode.render(stack, mouseX, mouseY, partialTicks);
+		}
+	}
+	
+	@Override
+	public void provideTooltips(int mouseX, int mouseY, Consumer<Component> tooltips) {
+		if(result != null && !result.getValue() && isMouseOver(mouseX, mouseY)) {
+			tooltips.accept(Component.literal(result.getError().getMessage()));
+		}
+		super.provideTooltips(mouseX, mouseY, tooltips);
+	}
+	
+	public static class FloatElement extends NumberElement {
+		FloatingSlider slider;
+		public FloatElement(IValueNode node) {
+			super(node);
+		}
+
+		@Override
+		protected void generateSlider(IRange range, SliderState state) {
+			slider = node.getSetting(FloatingSlider.class);
+			if(slider == null) return;
+			if(!(range instanceof FloatRange)) return;
+			FloatRange floats = (FloatRange)range;
+			if((floats.length() / slider.stepSize()) > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-10000
+			state.setMaxValue((long)(floats.max() / slider.stepSize())).setMinValue((long)(floats.min() / slider.stepSize()));
+			state.setDisplayFunction(T -> Component.literal(FLOATING_SLIDER_VALUE.format(T * slider.stepSize())));
+			if(!setSliderValue()) {
+				state.setMinValue(0).setMaxValue(0);
+			}
+		}
+
+		@Override
+		protected long parseValue(String input) throws NumberFormatException {
+			return (long)(Float.parseFloat(input) / slider.stepSize());
+		}
+
+		@Override
+		protected String toString(long value) {
+			return FLOATING_SLIDER_VALUE.format(value * slider.stepSize());
+		}
+	}
+	
+	public static class DoubleElement extends NumberElement {
+		FloatingSlider slider;
+		public DoubleElement(IValueNode node) {
+			super(node);
+		}
+
+		@Override
+		protected void generateSlider(IRange range, SliderState state) {
+			slider = node.getSetting(FloatingSlider.class);
+			if(slider == null) return;
+			if(!(range instanceof DoubleRange)) return;
+			DoubleRange doubles = (DoubleRange)range;
+			if((doubles.length() / slider.stepSize()) > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-10000
+			state.setMaxValue((long)(doubles.max() / slider.stepSize())).setMinValue((long)(doubles.min() / slider.stepSize()));
+			state.setDisplayFunction(T -> Component.literal(FLOATING_SLIDER_VALUE.format(T * slider.stepSize())));
+			if(!setSliderValue()) {
+				state.setMinValue(0).setMaxValue(0);
+			}
+		}
+
+		@Override
+		protected long parseValue(String input) throws NumberFormatException {
+			return (long)(Double.parseDouble(input) / slider.stepSize());
+		}
+
+		@Override
+		protected String toString(long value) {
+			return FLOATING_SLIDER_VALUE.format(value * slider.stepSize());
+		}
 	}
 	
 	public static class IntegerElement extends NumberElement {
@@ -122,8 +226,8 @@ public abstract class NumberElement extends ValueElement
 		protected void generateSlider(IRange range, SliderState state) {			
 			if(!(range instanceof IntegerRange)) return;
 			IntegerRange ints = (IntegerRange)range;
-			if(ints.length() > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-1000
-			state.setMinValue(ints.min()).setMaxValue(ints.max());
+			if(ints.length() > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-10000
+			state.setMaxValue(ints.max()).setMinValue(ints.min());
 			if(!setSliderValue()) {
 				state.setMinValue(0).setMaxValue(0);
 			}
@@ -150,8 +254,8 @@ public abstract class NumberElement extends ValueElement
 		protected void generateSlider(IRange range, SliderState state) {			
 			if(!(range instanceof LongRange)) return;
 			LongRange longs = (LongRange)range;
-			if(longs.length() > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-1000
-			state.setMinValue(longs.min()).setMaxValue(longs.max());
+			if(longs.length() > 99999 && !isForcingAlternative()) return; //We won't allow anything larger than 5 digits. We allow fine control within 1-10000
+			state.setMaxValue(longs.max()).setMinValue(longs.min());
 			if(!setSliderValue()) {
 				state.setMinValue(0).setMaxValue(0);
 			}

@@ -35,6 +35,7 @@ import speiger.src.collections.utils.Stack;
  */
 public class JEIValue implements IValueNode
 {
+	String nodeName;
 	Component name;
 	Component tooltip;
 	DataType type;
@@ -50,7 +51,8 @@ public class JEIValue implements IValueNode
 	String defaultValue;
 	boolean autosave;
 	
-	public JEIValue(Component name, Component tooltip, ReloadMode mode, IRange range, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
+	public JEIValue(String nodeName, Component name, Component tooltip, ReloadMode mode, IRange range, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
+		this.nodeName = nodeName;
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
@@ -113,6 +115,8 @@ public class JEIValue implements IValueNode
 	public IRange getRange() { return range; }
 	@Override
 	public ReloadMode getReloadState() { return mode; }
+	@Override
+		public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override

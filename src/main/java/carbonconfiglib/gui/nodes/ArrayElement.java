@@ -14,6 +14,7 @@ import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
+import carbonconfiglib.gui.nodes.base.NodeElement;
 import carbonconfiglib.gui.nodes.base.SuggestionEntry;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
@@ -61,7 +62,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	public void setEditable(boolean value) {}
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, node.getName(), left, top, width-23, height, Align.START, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, node.getName(), left, top, width-23, height, Align.START, -1, sinceFullyVisible);
 		boolean active = context.isElementActive(this);
 		button.setMessage(Component.literal(active ? "◀" : "▶"));
 		button.setSelected(active);
@@ -74,7 +75,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	
 	@Override
 	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.size()), left, top, desiredWidth-2, height, Align.END, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.size()), left, top, desiredWidth-2, height, Align.END, -1, sinceFullyVisible);
 	}
 	
 	@Override
@@ -184,6 +185,11 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		}
 		
 		@Override
+		public String getNodeName() {
+			return null;
+		}
+		
+		@Override
 		public Component getName() {
 			return Component.translatable("gui.carbonconfig.array.new");
 		}
@@ -199,7 +205,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		public void setEditable(boolean value) {}
 		@Override
 		public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.array.next"), left, top, width, height, Align.START, -1, owner.hashCode());
+			GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.array.next"), left, top, width, height, Align.START, -1, 0);
 		}
 
 		@Override

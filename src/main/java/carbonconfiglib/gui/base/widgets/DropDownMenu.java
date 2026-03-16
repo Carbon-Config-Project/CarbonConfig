@@ -98,7 +98,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x, this.y, 0, 46 + k * 20, this.width-14, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.x+width-15, this.y, 0, 46 + k * 20, 15, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
 		GuiUtils.drawScrollingShadowText(poseStack, mc.font, getMessage(), x+2, y, width-18, height, Align.CENTER, getFGColor(), hash);
-		GuiUtils.drawScrollingShadowText(poseStack, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), x+width-15, y, 11, height, Align.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(poseStack, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), x+width-13, y, 11, height, Align.CENTER, getFGColor(), hash);
 	}
 	
 	public static class DropDownScreen<T> extends BaseCarbonScreen {

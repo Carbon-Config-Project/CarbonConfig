@@ -61,11 +61,11 @@ public class GuiUtils
 		return (color & 0xFF000000) | Math.min(255, (int)(r / factor)) << 16 | Math.min(255, (int)(g / factor)) << 8 | Math.min(255, (int)(b / factor));
 	}
 	
-	public static float calculateScrollOffset(float width, Font font, Align align, Component text, int seed) {
+	public static float calculateScrollOffset(float width, Font font, Align align, Component text, long startTime) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
-			double timer = (Util.getMillis() + seed) / 1000D;
+			double timer = (currentMillseconds() - startTime) / 1000D;
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			return (float)Mth.lerp(offset, 0D, diff);
@@ -90,11 +90,11 @@ public class GuiUtils
 		}
 	}
 	
-	public static void drawScrollingText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, Align align, int color, int seed) {
+	public static void drawScrollingText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, Align align, int color, long startTime) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
-			double timer = (Util.getMillis() + seed) / 1000D;
+			double timer = (currentMillseconds() - startTime) / 1000D;
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
@@ -106,11 +106,11 @@ public class GuiUtils
 		font.draw(stack, text, x - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
 	}
 	
-	public static void drawScrollingShadowText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, Align align, int color, int seed) {
+	public static void drawScrollingShadowText(PoseStack stack, Font font, Component text, float x, float y, float width, float height, Align align, int color, long startTime) {
 		int textWidth = font.width(text);
 		if(textWidth > width) {
 			float diff = textWidth - width + 2F;
-			double timer = (Util.getMillis() + seed) / 1000D;
+			double timer = (currentMillseconds() - startTime) / 1000D;
 			double minDiff = Math.max(diff * 0.5D, 3.0D);
 			double offset = Math.sin((Math.PI / 2D) * Math.cos(((Math.PI * 2D) * timer) / minDiff)) / 2D + 0.01F + align.alignCenter();
 			pushScissors((int)x, (int)y, (int)width, (int)height);
@@ -120,6 +120,10 @@ public class GuiUtils
 		}
 		float offset = align.align(textWidth);
 		font.drawShadow(stack, text, x - align.align(width) + offset, y + (height * 0.5F) - (font.lineHeight * 0.5F), color);
+	}
+	
+	public static long currentMillseconds() {
+		return Util.getMillis();
 	}
 	
 	public static void pushScissors(int x, int y, int width, int height) {

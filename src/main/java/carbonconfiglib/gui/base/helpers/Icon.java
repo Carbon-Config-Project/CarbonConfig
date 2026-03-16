@@ -37,6 +37,7 @@ public class Icon
 	public static final Icon IMPORT = ICONS.create(48, 80);
 	public static final Icon EXPORT = ICONS.create(64, 80);
 	public static final Icon LIST = ICONS.create(64, 48);
+	public static final IconPair SUB_MODE = ICONS.verticalActivityIcon(64, 16, 0);
 	public static final IconPair SELECTED = ICONS.horizontalActivityIcon(0, 16, 64);
 	public static final IconPair AUTO_SAVE = ICONS.horizontalActivityIcon(32, 48, 64);
 	public static final IconPair SEARCH = ICONS.verticalActivityIcon(48, 32, 16);

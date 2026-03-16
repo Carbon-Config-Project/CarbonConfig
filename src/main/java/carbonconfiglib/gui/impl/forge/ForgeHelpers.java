@@ -46,6 +46,11 @@ public class ForgeHelpers
 		return value instanceof String && FormatType.guessType((String)value) != null;
 	}
 	
+	public static String removeExtension(String file) {
+		int index = file.lastIndexOf('.');
+		return index == -1 ? file : file.substring(0, index);
+	}
+	
 	public static ParseResult<Boolean> parseBoolean(String value) {
 		 return ParseResult.success(Boolean.parseBoolean(value)); 
 	}

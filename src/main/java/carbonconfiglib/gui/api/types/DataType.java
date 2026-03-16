@@ -5,7 +5,8 @@ import java.util.function.Function;
 
 import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.nodes.BooleanElement;
-import carbonconfiglib.gui.nodes.DoubleElement;
+import carbonconfiglib.gui.nodes.NumberElement.DoubleElement;
+import carbonconfiglib.gui.nodes.NumberElement.FloatElement;
 import carbonconfiglib.gui.nodes.NumberElement.IntegerElement;
 import carbonconfiglib.gui.nodes.NumberElement.LongElement;
 import carbonconfiglib.gui.nodes.SelectionElement;
@@ -36,7 +37,7 @@ public class DataType
 	public static final DataType BOOLEAN = new DataType("false", BooleanElement::new);
 	public static final DataType INTEGER = new DataType("0", IntegerElement::new);
 	public static final DataType LONG = new DataType("0", LongElement::new);
-	public static final DataType FLOAT = new DataType("0.0", DoubleElement::new);
+	public static final DataType FLOAT = new DataType("0.0", FloatElement::new);
 	public static final DataType DOUBLE = new DataType("0.0", DoubleElement::new);
 	public static final DataType STRING = new DataType("", StringElement::new);
 	public static final DataType ENUM = new DataType("", SelectionElement::new);

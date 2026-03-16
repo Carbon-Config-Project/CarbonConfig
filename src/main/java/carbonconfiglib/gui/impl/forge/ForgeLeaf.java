@@ -12,9 +12,11 @@ import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.IRange.DoubleRange;
 import carbonconfiglib.api.IRange.IntegerRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.impl.ReloadMode;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.ChatFormatting;
@@ -47,6 +49,7 @@ public class ForgeLeaf implements IConfigNode
 	ConfigValue<?> data;
 	CommentedConfig config;
 	ValueSpec spec;
+	ConfigPath path;
 	ForgeDataType<?> type;
 	IRange range;
 	boolean isArray;
@@ -54,9 +57,10 @@ public class ForgeLeaf implements IConfigNode
 	ForgeArray array;
 	Component tooltip;
 	
-	public ForgeLeaf(ForgeConfigSpec spec, ConfigValue<?> data, CommentedConfig config) {
+	public ForgeLeaf(ForgeConfigSpec spec, ConfigValue<?> data, ConfigPath path, CommentedConfig config) {
 		this.data = data;
 		this.config = config;
+		this.path = path;
 		this.spec = getSpec(spec, data);
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
@@ -120,10 +124,10 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public INode asNode() {
 		if(isArray) {
-			if(array == null) array = new ForgeArray(Iterables.getLast(data.getPath(), ""), getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
+			if(array == null) array = new ForgeArray(Iterables.getLast(data.getPath(), ""), getName(), getTooltip(), SettingsLoader.INSTANCE.getOverride(path), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrentList(), getDefaultList(), () -> ObjectLists.empty(), type::parse, this::save);
 			return array;
 		}
-		if(value == null) value = new ForgeValue(getName(), getTooltip(), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrent(), getDefault(), this::getSuggestions, type::parse, this::save);
+		if(value == null) value = new ForgeValue(Iterables.getLast(data.getPath(), ""), getName(), getTooltip(), SettingsLoader.INSTANCE.getOverride(path), spec.needsWorldRestart() ? ReloadMode.WORLD : null, type.getDataType(), range, getCurrent(), getDefault(), this::getSuggestions, type::parse, this::save);
 		return value;
 	}
 	

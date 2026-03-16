@@ -17,6 +17,7 @@ import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.CompoundType;
 import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
@@ -72,6 +73,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 			.withListener(this::onSuggestionPicked);
 	private DropDownMenu<Suggestion> suggestion;
 	private CarbonCheckBox edit;
+	protected long sinceFullyVisible;
 	
 	public BaseElement() {
 		if(showControls()) {
@@ -109,6 +111,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	@Override
 	public final void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		if(!isInFullView() || sinceFullyVisible == 0L) sinceFullyVisible = GuiUtils.currentMillseconds();
 		int leftWidth = context.calculateSegmentWidth(layer)-4;
 		renderLeftPart(poseStack, left, top, leftWidth, height, mouseX, mouseY, selected, partialTicks);
 		if(context.isAtTop(layer)) {
@@ -164,6 +167,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 		reloader.run();
 		return true;
 	}
+	public abstract String getNodeName();
 	public abstract Component getName();
 	public abstract Component getTooltip();
 	
@@ -206,6 +210,9 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	protected abstract void onRevert();
 	protected abstract void onReset();
 	protected abstract void onArrayDelete();
+	protected final boolean isRightSideEnabled() {
+		return right;
+	}
 	
 	public List<BaseElement> getChildNodes() {
 		return ObjectLists.empty();

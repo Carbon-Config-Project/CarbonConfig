@@ -11,6 +11,7 @@ import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ForcedSelection;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
@@ -35,8 +36,10 @@ import speiger.src.collections.utils.Stack;
  */
 public class ForgeValue implements IValueNode
 {
+	String nodeName;
 	Component name;
 	Component tooltip;
+	IEntrySettings settings;
 	DataType type;
 	IRange range;
 	ReloadMode mode;
@@ -50,9 +53,11 @@ public class ForgeValue implements IValueNode
 	String savedValue;
 	boolean autosave;
 	
-	public ForgeValue(Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, ForgeValue> saved) {
+	public ForgeValue(String nodeName, Component name, Component tooltip, IEntrySettings settings, ReloadMode mode, DataType type, IRange range, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, ForgeValue> saved) {
+		this.nodeName = nodeName;
 		this.name = name;
 		this.tooltip = tooltip;
+		this.settings = settings;
 		this.isValid = isValid;
 		this.mode = mode;
 		this.range = range;
@@ -105,9 +110,11 @@ public class ForgeValue implements IValueNode
 	@Override
 	public IRange getRange() { return range; }
 	@Override
-	public IEntrySettings getSettings() { return null; }
+	public IEntrySettings getSettings() { return settings; }
 	@Override
 	public ReloadMode getReloadState() { return mode; }
+	@Override
+	public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override
@@ -129,7 +136,18 @@ public class ForgeValue implements IValueNode
 	@Override
 	public DataType getDataType() { return type; }
 	@Override
-	public boolean isForcingSuggestions() { return type == DataType.ENUM; }
+	public boolean isForcingSuggestions() {
+		ForcedSelection selection = getSetting(ForcedSelection.class);
+		return type == DataType.ENUM || (selection != null && selection.suggestions().size() > 0); 
+	}
 	@Override
-	public List<Suggestion> getSuggestions() { return suggestions.get(); }
+	public List<Suggestion> getSuggestions() {
+		ForcedSelection selection = getSetting(ForcedSelection.class);
+		if(selection != null && selection.suggestions().size() > 0) {
+			List<Suggestion> results = new ObjectArrayList<>(selection.suggestions());
+			results.removeIf(T -> !isValid(T.getValue()).isValid());
+			return results;
+		}
+		return suggestions.get(); 
+	}
 }

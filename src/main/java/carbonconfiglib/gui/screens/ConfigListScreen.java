@@ -95,7 +95,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
-		GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
+		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
 		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, holder.getTexture());
 	}
 	

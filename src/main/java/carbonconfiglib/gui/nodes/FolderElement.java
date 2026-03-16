@@ -67,7 +67,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	protected ReloadMode getReloadState() { return null; }
 	
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, node.getName(), left, top, width-22, height, Align.START, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, node.getName(), left, top, width-22, height, Align.START, -1, sinceFullyVisible);
 		boolean active = context.isElementActive(this);
 		button.setMessage(Component.literal(active ? "◀" : "▶"));
 		button.setSelected(active);
@@ -80,7 +80,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	}
 	
 	public void renderRightPart(PoseStack stack, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.getChildren().size()), left, top, desiredWidth-2, height, Align.END, -1, 32);
+		GuiUtils.drawScrollingShadowText(stack, font, Component.translatable("gui.carbonconfig.elements", node.getChildren().size()), left, top, desiredWidth-2, height, Align.END, -1, sinceFullyVisible);
 	}
 	
 	protected void onClick(Button button) {

@@ -1,5 +1,6 @@
 package carbonconfiglib;
 
+import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
 
 import org.lwjgl.glfw.GLFW;
@@ -21,9 +22,10 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTypes;
 import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
+import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ConfigRequestScreen;
 import carbonconfiglib.gui.screens.ConfigScreen;
-import carbonconfiglib.gui.screens.TestUI;
+import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -31,18 +33,21 @@ import carbonconfiglib.impl.entries.RegistryKeyValue;
 import carbonconfiglib.impl.entries.RegistryValue;
 import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
+import carbonconfiglib.impl.internal.InternalFeatures;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.networking.CarbonNetwork;
-import carbonconfiglib.test.CompoundListTest;
-import carbonconfiglib.test.TestWidget;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -71,9 +76,6 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-/**
- * TODO Text scrolling text should always begin at left side. HOW THE F I AM GOING TO DO THAT DUNNO. But its a good idea anyways
- */
 
 @Mod("carbonconfig")
 public class CarbonConfig {
@@ -81,6 +83,7 @@ public class CarbonConfig {
 	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	public static BooleanSupplier MOD_GUI = () -> false;
+	public static BiPredicate<Integer, Integer> DEPENDENCY_VIEWER = (K, V) -> false;
 	ConfigHandler handler;
 	public static BoolValue FORGE_SUPPORT;
 	public static BoolValue FORCE_CUSTOM_BACKGROUND;
@@ -88,6 +91,7 @@ public class CarbonConfig {
 	public static BoolValue INGAME_BACKGROUND;
 	public static BoolValue AUTO_BACKUP;
 	public static BoolValue BACKUP_TOASTS;
+	public static BoolValue AUTO_SAVE;
 	public static HashSetCache<String> MODS_DISABLED;
 
 	public CarbonConfig() {
@@ -97,12 +101,15 @@ public class CarbonConfig {
 		MinecraftForge.EVENT_BUS.addListener(this::unload);
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
 		if (FMLEnvironment.dist.isClient()) {
+			InternalFeatures.loadDefaultSettings();
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onResourceReloadRegister);
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
+			AUTO_SAVE = section.addBool("auto-save", false, "Defines if autosave is enabled by default or not");
 			AUTO_BACKUP = section.addBool("auto-backup", false, "Enables that a backup is created everytime a config is saved through the gui");
 			BACKUP_TOASTS = section.addBool("backup-toasts", true, "Show toasts when backups were created or loaded to give feedback");
 			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], 
@@ -116,8 +123,6 @@ public class CarbonConfig {
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
 		}
-		CompoundListTest.initCompoundList();
-		TestWidget.initTest();
 	}
 	
 	/**
@@ -296,14 +301,25 @@ public class CarbonConfig {
 		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
 		event.register(mapping);
 		MOD_GUI = mapping::isDown;
+		KeyMapping mappingOther = new KeyMapping("key.carbon_config.dep", GLFW.GLFW_KEY_KP_ADD, "key.carbon_config");
+		event.register(mappingOther);
+		DEPENDENCY_VIEWER = (K, S) -> mappingOther.matches(K, S) || mappingOther.matchesMouse(K);
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
+	public void onResourceReloadRegister(RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(SettingsLoader.INSTANCE);
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.setScreen(new TestUI());
-//			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+		}
+		if(DEPENDENCY_VIEWER.test(event.getKey(), event.getScanCode()) && event.getAction() == GLFW.GLFW_PRESS) {
+			
+			mc.setScreen(new ModDependencyScreen());
 		}
 	}
 

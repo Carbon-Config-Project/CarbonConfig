@@ -245,6 +245,13 @@ public class BaseCarbonScreen extends Screen
 		return list;
 	}
 	
+	@Override
+	public void mouseMoved(double mouseX, double mouseY) {
+		for(GuiEventListener listener : children()) {
+			listener.mouseMoved(mouseX, mouseY);
+		}
+	}
+	
 	protected int getAlignedX(Align align) {
 		switch(align) {
 			case CENTER: return centerX;

@@ -136,7 +136,7 @@ public class CarbonSlider extends CarbonBaseButton {
 	}
 	
 	public static class SliderState {
-		private static final DecimalFormat NUMBERS = new DecimalFormat("###,###", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+		private static final DecimalFormat NUMBERS = new DecimalFormat("###,###", DecimalFormatSymbols.getInstance(Locale.ROOT));
 		long minValue;
 		long maxValue;
 		long value;
@@ -175,6 +175,11 @@ public class CarbonSlider extends CarbonBaseButton {
 			this.displayText = Objects.requireNonNull(displayText);
 			this.prefix = Objects.requireNonNull(prefix);
 			this.suffix = Objects.requireNonNull(suffix);
+		}
+		
+		public SliderState setDisplayFunction(LongFunction<Component> displayText) {
+			this.displayText = Objects.requireNonNull(displayText);
+			return this;
 		}
 		
 		public SliderState setListener(Consumer<CarbonSlider> listener) {

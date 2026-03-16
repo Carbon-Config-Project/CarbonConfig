@@ -1,13 +1,26 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.List;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import carbonconfiglib.api.IEntrySettings.TranslatedComment;
+import carbonconfiglib.api.IEntrySettings.TranslatedKey;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.suggestion.ISuggestionRenderer;
 import carbonconfiglib.gui.api.suggestion.SuggestionRenderers;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ColorType;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.FloatingSlider;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ForceMode;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ForcedSelection;
 import carbonconfiglib.gui.nodes.ColorElement;
 import carbonconfiglib.gui.nodes.RegistryElement;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -15,6 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2025 Speiger, Meduris
@@ -59,5 +73,23 @@ public class InternalFeatures
 		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
 		DataType.registerType(MobEffect.class, RegistryElement.createForType(MobEffect.class, "minecraft:luck"));
 		DataType.registerType(ColorWrapper.class, new DataType("0xFFFFFFFF", ColorElement::new));
+	}
+	
+	public static void loadDefaultSettings() {
+		SettingsLoader.INSTANCE.registerParser(new ResourceLocation("carbonconfig", "translation_key"), T -> T.has("key") ? new TranslatedKey(T.get("key").getAsString()) : null);
+		SettingsLoader.INSTANCE.registerParser(new ResourceLocation("carbonconfig", "translation_comment"), T -> T.has("comment") ? new TranslatedComment(T.get("comment").getAsString()) : null);
+		SettingsLoader.INSTANCE.registerParser(new ResourceLocation("carbonconfig", "color_type"), T -> T.has("hasAlpha") ? new ColorType(T.get("hasAlpha").getAsBoolean()) : null);
+		SettingsLoader.INSTANCE.registerParser(new ResourceLocation("carbonconfig", "slider"), T -> T.has("stepSize") ? new FloatingSlider(T.get("stepSize").getAsDouble()) : null);
+		SettingsLoader.INSTANCE.registerParser(new ResourceLocation("carbonconfig", "force_mode"), T -> T.has("forceText") ? new ForceMode(T.get("forceText").getAsBoolean()) : null);
+		SettingsLoader.INSTANCE.registerParser(new ResourceLocation("carbonconfig", "force_selection"), T -> {
+			if(!T.has("selection")) return null;
+			List<Suggestion> suggestions = new ObjectArrayList<>();
+			for(JsonElement element : T.getAsJsonArray("selection")) {
+				JsonObject obj = element.getAsJsonObject();
+				if(!obj.has("name") || !obj.has("value")) continue;
+				suggestions.add(Suggestion.namedValue(obj.get("name").getAsString(), obj.get("value").getAsString()));
+			}
+			return new ForcedSelection(suggestions);
+		});
 	}
 }

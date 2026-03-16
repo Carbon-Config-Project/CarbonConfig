@@ -40,6 +40,7 @@ public class ForgeArray implements IArrayNode
 	String nodeName;
 	Component name;
 	Component tooltip;
+	IEntrySettings settings;
 	DataType type;
 	IRange range;
 	ReloadMode mode;
@@ -54,10 +55,11 @@ public class ForgeArray implements IArrayNode
 	List<String> defaults;
 	boolean autosave;
 	
-	public ForgeArray(String nodeName, Component name, Component tooltip, ReloadMode mode, DataType type, IRange range, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
+	public ForgeArray(String nodeName, Component name, Component tooltip, IEntrySettings settings, ReloadMode mode, DataType type, IRange range, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
 		this.nodeName = nodeName;
 		this.name = name;
 		this.tooltip = tooltip;
+		this.settings = settings;
 		this.isValid = isValid;
 		this.mode = mode;
 		this.type = type;
@@ -97,7 +99,7 @@ public class ForgeArray implements IArrayNode
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new ForgeValue(name, tooltip, mode, type, range, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save).withAutosave());
+			values.add(new ForgeValue(null, name, tooltip, settings, mode, type, range, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid::apply, this::save).withAutosave());
 		}
 		autosave();
 	}
@@ -174,7 +176,7 @@ public class ForgeArray implements IArrayNode
 	@Override
 	public StructureType getInnerType() { return StructureType.SIMPLE; }
 	@Override
-	public IEntrySettings getSettings() { return null; }
+	public IEntrySettings getSettings() { return settings; }
 	@Override
 	public StructureType getNodeType() { return StructureType.LIST; }
 	@Override
@@ -201,7 +203,7 @@ public class ForgeArray implements IArrayNode
 			value = defaultValue;			
 		}
 		currentValues.add(value);
-		values.add(new ForgeValue(name, tooltip, mode, type, range, value, defaultValue, () -> ObjectLists.empty(), isValid::apply, this::save).withAutosave());
+		values.add(new ForgeValue(null, name, tooltip, settings, mode, type, range, value, defaultValue, () -> ObjectLists.empty(), isValid::apply, this::save).withAutosave());
 		autosave();
 	}
 	

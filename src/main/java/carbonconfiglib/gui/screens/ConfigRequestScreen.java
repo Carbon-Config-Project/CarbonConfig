@@ -86,7 +86,7 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestRec
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
 		int minY = (int)(height * 0.15F);
-		GuiUtils.renderBackground(0, width, 0, height, 0F, texture.getTexture());
+		if(!texture.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, texture.getTexture());
 		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, texture.getTexture());
 	}
 	

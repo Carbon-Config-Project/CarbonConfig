@@ -107,6 +107,8 @@ public class MinecraftValue implements IValueNode
 	@Override
 	public ReloadMode getReloadState() { return null; }
 	@Override
+	public String getNodeName() { return entry.getDescriptionId(); }
+	@Override
 	public Component getName() { return IConfigNode.createLabel(I18n.get(entry.getDescriptionId())); }
 	@Override
 	public Component getTooltip() {

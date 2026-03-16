@@ -20,6 +20,7 @@ import com.electronwill.nightconfig.toml.TomlFormat;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
@@ -123,7 +124,7 @@ public class ForgeConfig implements IModConfig
 	
 	@Override
 	public String getConfigName() {
-		return fileName;
+		return ForgeHelpers.removeExtension(fileName);
 	}
 	
 	@Override
@@ -153,7 +154,7 @@ public class ForgeConfig implements IModConfig
 	
 	@Override
 	public IConfigNode getRootNode() {
-		return new ForgeNode(new ObjectArrayList<>(), data, spec);
+		return new ForgeNode(new ObjectArrayList<>(), new ConfigPath(config.getModId(), getConfigName()), data, spec);
 	}
 	
 	@Override

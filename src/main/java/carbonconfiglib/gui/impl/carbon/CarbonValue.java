@@ -37,6 +37,7 @@ import speiger.src.collections.utils.Stack;
  */
 public class CarbonValue implements IValueNode, IValueActions
 {
+	String nodeName;
 	IReloadMode mode;
 	Component name;
 	Component tooltip;
@@ -55,7 +56,8 @@ public class CarbonValue implements IValueNode, IValueActions
 	String savedValue;
 	boolean autosave;
 	
-	public CarbonValue(IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, IStructuredData data, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
+	public CarbonValue(String nodeName, IReloadMode mode, Component name, Component tooltip, IEntrySettings settings, IStructuredData data, boolean forced, Supplier<List<Suggestion>> suggestions, String current, String defaultValue, Function<String, ParseResult<Boolean>> isValid, BiConsumer<String, IValueActions> saveAction) {
+		this.nodeName = nodeName;
 		this.mode = mode;
 		this.name = name;
 		this.tooltip = tooltip;
@@ -115,6 +117,8 @@ public class CarbonValue implements IValueNode, IValueActions
 	public IRange getRange() { return range; }
 	@Override
 	public ReloadMode getReloadState() { return mode instanceof ReloadMode ? (ReloadMode)mode : null; }
+	@Override
+	public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigSection;
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigFolderNode;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -29,11 +30,13 @@ import net.minecraft.network.chat.MutableComponent;
  */
 public class ConfigNode implements IConfigFolderNode
 {
+	ConfigPath path;
 	ConfigSection section;
 	List<IConfigNode> children;
 	
-	public ConfigNode(ConfigSection section) {
+	public ConfigNode(ConfigSection section, ConfigPath path) {
 		this.section = section;
+		this.path = path;
 	}
 
 	@Override
@@ -41,10 +44,10 @@ public class ConfigNode implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(ConfigSection sub : section.getChildren()) {
-				children.add(new ConfigNode(sub));
+				children.add(new ConfigNode(sub, path.append(sub.getName())));
 			}
 			for(ConfigEntry<?> entry : section.getEntries()) {
-				children.add(new ConfigLeaf(entry));
+				children.add(new ConfigLeaf(entry, path.append(entry.getKey())));
 			}
 		}
 		return children;
@@ -52,7 +55,7 @@ public class ConfigNode implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return section.getName().toLowerCase(Locale.ROOT); }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(section.getName()); }
+	public Component getName() { return IConfigNode.createLabel(section.getName(), section.getTranslationKey()); }
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();

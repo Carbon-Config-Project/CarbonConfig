@@ -1,9 +1,11 @@
 package carbonconfiglib.gui.api.types;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import carbonconfiglib.api.IConfigSerializer;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.node.ICompoundNode;
 import carbonconfiglib.gui.api.types.EntrySettingTypes.CompoundOverride;
 import carbonconfiglib.gui.nodes.CustomCompoundElement;
@@ -13,6 +15,7 @@ import carbonconfiglib.gui.screens.WidgetAlignerScreen.OverlayRenderer;
 import carbonconfiglib.impl.entries.WidgetAligner;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.gui.screens.Screen;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -44,11 +47,15 @@ public class CompoundType
 	
 	public static CompoundType by(ICompoundNode node) {
 		CompoundOverride override = node.getSetting(CompoundOverride.class);
-		return override == null ? null : AUTO_COMPOUND_TYPES.get(override.getType());
+		return override == null ? null : AUTO_COMPOUND_TYPES.get(override.type());
 	}
 	
 	public static void registerType(Class<?> clz, CompoundType type) {
 		AUTO_COMPOUND_TYPES.putIfAbsent(clz, type);
+	}
+	
+	public static void registerStandardType(Class<?> type, BiFunction<ICompoundNode, BackgroundHolder, Screen> holder) {
+		registerType(type, new CompoundType(T -> new CustomCompoundElement(T, holder)));
 	}
 	
 	public static void registerWidgetAligner(Class<?> type, OverlayRenderer renderer, IConfigSerializer<WidgetAligner> serializer) {

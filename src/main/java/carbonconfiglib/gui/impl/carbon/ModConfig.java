@@ -20,6 +20,7 @@ import carbonconfiglib.api.IConfigProxy.IPotentialTarget;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.impl.internal.BackupManager;
@@ -145,7 +146,7 @@ public class ModConfig implements IModConfig
 	
 	@Override
 	public IConfigNode getRootNode() {
-		return new ConfigRoot(config);
+		return new ConfigRoot(config, new ConfigPath(modId, config.getName()));
 	}
 	
 	@Override

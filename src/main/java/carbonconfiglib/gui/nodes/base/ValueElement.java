@@ -7,7 +7,6 @@ import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.EntrySettingTypes.ForceMode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
-import carbonconfiglib.gui.nodes.NodeElement;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -60,7 +59,7 @@ public abstract class ValueElement extends NodeElement
 	
 	@Override
 	public void renderLeftPart(PoseStack stack, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		GuiUtils.drawScrollingShadowText(stack, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, Align.START, -1, node.hashCode());
+		GuiUtils.drawScrollingShadowText(stack, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, Align.START, -1, sinceFullyVisible);
 	}
 	
 	@Override

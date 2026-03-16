@@ -1,4 +1,4 @@
-package carbonconfiglib.impl.internal;
+package carbonconfiglib.gui.screens;
 
 import java.util.List;
 

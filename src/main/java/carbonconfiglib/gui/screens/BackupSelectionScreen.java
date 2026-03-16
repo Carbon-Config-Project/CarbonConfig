@@ -24,7 +24,6 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.impl.internal.BackupManager.BackupEntry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds;
@@ -37,8 +36,8 @@ import net.minecraftforge.forgespi.language.IModInfo;
 public class BackupSelectionScreen extends BaseCarbonScreen
 {
 	private static final String[] DATA_TYPES = new String[]{"B", "KB", "MB", "GB", "TB", "PB"};
-	private static final DecimalFormat FORMAT = Util.make(new DecimalFormat("###,###.###"), T -> T.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
-	public static final DecimalFormat DATE_FORMAT = Util.make(new DecimalFormat("#.##"), T -> T.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
+	private static final DecimalFormat FORMAT = new DecimalFormat("###,###.###", DecimalFormatSymbols.getInstance(Locale.ROOT));
+	public static final DecimalFormat DATE_FORMAT = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.ROOT));
 	ListState<BackupListEntry> listState = new ListState<>();
 	BackgroundHolder holder;
 	Component header;
@@ -68,7 +67,7 @@ public class BackupSelectionScreen extends BaseCarbonScreen
 	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
-		GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
+		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
 		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, holder.getTexture());
 	}
 	
@@ -76,7 +75,7 @@ public class BackupSelectionScreen extends BaseCarbonScreen
 	public void renderForeground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
 		GuiUtils.renderListShadow(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
 		GuiUtils.drawScrollingShadowText(matrix, font, header, 0, 0, width, (int)(height * 0.15F)-20, Align.CENTER, -1, 0);
-		GuiUtils.drawScrollingShadowText(matrix, font, Component.literal("Backup Selector"), 0, 0, width, (int)(height * 0.15F)+20, Align.CENTER, -1, 0);
+		GuiUtils.drawScrollingShadowText(matrix, font, Component.translatable("gui.carbonconfig.backup.header"), 0, 0, width, (int)(height * 0.15F)+20, Align.CENTER, -1, 0);
 	}
 	
 	@Override

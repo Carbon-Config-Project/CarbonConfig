@@ -1,4 +1,4 @@
-package carbonconfiglib.test;
+package carbonconfiglib.examples;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 

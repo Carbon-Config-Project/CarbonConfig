@@ -1,11 +1,14 @@
 package carbonconfiglib.gui.api.types;
 
-import java.util.function.BiFunction;
+import java.util.List;
 
+import com.google.common.base.Function;
+import com.google.common.base.Supplier;
+
+import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.api.IEntrySettings;
-import carbonconfiglib.gui.api.node.ICompoundNode;
-import carbonconfiglib.gui.api.node.INode;
-import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.api.ISuggestionProvider.Suggestion;
+import net.minecraft.network.chat.Component;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -23,61 +26,11 @@ import carbonconfiglib.gui.api.node.IValueNode;
  * limitations under the License.
  */
 public class EntrySettingTypes
-{
-	public static class ArrayRenamer implements IEntrySettings {
-		BiFunction<Integer, ? extends INode, String> function;
-
-		public ArrayRenamer(BiFunction<Integer, ? extends INode, String> function) {
-			this.function = function;
-		}
-		
-		@SuppressWarnings("unchecked")
-		public BiFunction<Integer, INode, String> getFunction() {
-			return (BiFunction<Integer, INode, String>)function;
-		}
-		
-		public static ArrayRenamer ofValue(BiFunction<Integer, IValueNode, String> value) {
-			return new ArrayRenamer(value);
-		}
-		
-		public static ArrayRenamer ofCompound(BiFunction<Integer, ICompoundNode, String> compound) {
-			return new ArrayRenamer(compound);
-		}
-	}
-	
-	public static class ForceMode implements IEntrySettings {
-		boolean text;
-		
-		public ForceMode(boolean text) {
-			this.text = text;
-		}
-		
-		public boolean isForcingText() {
-			return text;
-		}
-	}
-	
-	public static class ColorType implements IEntrySettings {
-		boolean hasAlpha;
-
-		public ColorType(boolean hasAlpha) {
-			this.hasAlpha = hasAlpha;
-		}
-		
-		public boolean hasAlpha() {
-			return hasAlpha;
-		}
-	}
-	
-	public static class CompoundOverride implements IEntrySettings {
-		Class<?> clz;
-
-		public CompoundOverride(Class<?> clz) {
-			this.clz = clz;
-		}
-		
-		public Class<?> getType() {
-			return clz;
-		}
-	}
+{	
+	public record CompoundArrayNamer<T>(Supplier<IConfigSerializer<T>> serializer, Function<T, Component> provider) implements IEntrySettings {}
+	public record ForcedSelection(List<Suggestion> suggestions) implements IEntrySettings {}
+	public record FloatingSlider(double stepSize) implements IEntrySettings {}	
+	public record ForceMode(boolean isForcingText) implements IEntrySettings {}
+	public record ColorType(boolean hasAlpha) implements IEntrySettings {}
+	public record CompoundOverride(Class<?> type) implements IEntrySettings {}
 }

@@ -1,7 +1,5 @@
 package carbonconfiglib.gui.nodes.base;
 
-import java.util.Objects;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
@@ -29,7 +27,7 @@ import net.minecraft.network.chat.Component;
 public class SuggestionEntry extends ListEntry<SuggestionEntry> {
 	Component text;
 	Suggestion suggestion;
-	
+	long sinceFullyVisible;
 	public SuggestionEntry(Suggestion suggestion) {
 		this.suggestion = suggestion;
 		this.text = Component.literal(suggestion.getName());
@@ -42,12 +40,13 @@ public class SuggestionEntry extends ListEntry<SuggestionEntry> {
 
 	@Override
 	public void render(PoseStack poseStack, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		if(!isInFullView()) sinceFullyVisible = GuiUtils.currentMillseconds();
 		ISuggestionRenderer renderer = ISuggestionRenderer.Registry.getRendererForType(suggestion.getType());
 		if(renderer != null) {
 			renderer.renderSuggestion(poseStack, suggestion.getValue(), left, (int)Align.CENTER.alignStart(top, height, 16));
 			left += 20;
 			width -= 20;
 		}
-		GuiUtils.drawScrollingShadowText(poseStack, font, text, left, top, width, height, Align.CENTER, -1, Objects.hashCode(suggestion));
+		GuiUtils.drawScrollingShadowText(poseStack, font, text, left, top, width, height, Align.CENTER, -1, sinceFullyVisible);
 	}
 }

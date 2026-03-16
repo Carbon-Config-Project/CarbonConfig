@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.apache.logging.log4j.util.Strings;
 
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.ParsedArray;
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.impl.ReloadMode;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
@@ -39,9 +42,11 @@ public class ConfigLeaf implements IConfigNode
 	StructureType type;
 	ReloadMode mode;
 	IValueActions value;
+	ConfigPath path;
 	
-	public ConfigLeaf(ConfigEntry<?> entry) {
+	public ConfigLeaf(ConfigEntry<?> entry, ConfigPath path) {
 		this.entry = entry;
+		this.path = path;
 		this.data = entry.getDataType();
 		this.type = data.getDataType();
 		mode = entry.getReloadState() instanceof ReloadMode? (ReloadMode)entry.getReloadState() : null;
@@ -52,13 +57,13 @@ public class ConfigLeaf implements IConfigNode
 		if(value == null) {
 			switch(type) {
 				case COMPOUND:
-					value = new CarbonCompound(entry.getKey(), mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonCompound(entry.getKey(), path, mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case LIST:
-					value = new CarbonArray(entry.getKey(), mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonArray(entry.getKey(), path, mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case SIMPLE:
-					value = new CarbonValue(mode, getName(), getTooltip(), entry.getSettings(), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
+					value = new CarbonValue(entry.getKey(), mode, getName(), getTooltip(), IEntrySettings.copyMerge(entry.getSettings(), SettingsLoader.INSTANCE.getOverride(path)), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
 					break;
 			}
 		}

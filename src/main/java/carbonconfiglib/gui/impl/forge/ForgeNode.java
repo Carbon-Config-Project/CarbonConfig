@@ -8,6 +8,7 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.google.common.collect.Iterables;
 
+import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigFolderNode;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -33,6 +34,7 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
  */
 public class ForgeNode implements IConfigFolderNode
 {
+	ConfigPath path;
 	List<String> paths;
 	CommentedConfig config;
 	ForgeConfigSpec spec;
@@ -40,12 +42,13 @@ public class ForgeNode implements IConfigFolderNode
 	List<IConfigNode> children;
 	Component tooltip;
 	
-	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec) {
-		this(paths, config, spec, spec.getValues());
+	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, ForgeConfigSpec spec) {
+		this(paths, path, config, spec, spec.getValues());
 	}
 	
- 	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec, UnmodifiableConfig specConfig) {
+ 	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, ForgeConfigSpec spec, UnmodifiableConfig specConfig) {
 		this.paths = paths;
+		this.path = path;
 		this.config = config;
 		this.spec = spec;
 		this.specConfig = specConfig;
@@ -72,10 +75,10 @@ public class ForgeNode implements IConfigFolderNode
 				if(value instanceof UnmodifiableConfig) {
 					List<String> list = new ObjectArrayList<>(paths);
 					list.add(entry.getKey());
-					children.add(new ForgeNode(list, config, spec, (UnmodifiableConfig)value));
+					children.add(new ForgeNode(list, path.append(entry.getKey()), config, spec, (UnmodifiableConfig)value));
 				}
 				else if(value instanceof ConfigValue) {
-					ForgeLeaf leaf = new ForgeLeaf(spec, (ConfigValue<?>)value, config);
+					ForgeLeaf leaf = new ForgeLeaf(spec, (ConfigValue<?>)value, path.append(entry.getKey()), config);
 					if(!leaf.isValid()) continue;
 					children.add(leaf);
 				}

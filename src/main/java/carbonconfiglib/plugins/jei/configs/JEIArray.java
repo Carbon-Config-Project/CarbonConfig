@@ -97,7 +97,7 @@ public class JEIArray implements IArrayNode
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new JEIValue(name, tooltip, mode, range, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid, this::save).withAutosave());
+			values.add(new JEIValue(null, name, tooltip, mode, range, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid, this::save).withAutosave());
 		}
 		autosave();
 	}
@@ -201,7 +201,7 @@ public class JEIArray implements IArrayNode
 			value = defaultValue;			
 		}
 		currentValues.add(value);
-		values.add(new JEIValue(name, tooltip, mode, range, type, value, defaultValue, () -> ObjectLists.empty(), isValid, this::save).withAutosave());
+		values.add(new JEIValue(null, name, tooltip, mode, range, type, value, defaultValue, () -> ObjectLists.empty(), isValid, this::save).withAutosave());
 		autosave();
 	}
 	

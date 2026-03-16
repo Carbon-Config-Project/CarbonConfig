@@ -1,4 +1,4 @@
-package carbonconfiglib.gui.nodes;
+package carbonconfiglib.gui.nodes.base;
 
 import java.util.List;
 
@@ -6,7 +6,6 @@ import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IArrayNode;
 import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.gui.api.node.IValueNode;
-import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.utils.ObjectLists;
@@ -90,6 +89,11 @@ public abstract class NodeElement extends BaseElement
 	
 	protected void onValueChanged() {
 		context.onNodeChanged();
+	}
+	
+	@Override
+	public String getNodeName() {
+		return node.getNodeName();
 	}
 	
 	@Override
