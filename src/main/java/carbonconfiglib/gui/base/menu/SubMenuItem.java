@@ -3,9 +3,9 @@ package carbonconfiglib.gui.base.menu;
 import java.util.List;
 import java.util.Map;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.chat.Component;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 
 /**
  * Copyright 2026 Speiger, Meduris

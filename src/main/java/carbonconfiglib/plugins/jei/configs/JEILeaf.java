@@ -11,7 +11,6 @@ import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mezz.jei.api.runtime.config.IJeiConfigListValueSerializer;
 import mezz.jei.api.runtime.config.IJeiConfigValue;
 import mezz.jei.api.runtime.config.IJeiConfigValueSerializer;
@@ -24,6 +23,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 
 /**
  * Copyright 2026 Speiger, Meduris

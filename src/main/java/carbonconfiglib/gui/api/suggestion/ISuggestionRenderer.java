@@ -4,9 +4,9 @@ import java.util.Map;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.chat.Component;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 /**
  * Copyright 2023 Speiger, Meduris

@@ -2,6 +2,7 @@ package carbonconfiglib.gui.screens;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,8 +32,6 @@ import carbonconfiglib.gui.base.menu.SubMenuItem;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.utils.Helpers;
-import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -65,9 +64,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	JsonObject provider = new JsonObject();
 	ModNode focused;
 	
-	public ModDependencyScreen() {
-//		initDebugData();
-	}
+	public ModDependencyScreen() {}
 
 	@Override
 	protected void init() {
@@ -120,52 +117,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 		node.x = 0;
 		node.y = 0;
 		nodes.add(0, node);
-//		reloadDebugNodes();
 	}
-	
-//	private void initDebugData() {
-//		try(BufferedReader reader = Files.newBufferedReader(FMLPaths.GAMEDIR.get().resolve("data.json"))) {
-//			provider = JsonParser.parseReader(reader).getAsJsonObject();
-//		}
-//		catch(Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
-//	
-//	private void reloadDebugNodes() {
-//		nodes.clear();
-//		nodes.addAll(StreamSupport.stream(provider.getAsJsonArray("mods").spliterator(), false).map(JsonElement::getAsJsonObject).map(T -> T.get("id").getAsString()).sorted().map(ModNode::new).toList());
-//		Map<String, ModNode> mapped = new Object2ObjectOpenHashMap<>();
-//		nodes.forEach(T -> mapped.put(T.modId, T));
-//		ModNode node = mapped.get("minecraft");
-//		nodes.remove(mapped.put("forge", node));
-//		nodes.remove(node);
-//		for(JsonElement element : provider.getAsJsonArray("mods")) {
-//			JsonObject mod = element.getAsJsonObject();
-//			if(!mod.has("dep")) continue;
-//			ModNode owner = mapped.get(mod.get("id").getAsString());
-//			if(owner == null) continue;
-//			for(JsonElement dep : mod.getAsJsonArray("dep")) {
-//				if(!dep.isJsonObject()) {
-//					ModNode dependency = mapped.get(dep.getAsString());
-//					if(dependency == null || owner == dependency) continue;
-//					dependency.dependants.put(owner, true);
-//					owner.dependencies.put(dependency, true);
-//					continue;
-//				}				
-//				JsonObject modDep = dep.getAsJsonObject();
-//				ModNode dependency = mapped.get(modDep.get("id").getAsString());
-//				if(dependency == null || owner == dependency) continue;
-//				boolean optional = modDep.get("required").getAsBoolean();
-//				dependency.dependants.put(owner, optional);
-//				owner.dependencies.put(dependency, optional);
-//			}
-//		}
-//		layout(nodes, 0, 0, 200F, 250, 15);
-//		node.x = 0;
-//		node.y = 0;
-//		nodes.add(0, node);
-//	}
 	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
@@ -250,10 +202,10 @@ public class ModDependencyScreen extends BaseCarbonScreen
 		float textScale = Math.min(2.5F, 1F / scale);
 		float quadScale = Mth.clamp(textScale, 1F, 2F)*0.75F;
 		float radius = (dep ? 2.5F : -2.5F) * quadScale;
-		for(Object2BooleanMap.Entry<ModNode> entry : (dep ? source.dependencies : source.dependants).object2BooleanEntrySet()) {
+		for(Map.Entry<ModNode, Boolean> entry : (dep ? source.dependencies : source.dependants).entrySet()) {
 			ModNode child = entry.getKey();
-			GuiUtils.drawLine(stack, (float)source.x+this.x+radius, (float)source.y+this.y+radius, (float)child.x+this.x+radius, (float)child.y+this.y+radius, 2F, builder, entry.getBooleanValue() ? requiredColor : optionalColor);
-			if(entry.getBooleanValue()) drawNode(stack, child, dep, requiredColor, optionalColor, builder);
+			GuiUtils.drawLine(stack, (float)source.x+this.x+radius, (float)source.y+this.y+radius, (float)child.x+this.x+radius, (float)child.y+this.y+radius, 2F, builder, entry.getValue() ? requiredColor : optionalColor);
+			if(entry.getValue()) drawNode(stack, child, dep, requiredColor, optionalColor, builder);
 		}
 	}
 	
@@ -382,8 +334,8 @@ public class ModDependencyScreen extends BaseCarbonScreen
 		double x;
 		double y;
 		int layer = -1;
-		Object2BooleanMap<ModNode> dependencies = new Object2BooleanLinkedOpenHashMap<>();
-		Object2BooleanMap<ModNode> dependants = new Object2BooleanLinkedOpenHashMap<>();
+		Map<ModNode, Boolean> dependencies = new LinkedHashMap<>();
+		Map<ModNode, Boolean> dependants = new LinkedHashMap<>();
 		
 		public ModNode(String modId) {
 			this.modId = modId;

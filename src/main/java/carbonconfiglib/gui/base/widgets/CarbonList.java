@@ -14,8 +14,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import carbonconfiglib.gui.base.helpers.SmoothDouble;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -25,7 +23,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import speiger.src.collections.ints.functions.consumer.IntIntConsumer;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 
 /**
@@ -199,7 +199,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		
 		@Override
 		public List<? extends NarratableEntry> narratables() {
-			return ObjectLists.emptyList();
+			return ObjectLists.empty();
 		}
 		
 		protected abstract boolean containsSearch(String searchString);
@@ -478,7 +478,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			return nodes;
 		}
 		public List<T> getSelectedItems() {
-			return selectedElement == null ? ObjectLists.emptyList() : ObjectLists.singleton(selectedElement);
+			return selectedElement == null ? ObjectLists.empty() : ObjectLists.singleton(selectedElement);
 		}
 	}
 	
@@ -517,6 +517,6 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		}
 		
 		@Override
-		public List<T> getSelectedItems() { return selected.isEmpty() ? ObjectLists.emptyList() : new ObjectArrayList<>(selected); }
+		public List<T> getSelectedItems() { return selected.isEmpty() ? ObjectLists.empty() : new ObjectArrayList<>(selected); }
 	}
 }

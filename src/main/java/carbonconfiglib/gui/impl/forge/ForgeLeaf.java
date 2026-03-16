@@ -1,11 +1,11 @@
 package carbonconfiglib.gui.impl.forge;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.logging.log4j.util.Strings;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
-import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 
 import carbonconfiglib.api.IRange;
@@ -179,7 +179,7 @@ public class ForgeLeaf implements IConfigNode
 	public boolean isDefault() {
 		if(value != null && value.isDefault()) return true;
 		if(array != null && array.isDefault()) return true;
-		return Objects.equal(getDefault(), getCurrent());
+		return Objects.equals(getDefault(), getCurrent());
 	}
 	@Override
 	public boolean isChanged() {

@@ -13,9 +13,9 @@ import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.screens.WidgetAlignerScreen;
 import carbonconfiglib.gui.screens.WidgetAlignerScreen.OverlayRenderer;
 import carbonconfiglib.impl.entries.WidgetAligner;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.gui.screens.Screen;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 /**
  * Copyright 2026 Speiger, Meduris

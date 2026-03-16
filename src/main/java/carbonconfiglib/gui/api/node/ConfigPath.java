@@ -3,7 +3,8 @@ package carbonconfiglib.gui.api.node;
 import java.util.Arrays;
 import java.util.List;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+
 
 /**
  * Copyright 2026 Speiger, Meduris

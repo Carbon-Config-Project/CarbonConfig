@@ -22,11 +22,11 @@ import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListMultiState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.gui.ScreenUtils;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 
 /**

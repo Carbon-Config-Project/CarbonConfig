@@ -18,11 +18,11 @@ import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.StructureList.ListBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
+import speiger.src.collections.objects.utils.ObjectSets;
 
 /**
  * Copyright 2023 Speiger, Meduris

@@ -14,8 +14,8 @@ import carbonconfiglib.gui.nodes.StringElement;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.IStructuredData.SimpleData;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 /**
  * Copyright 2023 Speiger, Meduris

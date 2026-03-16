@@ -27,8 +27,6 @@ import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
 import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.networking.forge.RequestConfigPacket;
 import carbonconfiglib.networking.forge.SaveForgeConfigPacket;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelResource;
@@ -41,6 +39,8 @@ import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -181,7 +181,7 @@ public class ForgeConfig implements IModConfig
 		if(getConfigType() == ConfigType.SERVER) {
 			return getLevels();
 		}
-		return ObjectLists.emptyList();
+		return ObjectLists.empty();
 	}
 	
 	@Override

@@ -11,10 +11,10 @@ import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 /**
  * Copyright 2023 Speiger, Meduris
