@@ -314,7 +314,6 @@ public class CarbonConfig {
 			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 		}
 		if(DEPENDENCY_VIEWER.test(event.getKey(), event.getScanCode()) && event.getAction() == GLFW.GLFW_PRESS) {
-			
 			mc.setScreen(new ModDependencyScreen());
 		}
 	}
