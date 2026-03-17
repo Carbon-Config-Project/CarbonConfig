@@ -193,11 +193,6 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 			this.color = color;
 		}
 		
-		@Override
-		public boolean equals(Object obj) {
-			return obj == this || (obj instanceof ColorWrapper && ((ColorWrapper)obj).color == color);
-		}
-		
 		public int getColor() {
 			return color;
 		}
@@ -206,6 +201,11 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 		public long longValue() { return (long)color; }
 		public float floatValue() { return (float)color; }
 		public double doubleValue() { return (double)color; }
+		
+		@Override
+		public int hashCode() {
+			return color;
+		}
 		
 		@Override
 		public boolean equals(Object obj) {
