@@ -2,6 +2,11 @@
 
 This is a basic Develoer guide that provides you with the essentials you need to implement this mod if wanted.
 
+## How to expand the Gui Side
+
+If you want to add your own types or use compounds and want to add your own things into the gui.
+Follow this [link](CUSTOM.md)
+
 ## Basic Config
 
 How to implement the basic config:
@@ -188,4 +193,30 @@ No example provided but some notes
 If modded Entries should be supported then make sure the "Config" is loaded AFTER "FMLCommonSetupEvent" event because otherwise modded entries get seen as invalid.    
 This is a thing with any Config Library.   
 The PerWorldProxy automatically makes sure it loads during ServerStart and defaults are created during the "FMLCommonSetupEvent".   
-(Defaults being that it saves the config once during startup if not present to ensure a config was created in the "default configs" folder without creating a world)     
+(Defaults being that it saves the config once during startup if not present to ensure a config was created in the "default configs" folder without creating a world)    
+
+
+## Overrides
+
+Carbon Config provides plenty of overrides via the IEntrySettings system.    
+Which can be found [here](src/main/java/carbonconfiglib/gui/api/types/EntrySettingTypes.java).   
+These are registered in your compound or ConfigEntry using: addSettings or for compound fields: addEntrySettings.    
+- CompoundArrayNamer:
+	Arrays of compounds only show you the current index and how many subelements exist.    
+	Kinda bad, this override allows you to replace the right side text with something else.   
+	It just has to be text but what exact text is your choice.    
+	**Note**: This is a bit difficult to use. You need a IConfigSerializer while you are creating it. That's why its a supplier.    
+	Simply have a mutable object to allow to the result to be used in the construction itself. MutableObject might help.
+- ForcedSelection:    
+	Maybe a config hasn't properly implemented its enums or selection option. This allows you to override it.     
+	You simple provide a list of Suggestions and it will force the entry into a fixed selection.     
+- FloatingSlider:    
+	Float/Double values have to be typed in by hand normally.     
+	This allows to provide a step size how big each step should be and activate the slider.
+- ForceMode:   
+	Allows you to force raw text mode or lets call it fancy input mode on slider based components.     
+	Simple overrides for if something breaks or is not good as a fancy visualization.
+- ColorType:   
+	If you have a color element this allows you to define if it should include a alpha channel or not.
+- CompoundOverride:    
+	Used to make compound screens a thing.    
