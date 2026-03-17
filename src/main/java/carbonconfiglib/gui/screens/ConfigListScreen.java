@@ -58,6 +58,9 @@ public class ConfigListScreen extends BaseCarbonScreen
 	ListState<Element> listState = new ListState<Element>().setItemHeight(26);
 	TextState searchState = new TextState().setSuggestion(I18n.get("gui.carbonconfig.search")).setCallback(listState::search);
 	Component header;
+	CarbonButton importButton;
+	CarbonButton exportButton;
+	BulkRequest request;
 	
 	public ConfigListScreen(Screen parent, IModConfigs configs) {
 		this(parent, configs.getBackground(), configs);
@@ -86,8 +89,8 @@ public class ConfigListScreen extends BaseCarbonScreen
 		listArea(minX, minY, maxX, maxY, listState);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
-		iconButton((searchWidth >> 1)+2, minY-21, 18, 18, Align.CENTER, Align.START, Icon.IMPORT, T -> bulkBackup(Mode.CREATE)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.create"));
-		iconButton((searchWidth >> 1)+22, minY-21, 18, 18, Align.CENTER, Align.START, Icon.EXPORT, T -> bulkBackup(Mode.LOAD)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.load"));
+		importButton = iconButton((searchWidth >> 1)+2, minY-21, 18, 18, Align.CENTER, Align.START, Icon.IMPORT, T -> bulkBackup(Mode.CREATE)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.create"));
+		exportButton = iconButton((searchWidth >> 1)+22, minY-21, 18, 18, Align.CENTER, Align.START, Icon.EXPORT, T -> bulkBackup(Mode.LOAD)).withTooltip(Component.translatable("gui.carbonconfig.backup.bulk.load"));
 		listState.forEach(T -> {
 			if(T instanceof ConfigEntry) ((ConfigEntry)T).updateBackup();
 		});
@@ -95,6 +98,8 @@ public class ConfigListScreen extends BaseCarbonScreen
 	
 	@Override
 	public void renderBackground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
+		importButton.active = request == null;
+		exportButton.active = request == null;
 		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
 		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, holder.getTexture());
 	}
@@ -117,8 +122,14 @@ public class ConfigListScreen extends BaseCarbonScreen
 				((ConfigEntry)T).handleBulk(configs, mode);
 			}
 		});
-		if(configs.isEmpty()) return;
-		BulkRequest request = new BulkRequest(configs, mode);
+		if(configs.isEmpty()) {
+			if(CarbonConfig.BACKUP_TOASTS.get()) {
+				if(mode == Mode.CREATE) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+				else if(mode == Mode.LOAD) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+			}
+			return;
+		}
+		request = new BulkRequest(configs, mode);
 		listState.forEach(T -> {
 			if(T instanceof ConfigEntry) {
 				((ConfigEntry)T).pendingRequest = request;
@@ -325,8 +336,12 @@ public class ConfigListScreen extends BaseCarbonScreen
 				return;
 			}
 			if(mode == Mode.LIST) throw new IllegalStateException("List Mode is unsupported");
-			if(mode == Mode.CREATE) BackupManager.createBackup(config);
+			if(mode == Mode.CREATE) {
+				BackupManager.createBackup(config);
+				updateBackup();
+			}
 			if(mode == Mode.LOAD) BackupManager.loadLastBackup(config);
+			
 		}
 		
 		private void createBackup() {
