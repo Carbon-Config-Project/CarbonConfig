@@ -1,9 +1,11 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
+import java.util.Objects;
 
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
@@ -53,7 +55,11 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() { return value == null ? Objects.equals(entry.get(), entry.getDefault()) : value.isDefault(); }
+	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
+	@Override
+	public boolean isUnsaved() { return value != null && value.isUnsaved(); }
 	@Override
 	public void setPrevious() {
 		if(value != null) value.setPrevious();
@@ -61,7 +67,7 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public void setDefault() {
-		if(value != null) value.setDefault();
+		if(!isDefault()) asNode().setDefault();
 	}
 	
 	@Override
@@ -70,9 +76,7 @@ public class MinecraftLeaf implements IConfigNode
 	}
 	
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return false; }
+	public ReloadMode getReloadState() { return null; }
 	@Override
 	public String getNodeName() { return null; }
 	@Override

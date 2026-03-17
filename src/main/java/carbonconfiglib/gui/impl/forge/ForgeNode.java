@@ -8,15 +8,15 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.google.common.collect.Iterables;
 
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.ChatFormatting;
+import carbonconfiglib.gui.api.Texts;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -35,6 +35,7 @@ import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
  */
 public class ForgeNode implements IConfigFolderNode
 {
+	ConfigPath path;
 	List<String> paths;
 	CommentedConfig config;
 	ForgeConfigSpec spec;
@@ -42,12 +43,13 @@ public class ForgeNode implements IConfigFolderNode
 	List<IConfigNode> children;
 	Component tooltip;
 	
-	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec) {
-		this(paths, config, spec, spec.getValues());
+	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, ForgeConfigSpec spec) {
+		this(paths, path, config, spec, spec.getValues());
 	}
 	
- 	public ForgeNode(List<String> paths, CommentedConfig config, ForgeConfigSpec spec, UnmodifiableConfig specConfig) {
+ 	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, ForgeConfigSpec spec, UnmodifiableConfig specConfig) {
 		this.paths = paths;
+		this.path = path;
 		this.config = config;
 		this.spec = spec;
 		this.specConfig = specConfig;
@@ -59,8 +61,8 @@ public class ForgeNode implements IConfigFolderNode
  		if(value == null) return;
 		String[] array = value.split("\n");
 		if(array != null && array.length > 0) {
-			MutableComponent comp = new TextComponent("");
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]));
+			MutableComponent comp = Texts.empty();
+			for(int i = 0;i<array.length;comp.append(array[i++]).append("\n"));
 			tooltip = comp;
 		}
  	}
@@ -74,10 +76,10 @@ public class ForgeNode implements IConfigFolderNode
 				if(value instanceof UnmodifiableConfig) {
 					List<String> list = new ObjectArrayList<>(paths);
 					list.add(entry.getKey());
-					children.add(new ForgeNode(list, config, spec, (UnmodifiableConfig)value));
+					children.add(new ForgeNode(list, path.append(entry.getKey()), config, spec, (UnmodifiableConfig)value));
 				}
 				else if(value instanceof ConfigValue) {
-					ForgeLeaf leaf = new ForgeLeaf(spec, (ConfigValue<?>)value, config);
+					ForgeLeaf leaf = new ForgeLeaf(spec, (ConfigValue<?>)value, path.append(entry.getKey()), config);
 					if(!leaf.isValid()) continue;
 					children.add(leaf);
 				}
@@ -85,14 +87,14 @@ public class ForgeNode implements IConfigFolderNode
 		}
 		return children;
 	}
+	
 	@Override
 	public String getNodeName() { return paths.isEmpty() ? null : Iterables.getLast(paths, "Root").toLowerCase(Locale.ROOT); }
 	@Override
 	public Component getName() { return IConfigNode.createLabel(Iterables.getLast(paths, "Root")); }
 	@Override
 	public Component getTooltip() {
-		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(Iterables.getLast(paths, "Root")).withStyle(ChatFormatting.YELLOW));
+		MutableComponent comp = Texts.empty();
 		if(tooltip != null) comp.append(tooltip);
 		return comp;
 	}

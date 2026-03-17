@@ -10,7 +10,6 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy;
 import carbonconfiglib.api.SimpleConfigProxy.SimpleTarget;
 import carbonconfiglib.config.ConfigSettings;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -21,6 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
