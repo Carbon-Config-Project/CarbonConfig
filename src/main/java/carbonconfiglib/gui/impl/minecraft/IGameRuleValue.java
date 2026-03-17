@@ -3,7 +3,7 @@ package carbonconfiglib.gui.impl.minecraft;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 
-import carbonconfiglib.gui.api.DataType;
+import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.command.CommandSource;

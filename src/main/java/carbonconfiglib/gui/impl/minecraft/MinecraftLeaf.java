@@ -1,15 +1,16 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
+import java.util.Objects;
 
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.Texts;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -52,7 +53,11 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() { return value == null ? Objects.equals(entry.get(), entry.getDefault()) : value.isDefault(); }
+	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
+	@Override
+	public boolean isUnsaved() { return value != null && value.isUnsaved(); }
 	@Override
 	public void setPrevious() {
 		if(value != null) value.setPrevious();
@@ -60,7 +65,7 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public void setDefault() {
-		if(value != null) value.setDefault();
+		if(!isDefault()) asNode().setDefault();
 	}
 	
 	@Override
@@ -69,9 +74,7 @@ public class MinecraftLeaf implements IConfigNode
 	}
 	
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return false; }
+	public ReloadMode getReloadState() { return null; }
 	@Override
 	public String getNodeName() { return null; }
 	@Override
@@ -82,11 +85,11 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public ITextComponent getTooltip() {
 		String id = entry.getDescriptionId();
-		StringTextComponent result = new StringTextComponent("");
-		result.appendSibling(new TranslationTextComponent(id).applyTextStyle(TextFormatting.YELLOW));
+		ITextComponent result = Texts.empty();
+		result.appendSibling(Texts.translatable(id).applyTextStyle(TextFormatting.YELLOW));
 		id += ".description";
 		if(I18n.hasKey(id)) {
-			result.appendText("\n").appendSibling(new TranslationTextComponent(id).applyTextStyle(TextFormatting.GRAY));
+			result.appendText("\n").appendSibling(Texts.translatable(id).applyTextStyle(TextFormatting.GRAY));
 		}
 		return result;
 	}
