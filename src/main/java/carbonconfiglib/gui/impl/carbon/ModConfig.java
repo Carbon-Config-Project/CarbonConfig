@@ -1,28 +1,36 @@
 package carbonconfiglib.gui.impl.carbon;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.api.IConfigProxy.IPotentialTarget;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigHandler;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
+import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.networking.carbon.ConfigRequestPacket;
 import carbonconfiglib.networking.carbon.SaveConfigPacket;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.MultilinePolicy;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.PacketBuffer;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -44,6 +52,7 @@ public class ModConfig implements IModConfig
 	String modId;
 	ConfigHandler handler;
 	Config config;
+	Config original;
 	Path path;
 	
 	public ModConfig(String modId, ConfigHandler handler) {
@@ -54,6 +63,7 @@ public class ModConfig implements IModConfig
 		this.modId = modId;
 		this.handler = handler;
 		this.config = config;
+		this.original = config.copy();
 		this.path = path;
 	}
 	
@@ -78,7 +88,7 @@ public class ModConfig implements IModConfig
 		Config copy = config.copy();
 		try {
 			ConfigHandler.load(handler, copy, Files.readAllLines(path), false);
-			return new ModConfig(modId, handler, config, path);
+			return new ModConfig(modId, handler, copy, path);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -137,7 +147,7 @@ public class ModConfig implements IModConfig
 	
 	@Override
 	public IConfigNode getRootNode() {
-		return new ConfigRoot(config);
+		return new ConfigRoot(config, new ConfigPath(modId, config.getName()));
 	}
 	
 	@Override
@@ -151,10 +161,36 @@ public class ModConfig implements IModConfig
 	}
 	
 	@Override
-	public void save() {
+	public void save(boolean createBackup) {
+		if(createBackup) BackupManager.createBackup(this);
+		original = config.copy();
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 			writer.write(config.serialize(handler.getMultilinePolicy()));
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public byte[] createBackup() {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream))) {
+			writer.write(config.serialize(handler.getMultilinePolicy()));
+		}
+		catch(Exception e) { e.printStackTrace(); }
+		return stream.toByteArray();
+	}
+	
+	@Override
+	public void loadBackup(byte[] data) {
+		try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)))) {
+			List<String> lines = reader.lines().collect(Collectors.toList());
+			if(ConfigHandler.load(handler, config.copy(), lines, false)) {
+				ConfigHandler.load(handler, config, lines, false);
+				save(false);
+			}
+		}
+		catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -182,7 +218,9 @@ public class ModConfig implements IModConfig
 		}
 		
 		@Override
-		public void save() {
+		public void save(boolean createBackup) {
+			if(createBackup) BackupManager.createBackup(this);
+			original = config.copy();
 			CarbonConfig.NETWORK.sendToServer(new SaveConfigPacket(handler.getConfigIdentifer(), config.serialize(MultilinePolicy.DISABLED)));
 		}
 	}

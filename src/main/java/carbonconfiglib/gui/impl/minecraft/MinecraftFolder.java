@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.Texts;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules.Category;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
@@ -49,5 +49,5 @@ public class MinecraftFolder implements IConfigFolderNode {
 	@Override
 	public String getNodeName() { return cat.name().toLowerCase(Locale.ROOT); }
 	@Override
-	public ITextComponent getName() { return new TranslationTextComponent(cat.getDescriptionId()); }
+	public ITextComponent getName() { return Texts.translatable(cat.getDescriptionId()); }
 }

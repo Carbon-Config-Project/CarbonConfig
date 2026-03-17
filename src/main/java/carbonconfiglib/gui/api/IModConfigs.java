@@ -3,7 +3,8 @@ package carbonconfiglib.gui.api;
 import java.util.List;
 
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.impl.Reflects;
 import net.minecraftforge.fml.ExtensionPoint;
 

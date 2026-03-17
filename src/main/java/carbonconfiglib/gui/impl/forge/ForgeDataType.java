@@ -7,13 +7,14 @@ import java.util.function.Function;
 
 import carbonconfiglib.api.ISuggestionProvider;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.DataType;
+import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
+import speiger.src.collections.objects.utils.maps.Object2ObjectMaps;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -35,10 +36,11 @@ public class ForgeDataType<T>
 	private static final Map<Class<?>, ForgeDataType<?>> DATA_TYPES = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 	public static final ForgeDataType<Boolean> BOOLEAN = new ForgeDataType<>(Boolean.class, DataType.BOOLEAN, ForgeHelpers::parseBoolean, Object::toString, null);
 	public static final ForgeDataType<Integer> INTEGER = new ForgeDataType<>(Integer.class, DataType.INTEGER, Helpers::parseInt, Object::toString, ForgeHelpers::getIntLimit);
-	public static final ForgeDataType<Long> LONG = new ForgeDataType<>(Long.class, DataType.INTEGER, ForgeHelpers::parseLong, Object::toString, ForgeHelpers::getLongLimit);
-	public static final ForgeDataType<Float> FLOAT = new ForgeDataType<>(Float.class, DataType.DOUBLE, ForgeHelpers::parseFloat, Object::toString, ForgeHelpers::getFloatLimit);
+	public static final ForgeDataType<Long> LONG = new ForgeDataType<>(Long.class, DataType.LONG, Helpers::parseLong, Object::toString, ForgeHelpers::getLongLimit);
+	public static final ForgeDataType<Float> FLOAT = new ForgeDataType<>(Float.class, DataType.FLOAT, Helpers::parseFloat, Object::toString, ForgeHelpers::getFloatLimit);
 	public static final ForgeDataType<Double> DOUBLE = new ForgeDataType<>(Double.class, DataType.DOUBLE, Helpers::parseDouble, Object::toString, ForgeHelpers::getDoubleLimit);
 	public static final ForgeDataType<String> STRING = new ForgeDataType<>(String.class, DataType.STRING, ForgeHelpers::parseString, Object::toString, null);
+	public static final ForgeDataType<String> COLOR = new ForgeDataType<>(DataType.byClass(ColorWrapper.class), ForgeHelpers::parseString, Object::toString, null);
 	
 	DataType type;
 	Function<String, ParseResult<T>> parse;
@@ -113,6 +115,7 @@ public class ForgeDataType<T>
 		
 		@Override
 		public String serialize(Object value) {
+			if(value instanceof String) return (String)value;
 			return ((Enum<?>)value).name();
 		}
 		

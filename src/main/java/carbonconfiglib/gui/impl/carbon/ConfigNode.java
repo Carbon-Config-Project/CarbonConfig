@@ -5,11 +5,13 @@ import java.util.Locale;
 
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigSection;
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.Texts;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -29,11 +31,13 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class ConfigNode implements IConfigFolderNode
 {
+	ConfigPath path;
 	ConfigSection section;
 	List<IConfigNode> children;
 	
-	public ConfigNode(ConfigSection section) {
+	public ConfigNode(ConfigSection section, ConfigPath path) {
 		this.section = section;
+		this.path = path;
 	}
 
 	@Override
@@ -41,10 +45,10 @@ public class ConfigNode implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(ConfigSection sub : section.getChildren()) {
-				children.add(new ConfigNode(sub));
+				children.add(new ConfigNode(sub, path.append(sub.getName())));
 			}
 			for(ConfigEntry<?> entry : section.getEntries()) {
-				children.add(new ConfigLeaf(entry));
+				children.add(new ConfigLeaf(entry, path.append(entry.getKey())));
 			}
 		}
 		return children;
@@ -55,8 +59,8 @@ public class ConfigNode implements IConfigFolderNode
 	public ITextComponent getName() { return IConfigNode.createLabel(section.getName()); }
 	@Override
 	public ITextComponent getTooltip() {
-		StringTextComponent comp = new StringTextComponent("");
-		comp.append(new StringTextComponent(section.getName()).withStyle(TextFormatting.YELLOW));
+		IFormattableTextComponent comp = Texts.empty();
+		comp.append(Texts.literal(section.getName()).withStyle(TextFormatting.YELLOW));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
 			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(TextFormatting.GRAY));
