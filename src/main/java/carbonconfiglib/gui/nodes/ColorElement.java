@@ -29,10 +29,10 @@ import carbonconfiglib.utils.ParseResult;
  */
 public class ColorElement extends ValueElement
 {
-	CarbonSlider red = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.literal("Red: ")).setListener(this::updateSliders)));
-	CarbonSlider green = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.literal("Green: ")).setListener(this::updateSliders)));
-	CarbonSlider blue = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.literal("Blue: ")).setListener(this::updateSliders)));
-	CarbonSlider alpha = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.literal("Alpha: ")).setListener(this::updateSliders)));
+	CarbonSlider red = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.translatable("gui.carbonconfig.color.red")).setListener(this::updateSliders)));
+	CarbonSlider green = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.translatable("gui.carbonconfig.color.green")).setListener(this::updateSliders)));
+	CarbonSlider blue = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.translatable("gui.carbonconfig.color.blue")).setListener(this::updateSliders)));
+	CarbonSlider alpha = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 255).setPrefix(Texts.translatable("gui.carbonconfig.color.alpha")).setListener(this::updateSliders)));
 	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
 	ParseResult<Boolean> result;
 	boolean hasAlpha;
