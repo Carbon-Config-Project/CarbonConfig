@@ -125,7 +125,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 		if(configs.isEmpty()) {
 			if(CarbonConfig.BACKUP_TOASTS.get()) {
 				if(mode == Mode.CREATE) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
-				else if(mode == Mode.LOAD) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+				else if(mode == Mode.LOAD) Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToastIds.TUTORIAL_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
 			}
 			return;
 		}
