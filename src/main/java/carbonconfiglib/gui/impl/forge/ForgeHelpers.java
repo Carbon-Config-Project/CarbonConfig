@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
+import carbonconfiglib.gui.nodes.ColorElement.FormatType;
 import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
@@ -30,7 +31,7 @@ import net.minecraftforge.fml.config.ModConfig.ConfigReloading;
  * limitations under the License.
  */
 public class ForgeHelpers
-{    
+{
 	public static void saveConfig(Path path, CommentedConfig data) {
 		Helpers.ensureFolder(path.getParent());
 		data.configFormat().createWriter().write(data, path, WritingMode.REPLACE);
@@ -42,6 +43,15 @@ public class ForgeHelpers
 		ConfigReloading reloading = Reflects.createEvent(ConfigReloading.class, config);
 		if(reloading == null) return;
         ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(reloading);
+	}
+	
+	public static boolean isColor(Object value) {
+		return value instanceof String && FormatType.guessType((String)value) != null;
+	}
+	
+	public static String removeExtension(String file) {
+		int index = file.lastIndexOf('.');
+		return index == -1 ? file : file.substring(0, index);
 	}
 	
 	public static ParseResult<Boolean> parseBoolean(String value) {
