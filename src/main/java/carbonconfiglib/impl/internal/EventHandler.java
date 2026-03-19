@@ -14,10 +14,10 @@ import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ModConfigList;
 import carbonconfiglib.impl.PerWorldProxy;
-import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
+import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -66,7 +66,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
-		initMinecraftDataTypes(config);
+		InternalFeatures.initMinecraftDataTypes(config);
 		if(FMLEnvironment.dist.isDedicatedServer()) return;
 		ModLoadingContext context = ModLoadingContext.get();
 		if("minecraft".equals(context.getActiveNamespace())) {
@@ -74,12 +74,6 @@ public class EventHandler implements IConfigChangeListener
 			throw new IllegalStateException("Mod Configs Must be created (not loaded) during a Mod Loading Phase");
 		}
 		configs.computeIfAbsent(context.getActiveContainer(), ModConfigs::new).addConfig(config);
-	}
-	
-	public void initMinecraftDataTypes(ConfigHandler config) {
-		config.addParser('C', ColorValue::parse);
-		config.addTempParser('R');
-		config.addTempParser('K');
 	}
 	
 	@Override
@@ -142,6 +136,11 @@ public class EventHandler implements IConfigChangeListener
 				};
 			});
 		}
+		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
+			List<IModConfigs> configs = new ObjectArrayList<>();
+			V.applyConfigs(K, configs::add);
+			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
+		});
 		mappedConfigs.forEach((M, C) -> M.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (U, S) -> create(S, ModConfigList.createMultiIfApplicable(M, C))));
 		mappedConfigs.forEach((M, C) -> allKnownConfigs.put(M.getModId(), ModConfigList.createMultiIfApplicable(M, C)));
 	}
