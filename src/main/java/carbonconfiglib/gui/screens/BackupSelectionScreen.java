@@ -80,7 +80,7 @@ public class BackupSelectionScreen extends BaseCarbonScreen
 	
 	@Override
 	public void onClose() {
-		pushScreen(parent);
+		setScreen(parent);
 	}
 	
 	public static class BackupListEntry extends ListEntry<BackupListEntry> {

@@ -32,16 +32,19 @@ import carbonconfiglib.impl.entries.RegistryKeyValue;
 import carbonconfiglib.impl.entries.RegistryValue;
 import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.client.gui.screen.ModListScreen;
@@ -100,6 +103,7 @@ public class CarbonConfig
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
 		if(FMLEnvironment.dist.isClient()) {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientLoad);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onResourceReloadRegister);
 			MinecraftForge.EVENT_BUS.addListener(this::onKeyPressed);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
@@ -290,6 +294,11 @@ public class CarbonConfig
 		if(DEPENDENCY_VIEWER.test(event.getKey(), event.getScanCode()) && event.getAction() == GLFW.GLFW_PRESS) {
 			mc.setScreen(new ModDependencyScreen());
 		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public void onResourceReloadRegister(ParticleFactoryRegisterEvent event) {
+		((SimpleReloadableResourceManager)Minecraft.getInstance().getResourceManager()).registerReloadListener(SettingsLoader.INSTANCE);
 	}
 	
 	public void load(FMLServerAboutToStartEvent event) {
