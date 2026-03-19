@@ -13,19 +13,20 @@ import java.util.function.Predicate;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.file.FileNotFoundAction;
 import com.electronwill.nightconfig.toml.TomlFormat;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
+import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.networking.forge.RequestConfigPacket;
 import carbonconfiglib.networking.forge.SaveForgeConfigPacket;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelResource;
@@ -38,6 +39,8 @@ import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -57,21 +60,27 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 public class ForgeConfig implements IModConfig
 {
 	ModConfig config;
+	String fileName;
 	ForgeConfigSpec spec;
 	CommentedConfig data;
+	CommentedConfig original;
 	List<ConfigValue<?>> entries;
 	Path path;
 	
 	public ForgeConfig(ModConfig config) {
 		this.config = config;
+		this.fileName = validateString(config.getFileName());
 		spec = getSpec(config.getSpec());
 		data = config.getConfigData();
+		original = copy(data);
 		entries = collect();
 	}
 	
 	public ForgeConfig(ModConfig config, CommentedConfig data, Path path) {
 		this.config = config;
+		this.fileName = validateString(config.getFileName());
 		this.data = data;
+		this.original = copy(data);
 		this.path = path;
 		spec = getSpec(config.getSpec());
 		entries = collect();
@@ -99,14 +108,23 @@ public class ForgeConfig implements IModConfig
 		return null;
 	}
 	
+	protected static String validateString(String input) {
+		String sanitized = Path.of(input).getFileName().toString();
+		return input.equals(sanitized) ? input : sanitized;
+	}
+	
+	protected static CommentedConfig copy(CommentedConfig original) {
+		return original == null ? null : CommentedConfig.copy(original);
+	}
+	
 	@Override
 	public String getFileName() {
-		return config.getFileName();
+		return fileName;
 	}
 	
 	@Override
 	public String getConfigName() {
-		return config.getFileName();
+		return ForgeHelpers.removeExtension(fileName);
 	}
 	
 	@Override
@@ -136,7 +154,7 @@ public class ForgeConfig implements IModConfig
 	
 	@Override
 	public IConfigNode getRootNode() {
-		return new ForgeNode(new ObjectArrayList<>(), data, spec);
+		return new ForgeNode(new ObjectArrayList<>(), new ConfigPath(config.getModId(), getConfigName()), data, spec);
 	}
 	
 	@Override
@@ -163,7 +181,7 @@ public class ForgeConfig implements IModConfig
 		if(getConfigType() == ConfigType.SERVER) {
 			return getLevels();
 		}
-		return ObjectLists.emptyList();
+		return ObjectLists.empty();
 	}
 	
 	@Override
@@ -184,7 +202,9 @@ public class ForgeConfig implements IModConfig
 	}
 	
 	@Override
-	public void save() {
+	public void save(boolean createBackup) {
+		if(createBackup) BackupManager.createBackup(this);
+		original = copy(data);
 		if(path != null) {
 			ForgeHelpers.saveConfig(path, data);
 			return;
@@ -192,6 +212,23 @@ public class ForgeConfig implements IModConfig
 		config.save();
         config.getSpec().afterReload();
         ModList.get().getModContainerById(config.getModId()).get().dispatchConfigEvent(new ModConfigEvent.Reloading(this.config));
+	}
+	
+	@Override
+	public byte[] createBackup() {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		original.configFormat().createWriter().write(original, output);
+		return output.toByteArray();
+	}
+	
+	@Override
+	public void loadBackup(byte[] data) {
+		UnmodifiableConfig config = this.data.configFormat().createParser().parse(new ByteArrayInputStream(data));
+		for(int i = 0,m=entries.size();i<m;i++) {
+			ConfigValue<?> entry = entries.get(i);
+			this.data.set(entry.getPath(), config.get(entry.getPath()));
+		}
+		save(false);
 	}
 	
 	private List<ConfigValue<?>> collect() {
@@ -237,6 +274,7 @@ public class ForgeConfig implements IModConfig
 		public boolean test(FriendlyByteBuf t) {
 			try {
 				this.data = TomlFormat.instance().createParser().parse(new ByteArrayInputStream(t.readByteArray()));
+				this.original = copy(data);
 				return true;
 			}
 			catch(Exception e) {
@@ -246,7 +284,9 @@ public class ForgeConfig implements IModConfig
 		}
 		
 		@Override
-		public void save() {
+		public void save(boolean createBackup) {
+			if(createBackup) BackupManager.createBackup(this);
+			original = copy(data);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			data.configFormat().createWriter().write(data, stream);
 			CarbonConfig.NETWORK.sendToServer(new SaveForgeConfigPacket(config.getType(), config.getModId(), stream.toByteArray()));
