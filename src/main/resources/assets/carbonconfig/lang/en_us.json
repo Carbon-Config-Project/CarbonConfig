@@ -47,6 +47,7 @@
 	"gui.carbonconfig.dependency.license": "License: ",
 	"gui.carbonconfig.dependency.open_page": "Open Mod Page",
 	"gui.carbonconfig.dependency.not_provided": "Open Mod Page: Not Provided",
+	"gui.carbonconfig.dependency.open_issue": "Open Issue Tracker",
 	"gui.carbonconfig.dependency.missing": "Not Installed",
 	"gui.carbonconfig.dependency.config": "Open Configs",
 	"gui.carbonconfig.dependency.mods": "Open Mods Folder",
