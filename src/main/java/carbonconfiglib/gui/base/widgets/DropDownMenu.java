@@ -131,9 +131,9 @@ public class DropDownMenu<T> extends CarbonButton {
 				if(ownerState.isSelected(entry)) selections.setSelected(value);
 			}
 			selections.setItemHeight(ownerState.getElementHeight()).setChangeListener(() -> {
+				if(!ownerState.isMultiSelection()) ForgeHooksClient.popGuiLayer(getMinecraft());
 				if(selections.getSelectedItems().isEmpty() && !ownerState.isMultiSelection()) ownerState.reset();
 				else ownerState.replaceSelection(selections.getSelectedItems().stream().map(DropDownEntry::getEntry).toList());
-				if(!ownerState.isMultiSelection()) ForgeHooksClient.popGuiLayer(getMinecraft());
 			});
 			state.setCallback(selections::search);
 		}

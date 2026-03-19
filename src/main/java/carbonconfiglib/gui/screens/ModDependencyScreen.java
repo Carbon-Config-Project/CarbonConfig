@@ -42,6 +42,7 @@ import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.IModInfo.ModVersion;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -273,13 +274,23 @@ public class ModDependencyScreen extends BaseCarbonScreen
 					license.addLabel(Optional.ofNullable(info.getOwningFile().getLicense()).orElse("All Rights reserved"));
 					item.addSubMenu("license", license);
 					
-					info.getModURL().ifPresent(T -> {
+					info.getModURL().ifPresentOrElse(T -> {
 						try {
 							URI uri = T.toURI();
 							item.addNode("gui.carbonconfig.dependency.open_page", () -> Util.getPlatform().openUri(uri));					
 						}
 						catch(Exception e) { e.printStackTrace(); }
+					}, () -> {
+						item.addLabel(Component.translatable("gui.carbonconfig.dependency.not_provided"));
 					});
+					Optional.ofNullable(((ModFileInfo)info.getOwningFile()).getIssueURL()).ifPresent(T -> {
+						try {
+							URI uri = T.toURI();
+							item.addNode("gui.carbonconfig.dependency.open_issue", () -> Util.getPlatform().openUri(uri));					
+						}
+						catch(Exception e) { e.printStackTrace(); }
+					});
+					
 					IModConfigs configs = EventHandler.INSTANCE.getConfigsForMod(info.getModId());
 					if(configs != null) {
 						item.addNode("gui.carbonconfig.dependency.config", () -> {
