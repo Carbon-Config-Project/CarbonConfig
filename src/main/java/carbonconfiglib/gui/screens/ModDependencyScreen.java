@@ -1,5 +1,6 @@
 package carbonconfiglib.gui.screens;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -278,6 +279,13 @@ public class ModDependencyScreen extends BaseCarbonScreen
 					SubMenuItem license = new SubMenuItem("gui.carbonconfig.dependency.license");
 					license.addLabel(Optional.ofNullable(String.join("\n", info.getLicense())).filter(((Predicate<String>)String::isBlank).negate()).orElse("All Rights reserved"));
 					item.addSubMenu("license", license);
+					info.getContact().get("issues").or(() -> info.getContact().get("sources")).ifPresent(T -> {
+						try {
+							URI uri = URI.create(T);
+							item.addNode("gui.carbonconfig.dependency.open_issue", () -> Util.getPlatform().openUri(uri));					
+						}
+						catch(Exception e) { e.printStackTrace(); }						
+					});
 					IModConfigs configs = EventHandler.INSTANCE.getConfigsForMod(info.getId());
 					if(configs != null) {
 						item.addNode("gui.carbonconfig.dependency.config", () -> {
