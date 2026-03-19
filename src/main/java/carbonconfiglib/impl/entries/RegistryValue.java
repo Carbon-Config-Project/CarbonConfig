@@ -66,7 +66,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		String[] result = new String[value.size()];
 		int i = 0;
 		for(T entry : value) {
-			result[i] = registry.getKey(entry).toString();
+			result[i++] = registry.getKey(entry).toString();
 		}
 		return serializeArray(policy, result);
 	}

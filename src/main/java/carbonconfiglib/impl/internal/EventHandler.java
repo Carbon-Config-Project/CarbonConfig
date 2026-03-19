@@ -6,16 +6,12 @@ import java.util.Map;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
 import carbonconfiglib.config.ConfigHandler;
-import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IModConfigs;
-import carbonconfiglib.gui.api.ISuggestionRenderer;
-import carbonconfiglib.gui.config.ColorElement;
-import carbonconfiglib.gui.config.RegistryElement;
+import carbonconfiglib.gui.impl.ModConfigList;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
-import carbonconfiglib.gui.widgets.SuggestionRenderers;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.entries.ColorValue;
-import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.utils.SyncType;
@@ -31,12 +27,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
@@ -143,7 +134,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Environment(EnvType.CLIENT)
 	public void onConfigsLoaded() {
-		loadDefaultTypes();
+		InternalFeatures.loadDefaultTypes();
 	}
 	
 	public Map<String, IModConfigs> createConfigs() {
@@ -155,22 +146,6 @@ public class EventHandler implements IConfigChangeListener
 		return result;
 	}
 	
-	@Environment(EnvType.CLIENT)
-	private void loadDefaultTypes() {
-		ISuggestionRenderer.SuggestionRegistry.register(Item.class, new SuggestionRenderers.ItemEntry());
-		ISuggestionRenderer.SuggestionRegistry.register(Block.class, new SuggestionRenderers.ItemEntry());
-		ISuggestionRenderer.SuggestionRegistry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
-		ISuggestionRenderer.SuggestionRegistry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
-		ISuggestionRenderer.SuggestionRegistry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
-		ISuggestionRenderer.SuggestionRegistry.register(MobEffect.class, new SuggestionRenderers.PotionEntry());
-		
-		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
-		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
-		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:empty"));
-		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
-		DataType.registerType(MobEffect.class, RegistryElement.createForType(MobEffect.class, "minecraft:luck"));
-		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new, ColorElement::new));
-	}
 	
 	public void onPlayerServerJoinEvent(Player player) {
 		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.getConfigs().getConfigsToSync(), SyncType.SERVER_TO_CLIENT, true);

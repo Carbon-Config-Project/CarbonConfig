@@ -7,7 +7,7 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.api.IModConfigs;
-import carbonconfiglib.gui.screen.ConfigSelectorScreen;
+import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.impl.internal.EventHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,7 +36,7 @@ public class ModMenuIntegration implements ModMenuApi
 	
 	@Environment(EnvType.CLIENT)
 	private Screen create(Screen screen, IModConfigs configs) {	
-		return new ConfigSelectorScreen(configs, screen);
+		return new ConfigListScreen(screen, configs);
 	}
 	
 }

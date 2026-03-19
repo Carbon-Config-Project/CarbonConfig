@@ -3,18 +3,21 @@ package carbonconfiglib.gui.impl.minecraft;
 import java.util.List;
 import java.util.Objects;
 
+import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.Texts;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -37,57 +40,84 @@ public class MinecraftValue implements IValueNode
 	ObjectArrayList<String> previous = new ObjectArrayList<>();
 	IGameRuleValue entry;
 	String defaultValue;
+	String savedValue;
 	String current;
+	boolean autosave;
 	
 	public MinecraftValue(IGameRuleValue entry) {
 		this.entry = entry;
 		this.defaultValue = entry.getDefault(); 
 		this.current = entry.get();
+		this.savedValue = current;
 		this.previous.push(current);
 	}
 	
-	public void save() { entry.set(current); }
+	public MinecraftValue withAutosave() {
+		autosave = true;
+		return this;
+	}
+	
+	public void save() {
+		entry.set(current); 
+		savedValue = current;
+	}
 	
 	@Override
 	public boolean isDefault() { return Objects.equals(current, defaultValue); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public void setDefault() { current = defaultValue; }
+	public boolean isUnsaved() { return !Objects.equals(current, savedValue); }
+	@Override
+	public void setDefault() {
+		current = defaultValue; 
+		if(autosave) save();
+	}
 	@Override
 	public void setPrevious() {
 		current = previous.top();
 		if(previous.size() > 1) previous.pop();
+		if(autosave) save();
 	}
 	@Override
 	public void createTemp() { previous.push(current); }
 	@Override
-	public void apply() {
-		if(previous.size() > 1) previous.pop();
+	public void deleteTempIfNeeded() {
+		if(previous.size() > 1 && previous.top().equals(current)) {
+			previous.pop();
+		}
 	}
 	
 	@Override
+	public String getDefault() { return defaultValue; }
+	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { this.current = value; }
+	public void set(String value) {
+		this.current = value; 
+		if(autosave) save();
+	}
 	@Override
 	public ParseResult<Boolean> isValid(String value) { return entry.isValid(value); }
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override
-	public boolean requiresRestart() { return false; }
+	public IEntrySettings getSettings() { return null; }
 	@Override
-	public boolean requiresReload() { return false; }
+	public IRange getRange() { return null; }
+	@Override
+	public ReloadMode getReloadState() { return null; }
+	@Override
+	public String getNodeName() { return entry.getDescriptionId(); }
 	@Override
 	public Component getName() { return IConfigNode.createLabel(I18n.get(entry.getDescriptionId())); }
 	@Override
 	public Component getTooltip() {
 		String id = entry.getDescriptionId();
-		TextComponent result = new TextComponent("");
-		result.append(new TranslatableComponent(id).withStyle(ChatFormatting.YELLOW));
+		MutableComponent result = Texts.empty();
 		id += ".description";
 		if(I18n.exists(id)) {
-			result.append("\n").append(new TranslatableComponent(id).withStyle(ChatFormatting.GRAY));
+			result.append("\n").append(Texts.translatable(id).withStyle(ChatFormatting.GRAY));
 		}
 		return result;
 	}
