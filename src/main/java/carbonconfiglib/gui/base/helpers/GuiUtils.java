@@ -163,6 +163,9 @@ public class GuiUtils
 	}
     
 	public static void drawTextureRegion(GuiGraphics graphics, float x, float y, float texX, float texY, float width, float height, float texWidth, float texHeight, float textureWidth, float textureHeight) {
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		Matrix4f matrix = graphics.pose().last().pose();
 		float maxX = x + width;
 		float maxY = y + height;
