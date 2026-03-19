@@ -133,7 +133,10 @@ public class EventHandler implements IConfigChangeListener
 	public void onConfigsLoaded() {
 		InternalFeatures.loadDefaultTypes();
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
-		configs.forEach((M, C) -> mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C));
+		configs.forEach((M, C) -> {
+			if(CarbonConfig.MODS_DISABLED.contains(M.getMetadata().getId())) return;
+			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
+		});
 		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
 			V.applyConfigs(K, T -> {
 				mappedConfigs.supplyIfAbsent(K, ObjectArrayList::new).add(T); 
