@@ -13,13 +13,14 @@ import com.google.gson.JsonObject;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.gui.api.node.ConfigPath;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import speiger.src.collections.objects.maps.interfaces.Object2ObjectMap;
 
-public class SettingsLoader extends SimpleJsonResourceReloadListener
+public class SettingsLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener
 {
 	public static final SettingsLoader INSTANCE = new SettingsLoader();
 	Map<ResourceLocation, Function<JsonObject, IEntrySettings>> parsers = Object2ObjectMap.builder().map();
@@ -91,5 +92,10 @@ public class SettingsLoader extends SimpleJsonResourceReloadListener
 			if(entry.getValue().isJsonPrimitive()) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public ResourceLocation getFabricId() {
+		return new ResourceLocation("carbonconfig", "settings_system");
 	}
 }

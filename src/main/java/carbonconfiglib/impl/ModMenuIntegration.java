@@ -22,15 +22,14 @@ public class ModMenuIntegration implements ModMenuApi
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
 		if(!CarbonConfig.MOD_MENU_SUPPORT.get()) return null;
-		return T -> create(T, EventHandler.INSTANCE.createConfigs().get("carbonconfig"));
+		return T -> create(T, EventHandler.INSTANCE.getConfigsForMod("carbonconfig"));
 	}
 
 	@Override
 	public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
 		if(!CarbonConfig.MOD_MENU_SUPPORT.get()) return Object2ObjectMaps.empty();
-		Map<String, IModConfigs> configs = EventHandler.INSTANCE.createConfigs();
 		Object2ObjectMap<String, ConfigScreenFactory<?>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
-		configs.forEach((K, V) -> mappedConfigs.put(K, T -> create(T, V)));
+		EventHandler.INSTANCE.forEachConfigs((K, V) -> mappedConfigs.put(K, T -> create(T, V)));
 		return mappedConfigs;
 	}
 	

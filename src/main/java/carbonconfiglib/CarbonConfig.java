@@ -34,6 +34,8 @@ import carbonconfiglib.impl.entries.RegistryKeyValue;
 import carbonconfiglib.impl.entries.RegistryValue;
 import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
+import carbonconfiglib.impl.internal.InternalFeatures;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
 import net.fabricmc.api.EnvType;
@@ -42,12 +44,14 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
+import net.fabricmc.fabric.impl.resource.loader.ResourceManagerHelperImpl;
 import net.fabricmc.fabric.mixin.client.keybinding.KeyCodeAccessor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.player.Player;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
@@ -90,6 +94,7 @@ public class CarbonConfig implements ModInitializer
 		ServerLifecycleEvents.SERVER_STOPPING.register(T -> unload());
 		
 		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			InternalFeatures.loadDefaultSettings();
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			MOD_MENU_SUPPORT = section.addBool("enable-modmenu-support", true, "Enables that CarbonConfig automatically adds Mod Menu Support for all Carbon Configs").setRequiredReload(ReloadMode.GAME);
@@ -106,6 +111,7 @@ public class CarbonConfig implements ModInitializer
 			handler = createConfig("carbonconfig", config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
+			ResourceManagerHelperImpl.get(PackType.CLIENT_RESOURCES).registerReloadListener(SettingsLoader.INSTANCE);
 		}
 	}
 	
@@ -295,7 +301,7 @@ public class CarbonConfig implements ModInitializer
 			Window window = T.getWindow();
 			if(T.player != null && mapping.isDown()) {
 				if(Screen.hasShiftDown() && createModMenuScreen(T.screen, T::setScreen)) return;
-				T.setScreen(new ConfigListScreen(T.screen, BackgroundTexture.DEFAULT.asHolder(), new ObjectArrayList<>(EventHandler.INSTANCE.createConfigs().values())));
+				T.setScreen(new ConfigListScreen(T.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 			}
 			else if(InputConstants.isKeyDown(window.getWindow(), ((KeyCodeAccessor)mappingOther).fabric_getBoundKey().getValue())) {
 				T.setScreen(new ModDependencyScreen());

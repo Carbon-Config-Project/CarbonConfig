@@ -76,7 +76,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	
 	private void openConfigs() {
 		if(Screen.hasShiftDown() && CarbonConfig.createModMenuScreen(this, this::setScreen)) return;
-		setScreen(new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), new ObjectArrayList<>(EventHandler.INSTANCE.createConfigs().values())));
+		setScreen(new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 	}
 	
 	private void openMods() {
@@ -279,7 +279,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 					SubMenuItem license = new SubMenuItem("gui.carbonconfig.dependency.license");
 					license.addLabel(Optional.ofNullable(String.join("\n", info.getLicense())).filter(((Predicate<String>)String::isBlank).negate()).orElse("All Rights reserved"));
 					item.addSubMenu("license", license);
-					IModConfigs configs = EventHandler.INSTANCE.createConfigs().get(info.getId());
+					IModConfigs configs = EventHandler.INSTANCE.getConfigsForMod(info.getId());
 					if(configs != null) {
 						item.addNode("gui.carbonconfig.dependency.config", () -> {
 							MenuScreen.popAllMenus();
