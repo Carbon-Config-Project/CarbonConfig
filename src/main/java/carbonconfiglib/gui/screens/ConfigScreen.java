@@ -73,7 +73,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
 	CheckBoxState bulkEdit = new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onBulkEdit(T.getValue())).setTooltip(Texts.translatable("gui.carbonconfig.bulkedit"));
 	CheckBoxState autoSave = new CheckBoxState(CarbonConfig.AUTO_SAVE.get(), Icon.AUTO_SAVE).setCallback(T -> onNodeChanged()).setTooltip(Texts.translatable("gui.carbonconfig.autosave"));
-	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(T -> recalculateNode()).withTooltip(T -> Texts.literal(T.getState().getValue() ? "gui.carbonconfig.layout.normal" : "gui.carbonconfig.layout.wide"));
+	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(T -> recalculateNode()).withTooltip(T -> Texts.translatable(T.getState().getValue() ? "gui.carbonconfig.layout.normal" : "gui.carbonconfig.layout.wide"));
 	CarbonButton save;
 	Stack<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
 	Stack<BaseElement> pickedNode = new ObjectArrayList<>();
