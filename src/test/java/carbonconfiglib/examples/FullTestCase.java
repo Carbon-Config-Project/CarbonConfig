@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.mutable.MutableObject;
+
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.api.ISuggestionProvider;
@@ -13,6 +15,9 @@ import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
+import carbonconfiglib.gui.api.Texts;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.ColorType;
+import carbonconfiglib.gui.api.types.EntrySettingTypes.CompoundArrayNamer;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.utils.ParseResult;
@@ -124,14 +129,22 @@ public class FullTestCase
 		}
 		
 		public static IConfigSerializer<ExampleValue> createSerializer() {
-			CompoundBuilder builder = new CompoundBuilder();
-			builder.simple("Name", EntryDataType.STRING).setComments("Testing my ", "New Line Comment").finish();
-			builder.simple("Year", EntryDataType.INTEGER).addSuggestions(ISuggestionProvider.array(Suggestion.value("2000"), Suggestion.value("2005"), Suggestion.value("2017"), Suggestion.value("2023"))).finish();
-			builder.simple("Fluffyness", EntryDataType.DOUBLE).finish();
-			builder.variants("Color", EntryDataType.INTEGER, ColorWrapper.class, ColorWrapper::parse, ColorWrapper::serialize).addSuggestions(ISuggestionProvider.array(Suggestion.namedTypeValue("Red", "0xFF0000", ColorWrapper.class), Suggestion.namedTypeValue("Green", "0x00FF00", ColorWrapper.class), Suggestion.namedTypeValue("Blue", "0x0000FF", ColorWrapper.class), Suggestion.namedTypeValue("Black", "0x000000", ColorWrapper.class), Suggestion.namedTypeValue("White", "0xFFFFFF", ColorWrapper.class))).finish();
-			builder.enums("Dye", DyeColor.class).forceSuggestions(true).finish();
-			builder.simple("Valid", EntryDataType.BOOLEAN).finish();
-			return IConfigSerializer.noSync(builder.build(), new ExampleValue(), ExampleValue::parse, ExampleValue::serialize);
+			MutableObject<IConfigSerializer<ExampleValue>> result = new MutableObject<>();
+			CompoundBuilder builder = new CompoundBuilder().addSetting(new CompoundArrayNamer<>(result::getValue, T -> Texts.literal(T.name)))
+					.simple("Name", EntryDataType.STRING).setComments("Testing my ", "New Line Comment")
+					.simple("Year", EntryDataType.INTEGER).addSuggestions(ISuggestionProvider.array(Suggestion.value("2000"), Suggestion.value("2005"), Suggestion.value("2017"), Suggestion.value("2023")))
+					.simple("Fluffyness", EntryDataType.DOUBLE)
+					.variants("Color", EntryDataType.CUSTOM, ColorWrapper.class, ColorWrapper::parse, ColorWrapper::serialize).addEntrySetting(new ColorType(false))
+						.addSuggestions(ISuggestionProvider.array(
+								Suggestion.namedTypeValue("Red", "0xFF0000", ColorWrapper.class), 
+								Suggestion.namedTypeValue("Green", "0x00FF00", ColorWrapper.class), 
+								Suggestion.namedTypeValue("Blue", "0x0000FF", ColorWrapper.class), 
+								Suggestion.namedTypeValue("Black", "0x000000", ColorWrapper.class), 
+								Suggestion.namedTypeValue("White", "0xFFFFFF", ColorWrapper.class)))
+					.enums("Dye", DyeColor.class).forceSuggestions(true)
+					.simple("Valid", EntryDataType.BOOLEAN);
+			result.setValue(IConfigSerializer.noSync(builder.build(), new ExampleValue(), ExampleValue::parse, ExampleValue::serialize));
+			return result.getValue();
 		}
 		
 		public static List<ExampleValue> createExample() {
