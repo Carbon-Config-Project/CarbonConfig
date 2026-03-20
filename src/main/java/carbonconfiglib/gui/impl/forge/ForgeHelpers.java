@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
+import carbonconfiglib.gui.nodes.ColorElement.FormatType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.neoforged.fml.ModList;
@@ -39,6 +40,15 @@ public class ForgeHelpers
 		config.getConfigData().putAll(data);
 		config.save();
 		ModList.get().getModContainerById(config.getModId()).ifPresent(T -> T.dispatchConfigEvent(IConfigEvent.reloading(config)));
+	}
+	
+	public static boolean isColor(Object value) {
+		return value instanceof String && FormatType.guessType((String)value) != null;
+	}
+	
+	public static String removeExtension(String file) {
+		int index = file.lastIndexOf('.');
+		return index == -1 ? file : file.substring(0, index);
 	}
 	
 	public static ParseResult<Boolean> parseBoolean(String value) {
@@ -95,7 +105,7 @@ public class ForgeHelpers
 		Object obj = spec.getRange();
 		if(obj == null) return null;
 		try {
-            Class<Object> rangeClass = (Class<Object>)Class.forName("net.neoforged.neoforge.common.ModConfigSpec$Range");
+            Class<Object> rangeClass = (Class<Object>)Class.forName("net.minecraftforge.common.ModConfigSpec$Range");
             return new Object[] {ObfuscationReflectionHelper.getPrivateValue(rangeClass, obj, "min"), ObfuscationReflectionHelper.getPrivateValue(rangeClass, obj, "max")};
 		}
 		catch(Exception e) { e.printStackTrace(); }

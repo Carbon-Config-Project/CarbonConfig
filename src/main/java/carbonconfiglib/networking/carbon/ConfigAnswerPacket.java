@@ -2,15 +2,11 @@ package carbonconfiglib.networking.carbon;
 
 import java.util.UUID;
 
-import carbonconfiglib.gui.api.IRequestScreen;
+import carbonconfiglib.gui.api.IRequestReceiver;
 import carbonconfiglib.networking.ICarbonPacket;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -53,14 +49,6 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	
 	@Override
 	public void process(Player player) {
-		processClient();
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	private void processClient() {
-		Screen screen = Minecraft.getInstance().screen;
-		if(screen instanceof IRequestScreen) {
-			((IRequestScreen)screen).receiveConfigData(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
-		}
+		IRequestReceiver.Impl.receiveData(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
 	}
 }

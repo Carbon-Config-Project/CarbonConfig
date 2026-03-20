@@ -17,11 +17,11 @@ import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.StructureList.ListBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
+import speiger.src.collections.objects.utils.ObjectSets;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -40,11 +40,11 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 {
-	Registry<T> registry;
+	NamedRegistry<T> registry;
 	Class<T> clz;
 	Predicate<T> filter;
 	
-	protected RegistryValue(String key, Registry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
+	protected RegistryValue(String key, NamedRegistry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
 		super(key, defaultValue, comment);
 		this.registry = registry;
 		this.clz = clz;
@@ -66,7 +66,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		String[] result = new String[value.size()];
 		int i = 0;
 		for(T entry : value) {
-			result[i] = registry.getKey(entry).toString();
+			result[i++] = registry.getKey(entry).toString();
 		}
 		return serializeArray(policy, result);
 	}
@@ -78,7 +78,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		for(int i = 0,m=values.length;i<m;i++) {
 			ResourceLocation location = ResourceLocation.tryParse(values[i]);
 			if(location == null) continue;
-			T entry = registry.get(location);
+			T entry = registry.getValue(location);
 			if(entry == null || (filter != null && !filter.test(entry))) continue;
 			result.add(entry);
 		}
@@ -95,11 +95,11 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		}
 		return ParseResult.success(true);
 	}
-		
+	
 	private ParseResult<T> parseEntry(String value) {
 		ResourceLocation location = ResourceLocation.tryParse(value);
 		if(location == null) return ParseResult.error(value, "Id ["+value+"] isn't a valid resource location");
-		T entry = registry.get(location);
+		T entry = registry.getValue(location);
 		if(entry == null || (filter != null && !filter.test(entry))) return ParseResult.error(value, "Id ["+value+"] isn't valid");
 		return ParseResult.success(entry);
 	}
@@ -133,7 +133,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
-			T entry = registry.byId(buffer.readVarInt());
+			T entry = registry.getValue(buffer.readVarInt());
 			if(entry != null) {
 				result.add(entry);
 			}
@@ -153,10 +153,9 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		}
 		
 		@Override
-		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(T entry : value.registry) {
-				String key = value.registry.getKey(entry).toString();
-				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
+		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) { 
+			for(T entry : value.registry.getValues()) {
+				Suggestion suggestion = Suggestion.namedTypeValue(value.registry.getName(entry), value.registry.getKey(entry).toString(), value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
 			}
 		}
@@ -196,10 +195,18 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		}
 		
 		public RegistryValue<E> build(Registry<E> registry) {
-			return new RegistryValue<>(key, registry, clz, values, filter, comments);
+			return new RegistryValue<>(key, NamedRegistry.ofRegistry(registry, null), clz, values, filter, comments);
 		}
 		
 		public RegistryValue<E> build(Registry<E> registry, ConfigSection section) {
+			return section.add(new RegistryValue<>(key, NamedRegistry.ofRegistry(registry, null), clz, values, filter, comments));
+		}
+		
+		public RegistryValue<E> build(NamedRegistry<E> registry) {
+			return new RegistryValue<>(key, registry, clz, values, filter, comments);
+		}
+		
+		public RegistryValue<E> build(NamedRegistry<E> registry, ConfigSection section) {
 			return section.add(new RegistryValue<>(key, registry, clz, values, filter, comments));
 		}
 	}
