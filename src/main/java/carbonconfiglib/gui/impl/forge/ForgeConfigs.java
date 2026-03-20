@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.BackgroundTexture;
-import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
-import carbonconfiglib.impl.internal.ModConfigs;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
