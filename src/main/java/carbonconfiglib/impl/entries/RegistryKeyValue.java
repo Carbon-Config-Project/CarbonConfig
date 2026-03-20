@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import carbonconfiglib.api.ISuggestionProvider;
@@ -66,7 +67,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		String[] result = new String[value.size()];
 		int i = 0;
 		for(ResourceLocation entry : value) {
-			result[i] = entry.toString();
+			result[i++] = entry.toString();
 		}
 		return serializeArray(policy, result);
 	}
@@ -164,6 +165,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		String key;
 		Set<E> unparsedValues = new ObjectLinkedOpenHashSet<>();
 		Set<ResourceLocation> values = new ObjectLinkedOpenHashSet<>();
+		Function<ResourceLocation, String> namingFunction;
 		Predicate<ResourceLocation> filter;
 		String[] comments;
 		
