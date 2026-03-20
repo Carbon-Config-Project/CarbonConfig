@@ -120,11 +120,11 @@ public class CarbonNetwork
 	
 	@Environment(EnvType.CLIENT)
 	public boolean isInstalledOnServerSafe(Player player) {
-		return player instanceof LocalPlayer && isInstalledOnServer((LocalPlayer)player);
+		return player instanceof LocalPlayer && isInstalledOnServer();
 	}
 	
 	@Environment(EnvType.CLIENT)
-	public boolean isInstalledOnServer(LocalPlayer player) {
+	public boolean isInstalledOnServer() {
 		return ClientPlayNetworking.canSend(new ResourceLocation("carbonconfig", "sync"));
 	}
 	
