@@ -21,19 +21,25 @@ import net.minecraft.network.chat.Component;
  */
 public enum ReloadMode implements IReloadMode, ILimitationSerializer
 {
-	WORLD(Component.translatable("gui.carbonconfig.reload.sync"), "Requires Reload"),
-	GAME(Component.translatable("gui.carbonconfig.restart.sync"), "Requires Restart");
+	WORLD("gui.carbonconfig.reload.sync", "gui.carbonconfig.reload.state", "Requires Reload"),
+	GAME("gui.carbonconfig.restart.sync", "gui.carbonconfig.restart.state", "Requires Restart");
 	
 	Component message;
+	Component state;
 	String comment;
 	
-	private ReloadMode(Component message, String comment) {
-		this.message = message;
+	private ReloadMode(String message, String state, String comment) {
+		this.message = Component.translatable(message);
+		this.state = Component.translatable(state);
 		this.comment = comment;
 	}
 	
 	public Component getMessage() {
 		return message;
+	}
+	
+	public Component getState() {
+		return state;
 	}
 	
 	public static ReloadMode or(ReloadMode original, IReloadMode other) {

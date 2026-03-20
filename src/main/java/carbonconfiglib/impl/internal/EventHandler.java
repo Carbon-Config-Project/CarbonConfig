@@ -1,5 +1,7 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -7,7 +9,9 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
+import carbonconfiglib.gui.screens.ModConfigList;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
@@ -52,7 +56,8 @@ public class EventHandler implements IConfigChangeListener
 	private static MinecraftServer ACTIVE_SERVER = null;
 	boolean wasLoaded = false;
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<>();
-	
+	Map<String, IModConfigs> allKnownConfigs = new Object2ObjectLinkedOpenHashMap<>();
+
 	public static MinecraftServer getServer() {
 		return ACTIVE_SERVER;
 	}
@@ -95,7 +100,6 @@ public class EventHandler implements IConfigChangeListener
 			if(!FabricLoader.getInstance().isDevelopmentEnvironment()) return;
 			throw new IllegalStateException("Mod Configs Must be created (not loaded) during a Mod Loading Phase");
 		}
-		if(CarbonConfig.MODS_DISABLED.contains(active.getMetadata().getId())) return;
 		configs.computeIfAbsent(active, ModConfigs::new).addConfig(config);
 	}
 		
@@ -128,16 +132,36 @@ public class EventHandler implements IConfigChangeListener
 	@Environment(EnvType.CLIENT)
 	public void onConfigsLoaded() {
 		InternalFeatures.loadDefaultTypes();
+		getOrCreateConfigs();
 	}
 	
-	public Map<String, IModConfigs> createConfigs() {
+	public Map<String, IModConfigs> getOrCreateConfigs() {
+		if(!allKnownConfigs.isEmpty()) return Collections.unmodifiableMap(allKnownConfigs);
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
-		configs.forEach((M, C) -> mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C));
-		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> V.applyConfigs(K, mappedConfigs.supplyIfAbsent(K, ObjectArrayList::new)::add));
-		Object2ObjectMap<String, IModConfigs> result = new Object2ObjectLinkedOpenHashMap<>();
-		mappedConfigs.forEach((K, V) -> result.put(K.getMetadata().getId(), ModConfigList.createMultiIfApplicable(K, V)));
-		result.put("minecraft", new MinecraftConfigs());
+		configs.forEach((M, C) -> {
+			if(CarbonConfig.MODS_DISABLED.contains(M.getMetadata().getId())) return;
+			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
+		});
+		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
+			V.applyConfigs(K, T -> {
+				mappedConfigs.supplyIfAbsent(K, ObjectArrayList::new).add(T); 
+			});
+		});
+		
+		allKnownConfigs.clear();
+		mappedConfigs.forEach((K, V) -> allKnownConfigs.put(K.getMetadata().getId(), ModConfigList.createMultiIfApplicable(K, V)));
+		allKnownConfigs.put("minecraft", new MinecraftConfigs());
+		return Collections.unmodifiableMap(allKnownConfigs);
+	}
+	
+	public List<IModConfigs> getAllConfigs() {
+		List<IModConfigs> result = new ObjectArrayList<IModConfigs>(allKnownConfigs.values());
+		result.sort(Comparator.comparing(IModConfigs::getModName));
 		return result;
+	}
+	
+	public IModConfigs getConfigsForMod(String id) {
+		return allKnownConfigs.get(id);
 	}
 	
 	public void onPlayerServerJoinEvent(Player player) {
