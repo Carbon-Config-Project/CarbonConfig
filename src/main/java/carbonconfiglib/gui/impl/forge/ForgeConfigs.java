@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.Optional;
 
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.BackgroundTexture;
-import carbonconfiglib.gui.api.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfigs;
-import carbonconfiglib.impl.internal.ModConfigs;
-import it.unimi.dsi.fastutil.objects.ObjectLists;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforgespi.language.IModInfo;
+import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -54,7 +54,7 @@ public class ForgeConfigs implements IModConfigs
 	@Override
 	public List<IModConfig> getConfigInstances(ConfigType type) {
 		ModConfig config = configs.get(fromType(type));
-		return config == null ? ObjectLists.emptyList() : ObjectLists.singleton(new ForgeConfig(config));
+		return config == null ? ObjectLists.empty() : ObjectLists.singleton(new ForgeConfig(config));
 	}
 	
 	@Override

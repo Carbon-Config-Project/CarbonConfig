@@ -4,10 +4,11 @@ import java.util.List;
 
 import carbonconfiglib.config.Config;
 import carbonconfiglib.config.ConfigSection;
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import net.minecraft.network.chat.Component;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -27,10 +28,12 @@ import net.minecraft.network.chat.Component;
 public class ConfigRoot implements IConfigFolderNode
 {
 	Config config;
+	ConfigPath path;
 	List<IConfigNode> children;
 	
-	public ConfigRoot(Config config) {
+	public ConfigRoot(Config config, ConfigPath path) {
 		this.config = config;
+		this.path = path;
 	}
 
 	@Override
@@ -38,7 +41,7 @@ public class ConfigRoot implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(ConfigSection section : config.getChildren()) {
-				children.add(new ConfigNode(section));
+				children.add(new ConfigNode(section, path.append(section.getName())));
 			}
 		}
 		return children;

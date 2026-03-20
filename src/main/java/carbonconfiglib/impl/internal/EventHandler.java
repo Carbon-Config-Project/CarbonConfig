@@ -1,5 +1,6 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -7,9 +8,11 @@ import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
-import carbonconfiglib.gui.screen.ConfigSelectorScreen;
+import carbonconfiglib.gui.screens.ConfigListScreen;
+import carbonconfiglib.gui.screens.ModConfigList;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
@@ -58,6 +61,7 @@ public class EventHandler implements IConfigChangeListener
 {
 	public static final EventHandler INSTANCE = new EventHandler();
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
+	Map<String, IModConfigs> allKnownConfigs = new Object2ObjectLinkedOpenHashMap<>();
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
@@ -137,6 +141,17 @@ public class EventHandler implements IConfigChangeListener
 			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
 		});
 		mappedConfigs.forEach(this::register);
+		mappedConfigs.forEach((M, C) -> allKnownConfigs.put(M.getModId(), ModConfigList.createMultiIfApplicable(M, C)));
+	}
+	
+	public List<IModConfigs> getAllConfigs() {
+		List<IModConfigs> result = new ObjectArrayList<IModConfigs>(allKnownConfigs.values());
+		result.sort(Comparator.comparing(IModConfigs::getModName));
+		return result;
+	}
+	
+	public IModConfigs getConfigsForMod(String id) {
+		return allKnownConfigs.get(id);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -204,7 +219,7 @@ public class EventHandler implements IConfigChangeListener
 		
 		@Override
 		public Screen createScreen(Minecraft minecraft, Screen screen) {
-			return new ConfigSelectorScreen(ModConfigList.createMultiIfApplicable(container, configs), screen);
+			return new ConfigListScreen(screen, ModConfigList.createMultiIfApplicable(container, configs));
 		}
 		
 	}
