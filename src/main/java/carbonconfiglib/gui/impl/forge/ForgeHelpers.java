@@ -5,13 +5,14 @@ import java.nio.file.Path;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
+import carbonconfiglib.gui.nodes.ColorElement.FormatType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraftforge.common.ForgeConfigSpec.Range;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.IConfigEvent;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -39,6 +40,15 @@ public class ForgeHelpers
 		config.getConfigData().putAll(data);
 		config.save();
 		ModList.get().getModContainerById(config.getModId()).ifPresent(T -> T.dispatchConfigEvent(IConfigEvent.reloading(config)));
+	}
+	
+	public static boolean isColor(Object value) {
+		return value instanceof String && FormatType.guessType((String)value) != null;
+	}
+	
+	public static String removeExtension(String file) {
+		int index = file.lastIndexOf('.');
+		return index == -1 ? file : file.substring(0, index);
 	}
 	
 	public static ParseResult<Boolean> parseBoolean(String value) {
@@ -90,10 +100,16 @@ public class ForgeHelpers
 		return "";
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Object[] getRangeInfo(ValueSpec spec) {
-		Range<?> obj = spec.getRange();
+		Object obj = spec.getRange();
 		if(obj == null) return null;
-		return new Object[] {obj.getMin(), obj.getMax()};
+		try {
+            Class<Object> rangeClass = (Class<Object>)Class.forName("net.minecraftforge.common.ForgeConfigSpec$Range");
+            return new Object[] {ObfuscationReflectionHelper.getPrivateValue(rangeClass, obj, "min"), ObfuscationReflectionHelper.getPrivateValue(rangeClass, obj, "max")};
+		}
+		catch(Exception e) { e.printStackTrace(); }
+		return null;
 	}
 	
 }

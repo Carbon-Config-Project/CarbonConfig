@@ -7,9 +7,9 @@ import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.utils.SyncType;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris

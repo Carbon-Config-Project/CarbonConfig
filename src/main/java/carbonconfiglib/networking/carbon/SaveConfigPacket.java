@@ -3,9 +3,9 @@ package carbonconfiglib.networking.carbon;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.config.ConfigHandler;
 import carbonconfiglib.networking.ICarbonPacket;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
