@@ -76,10 +76,10 @@ public class CarbonButton extends CarbonBaseButton {
 	public void renderWidget(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
 		if(selected) {
 			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
-			graphics.blitSprite(SPRITES.get(active, isHoveredOrFocused()), getX(), getY(), width, height);
+			graphics.blitSprite(SPRITES.get(active, isHovered()), getX(), getY(), width, height);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		}
-		else graphics.blitSprite(SPRITES.get(active, isHoveredOrFocused()), getX(), getY(), width, height);
+		else graphics.blitSprite(SPRITES.get(active, isHovered()), getX(), getY(), width, height);
 		if(highlighted) {
 			graphics.fill(getX()+2, getY()+2, getX()+getWidth()-2, getY()+getHeight()-2, 0x33FFFFFF);
 		}
