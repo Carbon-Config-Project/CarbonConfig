@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
+import carbonconfiglib.gui.nodes.ColorElement.FormatType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.neoforged.fml.config.IConfigEvent;
@@ -37,7 +38,16 @@ public class ForgeHelpers
 	public static void saveConfig(CommentedConfig data, ModConfig config) {
 		config.getConfigData().putAll(data);
 		config.save();
-		IConfigEvent.reloading(config).post();
+        IConfigEvent.reloading(config).post();
+	}
+	
+	public static boolean isColor(Object value) {
+		return value instanceof String && FormatType.guessType((String)value) != null;
+	}
+	
+	public static String removeExtension(String file) {
+		int index = file.lastIndexOf('.');
+		return index == -1 ? file : file.substring(0, index);
 	}
 	
 	public static ParseResult<Boolean> parseBoolean(String value) {
@@ -90,7 +100,8 @@ public class ForgeHelpers
 	}
 	
 	public static Object[] getRangeInfo(ValueSpec spec) {
-		Range<?> obj = spec.getRange();
-		return obj == null ? null : new Object[] {obj.getMin(), obj.getMax()};
+		Range<?> range = spec.getRange();
+		return new Object[] {range.getMin(), range.getMax()};
 	}
+	
 }

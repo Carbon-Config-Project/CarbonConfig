@@ -37,6 +37,11 @@ Here is a list of what features we append when compared to forge.
 
 A Developer Guide can be found [Here](DEVELOPER_GUIDE.md)
 
+### Resource Packs
+
+Carbon Config supports some overrides via resource packs.
+Which can be found [here](RESOURCE_PACKS.md)
+
 ## The GUI
 
 Carbon Config isn't just a Config Library it is also a GUI implementation for other Config Libraries.    
