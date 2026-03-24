@@ -1,9 +1,9 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
@@ -132,6 +132,11 @@ public class EventHandler implements IConfigChangeListener
 	@Environment(EnvType.CLIENT)
 	public void onConfigsLoaded() {
 		InternalFeatures.loadDefaultTypes();
+		getOrCreateConfigs();
+	}
+	
+	public Map<String, IModConfigs> getOrCreateConfigs() {
+		if(!allKnownConfigs.isEmpty()) return Collections.unmodifiableMap(allKnownConfigs);
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
 			if(CarbonConfig.MODS_DISABLED.contains(M.getMetadata().getId())) return;
@@ -146,6 +151,7 @@ public class EventHandler implements IConfigChangeListener
 		allKnownConfigs.clear();
 		mappedConfigs.forEach((K, V) -> allKnownConfigs.put(K.getMetadata().getId(), ModConfigList.createMultiIfApplicable(K, V)));
 		allKnownConfigs.put("minecraft", new MinecraftConfigs());
+		return Collections.unmodifiableMap(allKnownConfigs);
 	}
 		
 	public List<IModConfigs> getAllConfigs() {
@@ -156,10 +162,6 @@ public class EventHandler implements IConfigChangeListener
 	
 	public IModConfigs getConfigsForMod(String id) {
 		return allKnownConfigs.get(id);
-	}
-	
-	public void forEachConfigs(BiConsumer<String, IModConfigs> configs) {
-		allKnownConfigs.forEach(configs);
 	}
 	
 	public void onPlayerServerJoinEvent(Player player) {

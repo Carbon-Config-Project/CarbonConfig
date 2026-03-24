@@ -29,7 +29,7 @@ public class ModMenuIntegration implements ModMenuApi
 	public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
 		if(!CarbonConfig.MOD_MENU_SUPPORT.get()) return Object2ObjectMaps.empty();
 		Object2ObjectMap<String, ConfigScreenFactory<?>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
-		EventHandler.INSTANCE.forEachConfigs((K, V) -> mappedConfigs.put(K, T -> create(T, V)));
+		EventHandler.INSTANCE.getOrCreateConfigs().forEach((K, V) -> mappedConfigs.put(K, T -> create(T, V)));
 		return mappedConfigs;
 	}
 	
