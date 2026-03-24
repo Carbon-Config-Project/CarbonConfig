@@ -2,13 +2,11 @@ package carbonconfiglib.networking.carbon;
 
 import java.util.UUID;
 
-import carbonconfiglib.gui.api.IRequestScreen;
+import carbonconfiglib.gui.api.IRequestReceiver;
 import carbonconfiglib.networking.ICarbonPacket;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -61,9 +59,6 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	
 	@Environment(EnvType.CLIENT)
 	private void processClient() {
-		Screen screen = Minecraft.getInstance().screen;
-		if(screen instanceof IRequestScreen) {
-			((IRequestScreen)screen).receiveConfigData(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
-		}
+		IRequestReceiver.Impl.receiveData(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
 	}
 }

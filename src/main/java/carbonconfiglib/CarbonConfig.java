@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.logging.LogUtils;
 
 import carbonconfiglib.api.ConfigType;
@@ -17,12 +19,13 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
 import carbonconfiglib.config.HashSetCache;
-import carbonconfiglib.gui.api.BackgroundTexture;
-import carbonconfiglib.gui.api.BackgroundTypes;
 import carbonconfiglib.gui.api.IModConfig;
-import carbonconfiglib.gui.screen.ConfigScreen;
-import carbonconfiglib.gui.screen.ConfigScreen.Navigator;
-import carbonconfiglib.gui.screen.RequestScreen;
+import carbonconfiglib.gui.api.background.BackgroundTexture;
+import carbonconfiglib.gui.api.background.BackgroundTypes;
+import carbonconfiglib.gui.screens.ConfigListScreen;
+import carbonconfiglib.gui.screens.ConfigRequestScreen;
+import carbonconfiglib.gui.screens.ConfigScreen;
+import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -38,12 +41,14 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
+import net.fabricmc.fabric.mixin.client.keybinding.KeyBindingAccessor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -71,7 +76,11 @@ public class CarbonConfig implements ModInitializer
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
 	public static BoolValue SHOW_MISSING_ENCHANTMENT_TEXTURE;
+	public static BoolValue AUTO_BACKUP;
+	public static BoolValue BACKUP_TOASTS;
+	public static BoolValue AUTO_SAVE;
 	public static HashSetCache<String> MODS_DISABLED;
+
 
 	@Override
 	public void onInitialize()
@@ -86,11 +95,14 @@ public class CarbonConfig implements ModInitializer
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			MOD_MENU_SUPPORT = section.addBool("enable-modmenu-support", true, "Enables that CarbonConfig automatically adds Mod Menu Support for all Carbon Configs").setRequiredReload(ReloadMode.GAME);
+			AUTO_SAVE = section.addBool("auto-save", false, "Defines if autosave is enabled by default or not");
+			AUTO_BACKUP = section.addBool("auto-backup", false, "Enables that a backup is created everytime a config is saved through the gui");
+			BACKUP_TOASTS = section.addBool("backup-toasts", true, "Show toasts when backups were created or loaded to give feedback");
 			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], "Disables these mods from carbon configs Gui System.", "This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored", "List of Blacklisted ModIds").setRequiredReload(ReloadMode.GAME);
-			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.PLANKS, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
+			BACKGROUNDS = section.addEnum("custom-background", BackgroundTypes.RAW_IRON, BackgroundTypes.class, "Allows to pick for a Custom Background for Configs that use the default Background");
 			FORCE_CUSTOM_BACKGROUND = section.addBool("force-custom-background", false, "Allows to force your Selected Background to be used everywhere instead of just default Backgrounds");
-			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
 			SHOW_MISSING_ENCHANTMENT_TEXTURE = section.addBool("show-missing-texture", true, "Enables that if enchantments are not accessible that missing textures will be shown instead of nothing");
+			INGAME_BACKGROUND = section.addBool("ingame-background", false, "Allows to set if the background is always visible or only if you are not in a active world");
 			handler = createConfig("carbonconfig", config, ConfigSettings.withConfigType(ConfigType.CLIENT).withAutomations(AutomationType.AUTO_LOAD));
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
@@ -153,7 +165,7 @@ public class CarbonConfig implements ModInitializer
 	}
 	
 	/**
-	 * Creates a ConfigBuilder that contains a Set of "Registry Keys" (ResourceLocation).
+	 * Creates a ConfigBuilder that contains a Set of "Registry Keys" (ResourceLocation.fromNamespaceAndPath).
 	 * The idea behind that is you might want a filter or something about a specific Type of Registry Element.
 	 * Compared to the RegistryEntry this doesn't actually store the "Registry Instances" but only the Ids.
 	 * @param <E> the Class-Type for Config Gui rendering.
@@ -203,24 +215,22 @@ public class CarbonConfig implements ModInitializer
 	@Environment(EnvType.CLIENT)
 	public static void openRemoteConfigFolder(IModConfig config, BackgroundTexture texture, String...path) {
 		MinecraftServer server = EventHandler.getServer();
-		if(server != null) {
+		if (server != null) {
 			openLocalConfigFolder(config, texture, path);
 			return;
-		}
-		else if(config.getConfigType() == ConfigType.CLIENT) {
+		} else if (config.getConfigType() == ConfigType.CLIENT) {
 			CarbonConfig.LOGGER.info("Tried to open a local config in the Remote Opener");
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		if(mc.player == null) {
+		if (mc.player == null) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
 			return;
-		}
-		else if(!mc.hasSingleplayerServer() && !mc.player.hasPermissions(4)) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");			
+		} else if (!mc.hasSingleplayerServer() && !mc.player.hasPermissions(4)) {
+			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");
 			return;
 		}
-		mc.setScreen(new RequestScreen(texture.asHolder(), Navigator.create(config).withWalker(path), mc.screen, config));
+		mc.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.screen, config, path));
 	}
 	
 	/**
@@ -247,12 +257,12 @@ public class CarbonConfig implements ModInitializer
 	 */
 	@Environment(EnvType.CLIENT)
 	public static void openLocalConfigFolder(IModConfig config, BackgroundTexture texture, String...path) {
-		if(!config.isLocalConfig()) {
+		if (!config.isLocalConfig()) {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config in the Local Opener");
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(new ConfigScreen(Navigator.create(config).withWalker(path), config, mc.screen, texture.asHolder()));
+		mc.setScreen(new ConfigScreen(config, texture.asHolder(), mc.screen).withWalker(path == null || path.length <= 0 ? null : ObjectArrayList.wrap(path)));
 	}
 	
 	public static boolean hasPermission(Player player, int permissionLevel) {
@@ -277,21 +287,29 @@ public class CarbonConfig implements ModInitializer
 	
 	@Environment(EnvType.CLIENT)
 	public void registerKeys() {
-		if(FabricLoader.getInstance().isModLoaded("modmenu")) {
-			KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
-			KeyBindingRegistryImpl.registerKeyBinding(mapping);
-			ClientTickEvents.END_CLIENT_TICK.register(T -> {
-				if(T.player != null && mapping.isDown()) {
-					createModMenuScreen(T.screen, T::setScreen);
-				}
-			});
-		}
+		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
+		KeyBindingRegistryImpl.registerKeyBinding(mapping);
+		KeyMapping mappingOther = new KeyMapping("key.carbon_config.dep", GLFW.GLFW_KEY_KP_ADD, "key.carbon_config");
+		KeyBindingRegistryImpl.registerKeyBinding(mappingOther);
+		ClientTickEvents.END_CLIENT_TICK.register(T -> {
+			Window window = T.getWindow();
+			if(T.player != null && mapping.isDown()) {
+				if(Screen.hasShiftDown() && createModMenuScreen(T.screen, T::setScreen)) return;
+				T.setScreen(new ConfigListScreen(T.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+			}
+			else if(InputConstants.isKeyDown(window.getWindow(), ((KeyBindingAccessor)mappingOther).fabric_getBoundKey().getValue())) {
+				T.setScreen(new ModDependencyScreen());
+			}
+		});
 	}
 	
 	@Environment(EnvType.CLIENT)
-	private void createModMenuScreen(Screen parent, Consumer<Screen> toOpen) {
-		try { toOpen.accept((Screen)Class.forName("com.terraformersmc.modmenu.gui.ModsScreen").getDeclaredConstructor(Screen.class).newInstance(parent)); }
-		catch(Exception e) { e.printStackTrace(); }
+	public static boolean createModMenuScreen(Screen parent, Consumer<Screen> toOpen) {
+		try {
+			toOpen.accept((Screen)Class.forName("com.terraformersmc.modmenu.gui.ModsScreen").getDeclaredConstructor(Screen.class).newInstance(parent)); 
+			return true;
+		}
+		catch(Exception e) { return false; }
 	}
 	
 	public void load() {
