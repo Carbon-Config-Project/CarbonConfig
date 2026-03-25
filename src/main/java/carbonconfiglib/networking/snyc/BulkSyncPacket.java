@@ -71,7 +71,7 @@ public class BulkSyncPacket implements ICarbonPacket
 			result = ReloadMode.or(result, packet.processEntry(player));
 		}
 		if(result != null) {
-			player.sendMessage(result.getName());
+			player.sendMessage(result.getMessage());
 		}
 	}
 	

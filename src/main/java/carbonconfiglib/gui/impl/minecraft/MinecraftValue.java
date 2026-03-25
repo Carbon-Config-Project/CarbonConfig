@@ -3,20 +3,20 @@ package carbonconfiglib.gui.impl.minecraft;
 import java.util.List;
 import java.util.Objects;
 
+import carbonconfiglib.api.IEntrySettings;
+import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
-import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.IValueNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.IValueNode;
+import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.base.helpers.Texts;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -39,57 +39,83 @@ public class MinecraftValue implements IValueNode
 	ObjectArrayList<String> previous = new ObjectArrayList<>();
 	IGameRuleValue entry;
 	String defaultValue;
+	String savedValue;
 	String current;
+	boolean autosave;
 	
 	public MinecraftValue(IGameRuleValue entry) {
 		this.entry = entry;
 		this.defaultValue = entry.getDefault(); 
 		this.current = entry.get();
+		this.savedValue = current;
 		this.previous.push(current);
 	}
 	
-	public void save() { entry.set(current); }
+	public MinecraftValue withAutosave() {
+		autosave = true;
+		return this;
+	}
+	
+	public void save() {
+		entry.set(current); 
+		savedValue = current;
+	}
 	
 	@Override
 	public boolean isDefault() { return Objects.equals(current, defaultValue); }
 	@Override
 	public boolean isChanged() { return !Objects.equals(previous.top(), current); }
 	@Override
-	public void setDefault() { current = defaultValue; }
+	public boolean isUnsaved() { return !Objects.equals(current, savedValue); }
+	@Override
+	public void setDefault() {
+		current = defaultValue; 
+		if(autosave) save();
+	}
 	@Override
 	public void setPrevious() {
 		current = previous.top();
 		if(previous.size() > 1) previous.pop();
+		if(autosave) save();
 	}
 	@Override
 	public void createTemp() { previous.push(current); }
 	@Override
-	public void apply() {
-		if(previous.size() > 1) previous.pop();
+	public void deleteTempIfNeeded() {
+		if(previous.size() > 1 && previous.top().equals(current)) {
+			previous.pop();
+		}
 	}
 	
 	@Override
+	public String getDefault() { return defaultValue; }
+	@Override
 	public String get() { return current; }
 	@Override
-	public void set(String value) { this.current = value; }
+	public void set(String value) {
+		this.current = value; 
+		if(autosave) save();
+	}
 	@Override
 	public ParseResult<Boolean> isValid(String value) { return entry.isValid(value); }
 	@Override
 	public StructureType getNodeType() { return StructureType.SIMPLE; }
 	@Override
-	public boolean requiresRestart() { return false; }
+	public IEntrySettings getSettings() { return null; }
 	@Override
-	public boolean requiresReload() { return false; }
+	public IRange getRange() { return null; }
+	@Override
+	public ReloadMode getReloadState() { return null; }
+	@Override
+	public String getNodeName() { return entry.getDescriptionId(); }
 	@Override
 	public ITextComponent getName() { return IConfigNode.createLabel(I18n.format(entry.getDescriptionId())); }
 	@Override
 	public ITextComponent getTooltip() {
-		String id = entry.getDescriptionId();
-		TextComponentBase result = new TextComponentString("");
-		result.appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.YELLOW)));
-		id += ".description";
+		String id = entry.getDescriptionId()+".description";
+		ITextComponent result = Texts.empty();
 		if(I18n.hasKey(id)) {
-			result.appendText("\n").appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.GRAY)));
+			result.appendSibling(Texts.translatable(id).setStyle(Texts.applyStyle(TextFormatting.GRAY)));
 		}
 		return result;
 	}
