@@ -265,7 +265,6 @@ public class MenuScreen extends BaseCarbonScreen {
 					int x = owner.getLeft() + owner.getWidth() - 3;
 					int width = Math.min(180, Math.max(80, MenuScreen.countWidth(menu, font)));
 			        int screenWidth = Minecraft.getInstance().mainWindow.getScaledWidth();
-			        CarbonConfig.LOGGER.info("Testing: "+(x+width)+", "+screenWidth);
 			        if(x + width >= screenWidth) {
 			        	x = owner.getLeft() - width - 5;
 			        }
