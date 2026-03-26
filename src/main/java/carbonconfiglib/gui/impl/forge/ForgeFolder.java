@@ -3,8 +3,9 @@ package carbonconfiglib.gui.impl.forge;
 import java.util.List;
 import java.util.Locale;
 
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
@@ -34,9 +35,11 @@ public class ForgeFolder implements IConfigFolderNode
 {
 	ConfigCategory category;
 	List<IConfigNode> children;
+	ConfigPath path;
 	
-	public ForgeFolder(ConfigCategory category) {
+	public ForgeFolder(ConfigCategory category, ConfigPath path) {
 		this.category = category;
+		this.path = path;
 	}
 
 	@Override
@@ -44,7 +47,7 @@ public class ForgeFolder implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(Property prop : category.values()) {
-				children.add(new ForgeLeaf(prop));
+				children.add(new ForgeLeaf(prop, path.append(prop.getName())));
 			}
 		}
 		return children;
@@ -57,12 +60,11 @@ public class ForgeFolder implements IConfigFolderNode
 	@Override
 	public ITextComponent getTooltip() {
 		TextComponentBase comp = new TextComponentString("");
-		comp.appendSibling(new TextComponentString(I18n.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()).setStyle(new Style().setColor(TextFormatting.YELLOW)));
 		String comment = category.getComment();
 		if(comment != null) {
 			String[] array = comment.split("\n");
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)));
+				for(int i = 0;i<array.length;comp.appendText(array[i++]).setStyle(new Style().setColor(TextFormatting.GRAY)).appendText("\n"));
 			}
 
 		}

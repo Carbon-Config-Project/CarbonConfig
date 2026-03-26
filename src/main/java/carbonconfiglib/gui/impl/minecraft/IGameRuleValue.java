@@ -1,6 +1,6 @@
 package carbonconfiglib.gui.impl.minecraft;
 
-import carbonconfiglib.gui.api.DataType;
+import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
 import net.minecraft.world.GameRules;

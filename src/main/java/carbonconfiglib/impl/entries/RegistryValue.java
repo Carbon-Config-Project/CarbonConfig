@@ -20,7 +20,6 @@ import carbonconfiglib.utils.structure.StructureList.ListBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.IForgeRegistry;
 import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
@@ -42,13 +41,13 @@ import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
  */
 public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionConfigEntry<T, Set<T>>
 {
-	FMLControlledNamespacedRegistry<T> registry;
+	NamedRegistry<T> registry;
 	Class<T> clz;
 	Predicate<T> filter;
 	
-	protected RegistryValue(String key, IForgeRegistry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
+	protected RegistryValue(String key, NamedRegistry<T> registry, Class<T> clz, Set<T> defaultValue, Predicate<T> filter, String... comment) {
 		super(key, defaultValue, comment);
-		this.registry = (FMLControlledNamespacedRegistry<T>)registry;
+		this.registry = registry;
 		this.clz = clz;
 		this.filter = filter;
 		addSuggestionProvider(new RegistrySuggestions<>(this));
@@ -68,7 +67,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		String[] result = new String[value.size()];
 		int i = 0;
 		for(T entry : value) {
-			result[i] = registry.getKey(entry).toString();
+			result[i++] = registry.getKey(entry).toString();
 		}
 		return serializeArray(policy, result);
 	}
@@ -131,7 +130,7 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
-			T entry = registry.getRaw(buffer.readVarInt());
+			T entry = registry.getValue(buffer.readVarInt());
 			if(entry != null) {
 				result.add(entry);
 			}
@@ -151,10 +150,9 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		}
 		
 		@Override
-		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(T entry : value.registry) {
-				String key = value.registry.getKey(entry).toString();
-				Suggestion suggestion = Suggestion.namedTypeValue(key, key, value.clz);
+		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) { 
+			for(T entry : value.registry.getValues()) {
+				Suggestion suggestion = Suggestion.namedTypeValue(value.registry.getName(entry), value.registry.getKey(entry).toString(), value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
 			}
 		}
@@ -194,10 +192,18 @@ public class RegistryValue<T extends IForgeRegistryEntry<T>> extends CollectionC
 		}
 		
 		public RegistryValue<E> build(IForgeRegistry<E> registry) {
-			return new RegistryValue<>(key, registry, clz, values, filter, comments);
+			return new RegistryValue<>(key, NamedRegistry.ofForge(registry, null), clz, values, filter, comments);
 		}
 		
 		public RegistryValue<E> build(IForgeRegistry<E> registry, ConfigSection section) {
+			return section.add(new RegistryValue<>(key, NamedRegistry.ofForge(registry, null), clz, values, filter, comments));
+		}
+		
+		public RegistryValue<E> build(NamedRegistry<E> registry) {
+			return new RegistryValue<>(key, registry, clz, values, filter, comments);
+		}
+		
+		public RegistryValue<E> build(NamedRegistry<E> registry, ConfigSection section) {
 			return section.add(new RegistryValue<>(key, registry, clz, values, filter, comments));
 		}
 	}

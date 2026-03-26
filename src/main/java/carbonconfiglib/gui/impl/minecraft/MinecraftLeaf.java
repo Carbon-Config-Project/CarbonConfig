@@ -1,16 +1,15 @@
 package carbonconfiglib.gui.impl.minecraft;
 
 import java.util.List;
+import java.util.Objects;
 
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.gui.base.helpers.Texts;
+import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -54,7 +53,11 @@ public class MinecraftLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() { return value == null ? Objects.equals(entry.get(), entry.getDefault()) : value.isDefault(); }
+	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
+	@Override
+	public boolean isUnsaved() { return value != null && value.isUnsaved(); }
 	@Override
 	public void setPrevious() {
 		if(value != null) value.setPrevious();
@@ -62,7 +65,7 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public void setDefault() {
-		if(value != null) value.setDefault();
+		if(!isDefault()) asNode().setDefault();
 	}
 	
 	@Override
@@ -71,9 +74,7 @@ public class MinecraftLeaf implements IConfigNode
 	}
 	
 	@Override
-	public boolean requiresRestart() { return false; }
-	@Override
-	public boolean requiresReload() { return false; }
+	public ReloadMode getReloadState() { return null; }
 	@Override
 	public String getNodeName() { return null; }
 	@Override
@@ -83,12 +84,10 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public ITextComponent getTooltip() {
-		String id = entry.getDescriptionId();
-		TextComponentBase result = new TextComponentString("");
-		result.appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.YELLOW)));
-		id += ".description";
+		String id = entry.getDescriptionId()+".description";
+		ITextComponent result = Texts.empty();
 		if(I18n.hasKey(id)) {
-			result.appendText("\n").appendSibling(new TextComponentTranslation(id).setStyle(new Style().setColor(TextFormatting.GRAY)));
+			result.appendText("\n").appendSibling(Texts.translatable(id).setStyle(Texts.applyStyle(TextFormatting.GRAY)));
 		}
 		return result;
 	}

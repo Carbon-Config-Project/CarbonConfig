@@ -1,5 +1,7 @@
 package carbonconfiglib.gui.impl.minecraft;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,9 +18,10 @@ import java.util.function.Predicate;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.PerWorldProxy.WorldTarget;
+import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import net.minecraft.client.Minecraft;
@@ -55,6 +58,7 @@ public class MinecraftConfig implements IModConfig
 	public static final GameRules DEFAULTS = new GameRules();
 	private static final Map<String, Category> CATEOGIRES = createCategories();
 	protected GameRules current;
+	protected GameRules original;
 	List<IGameRuleValue> values = new ObjectArrayList<>();
 	Map<Category, List<IGameRuleValue>> keys = new Object2ObjectLinkedOpenHashMap<>();
 	
@@ -70,9 +74,15 @@ public class MinecraftConfig implements IModConfig
 	
 	protected void setRules(GameRules current) {
 		this.current = current;
+		this.original = copy(current);
 		collect();		
 	}
 	
+	protected static GameRules copy(GameRules rules) {
+		GameRules newRules = new GameRules();
+		newRules.readFromNBT(rules.writeToNBT());
+		return newRules;
+	}
 	
 	private void collect() {
 		for(String key : current.getRules()) {
@@ -180,9 +190,28 @@ public class MinecraftConfig implements IModConfig
 	}
 	
 	@Override
-	public void save() {
+	public void save(boolean createBackup) {
 		if(current == null) return;
+		if(createBackup) BackupManager.createBackup(this);
+		original = copy(current);
 		current.readFromNBT(current.writeToNBT());
+	}
+	
+	@Override
+	public byte[] createBackup() {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		try { CompressedStreamTools.writeCompressed(original.writeToNBT(), stream); }
+		catch(IOException e) { e.printStackTrace(); }
+		return stream.toByteArray();
+	}
+	
+	@Override
+	public void loadBackup(byte[] data) {
+		try {
+			current.readFromNBT(CompressedStreamTools.readCompressed(new ByteArrayInputStream(data)));
+			save(false);
+		}
+		catch(Exception e) { e.printStackTrace(); }
 	}
 	
 	public static Map<String, Category> createCategories() {
@@ -237,12 +266,14 @@ public class MinecraftConfig implements IModConfig
 		
 		private static GameRules parse(NBTTagCompound tag) {
 			GameRules rules = new GameRules();
-			rules.readFromNBT(tag);;
+			rules.readFromNBT(tag);
 			return rules;
 		}
 		
 		@Override
-		public void save() {
+		public void save(boolean createBackup) {
+			if(createBackup) BackupManager.createBackup(this);
+			original = copy(current);
 			tag.getCompoundTag("Data").setTag("GameRules", current.writeToNBT());
 			try(OutputStream stream = Files.newOutputStream(file)) {
 				CompressedStreamTools.writeCompressed(tag, stream);
@@ -255,8 +286,10 @@ public class MinecraftConfig implements IModConfig
 	
 	public static class NetworkConfig extends MinecraftConfig implements Predicate<PacketBuffer> {
 		@Override
-		public void save() {
+		public void save(boolean createBackup) {
 			if(current == null) return;
+			if(createBackup) BackupManager.createBackup(this);
+			original = copy(current);
 			CarbonConfig.NETWORK.sendToServer(new SaveGameRulesPacket(current));
 		}
 		
