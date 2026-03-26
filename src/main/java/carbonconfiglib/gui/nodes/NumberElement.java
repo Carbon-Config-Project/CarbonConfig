@@ -61,9 +61,6 @@ public abstract class NumberElement extends ValueElement
 	@Override
 	protected void readValue() {
 		text.getState().setValue(node.get());
-		setSliderValue();
-		text.setTextColor(0xE0E0E0);
-		result = null;
 	}
 	
 	@Override

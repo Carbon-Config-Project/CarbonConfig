@@ -34,6 +34,7 @@ import carbonconfiglib.impl.entries.RegistryKeyValue;
 import carbonconfiglib.impl.entries.RegistryValue;
 import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
+import carbonconfiglib.impl.internal.InternalFeatures;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.Minecraft;
@@ -106,6 +107,7 @@ public class CarbonConfig
 		NETWORK.init();
 		MinecraftForge.EVENT_BUS.register(EventHandler.INSTANCE);
 		if(FMLCommonHandler.instance().getSide().isClient()) {
+			InternalFeatures.loadDefaultSettings();
 			MinecraftForge.EVENT_BUS.register(this);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");

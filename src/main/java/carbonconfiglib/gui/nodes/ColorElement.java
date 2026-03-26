@@ -55,9 +55,6 @@ public class ColorElement extends ValueElement
 	@Override
 	protected void readValue() {
 		text.getState().setSilentValue(node.get());
-		readSliders();
-		text.setTextColor(0xE0E0E0);
-		result = null;
 	}
 	
 	private void readSliders() {

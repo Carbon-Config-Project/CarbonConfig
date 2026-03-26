@@ -221,7 +221,6 @@ public class EventHandler implements IConfigChangeListener
 	public List<IModConfigs> getAllConfigs() {
 		List<IModConfigs> result = new ObjectArrayList<IModConfigs>(allKnownConfigs.values());
 		result.sort(Comparator.comparing(IModConfigs::getModName));
-		CarbonConfig.LOGGER.info("Testing: "+result.size());
 		return result;
 	}
 	

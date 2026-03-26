@@ -268,6 +268,7 @@ public class GuiUtils
 		builder.pos(x0 + width, y1, -100D).tex(width / 32F, y1 / 32F).color(color, color, color, 255).endVertex();
 		builder.pos(x0, y1, -100D).tex(0F, y1 / 32F).color(color, color, color, 255).endVertex();
 		tes.draw();
+        GlStateManager.depthFunc(515);
 	}
 	
 	public static void renderListShadow(int x0, int x1, int y0, int y1, int width, int height) {

@@ -70,6 +70,14 @@ public class CarbonEditBox extends GuiTextField implements ITooltipProvider, IWi
 	public void setHeight(int height) {
 		this.height = height;
 	}
+	
+	@Override
+	public void setText(String textIn) {
+		super.setText(textIn);
+		if(state.getFilter().apply(textIn)) {
+			setResponderEntryValue(0, getText());
+		}
+	}
 
 	@Override
 	public void render(int mouseX, int mouseY, float partialTicks) {
