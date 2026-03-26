@@ -1,3 +1,6 @@
 [submodule "carbonconfig"]
 	path = carbonconfig
 	url = ssh://git@github.com/Carbon-Config-Project/CarbonConfigLib.git
+[submodule "src/main/resources/assets/carbonconfig/lang"]
+	path = src/main/resources/assets/carbonconfig/lang
+	url = git@github.com:Carbon-Config-Project/CarbonConfigLang.git
