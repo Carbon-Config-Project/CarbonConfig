@@ -1,15 +1,19 @@
 package carbonconfiglib.gui.impl.forge;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import carbonconfiglib.api.ConfigType;
-import carbonconfiglib.gui.api.IConfigNode;
 import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.impl.internal.BackupManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.MinecraftForge;
@@ -21,6 +25,8 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEve
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.PostConfigChangedEvent;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import scala.actors.threadpool.Arrays;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -82,7 +88,7 @@ public class ForgeConfig implements IModConfig
 	public boolean createConfig(Path path) { return false; }
 	
 	@Override
-	public IConfigNode getRootNode() { return new ForgeRoot(config, configName); }
+	public IConfigNode getRootNode() { return new ForgeRoot(config, configName, new ConfigPath(getModId(), configName)); }
 	@Override
 	public List<IConfigTarget> getPotentialFiles() { return ObjectLists.empty(); }
 	@Override
@@ -91,7 +97,8 @@ public class ForgeConfig implements IModConfig
 	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<PacketBuffer>> network) { return null; }
 	
 	@Override
-	public void save() {
+	public void save(boolean createBackup) {
+		if(createBackup) BackupManager.createBackup(this);
 		boolean needsRestart = scanConfigs(this::hasRestartChanged);
 		config.save();
         ConfigChangedEvent event = new OnConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart);
@@ -100,11 +107,62 @@ public class ForgeConfig implements IModConfig
             MinecraftForge.EVENT_BUS.post(new PostConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart));
 	}
 	
+	@Override
+	public byte[] createBackup() {
+		try { return Files.readAllBytes(config.getConfigFile().toPath()); }
+		catch(Exception e) { e.printStackTrace(); }
+		return null;
+	}
+	
+	@Override
+	public void loadBackup(byte[] data) {
+		try {
+			Files.write(config.getConfigFile().toPath(), data);
+			Map<Property, String[]> before = serializeConfigs();
+			config.load();
+			boolean needsRestart = scanConfigs(T -> doPropsMatch(T, before.get(T)) && T.requiresMcRestart());
+	        ConfigChangedEvent event = new OnConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart);
+	        MinecraftForge.EVENT_BUS.post(event);
+	        if (!event.getResult().equals(Result.DENY))
+	            MinecraftForge.EVENT_BUS.post(new PostConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart));
+		}
+		catch(Exception e) { e.printStackTrace(); }
+	}
+	
+	private boolean doPropsMatch(Property prop, String[] data) {
+		return prop.isList() ? Arrays.deepEquals(prop.getStringList(), data) : Objects.equals(prop.getString(), data[0]);
+	}
+	
+	private Map<Property, String[]> serializeConfigs() {
+		Map<Property, String[]> result = new Object2ObjectOpenHashMap<>();
+		for(String section : config.getCategoryNames()) {
+			serializeCat(config.getCategory(section), result);
+		}
+		return result;
+	}
+	
+	private void serializeCat(ConfigCategory cat, Map<Property, String[]> data) {
+		for(ConfigCategory sub : cat.getChildren()) {
+			serializeCat(sub, data);
+		}
+		for(Property prop : cat.values()) {
+			data.put(prop, prop.isList() ? prop.getStringList().clone() : new String[] {prop.getString()});
+		}
+	}
+	
 	private boolean scanConfigs(Predicate<Property> props) {
 		for(String section : config.getCategoryNames()) {
-			for(Property prop : config.getCategory(section).values()) {
-				if(props.test(prop)) return true;
-			}
+			if(scanCategory(props, config.getCategory(section))) return true;
+		}
+		return false;
+	}
+	
+	private boolean scanCategory(Predicate<Property> props, ConfigCategory cat) {
+		for(ConfigCategory sub : cat.getChildren()) {
+			if(scanCategory(props, sub)) return true;
+		}
+		for(Property prop : cat.values()) {
+			if(props.test(prop)) return true;
 		}
 		return false;
 	}
@@ -115,45 +173,5 @@ public class ForgeConfig implements IModConfig
 	
 	private boolean isNotDefault(Property property) {
 		return !property.isDefault();
-	}
-	
-	public static Configuration copy(Configuration config) {
-		Configuration newConfig = new Configuration();
-		for(String entry : config.getCategoryNames()) {
-			copy(config.getCategory(entry), newConfig.getCategory(entry));
-		}
-		return newConfig;
-	}
-	
-	public static void copy(ConfigCategory category, ConfigCategory newCategory) {
-		newCategory.setComment(category.getComment());
-		newCategory.setLanguageKey(category.getLanguagekey());
-		for(Entry<String, Property> entry : category.entrySet()) {
-			newCategory.put(entry.getKey(), copy(entry.getValue()));
-		}
-		for(ConfigCategory child : category.getChildren()) {
-			copy(child, new ConfigCategory(child.getName(), newCategory));
-		}
-	}
-	
-	public static Property copy(Property prop) {
-		if(prop.isList()) {
-			Property newProp = new Property(prop.getName(), prop.getStringList(), prop.getType());
-			newProp.setDefaultValues(prop.getDefaults());
-			newProp.setComment(prop.getComment());
-			newProp.setLanguageKey(prop.getLanguageKey());
-			newProp.setRequiresMcRestart(prop.requiresMcRestart());
-			newProp.setRequiresWorldRestart(prop.requiresWorldRestart());
-			newProp.setValidValues(prop.getValidValues());
-			return newProp;
-		}
-		Property newProp = new Property(prop.getName(), prop.getStringList(), prop.getType());
-		newProp.setDefaultValues(prop.getDefaults());
-		newProp.setComment(prop.getComment());
-		newProp.setLanguageKey(prop.getLanguageKey());
-		newProp.setRequiresMcRestart(prop.requiresMcRestart());
-		newProp.setRequiresWorldRestart(prop.requiresWorldRestart());
-		newProp.setValidValues(prop.getValidValues());
-		return newProp;
 	}
 }

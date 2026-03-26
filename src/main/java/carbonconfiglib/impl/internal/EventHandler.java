@@ -1,5 +1,6 @@
 package carbonconfiglib.impl.internal;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,37 +10,30 @@ import com.google.common.collect.BiMap;
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.IConfigChangeListener;
 import carbonconfiglib.config.ConfigHandler;
-import carbonconfiglib.gui.api.DataType;
 import carbonconfiglib.gui.api.IModConfigs;
-import carbonconfiglib.gui.api.ISuggestionRenderer;
-import carbonconfiglib.gui.config.ColorElement;
-import carbonconfiglib.gui.config.RegistryElement;
+import carbonconfiglib.gui.base.screen.ITickableScreen;
+import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
-import carbonconfiglib.gui.screen.ConfigScreenFactory;
-import carbonconfiglib.gui.widgets.SuggestionRenderers;
-import carbonconfiglib.gui.widgets.screen.CarbonScreen;
+import carbonconfiglib.gui.screens.ConfigListScreen;
+import carbonconfiglib.gui.screens.ConfigScreenFactory;
+import carbonconfiglib.gui.screens.ModConfigList;
+import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.Reflects;
-import carbonconfiglib.impl.entries.ColorValue;
-import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
+import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.potion.Potion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.GuiModList;
 import net.minecraftforge.fml.client.IModGuiFactory;
@@ -82,7 +76,8 @@ public class EventHandler implements IConfigChangeListener
 	Map<ModContainer, ModConfigs> configs = new Object2ObjectLinkedOpenHashMap<ModContainer, ModConfigs>().synchronize();
 	Map<String, Configuration> foundFiles = new Object2ObjectLinkedOpenHashMap<String, Configuration>().synchronize();
 	Object2ObjectMap<ModContainer, List<Configuration>> forgeConfigs = new Object2ObjectLinkedOpenHashMap<ModContainer, List<Configuration>>().synchronize();
-	
+	Map<String, IModConfigs> allKnownConfigs = new Object2ObjectLinkedOpenHashMap<>();
+
 	public static void registerConfig(Configuration config) {
 		if(config == null || config.getConfigFile() == null) return;
 		IFMLSidedHandler side = FMLCommonHandler.instance().getSidedDelegate();
@@ -115,19 +110,13 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
-		initMinecraftDataTypes(config);
+		InternalFeatures.initMinecraftDataTypes(config);
 		if(FMLCommonHandler.instance().getSide() == Side.SERVER) return;
 		ModContainer container = Loader.instance().activeModContainer();
 		if(container == null) {
 			throw new IllegalStateException("Mod Configs Must be created (not loaded) during a Mod Loading Phase");
 		}
 		configs.computeIfAbsent(container, ModConfigs::new).addConfig(config);
-	}
-	
-	public void initMinecraftDataTypes(ConfigHandler config) {
-		config.addParser('C', ColorValue::parse);
-		config.addTempParser('R');
-		config.addTempParser('K');
 	}
 	
 	@Override
@@ -168,8 +157,8 @@ public class EventHandler implements IConfigChangeListener
 		if(event.phase == Phase.END) processEvents();
 		else {
 			GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-			if(screen instanceof CarbonScreen) {
-				((CarbonScreen)screen).tick();
+			if(screen instanceof ITickableScreen) {
+				((ITickableScreen)screen).tick();
 			}
 		}
 	}
@@ -177,7 +166,8 @@ public class EventHandler implements IConfigChangeListener
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onGuiOpenedEvent(GuiOpenEvent event) {
-		if(event.getGui() instanceof GuiModList) {
+		GuiScreen screen = event.getGui();
+		if(GuiModList.class.isInstance(screen) || ConfigListScreen.class.isInstance(screen) || ModDependencyScreen.class.isInstance(screen)) {
 			registerConfigs();
 		}
 	}
@@ -224,39 +214,40 @@ public class EventHandler implements IConfigChangeListener
 			if(factory.containsKey(M)) return;
 			mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(C);
 		});
-		if(CarbonConfig.FORGE_SUPPORT.get()) {
+		if(CarbonConfig.FORGE_SUPPORT.get()) {			
 			forgeConfigs.forEach((M, C) -> {
+				if(CarbonConfig.MODS_DISABLED.contains(M.getModId())) return;
 				if(factory.containsKey(M) && !CarbonConfig.FORCE_FORGE_SUPPORT.get()) return;
 				mappedConfigs.supplyIfAbsent(M, ObjectArrayList::new).add(new ForgeConfigs(M, C));
 			});
 		}
+		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
+			List<IModConfigs> configs = new ObjectArrayList<>();
+			V.applyConfigs(K, configs::add);
+			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
+		});
 		//This has to be done because otherwise MinecraftServer crashes during startup. I assume forges code deleter in 1.12.2 is as shitty as fabrics was in 1.19.2 xD
-		Optional.of(Loader.instance().getIndexedModList().get("carbonconfig")).ifPresent(T -> {
+		Optional.of(Loader.instance().getMinecraftModContainer()).ifPresent(T -> {
 			mappedConfigs.supplyIfAbsent(T, ObjectArrayList::new).add(new MinecraftConfigs());
 		});
 		mappedConfigs.forEach((M, C) -> factory.put(M, new ConfigScreenFactory(ModConfigList.createMultiIfApplicable(M, C))));
+		mappedConfigs.forEach((M, C) -> allKnownConfigs.put(M.getModId(), ModConfigList.createMultiIfApplicable(M, C)));
+
+	}
+	
+	public List<IModConfigs> getAllConfigs() {
+		List<IModConfigs> result = new ObjectArrayList<IModConfigs>(allKnownConfigs.values());
+		result.sort(Comparator.comparing(IModConfigs::getModName));
+		return result;
+	}
+	
+	public IModConfigs getConfigsForMod(String id) {
+		return allKnownConfigs.get(id);
 	}
 	
 	@SideOnly(Side.CLIENT)
 	public void onConfigsLoaded() {
-		loadDefaultTypes();
-	}
-	
-	@SideOnly(Side.CLIENT)
-	private void loadDefaultTypes() {
-		ISuggestionRenderer.Registry.register(Item.class, new SuggestionRenderers.ItemEntry());
-		ISuggestionRenderer.Registry.register(Block.class, new SuggestionRenderers.ItemEntry());
-		ISuggestionRenderer.Registry.register(Fluid.class, new SuggestionRenderers.FluidEntry());
-		ISuggestionRenderer.Registry.register(Enchantment.class, new SuggestionRenderers.EnchantmentEntry());
-		ISuggestionRenderer.Registry.register(ColorWrapper.class, new SuggestionRenderers.ColorEntry());
-		ISuggestionRenderer.Registry.register(Potion.class, new SuggestionRenderers.PotionEntry());
-		
-		DataType.registerType(Item.class, RegistryElement.createForType(Item.class, "minecraft:air"));
-		DataType.registerType(Block.class, RegistryElement.createForType(Block.class, "minecraft:air"));
-		DataType.registerType(Fluid.class, RegistryElement.createForType(Fluid.class, "minecraft:water"));
-		DataType.registerType(Enchantment.class, RegistryElement.createForType(Enchantment.class, "minecraft:fortune"));
-		DataType.registerType(Potion.class, RegistryElement.createForType(Potion.class, "minecraft:luck"));
-		DataType.registerType(ColorWrapper.class, new DataType(false, "0xFFFFFFFF", ColorElement::new, ColorElement::new, ColorElement::new));
+		InternalFeatures.loadDefaultTypes();
 	}
 	
 	public void onServerJoinPacket(EntityPlayer player) {

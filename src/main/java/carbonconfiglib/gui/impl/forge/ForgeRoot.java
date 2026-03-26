@@ -2,8 +2,9 @@ package carbonconfiglib.gui.impl.forge;
 
 import java.util.List;
 
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -28,11 +29,13 @@ public class ForgeRoot implements IConfigFolderNode
 {
 	Configuration config;
 	String fileName;
+	ConfigPath path;
 	List<IConfigNode> children;
 	
-	public ForgeRoot(Configuration config, String fileName) {
+	public ForgeRoot(Configuration config, String fileName, ConfigPath path) {
 		this.config = config;
 		this.fileName = fileName;
+		this.path = path;
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class ForgeRoot implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(String category : config.getCategoryNames()) {
-				children.add(new ForgeFolder(config.getCategory(category)));
+				children.add(new ForgeFolder(config.getCategory(category), path.append(category)));
 			}
 		}
 		return children;
