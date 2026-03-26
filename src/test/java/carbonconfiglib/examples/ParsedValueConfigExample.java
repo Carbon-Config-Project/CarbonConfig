@@ -24,10 +24,10 @@ public class ParsedValueConfigExample
 		ConfigSection section = config.add("parsedValue");
 		
 		// Structure information for the Gui/Config that is used for config comments and for the layout in the config Gui!
-		CompoundBuilder builder = new CompoundBuilder();
-		builder.simple("Name", EntryDataType.STRING).finish();
-		builder.simple("Year", EntryDataType.INTEGER).finish();
-		builder.variants("Favorite Color", EntryDataType.INTEGER, ColorWrapper.class, ColorWrapper::parse, ColorWrapper::serialize).finish();
+		CompoundBuilder builder = new CompoundBuilder()
+				.simple("Name", EntryDataType.STRING)
+				.simple("Year", EntryDataType.INTEGER)
+				.variants("Favorite Color", EntryDataType.INTEGER, ColorWrapper.class, ColorWrapper::parse, ColorWrapper::serialize);
 		
 		// serializing helper that turns the String into the actual value, Which requires the struct, a example, parser, serializer.
 		// Note that the parser is expected to catch all crashes and send "exceptions" through the ParseResult instead.

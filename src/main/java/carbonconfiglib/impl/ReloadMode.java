@@ -1,7 +1,8 @@
 package carbonconfiglib.impl;
 
+import carbonconfiglib.api.ILimitationSerializer;
 import carbonconfiglib.api.IReloadMode;
-import net.minecraft.util.ChatComponentTranslation;
+import carbonconfiglib.gui.base.helpers.Texts;
 import net.minecraft.util.IChatComponent;
 
 /**
@@ -19,19 +20,27 @@ import net.minecraft.util.IChatComponent;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public enum ReloadMode implements IReloadMode
+public enum ReloadMode implements IReloadMode, ILimitationSerializer
 {
-	WORLD(new ChatComponentTranslation("gui.carbonconfig.reload.sync")),
-	GAME(new ChatComponentTranslation("gui.carbonconfig.restart.sync"));
+	WORLD("gui.carbonconfig.reload.sync", "gui.carbonconfig.reload.state", "Requires Reload"),
+	GAME("gui.carbonconfig.restart.sync", "gui.carbonconfig.restart.state", "Requires Restart");
 	
 	IChatComponent message;
+	IChatComponent state;
+	String comment;
 	
-	private ReloadMode(IChatComponent message) {
-		this.message = message;
+	private ReloadMode(String message, String state, String comment) {
+		this.message = Texts.translatable(message);
+		this.state = Texts.translatable(state);
+		this.comment = comment;
 	}
 	
-	public IChatComponent getName() {
+	public IChatComponent getMessage() {
 		return message;
+	}
+	
+	public IChatComponent getState() {
+		return state;
 	}
 	
 	public static ReloadMode or(ReloadMode original, IReloadMode other) {
@@ -44,5 +53,10 @@ public enum ReloadMode implements IReloadMode
 	
 	private static ReloadMode getByIndex(int index) {
 		return index == 0 ? ReloadMode.WORLD : (index == 1 ? ReloadMode.GAME : null);
+	}
+
+	@Override
+	public String getLimitation() {
+		return comment;
 	}
 }

@@ -1,0 +1,88 @@
+package carbonconfiglib.gui.base.widgets;
+
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import org.lwjgl.opengl.GL11;
+
+import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
+import carbonconfiglib.gui.base.helpers.Icon;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.util.IChatComponent;
+
+
+/**
+ * Copyright 2026 Speiger, Meduris
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+public class CarbonButton extends CarbonBaseButton {
+	Optional<Icon> icon = Optional.empty();
+	int padding = 3;
+	boolean selected = false;
+	boolean highlighted = false;
+
+	public CarbonButton(int pX, int pY, int pWidth, int pHeight, IChatComponent pMessage, Consumer<CarbonBaseButton> listener) {
+		super(pX, pY, pWidth, pHeight, pMessage, listener);
+	}
+	
+	public CarbonButton withIcon(Optional<Icon> icon) {
+		this.icon = icon;
+		return this;
+	}
+	
+	public CarbonButton setHighlighted(boolean value) {
+		highlighted = value;
+		return this;
+	}
+	
+	public CarbonButton setSelected(boolean value) {
+		selected = value;
+		return this;
+	}
+	
+	public CarbonButton setPadding(int value) {
+		this.padding = value;
+		return this;
+	}
+	
+	public void renderIcon(int pMouseX, int pMouseY, float pPartialTick) {
+		int j = this.enabled ? 16777215 : 10526880;
+		GL11.glColor4f(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
+		GuiUtils.drawTextureRegion(xPosition + padding, yPosition + padding, width-padding*2, height-padding*2, icon.get(), 16, 16);
+		GL11.glColor4f(1F, 1F, 1F, 1F);
+	}
+	
+	@Override
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		this.field_146123_n = mousePressed(Minecraft.getMinecraft(), mouseX, mouseY);
+		int k = this.getHoverState(this.isHovered());
+		if(selected) {
+			GL11.glColor4f(0.5F, 0.5F, 0.5F, 1.0F);
+			GuiUtils.blitWithBorder(buttonTextures, xPosition, yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, zLevel, true);
+			GL11.glColor4f(1F, 1F, 1F, 1F);
+		}
+		else GuiUtils.blitWithBorder(buttonTextures, xPosition, yPosition, 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, zLevel, false);
+		if(highlighted) {
+			Gui.drawRect(xPosition+2, yPosition+2, xPosition+getButtonWidth()-2, yPosition+getHeight()-2, 0x33FFFFFF);
+		}
+		
+		if (icon.isPresent()) {
+			renderIcon(mouseX, mouseY, partialTicks);
+		}
+		GuiUtils.drawScrollingShadowText(Minecraft.getMinecraft().fontRenderer, displayString, xPosition+2, yPosition+2, width-4, height-4, Align.CENTER, this.enabled ? 16777215 : 10526880, 0);
+
+	}
+}

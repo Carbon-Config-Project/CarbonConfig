@@ -3,12 +3,12 @@ package carbonconfiglib.gui.impl.forge;
 import java.util.List;
 import java.util.Locale;
 
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.base.helpers.Texts;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.config.ConfigCategory;
@@ -34,9 +34,11 @@ public class ForgeFolder implements IConfigFolderNode
 {
 	ConfigCategory category;
 	List<IConfigNode> children;
+	ConfigPath path;
 	
-	public ForgeFolder(ConfigCategory category) {
+	public ForgeFolder(ConfigCategory category, ConfigPath path) {
 		this.category = category;
+		this.path = path;
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public class ForgeFolder implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(Property prop : category.values()) {
-				children.add(new ForgeLeaf(prop));
+				children.add(new ForgeLeaf(prop, path.append(prop.getName())));
 			}
 		}
 		return children;
@@ -53,16 +55,15 @@ public class ForgeFolder implements IConfigFolderNode
 	@Override
 	public String getNodeName() { return category.getName().toLowerCase(Locale.ROOT); }
 	@Override
-	public IChatComponent getName() { return IConfigNode.createLabel(ForgeLeaf.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()); }
+	public IChatComponent getName() { return IConfigNode.createLabel(Texts.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()); }
 	@Override
 	public IChatComponent getTooltip() {
-		ChatComponentStyle comp = new ChatComponentText("");
-		comp.appendSibling(new ChatComponentText(ForgeLeaf.hasKey(category.getLanguagekey()) ? I18n.format(category.getLanguagekey()) : category.getName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
+		IChatComponent comp = new ChatComponentText("");
 		String comment = category.getComment();
 		if(comment != null) {
 			String[] array = comment.split("\n");
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
+				for(int i = 0;i<array.length;comp.appendText(array[i++]).setChatStyle(Texts.applyStyle(EnumChatFormatting.GRAY)).appendText("\n"));
 			}
 
 		}

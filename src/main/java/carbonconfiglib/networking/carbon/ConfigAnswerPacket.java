@@ -4,15 +4,13 @@ import java.util.UUID;
 
 import carbonconfiglib.api.buffer.IReadBuffer;
 import carbonconfiglib.api.buffer.IWriteBuffer;
-import carbonconfiglib.gui.api.IRequestScreen;
+import carbonconfiglib.gui.api.IRequestReceiver;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.networking.buffer.ReadBuffer;
 import carbonconfiglib.networking.buffer.WriteBuffer;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 
@@ -64,9 +62,6 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	
 	@SideOnly(Side.CLIENT)
 	private void processClient() {
-		GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-		if(screen instanceof IRequestScreen) {
-			((IRequestScreen)screen).receiveConfigData(id, new PacketBuffer(Unpooled.wrappedBuffer(data)));
-		}
+		IRequestReceiver.Impl.receiveData(id, new PacketBuffer(Unpooled.wrappedBuffer(data)));
 	}
 }
