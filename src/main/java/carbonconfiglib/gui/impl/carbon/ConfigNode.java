@@ -5,11 +5,10 @@ import java.util.Locale;
 
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigSection;
-import carbonconfiglib.gui.api.IConfigFolderNode;
-import carbonconfiglib.gui.api.IConfigNode;
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigFolderNode;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.base.helpers.Texts;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -31,11 +30,13 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
  */
 public class ConfigNode implements IConfigFolderNode
 {
+	ConfigPath path;
 	ConfigSection section;
 	List<IConfigNode> children;
 	
-	public ConfigNode(ConfigSection section) {
+	public ConfigNode(ConfigSection section, ConfigPath path) {
 		this.section = section;
+		this.path = path;
 	}
 
 	@Override
@@ -43,10 +44,10 @@ public class ConfigNode implements IConfigFolderNode
 		if(children == null) {
 			children = new ObjectArrayList<>();
 			for(ConfigSection sub : section.getChildren()) {
-				children.add(new ConfigNode(sub));
+				children.add(new ConfigNode(sub, path.append(sub.getName())));
 			}
 			for(ConfigEntry<?> entry : section.getEntries()) {
-				children.add(new ConfigLeaf(entry));
+				children.add(new ConfigLeaf(entry, path.append(entry.getKey())));
 			}
 		}
 		return children;
@@ -57,11 +58,10 @@ public class ConfigNode implements IConfigFolderNode
 	public IChatComponent getName() { return IConfigNode.createLabel(section.getName()); }
 	@Override
 	public IChatComponent getTooltip() {
-		ChatComponentStyle comp = new ChatComponentText("");
-		comp.appendSibling(new ChatComponentText(section.getName()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
+		IChatComponent comp = Texts.empty();
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
+			for(int i = 0;i<array.length;comp.appendSibling(Texts.literal(array[i++]).setChatStyle(Texts.applyStyle(EnumChatFormatting.GRAY))).appendText("\n"));
 		}
 		return comp;
 	}

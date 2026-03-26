@@ -1,36 +1,52 @@
-package carbonconfiglib.gui.impl.carbon;
+	package carbonconfiglib.gui.impl.carbon;
 
 import java.util.List;
 
-import carbonconfiglib.api.IReloadMode;
+import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigEntry.ParsedArray;
-import carbonconfiglib.gui.api.DataType;
-import carbonconfiglib.gui.api.IConfigNode;
-import carbonconfiglib.gui.api.INode;
+import carbonconfiglib.gui.api.node.ConfigPath;
+import carbonconfiglib.gui.api.node.IConfigNode;
+import carbonconfiglib.gui.api.node.INode;
+import carbonconfiglib.gui.base.helpers.Texts;
 import carbonconfiglib.impl.ReloadMode;
+import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 
+/**
+ * Copyright 2026 Speiger, Meduris
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 public class ConfigLeaf implements IConfigNode
 {
 	ConfigEntry<?> entry;
 	IStructuredData data;
 	StructureType type;
-	IReloadMode mode;
+	ReloadMode mode;
 	IValueActions value;
+	ConfigPath path;
 	
-	public ConfigLeaf(ConfigEntry<?> entry) {
+	public ConfigLeaf(ConfigEntry<?> entry, ConfigPath path) {
 		this.entry = entry;
+		this.path = path;
 		this.data = entry.getDataType();
 		this.type = data.getDataType();
-		this.mode = entry.getReloadState();
+		mode = entry.getReloadState() instanceof ReloadMode ? (ReloadMode)entry.getReloadState() : null;
 	}
 	
 	@Override
@@ -38,13 +54,13 @@ public class ConfigLeaf implements IConfigNode
 		if(value == null) {
 			switch(type) {
 				case COMPOUND:
-					value = new CarbonCompound(mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonCompound(entry.getKey(), path, mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case LIST:
-					value = new CarbonArray(mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonArray(entry.getKey(), path, mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
 					break;
 				case SIMPLE:
-					value = new CarbonValue(mode, getName(), getTooltip(), DataType.bySimple(entry.getDataType().asSimple()), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
+					value = new CarbonValue(entry.getKey(), mode, getName(), getTooltip(), IEntrySettings.copyMerge(entry.getSettings(), SettingsLoader.INSTANCE.getOverride(path)), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
 					break;
 			}
 		}
@@ -58,7 +74,6 @@ public class ConfigLeaf implements IConfigNode
 		}
 		entry.deserializeValue(value);
 	}
-	
 	@Override
 	public List<IConfigNode> getChildren() { return null; }
 	@Override
@@ -66,37 +81,58 @@ public class ConfigLeaf implements IConfigNode
 	@Override
 	public boolean isRoot() { return false; }
 	@Override
+	public boolean isDefault() { return value == null ? entry.isDefault() : value.isDefault(); }
+	@Override
 	public boolean isChanged() { return value != null && value.isChanged(); }
+	@Override
+	public boolean isUnsaved() { return value != null && value.isUnsaved(); }
 	@Override
 	public void setPrevious() {
 		if(value != null) value.setPrevious();
 	}
 	@Override
 	public void setDefault() {
-		if(value != null) value.setDefault();		
+		if(!isDefault()) asNode().setDefault();
 	}
 	@Override
 	public void save() {
 		if(value != null) value.save();
 	}
 	@Override
-	public boolean requiresRestart() { return mode == ReloadMode.GAME; }
-	@Override
-	public boolean requiresReload() { return mode == ReloadMode.WORLD; }
+	public ReloadMode getReloadState() { return mode; }
 	@Override
 	public String getNodeName() { return null; }
 	@Override
-	public IChatComponent getName() { return IConfigNode.createLabel(entry.getKey()); }
+	public IChatComponent getName() { return IConfigNode.createLabel(entry.getKey(), entry.getTranslationKey()); }
 	@Override
 	public IChatComponent getTooltip() {
-		ChatComponentText comp = new ChatComponentText("");
-		comp.appendSibling(new ChatComponentText(entry.getKey()).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.YELLOW)));
-		String[] array = entry.getComment();
-		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GRAY)));
+		IChatComponent comp = Texts.empty();
+		String key = entry.getTranslationComment();
+		if(key != null && Texts.hasKey(key)) {
+			comp.appendSibling(Texts.translatable(key).setChatStyle(Texts.applyStyle(EnumChatFormatting.GRAY)).appendText("\n"));
 		}
+		else {
+			String[] array = entry.getComment();
+			if(array != null && array.length > 0) {
+				for(int i = 0;i<array.length;comp.appendText(array[i++]).setChatStyle(Texts.applyStyle(EnumChatFormatting.GRAY)).appendText("\n"));
+			}
+		}
+		
 		String limit = entry.getLimitations();
-		if(limit != null && !limit.trim().isEmpty()) comp.appendText("\n").appendSibling(new ChatComponentTranslation(limit).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.BLUE)));
+		if(limit != null && !limit.trim().isEmpty()) {
+			if(limit.contains("\nExample:")) {
+				IChatComponent result = Texts.empty();
+				EnumChatFormatting current = EnumChatFormatting.DARK_GREEN;
+				for(String entry : limit.split("\n")) {
+					if(current == EnumChatFormatting.DARK_GREEN && entry.startsWith("Example")) {
+						current = EnumChatFormatting.BLUE;
+					}
+					result.appendSibling(Texts.literal(entry).setChatStyle(Texts.applyStyle(current))).appendText("\n");
+				}
+				comp.appendSibling(result);
+			}
+			else comp.appendSibling(Texts.literal(limit).setChatStyle(Texts.applyStyle(EnumChatFormatting.BLUE)));
+		}
 		return comp;
 	}
 	@Override

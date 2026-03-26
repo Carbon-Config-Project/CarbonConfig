@@ -1,0 +1,403 @@
+package carbonconfiglib.gui.screens;
+
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.OptionalInt;
+
+import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.api.ConfigType;
+import carbonconfiglib.gui.api.IModConfig;
+import carbonconfiglib.gui.api.IModConfigs;
+import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
+import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
+import carbonconfiglib.gui.base.helpers.Icon;
+import carbonconfiglib.gui.base.helpers.Texts;
+import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
+import carbonconfiglib.gui.base.widgets.CarbonButton;
+import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
+import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
+import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
+import carbonconfiglib.impl.internal.BackupManager;
+import carbonconfiglib.impl.internal.BackupManager.BulkRequest;
+import carbonconfiglib.impl.internal.BackupManager.Mode;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.utils.ObjectLists;
+
+/**
+ * Copyright 2026 Speiger, Meduris
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+public class ConfigListScreen extends BaseCarbonScreen 
+{
+	GuiScreen parent;
+	BackgroundHolder holder;
+	ListState<Element> listState = new ListState<Element>().setItemHeight(26);
+	TextState searchState = new TextState().setCallback(listState::search);
+	IChatComponent header;
+	CarbonButton importButton;
+	CarbonButton exportButton;
+	BulkRequest request;
+	
+	public ConfigListScreen(GuiScreen parent, IModConfigs configs) {
+		this(parent, configs.getBackground(), configs);
+	}
+	
+	public ConfigListScreen(GuiScreen parent, BackgroundHolder holder, IModConfigs configs) {
+		this(parent, holder, ObjectLists.singleton(configs));
+	}
+	
+	public ConfigListScreen(GuiScreen parent, BackgroundHolder holder, List<IModConfigs> configs) {
+		this.parent = parent;
+		this.holder = holder;
+		this.listState.add(generateModList(configs));
+		this.header = configs.size() > 1 ? Texts.translatable("gui.carbonconfig.modlist") : Texts.literal(configs.get(0).getModName());
+	}
+	
+	@Override
+	public void initGui() {
+		super.initGui();
+		int searchWidth = (int)(width * 0.3F);
+		int minX = (int)(width * 0.5F) - 180;
+		int maxX = 360;
+		int minY = (int)(height * 0.15F);
+		int maxY = (int)(height * 0.8F) - minY;
+		modlogo(2, 2, minY - 4, minY - 4);
+		listArea(minX, minY, maxX, maxY, listState);
+		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
+		button(-80, -35, 160, 20, Align.CENTER, Align.END, Texts.translatable("gui.carbonconfig.back"), T -> onClose());
+		importButton = iconButton((searchWidth >> 1)+2, minY-21, 18, 18, Align.CENTER, Align.START, Icon.IMPORT, T -> bulkBackup(Mode.CREATE)).withTooltip(Texts.translatable("gui.carbonconfig.backup.bulk.create"));
+		exportButton = iconButton((searchWidth >> 1)+22, minY-21, 18, 18, Align.CENTER, Align.START, Icon.EXPORT, T -> bulkBackup(Mode.LOAD)).withTooltip(Texts.translatable("gui.carbonconfig.backup.bulk.load"));
+		listState.forEach(T -> {
+			if(T instanceof ConfigEntry) ((ConfigEntry)T).updateBackup();
+		});
+	}
+	
+	@Override
+	public void renderBackground(int mouseX, int mouseY, float partialTicks) {
+		importButton.enabled = request == null;
+		exportButton.enabled = request == null;
+		if(!holder.shouldDisableInLevel() || mc.theWorld == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
+		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, holder.getTexture());
+	}
+	
+	@Override
+	public void renderForeground(int mouseX, int mouseY, float partialTicks) {
+		GuiUtils.renderListShadow(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
+		GuiUtils.drawScrollingShadowText(fontRendererObj, header, 0, 0, width, (int)(height * 0.15F)-20, Align.CENTER, -1, 0);
+	}
+	
+	@Override
+	public void onClose() {
+		setScreen(parent);
+	}
+	
+	protected void bulkBackup(Mode mode) {
+		List<IModConfig> configs = new ObjectArrayList<>();
+		listState.forEach(T -> {
+			if(T instanceof ConfigEntry) {
+				((ConfigEntry)T).handleBulk(configs, mode);
+			}
+		});
+		if(configs.isEmpty()) {
+//			HELP WANTED: If someone wants to help getting toasts in the mod :)
+//			if(CarbonConfig.BACKUP_TOASTS.get()) {
+//				if(mode == Mode.CREATE) Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, Texts.translatable("gui.carbonconfig.toast.create"), Texts.translatable("gui.carbonconfig.toast.create.desc")));
+//				else if(mode == Mode.LOAD) Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, Texts.translatable("gui.carbonconfig.toast.load"), Texts.translatable("gui.carbonconfig.toast.load.desc")));
+//			}
+			return;
+		}
+		request = new BulkRequest(configs, mode);
+		listState.forEach(T -> {
+			if(T instanceof ConfigEntry) {
+				((ConfigEntry)T).pendingRequest = request;
+			}
+		});
+	}
+	
+	protected List<Element> generateModList(List<IModConfigs> configs) {
+		List<Element> element = new ObjectArrayList<>();
+		for(IModConfigs config : configs) {
+			List<Element> modConfig = createElements(config);
+			if(configs.size() > 1) {
+				element.add(new Label(Texts.literal(config.getModName()).setChatStyle(Texts.applyStyle(EnumChatFormatting.BOLD, EnumChatFormatting.RED))).withChildren(modConfig));
+			}
+			element.addAll(modConfig);
+		}
+		return element;
+	}
+	
+	protected List<Element> createElements(IModConfigs config) {
+		List<Element> result = new ObjectArrayList<>();
+		List<Element> local = new ObjectArrayList<>();
+		IChatComponent name = Texts.literal(config.getModName());
+		config.getConfigInstances(ConfigType.CLIENT).forEach(T -> local.add(new ConfigEntry(T, holder, name, false)));
+		config.getConfigInstances(ConfigType.SHARED).forEach(T -> local.add(new ConfigEntry(T, holder, name, false)));
+		if(local.size() > 0) {
+			result.add(new Label(Texts.translatable("gui.carbonconfig.configs.local").setChatStyle(Texts.applyStyle(EnumChatFormatting.GOLD, EnumChatFormatting.BOLD))).withChildren(local));
+			result.addAll(local);
+		}
+		
+		List<Element> serverConfigs = new ObjectArrayList<>();
+		Minecraft mc = Minecraft.getMinecraft();
+		if(mc.theWorld != null && isMultiplayer()) {
+			config.getConfigInstances(ConfigType.SHARED).forEach(T -> serverConfigs.add(new ConfigEntry(T, holder, name, true)));
+		}
+		if(mc.theWorld == null || mc.isSingleplayer() || isMultiplayer()) {
+			config.getConfigInstances(ConfigType.SERVER).forEach(T -> serverConfigs.add(new ConfigEntry(T, holder, name, true)));
+		}
+		if(serverConfigs.size() > 0) {
+			result.add(new Label(Texts.translatable("gui.carbonconfig.configs."+(mc.theWorld == null || !isMultiplayer() ? "world" : "multiplayer")).setChatStyle(Texts.applyStyle(EnumChatFormatting.GOLD, EnumChatFormatting.BOLD))).withChildren(serverConfigs));
+			result.addAll(serverConfigs);
+		}
+		return result;
+	}
+	
+	private static boolean isMultiplayer() {
+		Minecraft mc = Minecraft.getMinecraft();
+		return !mc.isSingleplayer() && CarbonConfig.NETWORK.isInstalledOnServer() && !isLanServer() && CarbonConfig.NETWORK.hasPermissions();
+	}
+	
+	private static boolean isLanServer() {
+		ServerData data = Minecraft.getMinecraft().getCurrentServerData();
+		return data != null && data.func_181041_d();
+	}
+	
+	public static abstract class Element extends ListEntry<Element> {
+		@Override
+		protected boolean containsSearch(String searchString) { return false; }
+	}
+	
+	public static class Label extends Element {
+		IChatComponent label;
+		List<Element> children;
+		
+		public Label(IChatComponent label) {
+			this.label = label;
+		}
+		
+		public Label withChildren(List<Element> children) {
+			this.children = children;
+			return this;
+		}
+		
+		@Override
+		public int getItemHeight() {
+			return 20;
+		}
+
+		@Override
+		protected boolean containsSearch(String searchString) {
+			if(children != null) {
+				for(int i = 0,m=children.size();i<m;i++) {
+					if(children.get(i).containsSearch(searchString)) return true;
+				}
+			}
+			return false;
+		}
+		
+		@Override
+		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {			
+			GuiUtils.drawScrollingText(font, label, left, top, width, height, Align.CENTER, -1, 0);
+		}
+	}
+		
+	public static class ConfigEntry extends Element {
+		protected BackgroundHolder holder;
+		protected IModConfig config;
+		protected IChatComponent type;
+		protected IChatComponent fileName;
+		protected IChatComponent modName;
+		protected boolean multiplayer;
+		protected CarbonButton open;
+		protected CarbonButton reset;
+		protected CarbonButton backup;
+		protected CarbonButton restore;
+		protected CarbonButton listBackups;
+		protected BulkRequest pendingRequest;
+		protected OptionalInt hasBackups = OptionalInt.empty();
+		
+		public ConfigEntry(IModConfig config, BackgroundHolder holder, IChatComponent modName, boolean multiplayer) {
+			this.config = config;
+			this.holder = holder;
+			this.modName = modName;
+			this.multiplayer = multiplayer;
+			this.type = Texts.translatable("gui.carbonconfig.type."+config.getConfigType().name().toLowerCase());
+			this.fileName = Texts.literal(config.getFileName()).setChatStyle(Texts.applyStyle(EnumChatFormatting.GRAY));
+			boolean isLarge = shouldCreatePick();
+			this.open = addChild(new CarbonButton(0, 0, isLarge ? 50 : 40, 20, Texts.translatable("gui.carbonconfig."+(shouldCreatePick() ? "pick_file" : "modify")), T -> open()));
+			if(!isLarge) {
+				this.reset = addChild(new CarbonButton(0, 0, 20, 20, Texts.empty(), T -> resetConfig()).withIcon(Optional.of(Icon.REVERT)).setPadding(3).withTooltip(Texts.translatable("gui.carbonconfig.reset")));
+				this.backup = addChild(new CarbonButton(0, 0, 20, 20, Texts.empty(), T -> createBackup()).withIcon(Optional.of(Icon.IMPORT)).setPadding(3).withTooltip(Texts.translatable("gui.carbonconfig.backup.create")));
+				this.restore = addChild(new CarbonButton(0, 0, 20, 20, Texts.empty(), T -> restoreBackup()).withIcon(Optional.of(Icon.EXPORT)).setPadding(3).withTooltip(Texts.translatable("gui.carbonconfig.backup.load_last")));
+				this.listBackups = addChild(new CarbonButton(0, 0, 20, 20, Texts.empty(), T -> selectBackups()).withIcon(Optional.of(Icon.LIST)).setPadding(3).withTooltip(Texts.translatable("gui.carbonconfig.backup.select")));
+			}
+			updateBackup();
+		}
+		
+		private void updateBackup() {
+			if(shouldCreatePick()) return;
+			this.hasBackups = OptionalInt.of(BackupManager.listBackups(config).size());
+		}
+		
+		@Override
+		public int getItemHeight() {
+			return super.getItemHeight();
+		}
+		
+		@Override
+		public boolean containsSearch(String searchString) {
+			return config.getFileName().toLowerCase(Locale.ROOT).contains(searchString.toLowerCase(Locale.ROOT)) || config.getModId().toLowerCase(Locale.ROOT).contains(searchString.toLowerCase(Locale.ROOT));
+		}
+		
+		private boolean isNotRequesting() {
+			return pendingRequest == null;
+		}
+		
+		private boolean hasBackups() {
+			return hasBackups.isPresent() && hasBackups.getAsInt() > 0;
+		}
+		
+		@Override
+		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			if(pendingRequest != null && !pendingRequest.isStillWorking()) {
+				pendingRequest = null;
+				updateBackup();
+			}
+			GuiUtils.drawTextureRegion(left, top, 22, 22, getIcon(), 16, 16);
+			GuiUtils.drawText(font, type, left+25, top+3, Align.START, -1);
+			GuiUtils.drawText(font, fileName, left+25, top+12, Align.START, -1);
+			int right = left + width;
+			open.xPosition = right - (70 + (reset != null ? 60 : 0));
+			open.yPosition = (int)Align.CENTER.alignStart(top, height, open.getHeight());
+			open.render(mouseX, mouseY, partialTicks);
+			if(reset != null) {
+				reset.xPosition = right - 89;
+				reset.yPosition = (int)Align.CENTER.alignStart(top, height, reset.getHeight());
+				reset.enabled = !config.isDefault();
+				reset.render(mouseX, mouseY, partialTicks);
+				
+				backup.xPosition = right - 68;
+				backup.yPosition = (int)Align.CENTER.alignStart(top, height, backup.getHeight());
+				backup.enabled = isNotRequesting();
+				backup.render(mouseX, mouseY, partialTicks);
+				
+				restore.xPosition = right - 47;
+				restore.yPosition = (int)Align.CENTER.alignStart(top, height, restore.getHeight());
+				restore.enabled = isNotRequesting() && hasBackups();
+				restore.render(mouseX, mouseY, partialTicks);
+				
+				listBackups.xPosition = right - 26;
+				listBackups.yPosition = (int)Align.CENTER.alignStart(top, height, listBackups.getHeight());
+				listBackups.enabled = isNotRequesting() && hasBackups();
+				listBackups.render(mouseX, mouseY, partialTicks);
+			}
+		}
+		
+		private boolean shouldCreatePick() {
+			return config.isDynamicConfig() && !isInWorldConfig();
+		}
+		
+		private boolean isInWorldConfig() {
+			return Minecraft.getMinecraft().theWorld != null && (config.getConfigType() == ConfigType.SERVER || (config.getConfigType() == ConfigType.SHARED && multiplayer));
+		}
+		
+		public Icon getIcon() {
+			return (shouldCreatePick() ? Icon.MULTITYPE_ICON : Icon.TYPE_ICON).get(config.getConfigType());
+		}
+		
+		public void handleBulk(List<IModConfig> download, Mode mode) {
+			Minecraft mc = Minecraft.getMinecraft();
+			if(shouldCreatePick()) return;
+			if(isInWorldConfig() && !mc.isSingleplayer()) {
+				download.add(config);
+				return;
+			}
+			if(mode == Mode.LIST) throw new IllegalStateException("List Mode is unsupported");
+			if(mode == Mode.CREATE) {
+				BackupManager.createBackup(config);
+				updateBackup();
+			}
+			if(mode == Mode.LOAD) BackupManager.loadLastBackup(config);
+			
+		}
+		
+		private void createBackup() {
+			Minecraft mc = Minecraft.getMinecraft();
+			if(isInWorldConfig() && !mc.isSingleplayer()) {
+				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.CREATE);
+				return;
+			}
+			BackupManager.createBackup(config);
+			updateBackup();
+//			HELP WANTED: If someone wants to help getting toasts in the mod :)
+//			if(CarbonConfig.BACKUP_TOASTS.get()) mc.getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, Texts.translatable("gui.carbonconfig.toast.create"), Texts.translatable("gui.carbonconfig.toast.create.desc")));
+		}
+		
+		private void restoreBackup() {
+			Minecraft mc = Minecraft.getMinecraft();
+			if(isInWorldConfig() && !mc.isSingleplayer()) {
+				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.LOAD);
+				return;
+			}
+			BackupManager.loadLastBackup(config);
+//			HELP WANTED: If someone wants to help getting toasts in the mod :)
+//			if(CarbonConfig.BACKUP_TOASTS.get()) mc.getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, Texts.translatable("gui.carbonconfig.toast.load"), Texts.translatable("gui.carbonconfig.toast.load.desc")));
+		}
+		
+		private void selectBackups() {
+			setExternalScreen(new BackupSelectionScreen(Minecraft.getMinecraft().currentScreen, holder, config, BackupManager.listBackups(config)));
+		}
+		
+		public void open() {
+			Minecraft mc = Minecraft.getMinecraft();
+			if(shouldCreatePick()) {
+				mc.displayGuiScreen(new ConfigSelectScreen(mc.currentScreen, holder, config));
+			}
+			else if(isInWorldConfig() && !mc.isSingleplayer()) {
+				mc.displayGuiScreen(new ConfigRequestScreen(holder, mc.currentScreen, config));
+			}
+			else {
+				mc.displayGuiScreen(new ConfigScreen(config, holder, mc.currentScreen));				
+			}
+		}
+		
+		public void resetConfig() {
+			if(GuiScreen.isShiftKeyDown()) {
+				config.restoreDefault();
+				config.save(false);
+				return;
+			}
+			GuiScreen parent = Minecraft.getMinecraft().currentScreen;
+			setExternalScreen(new MultiChoiceScreen(T -> {
+				if(T.isMain()) {
+					config.restoreDefault();
+					config.save(false);
+				}
+				setExternalScreen(parent);
+			}, 
+			Texts.translatable("gui.carbonconfig.reset_all.title"), 
+			Texts.translatable("gui.carbonconfig.reset_all.message"), 
+			Texts.translatable("gui.carbonconfig.reset_all.default"),
+			Texts.translatable("gui.carbonconfig.reset_all.cancel")));
+		}
+	}
+}
