@@ -106,6 +106,14 @@ public class CarbonEditBox extends GuiTextField implements ITooltipProvider, IWi
 		return state.enabled && textboxKeyTyped(pCodePoint, pModifiers);
 	}
 	
+	public void setText(String p_146180_1_) {
+		String s = getText();
+		super.setText(p_146180_1_);
+		if(!Objects.equals(s, getText())) {
+			state.updateValue(getText());
+		}
+	}
+	
 	@Override
 	public void writeText(String p_146191_1_) {
 		String s = getText();

@@ -22,9 +22,11 @@ import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTypes;
 import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
+import carbonconfiglib.gui.base.screen.LayeredScreen;
 import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ConfigRequestScreen;
 import carbonconfiglib.gui.screens.ConfigScreen;
+import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -49,10 +51,12 @@ import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
@@ -84,6 +88,7 @@ public class CarbonConfig
 	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), Loader.instance().getConfigDir().toPath(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
 	public static BooleanSupplier MOD_GUI = () -> false;
+	public static BooleanSupplier DEPENDENCY_VIEWER = () -> false;
 	ConfigHandler handler;
 	public static BoolValue FORGE_SUPPORT; 
 	public static BoolValue FORCE_FORGE_SUPPORT; 
@@ -303,6 +308,17 @@ public class CarbonConfig
 		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPAD0, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mapping);
 		MOD_GUI = mapping::getIsKeyPressed;
+		KeyBinding mappingOther = new KeyBinding("key.carbon_config.dep", Keyboard.KEY_NUMPAD1, "key.carbon_config");
+		ClientRegistry.registerKeyBinding(mappingOther);
+		DEPENDENCY_VIEWER = () -> GameSettings.isKeyDown(mappingOther);
+	}
+	
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onClientTickEvent(ClientTickEvent event) {
+		if(DEPENDENCY_VIEWER.getAsBoolean() && !(LayeredScreen.topScreen() instanceof ModDependencyScreen)) {
+			Minecraft.getMinecraft().displayGuiScreen(new ModDependencyScreen());
+		}
 	}
 	
 	@SubscribeEvent

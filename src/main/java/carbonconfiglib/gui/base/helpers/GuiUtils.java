@@ -270,26 +270,25 @@ public class GuiUtils
 	}
 	
 	public static void renderListShadow(int x0, int x1, int y0, int y1, int width, int height) {
-		//TODO FIX ME (causing GL Error Spam)
-//		Tessellator tes = Tessellator.instance;
-//		GL11.glEnable(GL11.GL_BLEND);
-//        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 0, 1);
-//        GL11.glDisable(GL11.GL_ALPHA);
-//        GL11.glShadeModel(GL11.GL_SMOOTH);
-//        GL11.glDisable(GL11.GL_TEXTURE_2D);
-//		tes.startDrawingQuads();
-//		tes.setColorRGBA(0, 0, 0, 0);
-//		tes.addVertex(x0, y0 + 4, 0D);
-//		tes.addVertex(x1, y0 + 4, 0D);
-//		tes.setColorRGBA(0, 0, 0, 255);
-//		tes.addVertex(x1, y0, 0D);
-//		tes.addVertex(x0, y0, 0D);
-//		tes.addVertex(x0, y1, 0D);
-//		tes.addVertex(x1, y1, 0D);
-//		tes.setColorRGBA(0, 0, 0, 0);
-//		tes.addVertex(x1, y1 - 4, 0D);
-//		tes.addVertex(x0, y1 - 4, 0D);
-//		tes.draw();
+		Tessellator tes = Tessellator.instance;
+		GL11.glEnable(GL11.GL_BLEND);
+        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 0, 1);
+        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+		tes.startDrawingQuads();
+		tes.setColorRGBA(0, 0, 0, 0);
+		tes.addVertex(x0, y0 + 4, 0D);
+		tes.addVertex(x1, y0 + 4, 0D);
+		tes.setColorRGBA(0, 0, 0, 255);
+		tes.addVertex(x1, y0, 0D);
+		tes.addVertex(x0, y0, 0D);
+		tes.addVertex(x0, y1, 0D);
+		tes.addVertex(x1, y1, 0D);
+		tes.setColorRGBA(0, 0, 0, 0);
+		tes.addVertex(x1, y1 - 4, 0D);
+		tes.addVertex(x0, y1 - 4, 0D);
+		tes.draw();
 	}
 	
 	public static void renderBackground(int x0, int x1, int y0, int y1, float scroll, BackgroundTexture texture) {
