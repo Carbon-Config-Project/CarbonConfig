@@ -6,7 +6,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
-import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.screen.LayeredScreen;
