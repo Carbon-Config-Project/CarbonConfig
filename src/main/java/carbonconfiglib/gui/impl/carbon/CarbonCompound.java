@@ -134,12 +134,12 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 		ITextComponent comp = Texts.empty();
 		String entryKey = data.getTranslationComment(key);
 		if(entryKey != null && I18n.hasKey(entryKey)) {
-			comp.appendText("\n").appendSibling(Texts.translatable(entryKey).applyTextStyle(TextFormatting.YELLOW));
+			comp.appendSibling(Texts.translatable(entryKey).applyTextStyle(TextFormatting.YELLOW)).appendText("\n");
 		}
 		else {
 			String[] array = data.getComments(key);
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.appendText("\n").appendSibling(Texts.literal(array[i++]).applyTextStyle(TextFormatting.GRAY)));
+				for(int i = 0;i<array.length;comp.appendSibling(Texts.literal(array[i++]).applyTextStyle(TextFormatting.GRAY)).appendText("\n"));
 			}
 		}
 		return comp;

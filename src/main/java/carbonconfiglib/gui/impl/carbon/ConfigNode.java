@@ -59,10 +59,9 @@ public class ConfigNode implements IConfigFolderNode
 	@Override
 	public ITextComponent getTooltip() {
 		ITextComponent comp = Texts.empty();
-		comp.appendSibling(Texts.literal(section.getName()).applyTextStyle(TextFormatting.YELLOW));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.appendText("\n").appendSibling(Texts.literal(array[i++]).applyTextStyle(TextFormatting.GRAY)));
+			for(int i = 0;i<array.length;comp.appendSibling(Texts.literal(array[i++]).applyTextStyle(TextFormatting.GRAY)).appendText("\n"));
 		}
 		return comp;
 	}

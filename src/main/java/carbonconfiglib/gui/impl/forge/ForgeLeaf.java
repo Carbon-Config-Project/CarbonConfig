@@ -66,7 +66,7 @@ public class ForgeLeaf implements IConfigNode
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
 			ITextComponent comp = Texts.empty();
-			for(int i = 0;i<array.length;comp.appendText("\n").appendText(array[i++]).applyTextStyle(TextFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.appendText(array[i++]).applyTextStyle(TextFormatting.GRAY).appendText("\n"));
 			tooltip = comp;
 		}
 		guessDataType();
@@ -223,10 +223,9 @@ public class ForgeLeaf implements IConfigNode
 	@Override
 	public ITextComponent getTooltip() {
 		StringTextComponent comp = new StringTextComponent("");
-		comp.appendSibling(new StringTextComponent(Iterables.getLast(data.getPath(), "")).applyTextStyle(TextFormatting.YELLOW));
 		if(tooltip != null) comp.appendSibling(tooltip);
 		String limit = type.getLimitations(spec);
-		if(limit != null && !Strings.isBlank(limit)) comp.appendText("\n").appendSibling(new StringTextComponent(limit).applyTextStyle(TextFormatting.BLUE));
+		if(limit != null && !Strings.isBlank(limit)) comp.appendSibling(new StringTextComponent(limit).applyTextStyle(TextFormatting.BLUE));
 		return comp;
 	}
 	
