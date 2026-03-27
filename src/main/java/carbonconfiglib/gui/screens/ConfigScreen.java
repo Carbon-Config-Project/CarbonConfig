@@ -240,15 +240,13 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	private void drawTooltip(BaseElement element, GuiGraphics graphics) {
 		Component text = element.getName();
-		boolean big = false;
+		PoseStack stack = graphics.pose();
 		if(text != null) {
 			String raw = element.getNodeName();
 			if(raw != null) text = text.copy().append("("+raw+")");
 			int scale = (int)((height * 0.85F) - (height * 0.8F)) / font.lineHeight;
 			float minY = (height * 0.8F);
 			float diff = (height * 0.85F - minY) * 0.5F;
-			big = scale > 1;
-			PoseStack stack = graphics.pose();
 			stack.pushPose();
 			stack.translate(2F, minY + diff - (font.lineHeight * scale * 0.5F), 0F);
 			stack.scale(scale, scale, 1F);
@@ -257,16 +255,25 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		}
 		text = element.getTooltip();
 		if(text != null) {
-			int lines = font.split(text, width>>1).size();
-			int scale = ((int)(height - (height * 0.85F)) / (font.lineHeight << 1)) >= lines && big ? 2 : 1;
+			int freeHeight = ((int)(height - (height * 0.85F)));
+			float scale = 1F;
+			int needed = findHeight(text, width-4);
+			if(freeHeight < needed) scale = 0.5F;
+			else if(freeHeight >= needed*1.5F) {
+				needed = findHeight(text, (int)(width / 1.5F) - 4);
+				if(freeHeight >= needed*1.5F) scale = 1.5F;
+			}
 			float minY = (height * 0.85F) + 2F;
-			PoseStack stack = graphics.pose();
 			stack.pushPose();
 			stack.translate(2F, minY, 0F);
 			stack.scale(scale, scale, 1F);
-			GuiUtils.drawSplitText(graphics, font, text, 0F, 0F, Align.START, -1, (width / scale) - 4);
+			GuiUtils.drawSplitText(graphics, font, text, 0F, 0F, Align.START, -1, (int)(width / scale) - 4);
 			stack.popPose();
 		}
+	}
+	
+	private int findHeight(Component comp, int width) {
+		return font.split(comp, width).size()*font.lineHeight;
 	}
 	
 	@Override
