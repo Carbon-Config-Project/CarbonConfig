@@ -7,6 +7,7 @@ plugins {
 
 version = MC_VERSION + '-' + MOD_VERSION
 group = project.maven_group
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 
 sourceSets {
