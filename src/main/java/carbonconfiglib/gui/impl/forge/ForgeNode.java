@@ -15,6 +15,7 @@ import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.Reflects;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -63,7 +64,7 @@ public class ForgeNode implements IConfigFolderNode
 		String[] array = value.split("\n");
 		if(array != null && array.length > 0) {
 			IFormattableTextComponent comp = Texts.empty();
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]));
+			for(int i = 0;i<array.length;comp.append(Texts.literal(array[i++]).withStyle(TextFormatting.GRAY)).append("\n"));
 			tooltip = comp;
 		}
  	}

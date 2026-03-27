@@ -85,12 +85,10 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public ITextComponent getTooltip() {
-		String id = entry.getDescriptionId();
+		String id = entry.getDescriptionId()+".description";
 		IFormattableTextComponent result = Texts.empty();
-		result.append(Texts.translatable(id).withStyle(TextFormatting.YELLOW));
-		id += ".description";
 		if(I18n.exists(id)) {
-			result.append("\n").append(Texts.translatable(id).withStyle(TextFormatting.GRAY));
+			result.append(Texts.translatable(id).withStyle(TextFormatting.GRAY));
 		}
 		return result;
 	}

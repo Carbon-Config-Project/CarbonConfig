@@ -66,7 +66,7 @@ public class ForgeLeaf implements IConfigNode
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
 			IFormattableTextComponent comp = Texts.empty();
-			for(int i = 0;i<array.length;comp.append(array[i++]).withStyle(TextFormatting.GRAY).append("\n"));
+			for(int i = 0;i<array.length;comp.append(Texts.literal(array[i++]).withStyle(TextFormatting.GRAY)).append("\n"));
 			tooltip = comp;
 		}
 		guessDataType();

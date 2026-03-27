@@ -118,7 +118,7 @@ public class ConfigLeaf implements IConfigNode
 		else {
 			String[] array = entry.getComment();
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.append(array[i++]).append("\n").withStyle(TextFormatting.GRAY));
+				for(int i = 0;i<array.length;comp.append(Texts.literal(array[i++]).withStyle(TextFormatting.GRAY)).append("\n"));
 			}
 		}
 		
