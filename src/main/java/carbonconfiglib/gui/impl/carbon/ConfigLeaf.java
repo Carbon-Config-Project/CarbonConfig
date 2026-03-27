@@ -112,12 +112,12 @@ public class ConfigLeaf implements IConfigNode
 		MutableComponent comp = Component.empty();
 		String key = entry.getTranslationComment();
 		if(key != null && I18n.exists(key)) {
-			comp.append("\n").append(Component.translatable(key).withStyle(ChatFormatting.GRAY));
+			comp.append(Component.translatable(key).withStyle(ChatFormatting.GRAY).append("\n"));
 		}
 		else {
 			String[] array = entry.getComment();
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.append(array[i++]).append("\n").withStyle(ChatFormatting.GRAY));
+				for(int i = 0;i<array.length;comp.append(Component.literal(array[i++]).withStyle(ChatFormatting.GRAY)).append("\n"));
 			}
 		}
 		
