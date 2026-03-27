@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import org.lwjgl.input.Keyboard;
 
 import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -88,7 +89,7 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	}
 	
 	private int messageHeight() {
-		return fontRendererObj.listFormattedStringToWidth(message.getFormattedText(), width-50).size() * 9;
+		return GuiUtils.splitLines(fontRendererObj, message, width-50).size() * 9;
 	}
 	
 	@Override

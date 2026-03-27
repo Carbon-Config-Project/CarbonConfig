@@ -25,6 +25,7 @@ import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
 import carbonconfiglib.impl.ReloadMode;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.ITextComponent;
@@ -78,6 +79,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	List<String> walker = null;
 	BaseElement tooltipFocused;
 	ReloadMode notifiedMode;
+	private FontRenderer fontRenderer;
 	
 	public ConfigScreen(IModConfig configs, BackgroundHolder holder, GuiScreen parent) {
 		this.parent = parent;
@@ -238,14 +240,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	
 	private void drawTooltip(BaseElement element) {
 		ITextComponent text = element.getName();
-		boolean big = false;
 		if(text != null) {
 			String raw = element.getNodeName();
 			if(raw != null) text = text.createCopy().appendText("("+raw+")");
 			int scale = (int)((height * 0.85F) - (height * 0.8F)) / fontRendererObj.FONT_HEIGHT;
 			float minY = (height * 0.8F);
 			float diff = (height * 0.85F - minY) * 0.5F;
-			big = scale > 1;
 			GlStateManager.pushMatrix();;
 			GlStateManager.translate(2F, minY + diff - (fontRendererObj.FONT_HEIGHT * scale * 0.5F), 0F);
 			GlStateManager.scale(scale, scale, 1F);
@@ -254,15 +254,25 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		}
 		text = element.getTooltip();
 		if(text != null) {
-			int lines = fontRendererObj.listFormattedStringToWidth(text.getFormattedText(), width>>1).size();
-			int scale = ((int)(height - (height * 0.85F)) / (fontRendererObj.FONT_HEIGHT << 1)) >= lines && big ? 2 : 1;
+			int freeHeight = ((int)(height - (height * 0.85F)));
+			float scale = 1F;
+			int needed = findHeight(text, width-4);
+			if(freeHeight < needed) scale = 0.5F;
+			else if(freeHeight >= needed*1.5F) {
+				needed = findHeight(text, (int)(width / 1.5F) - 4);
+				if(freeHeight >= needed*1.5F) scale = 1.5F;
+			}
 			float minY = (height * 0.85F) + 2F;
 			GlStateManager.pushMatrix();;
 			GlStateManager.translate(2F, minY, 0F);
 			GlStateManager.scale(scale, scale, 1F);
-			GuiUtils.drawSplitText(fontRendererObj, text, 0F, 0F, Align.START, -1, (width / scale) - 4);
+			GuiUtils.drawSplitText(fontRenderer, text, 0F, 0F, Align.START, -1, (int)(width / scale) - 4);
 			GlStateManager.popMatrix();
 		}
+	}
+	
+	private int findHeight(ITextComponent comp, int width) {
+		return GuiUtils.splitLines(fontRenderer, comp, width).size()*fontRenderer.FONT_HEIGHT;
 	}
 	
 	@Override
