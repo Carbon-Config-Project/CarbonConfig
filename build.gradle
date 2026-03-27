@@ -8,6 +8,10 @@ plugins {
 version = MC_VERSION + '-' + MOD_VERSION
 group = project.maven_group
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
 
 sourceSets {
     main {
