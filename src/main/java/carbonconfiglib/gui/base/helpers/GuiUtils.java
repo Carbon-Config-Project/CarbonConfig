@@ -2,6 +2,7 @@ package carbonconfiglib.gui.base.helpers;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
@@ -66,6 +67,14 @@ public class GuiUtils
 		return 0;
 	}
 	
+	public static List<String> splitLines(FontRenderer font, ITextComponent text, int width) {
+		return splitLines(font, text.getFormattedText(), width);
+	}	
+	
+	public static List<String> splitLines(FontRenderer font, String text, int width) {
+		return font.listFormattedStringToWidth(text.replace("\\n", "\n"), width);
+	}
+	
 	public static void drawText(FontRenderer font, ITextComponent comp, float x, float y, Align align, int color) {
 		drawText(font, comp.getFormattedText(), x, y, align, color);
 	}
@@ -90,7 +99,7 @@ public class GuiUtils
 	
 	public static void drawSplitText(FontRenderer font, String text, float x, float y, Align align, int color, int maxLength, float lineSplit) {
 		GlStateManager.enableTexture2D();
-		for(String subLine : font.listFormattedStringToWidth(text.replace("\\n", "\n"), maxLength)) {
+		for(String subLine : splitLines(font, text, maxLength)) {
 			float offset = align.align(font.getStringWidth(subLine));
 			font.drawString(subLine, x + offset, y, color, false);
 			y += lineSplit;
