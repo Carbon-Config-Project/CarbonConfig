@@ -112,12 +112,12 @@ public class ConfigLeaf implements IConfigNode
 		ITextComponent comp = Texts.empty();
 		String key = entry.getTranslationComment();
 		if(key != null && I18n.hasKey(key)) {
-			comp.appendText("\n").appendSibling(Texts.translatable(key).applyTextStyle(TextFormatting.GRAY));
+			comp.appendSibling(Texts.translatable(key).applyTextStyle(TextFormatting.GRAY).appendText("\n"));
 		}
 		else {
 			String[] array = entry.getComment();
 			if(array != null && array.length > 0) {
-				for(int i = 0;i<array.length;comp.appendText(array[i++]).appendText("\n").applyTextStyle(TextFormatting.GRAY));
+				for(int i = 0;i<array.length;comp.appendSibling(Texts.literal(array[i++]).applyTextStyle(TextFormatting.GRAY)).appendText("\n"));
 			}
 		}
 		

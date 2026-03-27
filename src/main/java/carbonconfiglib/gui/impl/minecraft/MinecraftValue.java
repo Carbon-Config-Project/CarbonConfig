@@ -112,10 +112,8 @@ public class MinecraftValue implements IValueNode
 	public ITextComponent getName() { return IConfigNode.createLabel(I18n.format(entry.getDescriptionId())); }
 	@Override
 	public ITextComponent getTooltip() {
-		String id = entry.getDescriptionId();
+		String id = entry.getDescriptionId()+".description";
 		ITextComponent result = Texts.empty();
-		result.appendSibling(Texts.translatable(id).applyTextStyle(TextFormatting.YELLOW));
-		id += ".description";
 		if(I18n.hasKey(id)) {
 			result.appendText("\n").appendSibling(Texts.translatable(id).applyTextStyle(TextFormatting.GRAY));
 		}
