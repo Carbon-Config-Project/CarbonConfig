@@ -65,7 +65,7 @@ public class ForgeLeaf implements IConfigNode
 		String[] array = buildComment(spec);
 		if(array != null && array.length > 0) {
 			MutableComponent comp = Component.empty();
-			for(int i = 0;i<array.length;comp.append(array[i++]).withStyle(ChatFormatting.GRAY).append("\n"));
+			for(int i = 0;i<array.length;comp.append(Component.literal(array[i++]).withStyle(ChatFormatting.GRAY)).append("\n"));
 			tooltip = comp;
 		}
 		guessDataType();
