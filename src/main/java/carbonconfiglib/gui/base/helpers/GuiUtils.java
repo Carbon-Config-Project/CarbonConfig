@@ -2,6 +2,7 @@ package carbonconfiglib.gui.base.helpers;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
@@ -64,6 +65,14 @@ public class GuiUtils
 			return (float)lerp(offset, 0D, diff);
 		}
 		return 0;
+	}
+	
+	public static List<String> splitLines(FontRenderer font, ITextComponent text, int width) {
+		return splitLines(font, text.getFormattedText(), width);
+	}	
+	
+	public static List<String> splitLines(FontRenderer font, String text, int width) {
+		return font.listFormattedStringToWidth(text.replace("\\n", "\n"), width);
 	}
 	
 	public static void drawText(FontRenderer font, ITextComponent comp, float x, float y, Align align, int color) {
