@@ -86,10 +86,8 @@ public class MinecraftLeaf implements IConfigNode
 	
 	@Override
 	public Component getTooltip() {
-		String id = entry.getDescriptionId();
+		String id = entry.getDescriptionId()+".description";
 		MutableComponent result = new TextComponent("");
-		result.append(new TranslatableComponent(id).withStyle(ChatFormatting.YELLOW));
-		id += ".description";
 		if(I18n.exists(id)) {
 			result.append("\n").append(new TranslatableComponent(id).withStyle(ChatFormatting.GRAY));
 		}

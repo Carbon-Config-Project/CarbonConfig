@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import carbonconfiglib.config.ConfigEntry;
 import carbonconfiglib.config.ConfigSection;
+import carbonconfiglib.gui.api.Texts;
 import carbonconfiglib.gui.api.node.ConfigPath;
 import carbonconfiglib.gui.api.node.IConfigFolderNode;
 import carbonconfiglib.gui.api.node.IConfigNode;
@@ -60,10 +61,9 @@ public class ConfigNode implements IConfigFolderNode
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = new TextComponent("");
-		comp.append(new TextComponent(section.getName()).withStyle(ChatFormatting.YELLOW));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.append(Texts.literal(array[i++]).withStyle(ChatFormatting.GRAY)).append("\n"));
 		}
 		return comp;
 	}
