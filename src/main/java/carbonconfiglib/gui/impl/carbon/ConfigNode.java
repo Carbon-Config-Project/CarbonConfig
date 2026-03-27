@@ -62,7 +62,7 @@ public class ConfigNode implements IConfigFolderNode
 		comp.append(Component.literal(section.getName()).withStyle(ChatFormatting.YELLOW));
 		String[] array = section.getComment();
 		if(array != null && array.length > 0) {
-			for(int i = 0;i<array.length;comp.append("\n").append(array[i++]).withStyle(ChatFormatting.GRAY));
+			for(int i = 0;i<array.length;comp.append(Component.literal(array[i++]).withStyle(ChatFormatting.GRAY)).append("\n"));
 		}
 		return comp;
 	}
