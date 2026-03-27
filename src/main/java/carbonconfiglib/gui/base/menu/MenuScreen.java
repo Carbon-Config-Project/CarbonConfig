@@ -5,6 +5,7 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import carbonconfiglib.gui.base.helpers.Align;
+import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.screen.LayeredScreen;
 import carbonconfiglib.gui.base.widgets.CarbonList;
@@ -191,17 +192,16 @@ public class MenuScreen extends BaseCarbonScreen {
 		}
 		
 		private static int height(IMenuItem item, FontRenderer font) {
-			return height(font.listFormattedStringToWidth(item.name().getFormattedText(), 180).size());
+			return height(GuiUtils.splitLines(font, item.name(), 180).size());
 		}
 		
 		private static int height(int count) {
 			return 12 * count;
 		}
 		
-		@SuppressWarnings("unchecked")
 		private static int width(IMenuItem item, FontRenderer font)  {
 			int width = 0;
-			for(String entry : (List<String>)font.listFormattedStringToWidth(item.name().getFormattedText(), 180)) {
+			for(String entry : GuiUtils.splitLines(font, item.name(), 180)) {
 				width = Math.max(font.getStringWidth(entry)+5, width);
 			}
 			return width + (item instanceof SubMenuItem ? font.getStringWidth(">")+10 : 0);
@@ -219,11 +219,10 @@ public class MenuScreen extends BaseCarbonScreen {
 			return 0x55FFFFFF;
 		}
 		
-		@SuppressWarnings("unchecked")
 		@Override
 		public void render(int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			lastY = top;
-			List<String> sequence = (List<String>)font.listFormattedStringToWidth(item.name().getFormattedText(), 180);
+			List<String> sequence = GuiUtils.splitLines(font, item.name(), 180);
 			int baseY = Align.CENTER.alignStart(top, height, height(sequence.size()));
 			int entryHeight = height(1);
 			int offset = Align.CENTER.alignStart(0, entryHeight, font.FONT_HEIGHT);

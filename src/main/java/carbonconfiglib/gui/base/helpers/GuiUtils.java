@@ -63,6 +63,15 @@ public class GuiUtils
 		return 0;
 	}
 	
+	public static List<String> splitLines(FontRenderer font, IChatComponent text, int width) {
+		return splitLines(font, text.getFormattedText(), width);
+	}	
+	
+	@SuppressWarnings("unchecked")
+	public static List<String> splitLines(FontRenderer font, String text, int width) {
+		return font.listFormattedStringToWidth(text.replace("\\n", "\n"), width);
+	}
+	
 	public static void drawText(FontRenderer font, IChatComponent comp, float x, float y, Align align, int color) {
 		drawText(font, comp.getFormattedText(), x, y, align, color);
 	}

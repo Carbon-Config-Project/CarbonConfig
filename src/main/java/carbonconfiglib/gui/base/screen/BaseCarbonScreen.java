@@ -126,16 +126,15 @@ public class BaseCarbonScreen extends GuiScreen implements IInteractableContaine
 		
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void renderTooltips(int mouseX, int mouseY, float partialTicks) {
 		List<String> tooltips = new ObjectArrayList<>();
 		if(mouseX != Integer.MAX_VALUE && mouseY != Integer.MAX_VALUE) {
 			for(IInteractable listener : children()) {
 				if(listener instanceof ITooltipProvider) {
-					((ITooltipProvider)listener).provideTooltips(mouseX, mouseY, T -> tooltips.addAll((List<String>)fontRendererObj.listFormattedStringToWidth(T.getFormattedText(), Math.max(mouseX, width - mouseX) - 20)));
+					((ITooltipProvider)listener).provideTooltips(mouseX, mouseY, T -> tooltips.addAll(GuiUtils.splitLines(fontRendererObj, T, Math.max(mouseX, width - mouseX) - 20)));
 				}
 			}
-			collectTooltips(mouseX, mouseY, partialTicks, T -> tooltips.addAll((List<String>)fontRendererObj.listFormattedStringToWidth(T.getFormattedText(), Math.max(mouseX, width - mouseX) - 20)));
+			collectTooltips(mouseX, mouseY, partialTicks, T -> tooltips.addAll(GuiUtils.splitLines(fontRendererObj, T, Math.max(mouseX, width - mouseX) - 20)));
 		}
 		if((!renderTooltip && (lastMouseX != mouseX || lastMouseY != mouseY)) || tooltips.isEmpty()) {
 			lastCheck = System.currentTimeMillis();
