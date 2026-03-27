@@ -81,12 +81,10 @@ public class MinecraftLeaf implements IConfigNode
 	public Component getName() { return IConfigNode.createLabel(I18n.get(entry.getDescriptionId())); }
 	@Override
 	public Component getTooltip() {
-		String id = entry.getDescriptionId();
+		String id = entry.getDescriptionId()+".description";
 		MutableComponent result = Component.empty();
-		result.append(Component.translatable(id).withStyle(ChatFormatting.YELLOW));
-		id += ".description";
 		if(I18n.exists(id)) {
-			result.append("\n").append(Component.translatable(id).withStyle(ChatFormatting.GRAY));
+			result.append(Component.translatable(id).withStyle(ChatFormatting.GRAY));
 		}
 		return result;
 	}
