@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -24,7 +25,10 @@ public class LangConverter {
     }
 
     private static void generateJsonFromLang(String language) {
-        Path target = Paths.get("src/main/resources/assets/carbonconfig/lang/" + language + ".lang");
+        String[] parts = language.split("_", 2);
+        String targetLanguage = parts.length > 1 ? parts[0] + "_" + parts[1].toUpperCase(Locale.ROOT) : language;
+
+        Path target = Paths.get("src/main/resources/assets/carbonconfig/lang/" + targetLanguage + ".lang");
         Path source = Paths.get("carbonconfiglang/" + language + ".json");
 
         try(BufferedReader reader = Files.newBufferedReader(source); BufferedWriter writer = Files.newBufferedWriter(target))
