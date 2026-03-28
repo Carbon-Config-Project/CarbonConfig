@@ -28,8 +28,6 @@ sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = co
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-
-
 minecraft {
     version = "1.11.2-13.20.1.2530"
     runDir = "run"
@@ -55,6 +53,12 @@ sourceSets {
  			srcDir "carbonconfig/src/main/java"
  			srcDir "src/main/java"
  		}
+    }
+    tools {
+        java {
+            compileClasspath += main.output + main.compileClasspath
+            runtimeClasspath += main.output + main.runtimeClasspath
+        }
     }
 }
 
@@ -126,5 +130,12 @@ task deobfJar(type: Jar) {
 
 artifacts {
     archives deobfJar
+}
+
+task generateLangFiles(type: JavaExec) {
+    group = 'internal'
+    description = 'Generate lang files'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'carbonconfiglib.LangConverter'
 }
 
