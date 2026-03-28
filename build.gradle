@@ -33,8 +33,6 @@ sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = co
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-
-
 minecraft {
     version = "1.12.2-14.23.0.2491"
     runDir = "run"
@@ -59,6 +57,12 @@ sourceSets {
  			srcDir "carbonconfig/src/main/java"
  			srcDir "src/main/java"
  		}
+    }
+    tools {
+        java {
+            compileClasspath += main.output + main.compileClasspath
+            runtimeClasspath += main.output + main.runtimeClasspath
+        }
     }
 }
 
@@ -178,4 +182,11 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+task generateLangFiles(type: JavaExec) {
+    group = 'internal'
+    description = 'Generate lang files'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'carbonconfiglib.LangConverter'
 }
