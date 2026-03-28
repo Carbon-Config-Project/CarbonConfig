@@ -1,14 +1,19 @@
 buildscript {
     repositories {
-        maven { url = "https://files.minecraftforge.net/maven" }
         mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath("com.anatawa12.forge:ForgeGradle:2.3-1.0.+") { changing = true }
+        classpath group: 'net.darkhax.curseforgegradle', name: 'CurseForgeGradle', version: '1.1.18'
+        classpath group: 'com.modrinth.minotaur', name: 'Minotaur', version: '2.+'
+        
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: "com.modrinth.minotaur"
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
@@ -31,9 +36,9 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 
 
 minecraft {
-    version = "1.8.9-11.15.1.2318-1.8.9"
+    version = "1.12.2-14.23.0.2491"
     runDir = "run"
-    mappings = "stable_20"
+    mappings = "snapshot_20171003"
 }
 
 repositories {
@@ -46,7 +51,6 @@ repositories {
 }
 
 dependencies {
-//    compile ':Primitive Collections-0.8.9'
 }
 
 sourceSets {
@@ -98,6 +102,67 @@ processResources {
 
 jar.finalizedBy('reobfJar')
 
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+    from {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+		configurations.runtimeClasspath.findAll { it.name.equalsIgnoreCase('Primitive Collections-0.8.9.jar') }.collect { zipTree(it) }	
+	}
+}
+
+artifacts {
+    archives deobfJar
+}
+
+
+task publishMods() {
+	group 'publishing'
+	description 'Publishes the mod to all Mod Distributors'
+	doLast {
+		System.out.println("Published Mods to Curseforge/Modrinth")
+	}
+}
+
+publishMods.dependsOn('modrinth')
+publishMods.dependsOn('curseforge')
+
+modrinth {
+	token = System.getenv("Modrinth_API_Token");
+	projectId = 'carbon-config'
+	versionName = archivesBaseName.replace(" ", "")+"-"+version
+	versionNumber = MOD_VERSION
+	versionType = RELEASE_TYPE
+	uploadFile = jar
+	gameVersions = [MC_VERSION]
+	loaders = ['forge']
+	
+	additionalFiles = [deobfJar]
+	
+    def logs = new File(projectDir, "/changelogs/"+MOD_VERSION.replace(".", "")+".md");
+    changelog = logs.exists() ? logs.getText('UTF-8') : "";
+}
+
+task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) { 
+	mustRunAfter assemble
+	group 'publishing'
+	description 'Publishes the mod to Curseforge'
+	apiToken = System.getenv("Curseforge_API_Token")
+		
+	def mainFile = upload(898104, jar)
+    mainFile.releaseType = RELEASE_TYPE
+    mainFile.displayName = archivesBaseName.replace(" ", "")+"-"+version
+    
+    def changelog = new File(projectDir, "/changelogs/"+MOD_VERSION.replace(".", "")+".md");
+    mainFile.changelog = changelog.exists() ? changelog.getText('UTF-8') : "";
+    mainFile.changelogType = 'markdown'
+    mainFile.addGameVersion(MC_VERSION, 'Server', 'Client')
+    mainFile.addJavaVersion('Java 8')
+    mainFile.addModLoader('Forge')
+    mainFile.withAdditionalFile(deobfJar);
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -120,10 +185,17 @@ task deobfJar(type: Jar) {
     classifier = 'deobf'
     from {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		configurations.runtimeClasspath.findAll { it.name.equalsIgnoreCase('Primitive Collections-0.8.9.jar') }.collect { zipTree(it) }	
+		configurations.runtimeClasspath.findAll { it.name.equalsIgnoreCase('Primitive Collections-0.8.9.jar') }.collect { zipTree(it) }
 	}
 }
 
 artifacts {
     archives deobfJar
+}
+
+task generateLangFiles(type: JavaExec) {
+    group = 'internal'
+    description = 'Generate lang files'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'carbonconfiglib.LangConverter'
 }
