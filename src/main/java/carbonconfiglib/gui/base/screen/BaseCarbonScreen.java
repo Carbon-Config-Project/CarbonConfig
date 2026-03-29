@@ -82,7 +82,7 @@ public class BaseCarbonScreen extends Screen
 	
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		if(renderBackground) renderBackground(graphics);
+		if(renderBackground && minecraft.level != null) renderBackground(graphics);
 		renderBackground(graphics, mouseX, mouseY, partialTicks);
 		renderWidgets(graphics, mouseX, mouseY, partialTicks);
 		renderForeground(graphics, mouseX, mouseY, partialTicks);
