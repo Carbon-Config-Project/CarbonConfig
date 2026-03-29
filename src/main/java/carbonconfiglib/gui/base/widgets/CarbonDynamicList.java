@@ -342,7 +342,7 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		public boolean isInFullView() {
 			return (owner.x0 < location[0] && owner.x1 >= location[0]) && owner.y0 < location[1] && owner.y1 >= location[1] + location[3];
 		}
-		
+				
 		public boolean isMouseOver(double pMouseX, double pMouseY) {
 			return Objects.equals(owner.getEntryAtPos(pMouseX, pMouseY), this);
 		}
@@ -359,6 +359,11 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 				container.setFocused(null);
 			}
 			if(listener.isFocused()) listener.setFocused(false);
+		}
+		
+		@SuppressWarnings("unchecked")
+		protected <T extends DynamicEntry<T>> void setOwner(CarbonDynamicList<T> list) {
+			this.owner = (CarbonDynamicList<E>)list;
 		}
 		
 		public boolean isDraggable() {
