@@ -75,6 +75,11 @@ jar {
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 		configurations.runtimeClasspath.findAll { it.name.contains('Primitive Collections') }.collect { zipTree(it) }	
 	}
+	eachFile { fcd ->
+        if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
+        	fcd.exclude()
+        }
+    }
 }
 
 jar.finalizedBy('reobfJar')
