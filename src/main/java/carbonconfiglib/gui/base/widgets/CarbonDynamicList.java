@@ -386,6 +386,11 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends AbstractScroll
 			return Objects.equals(owner.getEntryAtPos(pMouseX, pMouseY), this);
 		}
 		
+		@SuppressWarnings("unchecked")
+		protected <T extends DynamicEntry<T>> void setOwner(CarbonDynamicList<T> list) {
+			this.owner = (CarbonDynamicList<E>)list;
+		}
+		
 		public boolean isDraggable() {
 			return true;
 		}
