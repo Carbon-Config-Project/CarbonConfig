@@ -60,12 +60,9 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
-		init();
-		this.renderBackground();
+	public void renderForeground(int mouseX, int mouseY, float partialTicks){
 		drawCenteredString(this.font, this.title.getFormattedText(), this.width / 2, this.titleTop(), 16777215);
 		drawSplitText(message, 0, messageTop()-centerY, Align.CENTER, width-50, -1);
-		super.render(mouseX, mouseY, partialTicks);
 	}
 	
 	private int titleTop() {
