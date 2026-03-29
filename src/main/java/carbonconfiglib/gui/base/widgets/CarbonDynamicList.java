@@ -368,6 +368,11 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			listener.setFocused(false);
 		}
 		
+		@SuppressWarnings("unchecked")
+		protected <T extends DynamicEntry<T>> void setOwner(CarbonDynamicList<T> list) {
+			this.owner = (CarbonDynamicList<E>)list;
+		}
+		
 		public boolean isDraggable() {
 			return true;
 		}
