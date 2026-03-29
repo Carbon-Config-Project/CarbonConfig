@@ -58,6 +58,7 @@ public class BaseCarbonScreen extends GuiScreen implements IInteractableContaine
 	private boolean isDragging;
 	protected List<IInteractable> interactables = new ObjectArrayList<>();
 	protected List<IRenderable> renderable = new ObjectArrayList<>();
+	protected boolean renderBackground = true;
 	protected int centerX;
 	protected int centerY;
 	protected int tick;
@@ -103,6 +104,7 @@ public class BaseCarbonScreen extends GuiScreen implements IInteractableContaine
 			double weel = Mouse.getDWheel() / 120D;
 			if(((int)weel) != 0 && mouseScroll(mouseX, mouseY, weel));
 		}
+		if(renderBackground) drawDefaultBackground();
 		renderBackground(mouseX, mouseY, partialTicks);
 		renderWidgets(mouseX, mouseY, partialTicks);
 		renderForeground(mouseX, mouseY, partialTicks);
