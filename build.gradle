@@ -154,7 +154,6 @@ task publishMods() {
 }
 publishMods.dependsOn('modrinth')
 publishMods.dependsOn('curseforge')
-assemble.mustRunAfter('renameBuild')
 
 modrinth {
 	token = System.getenv("Modrinth_API_Token");
