@@ -110,7 +110,7 @@ reobf {
 }
 
 tasks.jarJar {
-	finalizedBy 'reobfJarJar'
+	mustRunAfter 'reobfJar'
     archiveClassifier.set("")
     eachFile { fcd ->
         if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
@@ -156,7 +156,6 @@ task publishMods() {
 
 publishMods.dependsOn('modrinth')
 publishMods.dependsOn('curseforge')
-assemble.mustRunAfter('renameBuild')
 
 modrinth {
 	token = System.getenv("Modrinth_API_Token");
@@ -174,7 +173,6 @@ modrinth {
 
 task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) { 
 	mustRunAfter assemble
-	mustRunAfter renameBuild
 	group 'publishing'
 	description 'Publishes the mod to Curseforge'
 	apiToken = System.getenv("Curseforge_API_Token")
