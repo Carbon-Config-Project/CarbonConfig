@@ -56,6 +56,7 @@ public class BaseCarbonScreen extends Screen
 	protected int centerX;
 	protected int centerY;
 	protected int tick;
+	protected boolean renderBackground = true;
 	int lastMouseX = 0;
 	int lastMouseY = 0;
 	long lastCheck = 0L;
@@ -100,6 +101,7 @@ public class BaseCarbonScreen extends Screen
 	
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		if(renderBackground && minecraft.level != null) renderBackground(graphics);
 		renderBackground(graphics, mouseX, mouseY, partialTicks);
 		renderWidgets(graphics, mouseX, mouseY, partialTicks);
 		renderForeground(graphics, mouseX, mouseY, partialTicks);
