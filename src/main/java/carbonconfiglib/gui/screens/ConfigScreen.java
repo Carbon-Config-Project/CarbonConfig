@@ -253,6 +253,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 			GuiUtils.drawText(graphics, font, text, 0F, 0F, Align.START, -1);
 			stack.popPose();
 		}
+		text = element.getTooltip();
 		if(text != null) {
 			int freeHeight = ((int)(height - (height * 0.85F)));
 			float scale = 1F;
