@@ -110,7 +110,7 @@ reobf {
 }
 
 tasks.jarJar {
-	finalizedBy 'reobfJarJar'
+	mustRunAfter 'reobfJar'
     archiveClassifier.set("")
     eachFile { fcd ->
         if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
@@ -118,6 +118,7 @@ tasks.jarJar {
         }
     }
 }
+
 
 task deobfJar(type: Jar) {
     archiveClassifier.set("deobf")
@@ -154,7 +155,6 @@ task publishMods() {
 }
 publishMods.dependsOn('modrinth')
 publishMods.dependsOn('curseforge')
-assemble.mustRunAfter('renameBuild')
 
 
 modrinth {
