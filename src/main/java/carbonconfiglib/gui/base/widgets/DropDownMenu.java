@@ -109,6 +109,7 @@ public class DropDownMenu<T> extends CarbonButton {
 			this.owner = owner;
 			this.ownerState = owner.getState();
 			generateElements();
+			renderBackground = false;
 		}
 		
 		private void generateElements() {
@@ -221,6 +222,7 @@ public class DropDownMenu<T> extends CarbonButton {
 				owner.renderSelection(graphics, left, top, width, height, GuiUtils.brighter(getSelectionColor(false), 0.8F), getSelectionBackgroundColor());
 			}
 			if(renderer != null) {
+				renderer.setOwner(owner);
 				renderer.render(graphics, x, top+1, left+1, width-2, height-2, mouseX, mouseY, selected, partialTicks);
 				return;
 			}

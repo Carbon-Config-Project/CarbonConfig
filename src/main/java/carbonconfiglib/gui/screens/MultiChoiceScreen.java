@@ -67,11 +67,14 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks){
-		this.renderDirtBackground(graphics);
+	public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		if(minecraft.level == null) renderDirtBackground(graphics);
+	}
+	
+	@Override
+	public void renderForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		graphics.drawCenteredString(this.font, this.title, this.width / 2, this.titleTop(), 16777215);
 		drawSplitText(graphics, message, 0, messageTop()-centerY, Align.CENTER, width-50, -1);
-		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	private int titleTop() {
