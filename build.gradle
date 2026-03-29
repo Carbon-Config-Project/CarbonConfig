@@ -107,9 +107,19 @@ jar {
 
 jar.finalizedBy('reobfJar')
 reobf {
-    jarJar { }
+    jarJar {}
 }
-tasks.jarJar.finalizedBy('reobfJarJar')
+
+
+tasks.jarJar {
+	finalizedBy 'reobfJarJar'
+    archiveClassifier.set("")
+    eachFile { fcd ->
+        if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
+        	fcd.exclude()
+        }
+    }
+}
 
 publishing {
     publications {
@@ -128,25 +138,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-task renameBuild (type: Copy) {
-	dependsOn jar
-	dependsOn reobf
-	include "*-all.jar"
-    from ('build/libs')
-    into ('build/libs')
-    rename { name ->  
-    	System.out.println('replacing: '+name)
-    	name.replace '-all', ''
-    }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-task deleteBuild(type: Delete) {
- 	delete fileTree('build/libs') {
- 		include '*-all.jar'
-	}
-}
-
 task publishMods() {
 	group 'publishing'
 	description 'Publishes the mod to all Mod Distributors'
@@ -154,9 +145,7 @@ task publishMods() {
 		System.out.println("Published Mods to Curseforge/Modrinth")
 	}
 }
-tasks.reobfJarJar.finalizedBy('renameBuild')
-renameBuild.mustRunAfter('reobfJar')
-renameBuild.finalizedBy('deleteBuild')
+
 publishMods.dependsOn('modrinth')
 publishMods.dependsOn('curseforge')
 
