@@ -150,8 +150,7 @@ public class JEILeaf implements IConfigNode
 	@Override
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();
-		comp.append(entry.getLocalizedDescription().copy().withStyle(ChatFormatting.YELLOW)).append("\n");
-		if(entry.getLocalizedDescription() != null) comp.append(entry.getLocalizedDescription()).append("\n");
+		if(entry.getLocalizedDescription() != null) comp.append(entry.getLocalizedDescription().copy().withStyle(ChatFormatting.GRAY)).append("\n");
 		IJeiConfigValueSerializer<?> serializer = isArray ? ((IJeiConfigListValueSerializer<?>)this.serializer).getListValueSerializer() : this.serializer;
 		comp.append(Component.literal(serializer.getValidValuesDescription()).withStyle(ChatFormatting.BLUE));
 		return comp;

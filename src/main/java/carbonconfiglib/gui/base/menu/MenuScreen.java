@@ -59,6 +59,7 @@ public class MenuScreen extends BaseCarbonScreen {
 		this.menuX = menuX;
 		this.menuY = menuY;
 		menuState.add(MenuEntry.create(this, item));
+		renderBackground = false;
 	}
 	
 	public MenuScreen setParent(MenuScreen parent) {
