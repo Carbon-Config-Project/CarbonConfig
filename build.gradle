@@ -82,22 +82,13 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 
-task renameBuild (type: Copy) {
-	dependsOn jar
-	include "*-all.jar"
-    from ('build/libs')
-    into ('build/libs')
-    rename { name ->  
-    	System.out.println('replacing: '+name)
-    	name.replace '-all', ''
+tasks.jarJar {
+    archiveClassifier.set("")
+    eachFile { fcd ->
+        if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
+        	fcd.exclude()
+        }
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-task deleteBuild(type: Delete) {
- 	delete fileTree('build/libs') {
- 		include '*-all.jar'
-	}
 }
 
 task publishMods() {
@@ -107,11 +98,8 @@ task publishMods() {
 		System.out.println("Published Mods to Curseforge/Modrinth")
 	}
 }
-tasks.jarJar.finalizedBy('renameBuild')
-renameBuild.finalizedBy('deleteBuild')
 publishMods.dependsOn('modrinth')
 publishMods.dependsOn('curseforge')
-assemble.mustRunAfter('renameBuild')
 
 
 modrinth {
