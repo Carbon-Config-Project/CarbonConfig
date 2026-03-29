@@ -117,6 +117,7 @@ public class DropDownMenu<T> extends CarbonButton {
 			this.owner = owner;
 			this.ownerState = owner.getState();
 			generateElements();
+			renderBackground = false;
 		}
 		
 		private void generateElements() {

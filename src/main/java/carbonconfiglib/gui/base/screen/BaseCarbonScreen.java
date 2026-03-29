@@ -52,6 +52,7 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
 public class BaseCarbonScreen extends Screen
 {
 	public static final int DEFAULT_DELAY = 200;
+	protected boolean renderBackground = true;
 	protected int centerX;
 	protected int centerY;
 	protected int tick;
@@ -81,6 +82,7 @@ public class BaseCarbonScreen extends Screen
 	
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		if(renderBackground) renderBackground(graphics);
 		renderBackground(graphics, mouseX, mouseY, partialTicks);
 		renderWidgets(graphics, mouseX, mouseY, partialTicks);
 		renderForeground(graphics, mouseX, mouseY, partialTicks);
