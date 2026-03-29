@@ -134,7 +134,7 @@ modrinth {
 	versionNumber = MOD_VERSION
 	versionType = RELEASE_TYPE
 	uploadFile = getReleaseJar()
-	gameVersions = [MC_VERSION, '1.20.6']
+	gameVersions = [MC_VERSION]
 	loaders = ['fabric']
 	dependencies {
 		optional.project "modmenu"
