@@ -67,13 +67,9 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 		button(55, y, 100, 20, Align.CENTER, Align.CENTER, cancelButton, T -> callback.accept(Result.CANCEL));
 	}
 	
-	@Override
-	public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks){
-		init();
-		this.renderBackground(stack);
-		drawCenteredString(stack, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
-		drawSplitText(stack, message, 0, messageTop()-centerY, Align.CENTER, width-50, -1);
-		super.render(stack, mouseX, mouseY, partialTicks);
+	public void renderForeground(PoseStack matrix, int mouseX, int mouseY, float partialTicks) {
+		drawCenteredString(matrix, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
+		drawSplitText(matrix, message, 0, messageTop()-centerY, Align.CENTER, width-50, -1);
 	}
 	
 	private int titleTop() {
