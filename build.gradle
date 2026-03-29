@@ -87,11 +87,18 @@ test {
 }
 
 tasks.jarJar {
-    archiveClassifier.set("")
+    archiveClassifier.set("all")
     eachFile { fcd ->
         if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
         	fcd.exclude()
         }
+    }
+    doLast {
+        def jarFile = archiveFile.get().asFile
+        def newJar = new File(jarFile.parent, jarFile.name.replace("-all", ""))
+        
+        if (newJar.exists()) newJar.delete() // make sure no conflict
+        jarFile.renameTo(newJar)
     }
 }
 
