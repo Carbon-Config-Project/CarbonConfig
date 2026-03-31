@@ -2,6 +2,7 @@ package carbonconfiglib.gui.impl.forge;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,17 +26,16 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import scala.actors.threadpool.Arrays;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2023 Speiger, Meduris
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -49,17 +49,17 @@ public class ForgeConfig implements IModConfig
 	ModContainer container;
 	Configuration config;
 	String configName;
-	
+
 	public ForgeConfig(ModContainer container, Configuration config) {
 		this(container, config, config.getConfigFile().toPath().getFileName().toString());
 	}
-		
+
 	public ForgeConfig(ModContainer container, Configuration config, String configName) {
 		this.container = container;
 		this.config = config;
 		this.configName = configName;
 	}
-	
+
 	@Override
 	public String getFileName() { return configName; }
 	@Override
@@ -82,11 +82,11 @@ public class ForgeConfig implements IModConfig
 			}
 		}
 	}
-	
+
 	public boolean canCreateConfigs() { return false; }
 	@Override
 	public boolean createConfig(Path path) { return false; }
-	
+
 	@Override
 	public IConfigNode getRootNode() { return new ForgeRoot(config, configName, new ConfigPath(getModId(), configName)); }
 	@Override
@@ -95,7 +95,7 @@ public class ForgeConfig implements IModConfig
 	public IModConfig loadFromFile(Path path) { return null; }
 	@Override
 	public IModConfig loadFromNetworking(UUID requestId, Consumer<Predicate<PacketBuffer>> network) { return null; }
-	
+
 	@Override
 	public void save(boolean createBackup) {
 		if(createBackup) BackupManager.createBackup(this);
@@ -106,14 +106,14 @@ public class ForgeConfig implements IModConfig
         if (!event.getResult().equals(Result.DENY))
             MinecraftForge.EVENT_BUS.post(new PostConfigChangedEvent(container.getModId(), null, Minecraft.getMinecraft().theWorld != null, needsRestart));
 	}
-	
+
 	@Override
 	public byte[] createBackup() {
 		try { return Files.readAllBytes(config.getConfigFile().toPath()); }
 		catch(Exception e) { e.printStackTrace(); }
 		return null;
 	}
-	
+
 	@Override
 	public void loadBackup(byte[] data) {
 		try {
@@ -128,11 +128,11 @@ public class ForgeConfig implements IModConfig
 		}
 		catch(Exception e) { e.printStackTrace(); }
 	}
-	
+
 	private boolean doPropsMatch(Property prop, String[] data) {
 		return prop.isList() ? Arrays.deepEquals(prop.getStringList(), data) : Objects.equals(prop.getString(), data[0]);
 	}
-	
+
 	private Map<Property, String[]> serializeConfigs() {
 		Map<Property, String[]> result = new Object2ObjectOpenHashMap<>();
 		for(String section : config.getCategoryNames()) {
@@ -140,7 +140,7 @@ public class ForgeConfig implements IModConfig
 		}
 		return result;
 	}
-	
+
 	private void serializeCat(ConfigCategory cat, Map<Property, String[]> data) {
 		for(ConfigCategory sub : cat.getChildren()) {
 			serializeCat(sub, data);
@@ -149,14 +149,14 @@ public class ForgeConfig implements IModConfig
 			data.put(prop, prop.isList() ? prop.getStringList().clone() : new String[] {prop.getString()});
 		}
 	}
-	
+
 	private boolean scanConfigs(Predicate<Property> props) {
 		for(String section : config.getCategoryNames()) {
 			if(scanCategory(props, config.getCategory(section))) return true;
 		}
 		return false;
 	}
-	
+
 	private boolean scanCategory(Predicate<Property> props, ConfigCategory cat) {
 		for(ConfigCategory sub : cat.getChildren()) {
 			if(scanCategory(props, sub)) return true;
@@ -166,11 +166,11 @@ public class ForgeConfig implements IModConfig
 		}
 		return false;
 	}
-	
+
 	private boolean hasRestartChanged(Property property) {
 		return property.hasChanged() && property.requiresMcRestart();
 	}
-	
+
 	private boolean isNotDefault(Property property) {
 		return !property.isDefault();
 	}

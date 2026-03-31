@@ -6,7 +6,6 @@ import java.util.function.BooleanSupplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.Config;
@@ -18,15 +17,8 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
 import carbonconfiglib.config.HashSetCache;
-import carbonconfiglib.gui.api.IModConfig;
-import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTypes;
 import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
-import carbonconfiglib.gui.base.screen.LayeredScreen;
-import carbonconfiglib.gui.screens.ConfigListScreen;
-import carbonconfiglib.gui.screens.ConfigRequestScreen;
-import carbonconfiglib.gui.screens.ConfigScreen;
-import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -37,8 +29,6 @@ import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.impl.internal.InternalFeatures;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
-import cpw.mods.fml.client.GuiModList;
-import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -49,30 +39,20 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraftforge.common.MinecraftForge;
-import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 
 /**
  * Copyright 2023 Speiger, Meduris
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -81,7 +61,7 @@ import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Mod(modid = "carbonconfig", version = "1.1.3", name = "Carbon Config Library", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(modid = "carbonconfig", version = Tags.VERSION, name = "Carbon Config Library", acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.7.10]")
 public class CarbonConfig
 {
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -90,15 +70,15 @@ public class CarbonConfig
 	public static BooleanSupplier MOD_GUI = () -> false;
 	public static BooleanSupplier DEPENDENCY_VIEWER = () -> false;
 	ConfigHandler handler;
-	public static BoolValue FORGE_SUPPORT; 
-	public static BoolValue FORCE_FORGE_SUPPORT; 
+	public static BoolValue FORGE_SUPPORT;
+	public static BoolValue FORCE_FORGE_SUPPORT;
 	public static BoolValue FORCE_CUSTOM_BACKGROUND;
 	public static EnumValue<BackgroundTypes> BACKGROUNDS;
 	public static BoolValue INGAME_BACKGROUND;
 	public static BoolValue AUTO_BACKUP;
 	public static BoolValue AUTO_SAVE;
 	public static HashSetCache<String> MODS_DISABLED;
-	
+
 	@cpw.mods.fml.common.Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
 	{
@@ -107,15 +87,15 @@ public class CarbonConfig
 		FMLCommonHandler.instance().bus().register(EventHandler.INSTANCE);
 		if(FMLCommonHandler.instance().getSide().isClient()) {
 			InternalFeatures.loadDefaultSettings();
-			MinecraftForge.EVENT_BUS.register(this);
-			FMLCommonHandler.instance().bus().register(this);
+			MinecraftForge.EVENT_BUS.register(CarbonConfigClient.INSTANCE);
+			FMLCommonHandler.instance().bus().register(CarbonConfigClient.INSTANCE);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
 			FORCE_FORGE_SUPPORT = section.addBool("force-forge-support", true, "Enables that Carbon Config Overrides the config guis of forge mods that have added their own guis").setRequiredReload(ReloadMode.GAME);
 			AUTO_SAVE = section.addBool("auto-save", false, "Defines if autosave is enabled by default or not");
 			AUTO_BACKUP = section.addBool("auto-backup", false, "Enables that a backup is created everytime a config is saved through the gui");
-			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0], 
+			ArrayValue blacklist = section.addArray("mod-blacklist", new String[0],
 					"Disables these mods from carbon configs Gui System.",
 					"This is mainly if a mod doesn't play well with Carbon Config it can be disabled/ignored",
 					"List of Blacklisted ModIds").withFilter(Loader::isModLoaded).setRequiredReload(ReloadMode.GAME).forceSuggestions(true).addSuggestionProvider(ModProvider.INSTANCE);
@@ -127,7 +107,7 @@ public class CarbonConfig
 			handler.register();
 		}
 	}
-	
+
 	/**
 	 * Creates a Setting with a PerWorld Proxy set by default.
 	 * And sets the config to be loaded at the right time!
@@ -136,7 +116,7 @@ public class CarbonConfig
 	public static ConfigSettings getPerWorldProxy() {
 		return PerWorldProxy.perWorld();
 	}
-	
+
 	/**
 	 * Creates a Setting that will allow Late Loading more easily.
 	 * @return ConfigSetting with just sync/Auto reload
@@ -145,7 +125,7 @@ public class CarbonConfig
 	public ConfigSettings createLateLoadSettings() {
 		return ConfigSettings.withSettings(AutomationType.AUTO_RELOAD, AutomationType.AUTO_SYNC);
 	}
-	
+
 	/**
 	 * Creates a Config that is dedicated for color.
 	 * It saves the Entry in Hex instead a normal number allowing to set RGB a lot easier and understand it nicer.
@@ -158,7 +138,7 @@ public class CarbonConfig
 	public static ColorValue createColor(String key, int color, String...comments) {
 		return new ColorValue(key, color, comments);
 	}
-	
+
 	/**
 	 * Creates a ConfigBuilder that contains a Set of "Registry Keys" (ResourceLocation).
 	 * The idea behind that is you might want a filter or something about a specific Type of Registry Element.
@@ -171,7 +151,7 @@ public class CarbonConfig
 	public static <E> RegistryKeyValue.Builder<E> createRegistryKeyBuilder(String key, Class<E> clz) {
 		return RegistryKeyValue.builder(key, clz);
 	}
-	
+
 	/**
 	 * Creates a ConfigBuilder that contains a Set of "Registry Elements" (i.e. Item/Block/Fluid/Enchantment).
 	 * The idea behind that is you might want a filter or something about a specific Type of Registry Element.
@@ -184,91 +164,14 @@ public class CarbonConfig
 	public static <E> RegistryValue.Builder<E> createRegistryBuilder(String key, Class<E> clz) {
 		return RegistryValue.builder(key, clz);
 	}
-	
-	/**
-	 * Helper function that allows to open a specific config folder in a remote config.<br>
-	 * Remote config is defined as a config that is on the servers machine.<br>
-	 * In Singleplayer that could also mean that client configs do work.
-	 * @param config that should be opened
-	 * @param path of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void openRemoteConfigFolder(IModConfig config, String...path) {
-		openRemoteConfigFolder(config, BackgroundTexture.DEFAULT, path);
-	}
-	
-	/**
-	 * Helper function that allows to open a specific config folder in a remote config.<br>
-	 * Remote config is defined as a config that is on the servers machine.<br>
-	 * In Singleplayer that could also mean that client configs do work.
-	 * @param config that should be opened
-	 * @param texture background that should be used
-	 * @param path of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void openRemoteConfigFolder(IModConfig config, BackgroundTexture texture, String...path) {
-		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		if(server != null) {
-			openLocalConfigFolder(config, texture, path);
-			return;
-		}
-		else if(config.getConfigType() == ConfigType.CLIENT) {
-			CarbonConfig.LOGGER.info("Tried to open a local config in the Remote Opener");
-			return;
-		}
-		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.thePlayer == null) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
-			return;
-		}
-		else if(!NETWORK.hasPermissions()) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");			
-			return;
-		}
-		mc.displayGuiScreen(new ConfigRequestScreen(texture.asHolder(), mc.currentScreen, config, path));
-	}
-	
-	/**
-	 * Helper function that allows to open a specific config folder in a local config.<br>
-	 * Local config is defined as a config that is on the clients machine.<br>
-	 * This includes Client/Singleplayer/Shared or Common configs.
-	 * @param config that should be opened
-	 * @param path of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void openLocalConfigFolder(IModConfig config, String...path) {
-		openLocalConfigFolder(config, BackgroundTexture.DEFAULT, path);
-	}
-	
-	/**
-	 * Helper function that allows to open a specific config folder in a local config.<br>
-	 * Local config is defined as a config that is on the clients machine.<br>
-	 * This includes Client/Singleplayer/Shared or Common configs.
-	 * @param config that should be opened
-	 * @param texture background that should be used
-	 * @param path of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void openLocalConfigFolder(IModConfig config, BackgroundTexture texture, String...path) {
-		if(!config.isLocalConfig()) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config in the Local Opener");
-			return;
-		}
-		Minecraft mc = Minecraft.getMinecraft();
-		mc.displayGuiScreen(new ConfigScreen(config, texture.asHolder(), mc.currentScreen).withWalker(path == null || path.length <= 0 ? null : ObjectArrayList.wrap(path)));
-	}
-	
+
 	public static boolean hasPermission(EntityPlayer player, int permissionLevel) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if(server.isSinglePlayer() && Objects.equals(player.getGameProfile().getName(), server.getServerOwner())) return true;
 		UserListOpsEntry entry = (UserListOpsEntry)server.getConfigurationManager().func_152603_m().func_152683_b(player.getGameProfile());
 		return entry != null && entry.func_152644_a() >= permissionLevel;
 	}
-	
+
 	@cpw.mods.fml.common.Mod.EventHandler
 	public void onCommonLoad(FMLPostInitializationEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
@@ -277,10 +180,10 @@ public class CarbonConfig
 			}
 		}
 		if(FMLCommonHandler.instance().getSide().isClient()) {
-			onClientLoad();
+			CarbonConfigClient.onClientLoad();
 		}
 	}
-	
+
 	@cpw.mods.fml.common.Mod.EventHandler
 	public void onIMC(IMCEvent event) {
 		Map<String, ModContainer> mods = new Object2ObjectOpenHashMap<>();
@@ -301,35 +204,7 @@ public class CarbonConfig
 		}
 		EventHandler.INSTANCE.processIMCEvents(mods, mappingTasks);
 	}
-	
-	@SideOnly(Side.CLIENT)
-	public void onClientLoad() {
-		EventHandler.INSTANCE.onConfigsLoaded();
-		KeyBinding mapping = new KeyBinding("key.carbon_config.key", Keyboard.KEY_NUMPAD0, "key.carbon_config");
-		ClientRegistry.registerKeyBinding(mapping);
-		MOD_GUI = mapping::getIsKeyPressed;
-		KeyBinding mappingOther = new KeyBinding("key.carbon_config.dep", Keyboard.KEY_NUMPAD1, "key.carbon_config");
-		ClientRegistry.registerKeyBinding(mappingOther);
-		DEPENDENCY_VIEWER = () -> GameSettings.isKeyDown(mappingOther);
-	}
-	
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void onClientTickEvent(ClientTickEvent event) {
-		if(DEPENDENCY_VIEWER.getAsBoolean() && !(LayeredScreen.topScreen() instanceof ModDependencyScreen)) {
-			Minecraft.getMinecraft().displayGuiScreen(new ModDependencyScreen());
-		}
-	}
-	
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void onKeyPressed(KeyInputEvent event) {
-		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.thePlayer != null && MOD_GUI.getAsBoolean()) {
-			mc.displayGuiScreen(GuiScreen.isShiftKeyDown() ? new GuiModList(mc.currentScreen) : new ConfigListScreen(mc.currentScreen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
-		}
-	}
-	
+
 	@cpw.mods.fml.common.Mod.EventHandler
 	public void load(FMLServerAboutToStartEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {
@@ -338,7 +213,7 @@ public class CarbonConfig
 			}
 		}
 	}
-	
+
 	@cpw.mods.fml.common.Mod.EventHandler
 	public void unload(FMLServerStoppingEvent event) {
 		for(ConfigHandler handler : CONFIGS.getAllConfigs()) {

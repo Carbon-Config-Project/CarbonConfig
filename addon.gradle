@@ -1,0 +1,20 @@
+sourceSets {
+    main {
+        java {
+            srcDir "carbonconfig/src/main/java"
+        }
+    }
+    tools {
+        java {
+            compileClasspath += main.output + main.compileClasspath
+            runtimeClasspath += main.output + main.runtimeClasspath
+        }
+    }
+}
+
+task generateLangFiles(type: JavaExec) {
+    group = 'internal'
+    description = 'Generate lang files'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'carbonconfiglib.LangConverter'
+}
