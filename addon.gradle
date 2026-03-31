@@ -12,6 +12,12 @@ sourceSets {
     }
 }
 
+configurations.toolsAnnotationProcessor.extendsFrom(configurations.annotationProcessor)
+
+tasks.named('test') {
+    failOnNoDiscoveredTests = false
+}
+
 task generateLangFiles(type: JavaExec) {
     group = 'internal'
     description = 'Generate lang files'
