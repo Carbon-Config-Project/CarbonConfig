@@ -23,6 +23,7 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import carbonconfiglib.impl.internal.BackupManager;
 import carbonconfiglib.impl.internal.BackupManager.BulkRequest;
 import carbonconfiglib.impl.internal.BackupManager.Mode;
+import carbonconfiglib.impl.internal.BackupManager.SingleRequest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.toasts.SystemToast;
@@ -255,6 +256,13 @@ public class ConfigListScreen extends BaseCarbonScreen
 		
 		private void updateBackup() {
 			if(shouldCreatePick()) return;
+			Minecraft mc = Minecraft.getMinecraft();
+			if(isInWorldConfig() && !mc.isSingleplayer()) {
+				new SingleRequest(config, T -> {
+					this.hasBackups = OptionalInt.of(BackupManager.listBackups(T).size());					
+				});
+				return;
+			}
 			this.hasBackups = OptionalInt.of(BackupManager.listBackups(config).size());
 		}
 		
@@ -362,6 +370,11 @@ public class ConfigListScreen extends BaseCarbonScreen
 		}
 		
 		private void selectBackups() {
+			Minecraft mc = Minecraft.getMinecraft();
+			if(isInWorldConfig() && !mc.isSingleplayer()) {
+				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.LIST);
+				return;
+			}
 			setExternalScreen(new BackupSelectionScreen(Minecraft.getMinecraft().currentScreen, holder, config, BackupManager.listBackups(config)));
 		}
 		
