@@ -56,8 +56,8 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 		Window window = Minecraft.getInstance().getWindow();
 		width = (window.getGuiScaledWidth()-30);
 		height = (window.getGuiScaledHeight()-55);
-		vertical.setDefaultValues(ObjectLists.singleton(value.screenX()));
-		horizontal.setDefaultValues(ObjectLists.singleton(value.screenY()));
+		vertical.setDefaultValues(ObjectLists.singleton(value.screenY()));
+		horizontal.setDefaultValues(ObjectLists.singleton(value.screenX()));
 		updateAlign();
 		xOff.set((long)(value.xOffset()*10000F));
 		yOff.set((long)(value.yOffset()*10000F));
@@ -110,10 +110,21 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	private void updateAlign() {
 		int realWidth = 10000;
 		int realHeight = 10000;
-		Align vertical = this.vertical.getSelectedElement();
 		Align horizontal = this.horizontal.getSelectedElement();
-		xOff.setMinValue(generateMin(horizontal, realWidth)).setMaxValue(generateMax(horizontal, realWidth));
-		yOff.setMinValue(generateMin(vertical, realHeight)).setMaxValue(generateMax(vertical, realHeight));
+		Align vertical = this.vertical.getSelectedElement();
+		long x = xOff.get();
+		long y = yOff.get();
+		
+		xOff.setMinValue(generateMin(horizontal, realWidth)).setMaxValue(generateMax(horizontal, realWidth)).set(updateValue(x, horizontal));
+		yOff.setMinValue(generateMin(vertical, realHeight)).setMaxValue(generateMax(vertical, realHeight)).set(updateValue(y, vertical));
+	}
+	
+	private long updateValue(long original, Align align) {
+		switch(align) {
+			case START: return original < 0 ? -original : original;
+			case END: return original > 0 ? -original : original;
+			default: return original;
+		}
 	}
 	
 	private int generateMin(Align align, int value) {
