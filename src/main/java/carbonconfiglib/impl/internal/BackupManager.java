@@ -10,8 +10,10 @@ import java.util.AbstractMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -218,6 +220,28 @@ public class BackupManager {
 		}
 	}
 	
+	public static class SingleRequest implements IRequestReceiver {
+		Consumer<IModConfig> result;
+		Predicate<FriendlyByteBuf> filter;
+		IModConfig parsed;
+		UUID myId;
+		
+		public SingleRequest(IModConfig parsed, Consumer<IModConfig> result) {
+			this.myId = UUID.randomUUID();
+			this.result = result;
+			IRequestReceiver.Impl.register(this);
+			this.parsed = parsed.loadFromNetworking(myId, T -> filter = T);
+		}
+		
+		@Override
+		public void receiveConfigData(UUID requestId, FriendlyByteBuf buf) {
+			if(!Objects.equals(requestId, myId)) return;
+			IRequestReceiver.Impl.unregister(this);
+			if(!filter.test(buf)) return;
+			result.accept(parsed);
+		}
+	}
+	
 	public static class BulkRequest implements IRequestReceiver {
 		Mode mode;
 		Map<UUID, Map.Entry<IModConfig, Predicate<FriendlyByteBuf>>> toCheck = new Object2ObjectOpenHashMap<>();
@@ -250,7 +274,7 @@ public class BackupManager {
 						BackupManager.loadLastBackup(entry.getKey());
 						break;
 					case LIST:
-						BaseCarbonScreen.pushExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, BackgroundTexture.DEFAULT.asHolder(), entry.getKey(), BackupManager.listBackups(entry.getKey())));
+						BaseCarbonScreen.setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, BackgroundTexture.DEFAULT.asHolder(), entry.getKey(), BackupManager.listBackups(entry.getKey())));
 						break;
 				}
 				if(toCheck.isEmpty()) {
