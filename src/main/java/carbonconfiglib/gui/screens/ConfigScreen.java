@@ -25,7 +25,6 @@ import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
 import carbonconfiglib.impl.ReloadMode;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.ITextComponent;
@@ -79,7 +78,6 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	List<String> walker = null;
 	BaseElement tooltipFocused;
 	ReloadMode notifiedMode;
-	private FontRenderer fontRenderer;
 	
 	public ConfigScreen(IModConfig configs, BackgroundHolder holder, GuiScreen parent) {
 		this.parent = parent;
@@ -266,13 +264,13 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 			GlStateManager.pushMatrix();;
 			GlStateManager.translate(2F, minY, 0F);
 			GlStateManager.scale(scale, scale, 1F);
-			GuiUtils.drawSplitText(fontRenderer, text, 0F, 0F, Align.START, -1, (int)(width / scale) - 4);
+			GuiUtils.drawSplitText(fontRendererObj, text, 0F, 0F, Align.START, -1, (int)(width / scale) - 4);
 			GlStateManager.popMatrix();
 		}
 	}
 	
 	private int findHeight(ITextComponent comp, int width) {
-		return GuiUtils.splitLines(fontRenderer, comp, width).size()*fontRenderer.FONT_HEIGHT;
+		return GuiUtils.splitLines(fontRendererObj, comp, width).size()*fontRendererObj.FONT_HEIGHT;
 	}
 	
 	@Override
