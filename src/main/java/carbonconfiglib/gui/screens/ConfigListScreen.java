@@ -372,6 +372,11 @@ public class ConfigListScreen extends BaseCarbonScreen
 		}
 		
 		private void selectBackups() {
+			Minecraft mc = Minecraft.getInstance();
+			if(isInWorldConfig() && !mc.isSingleplayer()) {
+				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.LIST);
+				return;
+			}
 			setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().currentScreen, holder, config, BackupManager.listBackups(config)));
 		}
 		
