@@ -1,5 +1,7 @@
 package carbonconfiglib.impl.entries;
 
+import java.util.Objects;
+
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import carbonconfiglib.api.IConfigSerializer;
@@ -70,6 +72,25 @@ public class WidgetAligner
 	public void applyToPose(double screenWidth, double screenHeight, double width, double height) {
 		GlStateManager.translated(screenX.alignStart(0F, screenWidth, width*scale)+xOffset*screenWidth, screenY.alignStart(0F, screenHeight, height*scale)+yOffset*screenHeight, 0F);
 		GlStateManager.scalef(scale, scale, 1F);
+	}
+	
+	@Override
+	public String toString() {
+		return "WidgetAligner[alignX="+screenX+", alignY="+screenY+", xOffset="+xOffset+", yOffset="+yOffset+", scale="+scale+"]";
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof WidgetAligner) {
+			WidgetAligner align = (WidgetAligner)obj;
+			return align.screenX == screenX && align.screenY == screenY && Float.compare(align.xOffset, xOffset) == 0 && Float.compare(align.yOffset, yOffset) == 0 && Float.compare(align.scale, scale) == 0;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(screenX, screenY, xOffset, yOffset, scale);
 	}
 	
 	private ParsedMap serialize() {
