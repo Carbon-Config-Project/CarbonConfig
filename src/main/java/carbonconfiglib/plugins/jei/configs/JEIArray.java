@@ -17,7 +17,6 @@ import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
-import speiger.src.collections.objects.utils.ObjectLists;
 import speiger.src.collections.utils.Stack;
 
 /**
@@ -97,7 +96,7 @@ public class JEIArray implements IArrayNode
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new JEIValue(null, name, tooltip, mode, range, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), () -> ObjectLists.empty(), isValid, this::save).withAutosave());
+			values.add(new JEIValue(null, name, tooltip, mode, range, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), suggestions, isValid, this::save).withAutosave());
 		}
 		autosave();
 	}
@@ -201,7 +200,7 @@ public class JEIArray implements IArrayNode
 			value = defaultValue;			
 		}
 		currentValues.add(value);
-		values.add(new JEIValue(null, name, tooltip, mode, range, type, value, defaultValue, () -> ObjectLists.empty(), isValid, this::save).withAutosave());
+		values.add(new JEIValue(null, name, tooltip, mode, range, type, value, defaultValue, suggestions, isValid, this::save).withAutosave());
 		autosave();
 	}
 	
