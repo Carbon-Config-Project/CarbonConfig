@@ -237,8 +237,8 @@ public class CarbonSlider extends CarbonBaseButton {
 			long newValue = Math.max(minValue, Math.min(maxValue, value));
 			if(this.value != newValue) {
 				this.value = newValue;
-				if(owner != null) owner.updateMessage();
 			}
+			if(owner != null) owner.updateMessage();
 			return this;
 		}
 		
