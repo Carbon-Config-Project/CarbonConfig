@@ -200,9 +200,13 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 			pos = new ChunkPos(mouseX, mouseY);
 			serialize();
 		}
-		renderMenuBackground(graphics);
+		graphics.blit(MENU_BACKGROUND, 0, 0, width, height, width, height, 32, 32);
 		GuiUtils.fillDropArea(graphics, 10, 10, width-20, height-20, -3750202, false);
 		GuiUtils.fillDropArea(graphics, 15, 15, width-30, height-55, -7631989, true);
+		graphics.setColor(0.35F, 0.35F, 0.35F, 1.0F);
+		graphics.blit(holder.getTexture().getForegroundTexture(), 15, 15, width-15, height-40, width-30, height-55, 32, 32);
+		graphics.setColor(1F, 1F, 1F, 1F);
+
 		GuiUtils.renderBackground(15, width-15, 15, height-40, 0F, holder.getTexture());
 		GuiUtils.pushScissors(15, 15, width-30, height-55);
 		PoseStack stack = graphics.pose();
