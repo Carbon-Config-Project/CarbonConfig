@@ -102,7 +102,11 @@ public class JEIHelpers
 		return ParseResult.success(data.get());
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> List<Suggestion> getSuggestions(IJeiConfigValueSerializer<T> serializer) {
+		if(serializer instanceof IJeiConfigListValueSerializer) {
+			serializer = ((IJeiConfigListValueSerializer<T>)serializer).getListValueSerializer();
+		}
 		Optional<Collection<T>> result = serializer.getAllValidValues();
 		if(result.isEmpty()) return ObjectLists.empty();
 		List<Suggestion> suggestions = new ObjectArrayList<>();
