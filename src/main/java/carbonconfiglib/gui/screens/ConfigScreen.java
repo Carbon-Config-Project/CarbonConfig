@@ -51,7 +51,6 @@ import speiger.src.collections.utils.Stack;
  */
 public class ConfigScreen extends BaseCarbonScreen implements IElementContext, IFolderController
 {
-	private static final Comparator<BaseElement> SORTER = (K, V) -> (V instanceof FolderElement ? 1 : 0) - (K instanceof FolderElement ? 1 : 0);
 	private static final Comparator<BaseElement> SPECIAL_SORTER = (K, V) -> {
 		int sort = (V instanceof FolderElement ? 1 : 0) - (K instanceof FolderElement ? 1 : 0);
 		return sort != 0 ? sort : String.CASE_INSENSITIVE_ORDER.compare(K.getName().getUnformattedText(), V.getName().getUnformattedText());
@@ -125,6 +124,7 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 				if(found) continue;
 				break;
 			}
+			walker = null;
 			recalculateNode();
 		}
 	}
@@ -373,7 +373,9 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		for(int i = 0,m=data.size();i<m;i++) {
 			data.get(i).setLayer(index);
 		}
-		data.sort(owner instanceof ISortableNode ? SORTER : SPECIAL_SORTER);
+		if(!(owner instanceof ISortableNode)) {
+			data.sort(SPECIAL_SORTER);			
+		}
 		return data;
 	}
 	
