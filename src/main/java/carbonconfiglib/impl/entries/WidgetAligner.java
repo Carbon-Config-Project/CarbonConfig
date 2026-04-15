@@ -39,25 +39,6 @@ public class WidgetAligner
 		this(Align.CENTER, Align.CENTER, 0F, 0F, 1F);
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof WidgetAligner) {
-			WidgetAligner align = (WidgetAligner)obj;
-			return align.horizontalAlignment() == horizontalAlignment() && align.verticalAlignment() == verticalAlignment() && Float.compare(align.xOffset(), xOffset()) == 0 && Float.compare(align.yOffset(), yOffset()) == 0 && Float.compare(align.scale(), scale()) == 0;
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(screenX, screenY, xOffset, yOffset, scale);
-	}
-	
-	@Override
-	public String toString() {
-		return "WidgetAligner[H="+screenX+", V="+screenY+", X="+xOffset+", Y="+yOffset+", S="+scale+"]";
-	}
-
 	public Align horizontalAlignment() {
 		return screenX;
 	}
@@ -76,6 +57,25 @@ public class WidgetAligner
 	
 	public float yOffset() {
 		return yOffset;
+	}
+	
+	@Override
+	public String toString() {
+		return "WidgetAligner[alignX="+screenX+", alignY="+screenY+", xOffset="+xOffset+", yOffset="+yOffset+", scale="+scale+"]";
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof WidgetAligner) {
+			WidgetAligner align = (WidgetAligner)obj;
+			return align.screenX == screenX && align.screenY == screenY && Float.compare(align.xOffset, xOffset) == 0 && Float.compare(align.yOffset, yOffset) == 0 && Float.compare(align.scale, scale) == 0;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(screenX, screenY, xOffset, yOffset, scale);
 	}
 	
 	public double applyX(double screenWidth, double width) {

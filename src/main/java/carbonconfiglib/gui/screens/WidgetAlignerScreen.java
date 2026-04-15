@@ -109,10 +109,21 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	private void updateAlign() {
 		int realWidth = 10000;
 		int realHeight = 10000;
-		Align vertical = this.vertical.getSelectedElement();
 		Align horizontal = this.horizontal.getSelectedElement();
-		xOff.setMinValue(generateMin(horizontal, realWidth)).setMaxValue(generateMax(horizontal, realWidth));
-		yOff.setMinValue(generateMin(vertical, realHeight)).setMaxValue(generateMax(vertical, realHeight));
+		Align vertical = this.vertical.getSelectedElement();
+		long x = xOff.get();
+		long y = yOff.get();
+		
+		xOff.setMinValue(generateMin(horizontal, realWidth)).setMaxValue(generateMax(horizontal, realWidth)).set(updateValue(x, horizontal));
+		yOff.setMinValue(generateMin(vertical, realHeight)).setMaxValue(generateMax(vertical, realHeight)).set(updateValue(y, vertical));
+	}
+	
+	private long updateValue(long original, Align align) {
+		switch(align) {
+			case START: return original < 0 ? -original : original;
+			case END: return original > 0 ? -original : original;
+			default: return original;
+		}
 	}
 	
 	private int generateMin(Align align, int value) {
