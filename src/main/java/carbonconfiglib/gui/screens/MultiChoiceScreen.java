@@ -5,7 +5,8 @@ import java.util.function.Consumer;
 
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -60,20 +61,20 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	
 	protected void addButtons(int y) {
 		boolean singleOption = otherButton == null && cancelButton == null;
-		button(-50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, Align.CENTER, Align.CENTER, mainButton, T -> callback.accept(Result.MAIN));
+		button(-50 - (singleOption ? 50 : 105), y, singleOption ? 200 : 100, 20, Align.CENTER, Align.CENTER, mainButton, _ -> callback.accept(Result.MAIN));
 		if(singleOption) return;
-		button(-50, y, 100, 20, Align.CENTER, Align.CENTER, otherButton, T -> callback.accept(Result.OTHER));
-		button(55, y, 100, 20, Align.CENTER, Align.CENTER, cancelButton, T -> callback.accept(Result.CANCEL));
+		button(-50, y, 100, 20, Align.CENTER, Align.CENTER, otherButton, _ -> callback.accept(Result.OTHER));
+		button(55, y, 100, 20, Align.CENTER, Align.CENTER, cancelButton, _ -> callback.accept(Result.CANCEL));
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		if(minecraft.level == null) renderBackground(graphics, mouseX, mouseY, partialTicks);
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		if(minecraft.level == null) extractBackground(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
-	public void drawForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		graphics.drawCenteredString(this.font, this.title, this.width / 2, this.titleTop(), 16777215);
+	public void drawForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		graphics.centeredText(this.font, this.title, this.width / 2, this.titleTop(), 0xFFFFFFFF);
 		drawSplitText(graphics, message, 0, messageTop()-centerY, Align.CENTER, width-50, -1);
 	}
 	
@@ -96,12 +97,12 @@ public class MultiChoiceScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public boolean keyPressed(int mouseButton, int mouseX, int mouseY){
-		if(mouseButton == 256) {
+	public boolean keyPressed(KeyEvent event) {
+		if(event.isEscape()) {
 			this.callback.accept(Result.CANCEL);
 			return true;
 		}
-		return super.keyPressed(mouseButton, mouseX, mouseY);
+		return super.keyPressed(event);
 	}
 	
 	public static enum Result {

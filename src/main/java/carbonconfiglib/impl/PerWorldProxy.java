@@ -15,8 +15,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -66,17 +64,16 @@ public final class PerWorldProxy implements IConfigProxy
 			Path path = server.getWorldPath(SERVERCONFIG);
 			if(Files.exists(path.resolve(relativeFile))) return path;
 		}
-		else if(FMLEnvironment.dist.isClient() && CarbonConfig.NETWORK.isInWorld()) return baseClientPath;
+		else if(FMLEnvironment.getDist().isClient() && CarbonConfig.NETWORK.isInWorld()) return baseClientPath;
 		return baseServerPath;
 	}
 	
 	@Override
 	public List<? extends IPotentialTarget> getPotentialConfigs() {
-		if(FMLEnvironment.dist.isClient()) return getLevels();
+		if(FMLEnvironment.getDist().isClient()) return getLevels();
 		else return Collections.singletonList(new SimpleTarget(ServerLifecycleHooks.getCurrentServer().getWorldPath(SERVERCONFIG), "server"));
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	private List<IPotentialTarget> getLevels() {
 		LevelStorageSource storage = Minecraft.getInstance().getLevelSource();
 		List<IPotentialTarget> folders = new ObjectArrayList<>();

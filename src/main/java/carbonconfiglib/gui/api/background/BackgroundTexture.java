@@ -4,7 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.utils.Helpers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -25,8 +25,8 @@ public class BackgroundTexture
 {
 	public static final BackgroundTexture DEFAULT = of().build();
 	
-	ResourceLocation backgroundTexture;
-	ResourceLocation foregroundTexture;
+	Identifier backgroundTexture;
+	Identifier foregroundTexture;
 	int backgroundBrightness = 32;
 	int foregroundBrightness = 64;
 	BooleanSupplier disableBackgroundInLevel = () -> !CarbonConfig.INGAME_BACKGROUND.get();
@@ -46,7 +46,7 @@ public class BackgroundTexture
 		return new Builder().withTexture(namespace, path);
 	}
 	
-	public static Builder of(ResourceLocation location) {
+	public static Builder of(Identifier location) {
 		return new Builder().withTexture(location);
 	}
 	
@@ -54,11 +54,11 @@ public class BackgroundTexture
 		return holder;
 	}
 	
-	public ResourceLocation getBackgroundTexture() {
+	public Identifier getBackgroundTexture() {
 		return backgroundTexture;
 	}
 	
-	public ResourceLocation getForegroundTexture() {
+	public Identifier getForegroundTexture() {
 		return foregroundTexture;
 	}
 	
@@ -95,40 +95,40 @@ public class BackgroundTexture
 		BackgroundTexture texture = new BackgroundTexture();
 		
 		public Builder withBackground(String id) {
-			return withBackground(ResourceLocation.tryParse(id));
+			return withBackground(Identifier.tryParse(id));
 		}
 		
 		public Builder withBackground(String namespace, String path) {
-			return withBackground(ResourceLocation.fromNamespaceAndPath(namespace, path));
+			return withBackground(Identifier.fromNamespaceAndPath(namespace, path));
 		}
 		
-		public Builder withBackground(ResourceLocation texture) {
+		public Builder withBackground(Identifier texture) {
 			this.texture.backgroundTexture = texture;
 			return this;
 		}
 		
 		public Builder withForeground(String id) {
-			return withForeground(ResourceLocation.tryParse(id));
+			return withForeground(Identifier.tryParse(id));
 		}
 		
 		public Builder withForeground(String namespace, String path) {
-			return withForeground(ResourceLocation.fromNamespaceAndPath(namespace, path));
+			return withForeground(Identifier.fromNamespaceAndPath(namespace, path));
 		}
 		
-		public Builder withForeground(ResourceLocation texture) {
+		public Builder withForeground(Identifier texture) {
 			this.texture.foregroundTexture = texture;
 			return this;
 		}
 		
 		public Builder withTexture(String id) {
-			return withTexture(ResourceLocation.tryParse(id));
+			return withTexture(Identifier.tryParse(id));
 		}
 		
 		public Builder withTexture(String namespace, String path) {
-			return withTexture(ResourceLocation.fromNamespaceAndPath(namespace, path));
+			return withTexture(Identifier.fromNamespaceAndPath(namespace, path));
 		}
 		
-		public Builder withTexture(ResourceLocation texture) {
+		public Builder withTexture(Identifier texture) {
 			this.texture.backgroundTexture = texture;
 			this.texture.foregroundTexture = texture;
 			return this;

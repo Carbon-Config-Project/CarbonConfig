@@ -4,8 +4,10 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fStack;
+
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
@@ -17,10 +19,16 @@ import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.impl.entries.WidgetAligner;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import speiger.src.collections.objects.utils.ObjectLists;
 
@@ -37,10 +45,10 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	float xScale;
 	float yScale;
 	
-	DropDownState<Align> vertical = new DropDownState<Align>(Align.CENTER, T -> Component.literal(T.name()), Align.values()).allowEmpty(false).withPrefix(Component.translatable("gui.carbonconfig.align.vertical")).withListener(T -> updateSlider());
-	DropDownState<Align> horizontal = new DropDownState<Align>(Align.CENTER, T -> Component.literal(T.name()), Align.values()).allowEmpty(false).withPrefix(Component.translatable("gui.carbonconfig.align.horizontal")).withListener(T -> updateSlider());
-	SliderState xOff = new SliderState(0, -10000, 10000, T -> Component.literal(FORMAT.format(getCurrentValue().xOffset()*100)+"%")).setPrefix(Component.translatable("gui.carbonconfig.offset_x")).setListener(this::serialize);
-	SliderState yOff = new SliderState(0, -10000, 10000, T -> Component.literal(FORMAT.format(getCurrentValue().yOffset()*100)+"%")).setPrefix(Component.translatable("gui.carbonconfig.offset_y")).setListener(this::serialize);
+	DropDownState<Align> vertical = new DropDownState<Align>(Align.CENTER, T -> Component.literal(T.name()), Align.values()).allowEmpty(false).withPrefix(Component.translatable("gui.carbonconfig.align.vertical")).withListener(_ -> updateSlider());
+	DropDownState<Align> horizontal = new DropDownState<Align>(Align.CENTER, T -> Component.literal(T.name()), Align.values()).allowEmpty(false).withPrefix(Component.translatable("gui.carbonconfig.align.horizontal")).withListener(_ -> updateSlider());
+	SliderState xOff = new SliderState(0, -10000, 10000, _ -> Component.literal(FORMAT.format(getCurrentValue().xOffset()*100)+"%")).setPrefix(Component.translatable("gui.carbonconfig.offset_x")).setListener(this::serialize);
+	SliderState yOff = new SliderState(0, -10000, 10000, _ -> Component.literal(FORMAT.format(getCurrentValue().yOffset()*100)+"%")).setPrefix(Component.translatable("gui.carbonconfig.offset_y")).setListener(this::serialize);
 	SliderState scale = new SliderState(1000, 10, 5000, T -> Component.literal(FORMAT.format(T/10F)+"%")).setPrefix(Component.translatable("gui.carbonconfig.scale")).setListener(this::serialize);
 	
 	public WidgetAlignerScreen(ICompoundNode node, BackgroundHolder holder, OverlayRenderer renderer, IConfigSerializer<WidgetAligner> serializer) {
@@ -80,12 +88,12 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 		if(serializer.getFormat().hasEntry("scale")) {
 			slider(76, -38, 120, 13, Align.CENTER, Align.END, scale).withTooltip(Component.translatable("gui.carbonconfig.scroll"));
 			scale.getOwner().updateMessage();
-			button(76, -24, 60, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.apply"), T -> onClose());
-			button(137, -24, 59, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.cancel"), T -> cancel());
+			button(76, -24, 60, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.apply"), _ -> onClose());
+			button(137, -24, 59, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.cancel"), _ -> cancel());
 		}
 		else {
-			button(76, -38, 120, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.apply"), T -> onClose());
-			button(76, -24, 120, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.cancel"), T -> cancel());
+			button(76, -38, 120, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.apply"), _ -> onClose());
+			button(76, -24, 120, 13, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.cancel"), _ -> cancel());
 
 		}
 		updateAlign();
@@ -164,21 +172,21 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if(super.mouseClicked(mouseX, mouseY, button)) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if(super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if(isHoveringObject(mouseX, mouseY)) {
-			pos = new ChunkPos((int)mouseX, (int)mouseY);
+		if(isHoveringObject(event.x(), event.y())) {
+			pos = new ChunkPos((int)event.x(), (int)event.y());
 			return true;
 		}
 		return false;
 	}
 	
 	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+	public boolean mouseReleased(MouseButtonEvent event) {
 		pos = null;
-		return super.mouseReleased(mouseX, mouseY, button);
+		return super.mouseReleased(event);
 	}
 	
 	@Override
@@ -191,32 +199,33 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		if(pos != null && (pos.x != mouseX || pos.z != mouseY)) {
-			long xOffset = (long)((pos.x - mouseX)*xScale*10000F);
-			long yOffset = (long)((pos.z - mouseY)*yScale*10000F);
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		if(pos != null && (pos.x() != mouseX || pos.z() != mouseY)) {
+			long xOffset = (long)((pos.x() - mouseX)*xScale*10000F);
+			long yOffset = (long)((pos.z() - mouseY)*yScale*10000F);
 			xOff.setSilent(xOff.get() - xOffset);
 			yOff.setSilent(yOff.get() - yOffset);
 			pos = new ChunkPos(mouseX, mouseY);
 			serialize();
 		}
-		graphics.blit(MENU_BACKGROUND, 0, 0, width, height, width, height, 32, 32);
+		graphics.fill(0, 0, width, height, 0xFF000000);
 		GuiUtils.fillDropArea(graphics, 10, 10, width-20, height-20, -3750202, false);
 		GuiUtils.fillDropArea(graphics, 15, 15, width-30, height-55, -7631989, true);
-		graphics.setColor(0.35F, 0.35F, 0.35F, 1.0F);
-		graphics.blit(holder.getTexture().getForegroundTexture(), 15, 15, width-15, height-40, width-30, height-55, 32, 32);
-		graphics.setColor(1F, 1F, 1F, 1F);
-		GuiUtils.pushScissors(15, 15, width-30, height-55);
-		PoseStack stack = graphics.pose();
-		stack.pushPose();
-		stack.translate(15, 15, 0);
+		AbstractTexture texture = minecraft.getTextureManager().getTexture(holder.getTexture().getForegroundTexture());
+		float realWidth = (width-30) / 32F;
+		float realHeight = (height-55) / 32F;
+        graphics.submitGuiElementRenderState(new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()), new Matrix3x2f(graphics.pose()), 15, 15, width-15, height-40, realWidth, realWidth*2, realHeight, realHeight*2, ARGB.colorFromFloat(1F, 0.35F, 0.35F, 0.35F), graphics.peekScissorStack()));
+		graphics.enableScissor(15, 15, width-15, height-40);
+		Matrix3x2fStack stack = graphics.pose();
+		stack.pushMatrix();
+		stack.translate(15, 15);
 		renderer.render(graphics, width-31, height-56, partialTicks, getCurrentValue());
-		stack.popPose();
-		GuiUtils.popScissors();
+		stack.popMatrix();
+		graphics.disableScissor();
 	}
 	
 	public static interface OverlayRenderer {
-		public void render(GuiGraphics graphics, int screenWidth, int screenHeight, float partialTicks, WidgetAligner aligner);
+		public void render(GuiGraphicsExtractor graphics, int screenWidth, int screenHeight, float partialTicks, WidgetAligner aligner);
 		public double unscaledWidth();
 		public double unscaledHeight();
 	}

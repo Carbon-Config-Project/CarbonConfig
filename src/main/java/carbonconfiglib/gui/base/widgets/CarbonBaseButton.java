@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 
@@ -23,7 +24,7 @@ import net.minecraft.network.chat.Component;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class CarbonBaseButton extends Button implements ITooltipProvider
+public abstract class CarbonBaseButton extends Button implements ITooltipProvider
 {
 	protected Function<CarbonBaseButton, Component> tooltip;
 	
@@ -32,7 +33,7 @@ public class CarbonBaseButton extends Button implements ITooltipProvider
 	}
 	
 	@Override
-	public void onPress() {
+	public void onPress(InputWithModifiers input) {
 		if(onPress != null) {
 			onPress.onPress(this);
 		}
@@ -40,7 +41,7 @@ public class CarbonBaseButton extends Button implements ITooltipProvider
 	
 	@SuppressWarnings("unchecked")
 	public <T extends CarbonBaseButton> T withTooltip(Component tooltip) {
-		this.tooltip = T -> tooltip;
+		this.tooltip = _ -> tooltip;
 		return (T)this;
 	}
 	

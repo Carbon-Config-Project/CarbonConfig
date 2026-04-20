@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -50,7 +50,7 @@ public class ForgeTest
 	}
     
     private static boolean isResourceLocation(Object o) {
-        return o instanceof String && ResourceLocation.tryParse((String)o) != null;
+        return o instanceof String && Identifier.tryParse((String)o) != null;
     }
 
     private static boolean isPositive(Object o) {

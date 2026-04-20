@@ -6,7 +6,7 @@ import java.util.Map;
 import carbonconfiglib.gui.api.node.IConfigFolderNode;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.GameRules.Category;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
@@ -26,10 +26,10 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
  */
 public class MinecraftRoot implements IConfigFolderNode
 {
-	Map<Category, List<IGameRuleValue>> configNodes;
+	Map<GameRuleCategory, List<IGameRuleValue>> configNodes;
 	List<IConfigNode> children;
 	
-	public MinecraftRoot(Map<Category, List<IGameRuleValue>> configNodes) {
+	public MinecraftRoot(Map<GameRuleCategory, List<IGameRuleValue>> configNodes) {
 		this.configNodes = configNodes;
 	}
 	
@@ -37,7 +37,7 @@ public class MinecraftRoot implements IConfigFolderNode
 	public List<IConfigNode> getChildren() {
 		if(children == null) {
 			children = new ObjectArrayList<>();
-			for(Map.Entry<Category, List<IGameRuleValue>> entry : configNodes.entrySet()) {
+			for(Map.Entry<GameRuleCategory, List<IGameRuleValue>> entry : configNodes.entrySet()) {
 				children.add(new MinecraftFolder(entry));
 			}
 		}

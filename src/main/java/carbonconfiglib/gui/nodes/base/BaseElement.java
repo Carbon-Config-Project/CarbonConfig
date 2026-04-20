@@ -31,7 +31,7 @@ import carbonconfiglib.gui.nodes.SelectionElement;
 import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.utils.ObjectLists;
@@ -76,8 +76,8 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	
 	public BaseElement() {
 		if(showControls()) {
-			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onRevert()).withIcon(Optional.of(Icon.REVERT)).withTooltip(Component.translatable("gui.carbonconfig.revert")));
-			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)).withTooltip(Component.translatable("gui.carbonconfig.default")));
+			revert = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), _ -> onRevert()).withIcon(Optional.of(Icon.REVERT)).withTooltip(Component.translatable("gui.carbonconfig.revert")));
+			reset = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), _ -> onReset()).withIcon(Optional.of(Icon.SET_DEFAULT)).withTooltip(Component.translatable("gui.carbonconfig.default")));
 			if(isValue()) {
 				if(allowSuggestions()) suggestion = addChild(new DropDownMenu<Suggestion>(0, 0, 18, 18, suggestionState).withTooltip(Component.translatable("gui.carbonconfig.suggestions")));
 				edit = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(false, Icon.NOT_DEFAULT).setTooltip(Component.translatable("gui.carbonconfig.edit")).setCallback(T -> onEditButtonPressed(T.getValue(), false))));
@@ -88,7 +88,7 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	public final void setArray(IArrayNode array, Runnable reloader) {
 		this.array = array;
 		this.reloader = reloader;
-		delete = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), T -> onArrayDelete()).withIcon(Optional.of(Icon.DELETE)).withTooltip(Component.translatable("gui.carbonconfig.delete")));
+		delete = addChild(new CarbonButton(0, 0, 18, 18, Component.empty(), _ -> onArrayDelete()).withIcon(Optional.of(Icon.DELETE)).withTooltip(Component.translatable("gui.carbonconfig.delete")));
 	}
 	
 	public final void setContext(IElementContext context) {
@@ -108,27 +108,28 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	@Override
 	protected boolean containsSearch(String searchString) { return getName().getString().toLowerCase(Locale.ROOT).contains(searchString); }
 	
+	
 	@Override
-	public final void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public final void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		if(!isInFullView() || sinceFullyVisible == 0L) sinceFullyVisible = GuiUtils.currentMillseconds();
 		int leftWidth = context.calculateSegmentWidth(layer)-4;
-		renderLeftPart(graphics, left, top, leftWidth, height, mouseX, mouseY, selected, partialTicks);
+		extractLeftPart(graphics, getX(), getContentY(), leftWidth, getContentHeight(), mouseX, mouseY, selected, partialTicks);
 		if(context.isAtTop(layer)) {
 			if(!right) {
 				right = true;
 				setRightComponentsVisible(true);
 			}
 			if(!showControls()) {
-				int totalWidth = width-leftWidth-10;
+				int totalWidth = getContentWidth()-leftWidth-10;
 				int desiredWidth = Math.min(totalWidth >> 1, totalWidth);
-				renderRightPart(graphics, left+leftWidth+8, top, desiredWidth, totalWidth, height, mouseX, mouseY, selected, partialTicks);
+				extractRightPart(graphics, getX()+leftWidth+8, getContentY(), desiredWidth, totalWidth, getContentHeight(), mouseX, mouseY, selected, partialTicks);
 				return;
 			}
 			int controlWidth = 80 + (allowSuggestions() && !getSuggestions().isEmpty() ? 20 : 0);
-			int totalWidth = width-leftWidth-10-controlWidth;
+			int totalWidth = getContentWidth()-leftWidth-10-controlWidth;
 			int desiredWidth = Math.min((totalWidth + controlWidth) >> 1, totalWidth);
-			renderControls(graphics, left+width-controlWidth, top, controlWidth, height, mouseX, mouseY, selected, partialTicks);
-			renderRightPart(graphics, left+leftWidth+8, top, desiredWidth, totalWidth, height, mouseX, mouseY, selected, partialTicks);
+			extractControls(graphics, getContentRight()-controlWidth, getContentY(), controlWidth, getContentHeight(), mouseX, mouseY, selected, partialTicks);
+			extractRightPart(graphics, getX()+leftWidth+8, getContentY(), desiredWidth, totalWidth, getContentHeight(), mouseX, mouseY, selected, partialTicks);
 		}
 		else if(right) {
 			right = false;
@@ -170,30 +171,30 @@ public abstract class BaseElement extends ListEntry<BaseElement>
 	public abstract Component getName();
 	public abstract Component getTooltip();
 	
-	public abstract void renderLeftPart(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
+	public abstract void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	
-	public abstract void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
+	public abstract void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
 	
-	public void renderControls(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractControls(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		int right = left + width - 19;
-		if(!render(delete, right, top, height, null, graphics, mouseX, mouseY, partialTicks)) {
-			render(reload, right, top, height, null, graphics, mouseX, mouseY, partialTicks);
+		if(!extract(delete, right, top, height, null, graphics, mouseX, mouseY, partialTicks)) {
+			extract(reload, right, top, height, null, graphics, mouseX, mouseY, partialTicks);
 		}
 		
-		render(revert, right-20, top, height, this::isChanged, graphics, mouseX, mouseY, partialTicks);
-		render(reset, right-40, top, height, this::isNotDefault, graphics, mouseX, mouseY, partialTicks);
-		render(edit, right-60, top, height, null, graphics, mouseX, mouseY, partialTicks);
+		extract(revert, right-20, top, height, this::isChanged, graphics, mouseX, mouseY, partialTicks);
+		extract(reset, right-40, top, height, this::isNotDefault, graphics, mouseX, mouseY, partialTicks);
+		extract(edit, right-60, top, height, null, graphics, mouseX, mouseY, partialTicks);
 		if(allowSuggestions() && !getSuggestions().isEmpty()) {
-			render(suggestion, right-80, top, height, null, graphics, mouseX, mouseY, partialTicks);
+			extract(suggestion, right-80, top, height, null, graphics, mouseX, mouseY, partialTicks);
 		}
 	}
 	
-	private boolean render(AbstractWidget widget, int x, int y, int height, BooleanSupplier active, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	private boolean extract(AbstractWidget widget, int x, int y, int height, BooleanSupplier active, GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		if(widget == null) return false;
 		widget.setX(x);
 		widget.setY((int)Align.CENTER.alignStart(y, height, widget.getHeight()));
 		if(active != null) widget.active = active.getAsBoolean();
-		widget.render(graphics, mouseX, mouseY, partialTicks);
+		widget.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		return true;
 	}
 	

@@ -9,8 +9,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -53,11 +51,6 @@ public class ConfigAnswerPacket implements ICarbonPacket
 	public Type<? extends CustomPacketPayload> type() { return ID; }
 	
 	public void process(Player player) {
-		processClient();
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	private void processClient() {
 		IRequestReceiver.Impl.receiveData(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
 	}
 }

@@ -5,7 +5,7 @@ import carbonconfiglib.gui.base.widgets.CarbonEditBox;
 import carbonconfiglib.gui.base.widgets.CarbonEditBox.TextState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -64,11 +64,11 @@ public class StringElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		text.setX(left);
 		text.setY(top);
 		text.setWidth(desiredWidth);
 		text.setHeight(height);
-		text.render(graphics, mouseX, mouseY, partialTicks);
+		text.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 }

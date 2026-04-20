@@ -16,9 +16,9 @@ import carbonconfiglib.gui.nodes.base.NodeElement;
 import carbonconfiglib.gui.nodes.base.SuggestionEntry;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -60,7 +60,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 	@Override
 	public void setEditable(boolean value) {}
 	@Override
-	public void renderLeftPart(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(graphics, font, node.getName(), left, top, width-23, height, Align.START, -1, sinceFullyVisible);
 		boolean active = context.isElementActive(this);
 		button.setMessage(Component.literal(active ? "◀" : "▶"));
@@ -69,11 +69,11 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		button.setY(top);
 		button.setWidth(20);
 		button.setHeight(height);
-		button.render(graphics, mouseX, mouseY, partialTicks);
+		button.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(graphics, font, Component.translatable("gui.carbonconfig.elements", node.size()), left, top, desiredWidth-2, height, Align.END, -1, sinceFullyVisible);
 	}
 	
@@ -203,15 +203,15 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		@Override
 		public void setEditable(boolean value) {}
 		@Override
-		public void renderLeftPart(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			GuiUtils.drawScrollingShadowText(graphics, font, Component.translatable("gui.carbonconfig.array.next"), left, top, width, height, Align.START, -1, 0);
 		}
 
 		@Override
-		public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			selector.setX(left + (int)(desiredWidth * 0.18F));
 			selector.setY(top);
-			selector.render(graphics, mouseX, mouseY, partialTicks);
+			selector.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		}
 		
 		protected void onElementSelected(List<Suggestion> elements) {
@@ -219,8 +219,8 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		}
 		
 		@Override
-		public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-			if(pButton == 0 && (Screen.hasShiftDown() || skip) && selector.isMouseOver(pMouseX, pMouseY)) {
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			if(event.input() == 0 && (event.hasShiftDown() || skip) && selector.isMouseOver(event.x(), event.y())) {
 				if(!owner.node.isForcedSuggestion()) {
 					owner.addElement(null);					
 					return true;
@@ -229,7 +229,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 				owner.addElement(values.isEmpty() ? null : values.get(RandomSource.create().nextInt(values.size())).getValue());
 				return true;
 			}
-			return super.mouseClicked(pMouseX, pMouseY, pButton);
+			return super.mouseClicked(event, doubleClick);
 		}
 		
 		@Override

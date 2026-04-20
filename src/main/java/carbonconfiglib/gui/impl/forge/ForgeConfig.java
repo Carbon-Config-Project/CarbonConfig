@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
+import com.electronwill.nightconfig.core.UnmodifiableConfig.Entry;
 import com.electronwill.nightconfig.core.file.FileNotFoundAction;
 import com.electronwill.nightconfig.toml.TomlFormat;
 
@@ -215,17 +216,17 @@ public class ForgeConfig implements IModConfig
 	
 	private List<ConfigValue<?>> collect() {
 		List<ConfigValue<?>> values = new ObjectArrayList<>();
-		iterate(spec.getValues().valueMap().values(), values::add);
+		iterate(spec.getValues().entrySet(), values::add);
 		return values;
 	}
 	
-	private void iterate(Iterable<Object> source, Consumer<ConfigValue<?>> result) {
+	private void iterate(Iterable<? extends Entry> source, Consumer<ConfigValue<?>> result) {
 		for(Object entry : source) {
 			if(entry instanceof ConfigValue) {
 				result.accept((ConfigValue<?>)entry);
 			}
 			else if(entry instanceof Config) {
-				iterate(((Config)entry).valueMap().values(), result);
+				iterate(((Config)entry).entrySet(), result);
 			}
 		}
 	}

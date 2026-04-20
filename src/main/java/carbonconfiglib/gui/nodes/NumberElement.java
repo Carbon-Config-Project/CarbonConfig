@@ -21,7 +21,7 @@ import carbonconfiglib.gui.base.widgets.CarbonSlider;
 import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -44,7 +44,7 @@ public abstract class NumberElement extends ValueElement
 	private static final DecimalFormat FLOATING_SLIDER_VALUE = new DecimalFormat("0.0#####", DecimalFormatSymbols.getInstance(Locale.ROOT));
 	CarbonSlider slider = addChild(new CarbonSlider(0, 0, 0, 0, new SliderState(0, 0, 0)));
 	CarbonEditBox text = addChild(new CarbonEditBox(getFont(), 0, 0, Integer.MAX_VALUE, 0));
-	CarbonCheckBox subMode = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(Icon.SUB_MODE).setCallback(T -> updateState()).withTooltip(T -> Component.translatable("gui.carbonconfig.mode."+(T.selected() ? "slider" : "text")))));
+	CarbonCheckBox subMode = addChild(new CarbonCheckBox(0, 0, 18, 18, new CheckBoxState(Icon.SUB_MODE).setCallback(_ -> updateState()).withTooltip(T -> Component.translatable("gui.carbonconfig.mode."+(T.selected() ? "slider" : "text")))));
 	ParseResult<Boolean> result;
 	
 	public NumberElement(IValueNode node) {
@@ -125,24 +125,24 @@ public abstract class NumberElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		slider.setX(left);
 		slider.setY(top);
 		slider.setWidth(desiredWidth);
 		slider.setHeight(height);
-		slider.render(graphics, mouseX, mouseY, partialTicks);
+		slider.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		
 		text.setX(left);
 		text.setY(top);
 		text.setWidth(desiredWidth);
 		text.setHeight(height);
-		text.render(graphics, mouseX, mouseY, partialTicks);
+		text.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		if(slider.getState().getRange() > 0 && width - (desiredWidth+2) >= height) {
 			subMode.setX(left + desiredWidth+2);
 			subMode.setY(Align.CENTER.alignStart(top, height, subMode.getHeight()));
 			subMode.setWidth(height);
 			subMode.setHeight(height);
-			subMode.render(graphics, mouseX, mouseY, partialTicks);
+			subMode.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		}
 	}
 	

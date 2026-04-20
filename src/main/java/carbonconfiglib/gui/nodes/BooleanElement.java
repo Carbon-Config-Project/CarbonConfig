@@ -6,7 +6,7 @@ import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox;
 import carbonconfiglib.gui.base.widgets.CarbonCheckBox.CheckBoxState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -57,9 +57,9 @@ public class BooleanElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		box.setX(left);
 		box.setY((int)Align.CENTER.alignStart(top, height, box.getHeight()));
-		box.render(graphics, mouseX, mouseY, partialTicks);
+		box.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 }

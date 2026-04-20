@@ -22,11 +22,12 @@ import carbonconfiglib.gui.base.widgets.DropDownMenu;
 import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.base.widgets.ModLogo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -81,34 +82,37 @@ public class BaseCarbonScreen extends Screen
 	}
 	
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		if(renderBackground && minecraft.level != null) renderBackground(graphics, mouseX, mouseY, partialTicks);
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		if(renderBackground && minecraft.level != null) super.extractBackground(graphics, mouseX, mouseY, partialTicks);
+	}
+	
+	@Override
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		drawBackground(graphics, mouseX, mouseY, partialTicks);
 		drawWidgets(graphics, mouseX, mouseY, partialTicks);
 		drawForeground(graphics, mouseX, mouseY, partialTicks);
 		drawTooltips(graphics, mouseX, mouseY, partialTicks);
 	}
 	
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		
 	}
 	
-	public void drawWidgets(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawWidgets(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		for(Renderable widget : this.renderables) {
-			widget.render(graphics, mouseX, mouseY, partialTicks);
+			widget.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		}	
 	}
 	
-	
-	public void drawForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		
 	}
 	
-	public void collectTooltips(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks, Consumer<Component> tooltips) {
+	public void collectTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks, Consumer<Component> tooltips) {
 		
 	}
 	
-	public void drawTooltips(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		List<FormattedCharSequence> tooltips = new ObjectArrayList<>();
 		if(mouseX != Integer.MAX_VALUE && mouseY != Integer.MAX_VALUE) {
 			for(GuiEventListener listener : children()) {
@@ -134,7 +138,8 @@ public class BaseCarbonScreen extends Screen
 			return;
 		}
 		lastDrawnToolTipAmount = 0;
-		graphics.renderTooltip(font, tooltips, DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
+		graphics.nextStratum();
+		graphics.tooltip(font, tooltips.stream().map(ClientTooltipComponent::create).toList(), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
 		lastDrawnToolTipAmount = tooltips.size();
 	}
 	
@@ -154,15 +159,15 @@ public class BaseCarbonScreen extends Screen
 		ClientHooks.pushGuiLayer(minecraft, screen);
 	}
 	
-	public void drawText(GuiGraphics graphics, Component text, float x, float y, Align align, int color) {
+	public void drawText(GuiGraphicsExtractor graphics, Component text, float x, float y, Align align, int color) {
 		GuiUtils.drawText(graphics, font, text, x + centerX, y + centerY, align, color);
 	}
 	
-	public void drawUnalignedText(GuiGraphics graphics, Component text, float x, float y, Align align, int color) {
+	public void drawUnalignedText(GuiGraphicsExtractor graphics, Component text, float x, float y, Align align, int color) {
 		GuiUtils.drawText(graphics, font, text, x, y, align, color);
 	}
 	
-	public void drawSplitText(GuiGraphics graphics, Component text, float x, float y, Align align, int maxWidth, int color) {
+	public void drawSplitText(GuiGraphicsExtractor graphics, Component text, float x, float y, Align align, int maxWidth, int color) {
 		GuiUtils.drawSplitText(graphics, font, text, x + centerX, y + centerY, align, color, maxWidth);
 	}
 	

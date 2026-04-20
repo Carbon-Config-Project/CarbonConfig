@@ -13,26 +13,21 @@ import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ModConfigList;
-import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.mclanguageprovider.MinecraftModContainer;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -67,10 +62,10 @@ public class EventHandler implements IConfigChangeListener
 	@Override
 	public void onConfigCreated(ConfigHandler config) {
 		InternalFeatures.initMinecraftDataTypes(config);
-		if(FMLEnvironment.dist.isDedicatedServer()) return;
+		if(FMLEnvironment.getDist().isDedicatedServer()) return;
 		ModLoadingContext context = ModLoadingContext.get();
 		if("minecraft".equals(context.getActiveNamespace())) {
-			if(FMLEnvironment.production) return;
+			if(FMLEnvironment.isProduction()) return;
 			throw new IllegalStateException("Mod Configs Must be created (not loaded) during a Mod Loading Phase");
 		}
 		configs.computeIfAbsent(context.getActiveContainer(), ModConfigs::new).addConfig(config);
@@ -82,7 +77,7 @@ public class EventHandler implements IConfigChangeListener
 	
 	@Override
 	public void onConfigChanged(ConfigHandler config) {
-		if(FMLEnvironment.dist.isDedicatedServer()) {
+		if(FMLEnvironment.getDist().isDedicatedServer()) {
 			SyncPacket packet = SyncPacket.create(config, SyncType.SERVER_TO_CLIENT, false);
 			if(packet != null) CarbonConfig.NETWORK.sendToAllPlayers(packet);
 			return;
@@ -103,18 +98,15 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	@SubscribeEvent
-	@OnlyIn(Dist.DEDICATED_SERVER)
 	public void onServerTickEvent(ServerTickEvent.Post event) {
 		processEvents();
 	}
 	
 	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
 	public void onClientTickEvent(ClientTickEvent.Post event) {
 		processEvents();		
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	public void onConfigsLoaded() {
 		InternalFeatures.loadDefaultTypes();
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
@@ -137,7 +129,7 @@ public class EventHandler implements IConfigChangeListener
 		ICarbonPlugin.LOADED_PLUGINS.forEach((K, V) -> {
 			List<IModConfigs> configs = new ObjectArrayList<>();
 			V.applyConfigs(K, configs::add);
-			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, T -> new ObjectArrayList<>()).addAll(configs);
+			if(configs.size() > 0) mappedConfigs.computeIfAbsent(K, _ -> new ObjectArrayList<>()).addAll(configs);
 		});
 		mappedConfigs.forEach(this::register);
 		mappedConfigs.forEach((M, C) -> allKnownConfigs.put(M.getModId(), ModConfigList.createMultiIfApplicable(M, C)));
@@ -153,7 +145,6 @@ public class EventHandler implements IConfigChangeListener
 		return allKnownConfigs.get(id);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	private void register(ModContainer container, List<IModConfigs> configs) {
 		container.registerExtensionPoint(IConfigScreenFactory.class, new Wrapper(configs, container.getCustomExtension(IConfigScreenFactory.class).orElse(null)));
 	}
@@ -171,42 +162,10 @@ public class EventHandler implements IConfigChangeListener
 		CarbonConfig.NETWORK.onPlayerLeft(event.getEntity(), true);		
 	}
 	
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerJoinEvent(LoggingIn event) {
-		if(Minecraft.getInstance().getCurrentServer() == null) loadMPConfigs();
-		CarbonConfig.NETWORK.sendToServer(new StateSyncPacket(Dist.CLIENT));
-		BulkSyncPacket packet = BulkSyncPacket.create(CarbonConfig.CONFIGS.getConfigsToSync(), SyncType.CLIENT_TO_SERVER, true);
-		if(packet == null) return;
-		CarbonConfig.NETWORK.sendToServer(packet);
-	}
-	
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public void onPlayerServerLeaveEvent(LoggingOut event) {
-		CarbonConfig.NETWORK.onPlayerLeft(event.getPlayer(), false);
-		if(!Minecraft.getInstance().isLocalServer()) {
-			for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
-				if(PerWorldProxy.isProxy(handler.getProxy())) {
-					handler.unload();
-				}
-			}
-		}
-	}
-	
-	private void loadMPConfigs() {
-		for(ConfigHandler handler : CarbonConfig.CONFIGS.getAllConfigs()) {
-			if(PerWorldProxy.isProxy(handler.getProxy())) {
-				handler.load();
-			}
-		}
-	}
-	
 	private void processEvents() {
 		CarbonConfig.CONFIGS.processFileSystemEvents();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	private class Wrapper implements IConfigScreenFactory {
 		List<IModConfigs> configs;
 		IConfigScreenFactory factory;

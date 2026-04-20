@@ -5,16 +5,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import carbonconfiglib.gui.base.helpers.GuiUtils;
+import org.jspecify.annotations.Nullable;
+
 import carbonconfiglib.gui.base.widgets.CarbonDynamicList.DynamicEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.util.Mth;
+import net.minecraft.client.input.MouseButtonEvent;
 
 
 /**
@@ -34,9 +35,7 @@ import net.minecraft.util.Mth;
  */
 public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjectSelectionList<E> {
 	
-	protected boolean scrolling;
 	protected boolean renderSelection = true;
-	protected E hovered;
 	protected boolean draggingStarted = false;
 	protected boolean ignoreSelection = false;
 	protected E dragging;
@@ -59,90 +58,62 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		this.drawBackground = value;
 	}
 	
+	protected boolean entriesCanBeSelected() {
+		return renderSelection;
+	}
+	
+	protected boolean isSelected(E entry) {
+		return getSelected() == entry;
+	}
+	
 	protected void onElementsSwapped(int oldIndex, int newIndex) {
 		
 	}
 	
 	public E getHovered(double mouseX, double mouseY) {
-		return getEntryAtPos(mouseX, mouseY);
+		return getEntryAtPosition(mouseX, mouseY);
 	}
 	
-	protected E getEntryAtPos(double mouseX, double mouseY) {
-		int centerWidth = this.getRowWidth() / 2;
-		int centerX = this.getX() + this.width / 2;
-		int minX = centerX - centerWidth;
-		int maxX = centerX + centerWidth;
-		int position = Mth.floor(mouseY - (double)this.getY()) - this.headerHeight + (int)this.getScrollAmount() - 4;
-		int index = 0;
-		while(index < children().size()) {
-			int height = children().get(index).getItemHeight();
-			if(height > position) break;
-			position -= height;
-			index++;
-		}
-		return (E)(mouseX < (double)this.getScrollbarPosition() && mouseX >= (double)minX && mouseX <= (double)maxX && index >= 0 && position >= 0 && index < this.getItemCount() ? this.children().get(index) : null);
+	private E getHoveredWithoutDragging(double mouseX, double mouseY) {
+        for (E child : this.children) {
+            if (child != dragging && child.isMouseOver(mouseX, mouseY)) {
+                return child;
+            }
+        }
+
+        return null;
 	}
 	
-	@Override
-	protected int getMaxPosition() {
-		int max = 0;
-		for(int i = 0,m = getItemCount();i < m;i++) max += children().get(i).getItemHeight();
-		return max;
-	}
-		
 	protected void scroll(int value) {
-		setScrollAmount(getScrollAmount() + (double)value);
+		setScrollAmount(scrollAmount() + (double)value);
 	}
 	
 	@Override
 	protected void centerScrollOn(E element) {
-		int index = children().indexOf(element);
+		int index = children.indexOf(element);
 		if(index <= 0) {
 			setScrollAmount(0D);
 			return;
 		}
 		int value = 0;
-		for(int i = 0;i < index;i++) value += children().get(i).getItemHeight();
-		value += children().get(index).getItemHeight() / 2;
+		for(int i = 0;i < index;i++) value += children().get(i).getHeight();
+		value += children().get(index).getHeight() / 2;
 		setScrollAmount(value - ((getHeight()) / 2));
 	}
-	
-	protected void ensureVisible(E element) {
-		int index = children().indexOf(element);
-		int minY = getRowTop(index);
-		int itemHeight = index < 0 ? this.itemHeight : children().get(index).getItemHeight();
-		int maxY = minY - getY() - 4 - itemHeight;
-		if(maxY < 0) scroll(maxY);
 		
-		int k = getBottom() - minY - itemHeight - itemHeight;
-		if(k < 0) scroll(-k);
-	}
-	
-	@Override
-	protected int getRowTop(int p_93512_) {
-		int max = getY() + 4 - (int)getScrollAmount();
-		for(int i = 0,m = getItemCount();i < m;i++) { max += children().get(i).getItemHeight(); }
-		return max + headerHeight;
-	}
-	
 	@Override
 	public boolean isMouseOver(double p_93479_, double p_93480_) {
-		return enabled() && p_93480_ >= (double)this.getY() && p_93480_ <= (double)getBottom() && p_93479_ >= (double)this.getX() && p_93479_ <= (double)getScrollbarPosition()+6;
+		return enabled() && p_93480_ >= (double)this.getY() && p_93480_ <= (double)getBottom() && p_93479_ >= (double)this.getX() && p_93479_ <= (double)scrollBarX()+scrollbarWidth();
 	}
 	
 	@Override
-	protected void updateScrollingState(double mouseX, double mouseY, int button) {
-		super.updateScrollingState(mouseX, mouseY, button);
-		this.scrolling = button == 0 && mouseX >= (double)this.getScrollbarPosition() && mouseX < (double)(this.getScrollbarPosition() + 6);
-	}
-	
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		this.updateScrollingState(mouseX, mouseY, button);
-		if(!this.isMouseOver(mouseX, mouseY)) return false;
-		E element = this.getEntryAtPos(mouseX, mouseY);
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		updateScrolling(event);
+		if(!this.isMouseOver(event.x(), event.y())) return false;
+		E element = this.getEntryAtPosition(event.x(), event.y());
 		if(element != null) {
 			E prev = getFocused();
-			if(element.mouseClicked(mouseX, mouseY, button)) {
+			if(element.mouseClicked(event, doubleClick)) {
 				this.setFocused(element);
 				this.setDragging(true);
 				if(prev != null && prev != element) {
@@ -159,10 +130,6 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 				return true;
 			}
 		}
-		else if(button == 0) {
-			this.clickedHeader((int)(mouseX - (double)(this.getX() + this.width / 2 - this.getRowWidth() / 2)), (int)(mouseY - (double)this.getY()) + (int)this.getScrollAmount() - 4);
-			return true;
-		}
 		return this.scrolling;
 	}
 	
@@ -174,34 +141,35 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	}
 	
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int pButton, double pDragX, double pDragY) {
+	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
 		if(dragging != null) draggingStarted = true;
-		handleDragging(mouseX, mouseY);
-		return super.mouseDragged(mouseX, mouseY, pButton, pDragX, pDragY);
+		handleDragging(event.x(), event.y());
+		return super.mouseDragged(event, dx, dy);
 	}
 	
 	protected void handleDragging(double mouseX, double mouseY) {
 		if(draggingStarted) {
-			E newElement = getEntryAtPos(mouseX, mouseY);
+			E newElement = getHoveredWithoutDragging(mouseX, mouseY);
 			if(newElement != null && newElement != dragging && newElement.isDraggable()) {
 				int dragginIndex = children().indexOf(dragging);
 				int newIndex = children().indexOf(newElement);
 				if(dragginIndex == -1 || newIndex == -1) return;
-				children().set(dragginIndex, children().set(newIndex, dragging));
+				children.set(dragginIndex, children.set(newIndex, dragging));
 				onElementsSwapped(dragginIndex, newIndex);
+				repositionEntries();
 			}
 		}
 	}
 	
 	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+	public boolean mouseReleased(MouseButtonEvent event) {
 		if(!enabled()) return false;
 		dragging = null;
 		draggingStarted = false;
 		scrolling = false;
-		return super.mouseReleased(mouseX, mouseY, button);
+		return super.mouseReleased(event);
 	}
-	
+		
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
 		if(!enabled()) return false;
@@ -209,14 +177,13 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		if(!listener.isEmpty() && listener.get().mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
 		
 		scrolling = false;
-		scroll(-(int)(scrollY * this.itemHeight * 2D));
+		scroll(-(int)(scrollY * this.defaultEntryHeight * 2D));
 		handleDragging(mouseX, mouseY);
 		return true;
 	}
 	
+	public E getHovered() { return super.getHovered(); }
 	public boolean isScrolling() { return scrolling; }
-	@Override
-	public E getHovered() { return hovered; }
 	protected boolean shouldRender() { return true; }
 	protected boolean enabled() { return true; }
 	
@@ -228,84 +195,70 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		if(!shouldRender()) return;
-		super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+		super.extractWidgetRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
-	protected void renderListBackground(GuiGraphics graphics) {
+	protected void extractListBackground(GuiGraphicsExtractor graphics) {
 		if(!drawBackground) return;
-		super.renderListBackground(graphics);
+		super.extractListBackground(graphics);
 	}
 	
 	@Override
-	protected void renderListSeparators(GuiGraphics graphics) {
+	protected void extractListSeparators(GuiGraphicsExtractor graphics) {
 		if(!drawTopAndBottom) return;
-		super.renderListSeparators(graphics);
-	};
+		super.extractListSeparators(graphics);		
+	}
 	
 	@Override
-	protected void renderListItems(GuiGraphics graphics, int mouseX, int mouseY, float particalTicks) {
-		this.hovered = this.isMouseOver((double)mouseX, (double)mouseY) ? this.getEntryAtPos((double)mouseX, (double)mouseY) : null;
-		int minX = this.getRowLeft();
-		int width = this.getRowWidth();
-		int size = this.getItemCount();
-		int yOff = getY() + 4 - (int)getScrollAmount() + headerHeight;
-		int yOffset = 0;
+	protected void extractListItems(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float particalTicks) {
 		boolean hasRendered = false;
-		GuiUtils.pushScissors(minX, getY() + headerHeight, width, getHeight());
-		minX+=1;
-		for(int i = 0; i < size; ++i) {
-			E entry = getEntry(i);
-			int height = entry.getItemHeight();
-			int minY = yOffset + yOff;
-			int maxY = minY + height;
-			if (maxY >= getY() && minY <= getBottom() && (entry != dragging || !draggingStarted)) {
-				hasRendered = true;
-				this.renderItem(graphics, mouseX, mouseY, particalTicks, i, minX, minY, width-2, height);
-			}
-			else if(hasRendered && (entry != dragging || !draggingStarted)) break;
-			yOffset += height;
-		}
+        for (E child : this.children()) {
+            if (child.getY() + child.getHeight() >= this.getY() && child.getY() <= this.getBottom() && (child != dragging || !draggingStarted)) {
+                hasRendered = true;
+                this.extractItem(graphics, mouseX, mouseY, particalTicks, child);
+            }
+            else if(hasRendered && (child != dragging || !draggingStarted)) break;
+        }
 		if(draggingStarted && dragging != null) {
-			int ySize = dragging.getItemHeight();
-			this.renderItem(graphics, mouseX, mouseY, particalTicks, children().indexOf(dragging), minX, mouseY - (ySize >> 1), width-2, ySize);
+			dragging.setY(mouseY - (dragging.getHeight() >> 1));
+            this.extractItem(graphics, mouseX, mouseY, particalTicks, dragging);
 		}
+	}
+	
+	@Override
+	@SuppressWarnings("unlikely-arg-type")
+	protected void extractItem(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float particalTicks, E entry) {
+        if (this.entriesCanBeSelected() && isSelected(entry)) {
+			int color = entry.getSelectionColor(isFocused());
+            this.extractSelection(graphics, entry, color, entry.getSelectionBackgroundColor());
+        }
+        entry.extractContent(graphics, mouseX, mouseY, Objects.equals(isHovered(), entry), particalTicks);
+	}
+	
+	protected void extractSelection(GuiGraphicsExtractor graphics, E entry, int frameColor, int backgroundColor) {
+        int left = entry.getX();
+        int top = entry.getY();
+        int right = left + entry.getWidth();
+        int bottom = top + entry.getHeight();
+		graphics.fill(left, top, right, bottom, frameColor);
+		graphics.fill(left + 1, top + 1, right - 1, bottom - 1, backgroundColor);
+	}
 		
-		GuiUtils.popScissors();
-	}
-	
-	protected void renderItem(GuiGraphics graphics, int mouseX, int mouseY, float particalTicks, int index, int left, int top, int width, int height) {
-		E e = this.getEntry(index);
-		if(this.renderSelection && this.isSelectedItem(index) && e.isRenderingSelection()) {
-			int color = e.getSelectionColor(isFocused());
-			this.renderSelection(graphics, left, top, width, height, color, e.getSelectionBackgroundColor());
-		}
-		e.location[0] = left;
-		e.location[1] = top+2;
-		e.location[2] = width;
-		e.location[3] = height-4;
-		e.render(graphics, index, top+2, left, width, height-4, mouseX, mouseY, Objects.equals(this.getHovered(), e), particalTicks);
-	}
-	
-	public void renderSelection(GuiGraphics graphics, int left, int top, int width, int height, int frameColor, int backgroundColor) {
-		graphics.fill(left, top, left + width, top + height, frameColor);
-		graphics.fill(left + 1, top + 1, left + width - 1, top + height - 1, backgroundColor);
-	}
-	
 	@Override
 	public NarratableEntry.NarrationPriority narrationPriority() {
 		if(this.isFocused()) {
 			return NarratableEntry.NarrationPriority.FOCUSED;
 		}
 		else {
-			return this.hovered != null ? NarratableEntry.NarrationPriority.HOVERED : NarratableEntry.NarrationPriority.NONE;
+			return this.getHovered() != null ? NarratableEntry.NarrationPriority.HOVERED : NarratableEntry.NarrationPriority.NONE;
 		}
 	}
 	
 	@Override
-	protected void replaceEntries(Collection<E> elements) {
+	public void replaceEntries(Collection<E> elements) {
 		elements.forEach(this::bindToSelf);
 		super.replaceEntries(elements);
 	}
@@ -337,7 +290,7 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 	}
 	
 	protected void bindToSelf(E element) {
-		element.itemheight = itemHeight;
+		element.itemheight = defaultEntryHeight;
 		element.owner = this;
 	}
 	
@@ -345,22 +298,17 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		int itemheight;
 		protected CarbonDynamicList<E> owner;
 		protected Font font = Minecraft.getInstance().font;
-		protected int[] location = new int[4];
 
 		protected boolean isVisible(int mouseX, int mouseY) {
 			return owner.getY() <= mouseY && owner.getBottom() >= mouseY;
 		}
 		
 		protected boolean isFullyVisible(int mouseX, int mouseY) {
-			return mouseX >= location[0] && mouseX <= location[0] + location[2] && mouseY >= location[1] && mouseY <= location[1] + location[3];
+			return mouseX >= getX() && mouseX <= getX() + getWidth() && mouseY >= getY() && mouseY <= getY() + getHeight();
 		}
 		
 		public boolean isInFullView() {
-			return (owner.getX() < location[0] && owner.getRight() >= location[0]) && owner.getY() < location[1] && owner.getBottom() >= location[1] + location[3];
-		}
-		
-		public boolean isMouseOver(double pMouseX, double pMouseY) {
-			return Objects.equals(owner.getEntryAtPos(pMouseX, pMouseY), this);
+			return (owner.getX() < getX() && owner.getRight() >= getX()) && owner.getY() < getY() && owner.getBottom() >= getY() + getHeight();
 		}
 		
 		public void clearFocus() {
@@ -375,6 +323,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 				container.setFocused(null);
 			}
 			if(listener.isFocused()) listener.setFocused(false);
+		}
+		
+		@Override
+		public void setFocused(@Nullable GuiEventListener focused) {
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -398,10 +350,10 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 			return -16777216;
 		}
 		
-		public int getItemHeight() { return itemheight; }
+		public int getHeight() { return itemheight; }
 		
 		@Override
-		public void render(GuiGraphics grahics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void extractContent(GuiGraphicsExtractor grahics, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		}
 	}
 }

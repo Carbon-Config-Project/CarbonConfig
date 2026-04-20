@@ -14,10 +14,11 @@ import carbonconfiglib.gui.base.helpers.SmoothDouble;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -77,7 +78,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			state.draggingListener.accept(oldIndex, newIndex);
 		}
 	}
-	
+		
 	@Override
 	protected boolean shouldRender() {
 		return state.visible;
@@ -98,9 +99,8 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		return getX() + 2;
 	}
 	
-	@Override
-	protected boolean isSelectedItem(int index) {
-		return state.isSelected(index);
+	protected boolean isSelected(T entry) {
+		return state.isSelected(entry);
 	}
 	
 	@Override
@@ -110,9 +110,9 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		if(ignoreSelection | !state.isSelectable()) return;
 		state.setSelected(element);
 	}
-	
+		
 	@Override
-	protected int getScrollbarPosition() {
+	protected int scrollBarX() {
 		return getX() + this.width / 2 + (state.getRowWidth() / 2) + state.scrollOffset; 
 	}
 	
@@ -127,32 +127,32 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 	}
 	
 	public void setScrollAmount(double value, boolean force) {
-		float actualValue = (float)Mth.clamp(value, 0, getMaxScroll());
+		float actualValue = (float)Mth.clamp(value, 0, maxScrollAmount());
 		state.setScrollAmount(actualValue);
 		if(force) state.scrollAmount.forceFinish();
 	}
 	
 	@Override
-	public double getScrollAmount() {
+	public double scrollAmount() {
 		return state.getScrollAmount(); 
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		boolean finished = state.scrollAmount.isDone();
 		state.scrollAmount.update(partialTicks);
 		super.setScrollAmount(state.scrollAmount.getValue());
 		if(!finished) {
 			handleDragging(mouseX, mouseY);
 		}
-		super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+		super.extractWidgetRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	public void applySearch(String search) {
 		state.updateSearch(search);
 		if(search == null || search.isEmpty()) {
 			replaceEntries(state.getNodes());
-			setScrollAmount(getScrollAmount());
+			setScrollAmount(scrollAmount());
 			return;
 		}
 		String actualSearch = search.toLowerCase(Locale.ROOT);
@@ -163,13 +163,12 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			}
 		}
 		replaceEntries(nodes);
-		setScrollAmount(getScrollAmount());
+		setScrollAmount(scrollAmount());
 	}
-		
-	@Override
-	public boolean mouseReleased(double p_93491_, double p_93492_, int p_93493_) {
+	
+	public boolean mouseReleased(MouseButtonEvent event) {
 		if(scrolling) state.scrollAmount.forceFinish();
-		return super.mouseReleased(p_93491_, p_93492_, p_93493_);
+		return super.mouseReleased(event);
 	}
 	
 	public static abstract class ListEntry<T extends ListEntry<T>> extends CarbonDynamicList.DynamicEntry<T> implements ITooltipProvider {
@@ -191,19 +190,14 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			}
 		}
 		
-		@Override
-		public List<? extends GuiEventListener> children() {
-			return children;
-		}
-		
-		@Override
-		public List<? extends NarratableEntry> narratables() {
-			return ObjectLists.empty();
-		}
-		
 		protected abstract boolean containsSearch(String searchString);
+		
 		@Override
-		public abstract void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks);
+		public List<? extends GuiEventListener> children() { return children; }
+		@Override
+		public List<? extends NarratableEntry> narratables() { return ObjectLists.empty(); }
+		@Override
+		public abstract void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean selected, float partialTicks);
 	}
 	
 	public static class ListState<T extends ListEntry<T>> {
@@ -426,8 +420,8 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 			return frame; 
 		}
 		
-		public boolean isSelected(int index) {
-			return isFramed() || (isSelectable() && owner.getEntry(index) == getSelected());
+		public boolean isSelected(T entry) {
+			return isFramed() || (isSelectable() && entry == getSelected());
 		}
 		
 		public boolean isEnabled() {
@@ -447,7 +441,7 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		}
 		
 		public boolean isScrollbarVisible() {
-			return owner != null && owner.getMaxScroll() > 0;
+			return owner != null && owner.maxScrollAmount() > 0;
 		}
 		
 		public boolean isSearching() {
@@ -503,8 +497,8 @@ public class CarbonList<T extends ListEntry<T>> extends CarbonDynamicList<T> imp
 		}
 		
 		@Override
-		public boolean isSelected(int index) {
-			return isFramed() || isSelectable() && selected.contains(owner.getEntry(index));
+		public boolean isSelected(T entry) {
+			return isFramed() || isSelectable() && selected.contains(entry);
 		}
 		
 		@Override

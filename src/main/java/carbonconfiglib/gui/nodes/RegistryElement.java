@@ -6,7 +6,7 @@ import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.suggestion.ISuggestionRenderer;
 import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.gui.base.helpers.Align;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -35,14 +35,14 @@ public class RegistryElement extends SelectionElement
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		bounds[0] = left;
 		bounds[1] = top;
 		if(renderer != null) {
 			last = renderer.renderSuggestion(graphics, node.get(), left, (int)Align.CENTER.alignStart(top, height, 16));
 			left += 20;
 		}
-		super.renderRightPart(graphics, left, top, desiredWidth, width, height, mouseX, mouseY, selected, partialTicks);
+		super.extractRightPart(graphics, left, top, desiredWidth, width, height, mouseX, mouseY, selected, partialTicks);
 	}
 	
 	@Override

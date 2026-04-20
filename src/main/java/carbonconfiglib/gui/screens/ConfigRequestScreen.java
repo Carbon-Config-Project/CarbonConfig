@@ -10,7 +10,7 @@ import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -83,15 +83,15 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestRec
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		int minY = (int)(height * 0.15F);
-		if(!texture.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, texture.getTexture());
-		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, texture.getTexture());
+		if(!texture.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(graphics, 0, width, 0, height, 0F, texture.getTexture());
+		GuiUtils.renderListOverlay(graphics, 0, width, minY, (int)(height * 0.8F), width, height, texture.getTexture());
 	}
 	
 	@Override
-	public void drawForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		GuiUtils.renderListShadow(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
+	public void drawForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		GuiUtils.renderListShadow(graphics, 0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
 		drawText(graphics, REQUEST, 0, -15, Align.CENTER, -1);
 		int index = (tick / 5) % 8;
 		if(index >= 5) index = 8-index;

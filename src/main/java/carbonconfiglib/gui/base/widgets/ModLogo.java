@@ -4,12 +4,13 @@ import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.screens.MultiChoiceScreen;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 
 public class ModLogo extends CarbonButton
 {
@@ -24,12 +25,12 @@ public class ModLogo extends CarbonButton
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		GuiUtils.drawTextureRegion(graphics, getX(), getY(), width, height, Icon.LOGO, 400, 400);
 	}
 	
 	@Override
-	public void onPress() {
+	public void onPress(InputWithModifiers input) {
 		MultiChoiceScreen screen = new MultiChoiceScreen(T -> {
 			if(T.isMain()) openURL("https://curseforge.com/minecraft/mc-mods/carbon-config");
 			else if(T.isOther()) openURL("https://modrinth.com/mod/carbon-config");

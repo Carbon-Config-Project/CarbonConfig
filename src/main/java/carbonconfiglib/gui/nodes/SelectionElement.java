@@ -10,7 +10,7 @@ import carbonconfiglib.gui.base.widgets.DropDownMenu.DropDownState;
 import carbonconfiglib.gui.nodes.base.SuggestionEntry;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.utils.ObjectLists;
 
@@ -102,18 +102,18 @@ public class SelectionElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		values.setX(left);
 		values.setY(top);
 		values.setWidth(desiredWidth);
 		values.setHeight(height);
-		values.render(graphics, mouseX, mouseY, partialTicks);
+		values.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		
 		text.setX(left);
 		text.setY(top);
 		text.setWidth(desiredWidth);
 		text.setHeight(height);
-		text.render(graphics, mouseX, mouseY, partialTicks);
+		text.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 }

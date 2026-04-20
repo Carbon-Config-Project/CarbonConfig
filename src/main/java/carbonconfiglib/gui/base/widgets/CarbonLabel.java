@@ -3,14 +3,12 @@ package carbonconfiglib.gui.base.widgets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import carbonconfiglib.gui.base.helpers.Icon;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 
 
@@ -39,24 +37,21 @@ public class CarbonLabel extends AbstractWidget implements ITooltipProvider
 	}
 	
 	@Override
-	protected boolean isValidClickButton(int pButton) {
+	protected boolean isValidClickButton(MouseButtonInfo buttonInfo) {
 		return false;
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-		int j = getFGColor();
-		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(graphics, getX()+2, getY()+2, width-4, height-4, icon, 16, 16);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+	protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		icon.drawIcon(graphics, getX()+2, getY()+2, width-4, height-4, 16, 16, getFGColor());
 	}
-	
+		
 	@Override
 	protected void updateWidgetNarration(NarrationElementOutput p_259858_) {}
 	
 	@SuppressWarnings("unchecked")
 	public <T extends CarbonLabel> T withTooltip(Component tooltip) {
-		this.tooltip = T -> tooltip;
+		this.tooltip = _ -> tooltip;
 		return (T)this;
 	}
 	

@@ -12,8 +12,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.mojang.serialization.Dynamic;
-
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IModConfig;
@@ -26,16 +24,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameRules.BooleanValue;
-import net.minecraft.world.level.GameRules.Category;
-import net.minecraft.world.level.GameRules.GameRuleTypeVisitor;
-import net.minecraft.world.level.GameRules.IntegerValue;
-import net.minecraft.world.level.GameRules.Key;
-import net.minecraft.world.level.GameRules.Type;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
+import net.minecraft.world.level.gamerules.GameRuleTypeVisitor;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -60,11 +55,11 @@ import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHas
  */
 public class MinecraftConfig implements IModConfig
 {
-	public static final GameRules DEFAULTS = new GameRules();
+	public static final GameRules DEFAULTS = new GameRules(FeatureFlags.REGISTRY.allFlags());
 	protected GameRules current;
 	protected GameRules original;
 	List<IGameRuleValue> values = new ObjectArrayList<>();
-	Map<Category, List<IGameRuleValue>> keys = new Object2ObjectLinkedOpenHashMap<>();
+	Map<GameRuleCategory, List<IGameRuleValue>> keys = new Object2ObjectLinkedOpenHashMap<>();
 	
 	public MinecraftConfig() {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -78,26 +73,26 @@ public class MinecraftConfig implements IModConfig
 	
 	protected void setRules(GameRules current) {
 		this.current = current;
-		this.original = current.copy();
+		this.original = IGameRuleValue.copy(current);
 		collect();		
 	}
 	
 	private void collect() {
-		GameRules.visitGameRuleTypes(new GameRuleTypeVisitor() {
+		current.visitGameRuleTypes(new GameRuleTypeVisitor() {
 			@Override
-			public void visitBoolean(Key<BooleanValue> key, Type<BooleanValue> type) {
-				add(key, IGameRuleValue.bool(key, current.getRule(key)));
+			public void visitBoolean(GameRule<Boolean> gameRule) {
+				add(gameRule, IGameRuleValue.bool(gameRule, current));
 			}
 			
 			@Override
-			public void visitInteger(Key<IntegerValue> key, Type<IntegerValue> type) {
-				add(key, IGameRuleValue.ints(key, current.getRule(key)));
+			public void visitInteger(GameRule<Integer> gameRule) {
+				add(gameRule, IGameRuleValue.ints(gameRule, current));
 			}
 		});
 	}
 	
-	private void add(Key<?> key, IGameRuleValue value) {
-		keys.computeIfAbsent(key.getCategory(), T -> new ObjectArrayList<>()).add(value);
+	private void add(GameRule<?> key, IGameRuleValue value) {
+		keys.computeIfAbsent(key.category(), _ -> new ObjectArrayList<>()).add(value);
 		values.add(value);
 	}
 	
@@ -191,14 +186,14 @@ public class MinecraftConfig implements IModConfig
 	public void save(boolean createBackup) {
 		if(current == null) return;
 		if(createBackup) BackupManager.createBackup(this);
-		original = current.copy();
-		current.assignFrom(current.copy(), ServerLifecycleHooks.getCurrentServer());
+		original = IGameRuleValue.copy(current);
+		current.setAll(IGameRuleValue.copy(current), ServerLifecycleHooks.getCurrentServer());
 	}
 	
 	@Override
 	public byte[] createBackup() {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		try { NbtIo.writeCompressed(original.createTag(), stream); }
+		try { NbtIo.writeCompressed(IGameRuleValue.write(original), stream); }
 		catch(IOException e) { e.printStackTrace(); }
 		return stream.toByteArray();
 	}
@@ -206,7 +201,7 @@ public class MinecraftConfig implements IModConfig
 	@Override
 	public void loadBackup(byte[] data) {
 		try { 
-			current.assignFrom(new GameRules(new Dynamic<>(NbtOps.INSTANCE, NbtIo.readCompressed(new ByteArrayInputStream(data), NbtAccounter.unlimitedHeap()))), ServerLifecycleHooks.getCurrentServer()); 
+			current.setAll(IGameRuleValue.read(NbtIo.readCompressed(new ByteArrayInputStream(data), NbtAccounter.unlimitedHeap())), ServerLifecycleHooks.getCurrentServer()); 
 			save(false);
 		}
 		catch(Exception e) { e.printStackTrace(); }
@@ -217,7 +212,7 @@ public class MinecraftConfig implements IModConfig
 		CompoundTag tag;
 		
 		public FileConfig(Path file, CompoundTag tag) { 
-			super(new GameRules(new Dynamic<>(NbtOps.INSTANCE, tag.getCompound("Data").getCompound("GameRules"))));
+			super(IGameRuleValue.read(tag.getCompoundOrEmpty("Data").getCompoundOrEmpty("GameRules")));
 			this.file = file;
 			this.tag = tag;
 		}
@@ -225,8 +220,8 @@ public class MinecraftConfig implements IModConfig
 		@Override
 		public void save(boolean createBackup) {
 			if(createBackup) BackupManager.createBackup(this);
-			original = current.copy();
-			tag.getCompound("Data").put("GameRules", current.createTag());
+			original = current.copy(FeatureFlags.REGISTRY.allFlags());
+			tag.getCompoundOrEmpty("Data").put("GameRules", IGameRuleValue.write(current));
 			try {
 				NbtIo.writeCompressed(tag, file);
 			}
@@ -241,13 +236,13 @@ public class MinecraftConfig implements IModConfig
 		public void save(boolean createBackup) {
 			if(current == null) return;
 			if(createBackup) BackupManager.createBackup(this);
-			original = current.copy();
+			original = IGameRuleValue.copy(current);
 			CarbonConfig.NETWORK.sendToServer(new SaveGameRulesPacket(current));
 		}
 		
 		@Override
 		public boolean test(FriendlyByteBuf buffer) {
-			setRules(new GameRules(new Dynamic<>(NbtOps.INSTANCE, buffer.readNbt())));
+			setRules(IGameRuleValue.read(buffer.readNbt()));
 			return true;
 		}
 	}

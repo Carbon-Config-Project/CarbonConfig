@@ -5,7 +5,7 @@ import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.EntrySettingTypes.ForceMode;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -57,12 +57,12 @@ public abstract class ValueElement extends NodeElement
 	}
 	
 	@Override
-	public void renderLeftPart(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(graphics, font, shouldRenderIndex() ? Component.literal(index(node)+": ") : node.getName(), left, top, width, height, Align.START, -1, sinceFullyVisible);
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		
 	}
 	

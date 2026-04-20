@@ -54,7 +54,7 @@ public class SuggestionProviders
 		@Override
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
 			collectProfiles(T -> {
-				Suggestion suggestion = Suggestion.namedValue(T.getName(), T.getId().toString());
+				Suggestion suggestion = Suggestion.namedValue(T.name(), T.id().toString());
 				if(filter.test(suggestion)) output.accept(suggestion);
 			});
 		}

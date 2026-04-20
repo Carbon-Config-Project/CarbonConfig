@@ -13,7 +13,7 @@ import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.gui.nodes.base.NodeElement;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -72,7 +72,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	}
 
 	@Override
-	public void renderLeftPart(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		Component comp = shouldRenderIndex() ? getOverride() : null;
 		GuiUtils.drawScrollingShadowText(graphics, font, comp != null ? comp : node.getName(), left, top, width-23, height, Align.START, -1, sinceFullyVisible);
 		boolean active = context.isElementActive(this);
@@ -82,7 +82,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 		button.setY(top);
 		button.setWidth(20);
 		button.setHeight(height);
-		button.render(graphics, mouseX, mouseY, partialTicks);
+		button.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -97,7 +97,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(graphics, font, Component.translatable("gui.carbonconfig.elements", node.getValues().size()), left+(desiredWidth>>1), top, (desiredWidth>>1)-2, height, Align.END, -1, sinceFullyVisible);
 	}
 	

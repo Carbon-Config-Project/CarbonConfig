@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import org.joml.Matrix3x2fStack;
 
 import carbonconfiglib.CarbonConfig;
 import carbonconfiglib.gui.api.IModConfig;
@@ -26,7 +26,7 @@ import carbonconfiglib.gui.nodes.base.IFolderNode.IFolderController;
 import carbonconfiglib.gui.nodes.base.ISortableNode;
 import carbonconfiglib.impl.ReloadMode;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -70,8 +70,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	@SuppressWarnings("unchecked")
 	ListState<BaseElement>[] all = new ListState[] {rowOne, rowTwo, rowThree};
 	CheckBoxState bulkEdit = new CheckBoxState(false, Icon.NOT_DEFAULT).setCallback(T -> onBulkEdit(T.getValue())).setTooltip(Component.translatable("gui.carbonconfig.bulkedit"));
-	CheckBoxState autoSave = new CheckBoxState(CarbonConfig.AUTO_SAVE.get(), Icon.AUTO_SAVE).setCallback(T -> onNodeChanged()).setTooltip(Component.translatable("gui.carbonconfig.autosave"));
-	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(T -> recalculateNode()).withTooltip(T -> Component.translatable(T.getState().getValue() ? "gui.carbonconfig.layout.normal" : "gui.carbonconfig.layout.wide"));
+	CheckBoxState autoSave = new CheckBoxState(CarbonConfig.AUTO_SAVE.get(), Icon.AUTO_SAVE).setCallback(_ -> onNodeChanged()).setTooltip(Component.translatable("gui.carbonconfig.autosave"));
+	CheckBoxState layerMode = new CheckBoxState(true, Icon.PAGE_MODE).setCallback(_ -> recalculateNode()).withTooltip(T -> Component.translatable(T.getState().getValue() ? "gui.carbonconfig.layout.normal" : "gui.carbonconfig.layout.wide"));
 	CarbonButton save;
 	Stack<List<BaseElement>> visibleChildren = new ObjectArrayList<>();
 	Stack<BaseElement> pickedNode = new ObjectArrayList<>();
@@ -104,12 +104,12 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		listArea(0, minY, widthOne, maxY, rowOne);
 		listArea(widthOne+4, minY, widthTwo, maxY, rowTwo);
 		listArea(widthTwo + 8 + widthOne, minY, widthThree, maxY, rowThree);
-		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, T -> onClose()).withTooltip(Component.translatable("gui.carbonconfig.home"));
+		iconButton(minY, minY - 22, 20, 20, Align.START, Align.START, Icon.HOME, _ -> onClose()).withTooltip(Component.translatable("gui.carbonconfig.home"));
 		checkbox(minY + 22, minY - 22, 20, 20, layerMode);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
 		checkbox(-89, minY - 20, 18, 18, Align.END, Align.START, bulkEdit);
 		checkbox(-69, minY - 20, 18, 18, Align.END, Align.START, autoSave);
-		save = iconButton(-49, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, T -> save()).setPadding(0).withTooltip(Component.translatable("gui.carbonconfig.save"));
+		save = iconButton(-49, minY - 20, 18, 18, Align.END, Align.START, Icon.SAVE, _ -> save()).setPadding(0).withTooltip(Component.translatable("gui.carbonconfig.save"));
 		
 		if(walker != null) {
 			Deque<String> dequeue = new ArrayDeque<String>(walker);
@@ -198,17 +198,17 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		if(save != null) save.active = rootElement.needsSaving();
 		int minY = (int)(height * 0.15F);
-		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
-		GuiUtils.renderListOverlay(0, width, minY, (int)(height * 0.8F), width, height, holder.getTexture());
+		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(graphics, 0, width, 0, height, 0F, holder.getTexture());
+		GuiUtils.renderListOverlay(graphics, 0, width, minY, (int)(height * 0.8F), width, height, holder.getTexture());
 	}
 	
 	@Override
-	public void drawForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void drawForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		drawText(graphics, display, 0, -centerY + 3, Align.CENTER, -1);
-		GuiUtils.renderListShadow(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
+		GuiUtils.renderListShadow(graphics, 0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
 		int widthOne = calculateWidth(0);
 		if(!rowOne.isScrollbarVisible() && !rowTwo.isEmpty()) {
 			graphics.fill(widthOne, (int)(height * 0.15F), widthOne+4, (int)(height * 0.8F), 0xFF000000);
@@ -238,8 +238,8 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		graphics.fill(0, (int)(height * 0.85F), width, (int)(height * 0.85F+2), 0xFF000000);
 	}
 	
-	private void drawTooltip(BaseElement element, GuiGraphics graphics) {
-		PoseStack stack = graphics.pose();
+	private void drawTooltip(BaseElement element, GuiGraphicsExtractor graphics) {
+		Matrix3x2fStack stack = graphics.pose();
 		Component text = element.getName();
 		if(text != null) {
 			String raw = element.getNodeName();
@@ -247,11 +247,11 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 			int scale = (int)((height * 0.85F) - (height * 0.8F)) / font.lineHeight;
 			float minY = (height * 0.8F);
 			float diff = (height * 0.85F - minY) * 0.5F;
-			stack.pushPose();
-			stack.translate(2F, minY + diff - (font.lineHeight * scale * 0.5F), 0F);
-			stack.scale(scale, scale, 1F);
+			stack.pushMatrix();
+			stack.translate(2F, minY + diff - (font.lineHeight * scale * 0.5F));
+			stack.scale(scale, scale);
 			GuiUtils.drawText(graphics, font, text, 0F, 0F, Align.START, -1);
-			stack.popPose();
+			stack.popMatrix();
 		}
 		text = element.getTooltip();
 		if(text != null) {
@@ -264,11 +264,11 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 				if(freeHeight >= needed*1.5F) scale = 1.5F;
 			}
 			float minY = (height * 0.85F) + 2F;
-			stack.pushPose();
-			stack.translate(2F, minY, 0F);
-			stack.scale(scale, scale, 1F);
+			stack.pushMatrix();
+			stack.translate(2F, minY);
+			stack.scale(scale, scale);
 			GuiUtils.drawSplitText(graphics, font, text, 0F, 0F, Align.START, -1, (int)(width / scale) - 4);
-			stack.popPose();
+			stack.popMatrix();
 		}
 	}
 	
@@ -431,10 +431,10 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		}
 		Screen owner = this;
 		if(mode == ReloadMode.GAME) {
-			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+			minecraft.setScreen(new MultiChoiceScreen(_ -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 		else if(mode == ReloadMode.WORLD && minecraft.level != null) {
-			minecraft.setScreen(new MultiChoiceScreen(T -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+			minecraft.setScreen(new MultiChoiceScreen(_ -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 	}
 }

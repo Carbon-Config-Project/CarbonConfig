@@ -1,9 +1,5 @@
 package carbonconfiglib;
 
-import java.util.function.BiPredicate;
-import java.util.function.BooleanSupplier;
-
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -18,14 +14,8 @@ import carbonconfiglib.config.ConfigSection;
 import carbonconfiglib.config.ConfigSettings;
 import carbonconfiglib.config.FileSystemWatcher;
 import carbonconfiglib.config.HashSetCache;
-import carbonconfiglib.gui.api.IModConfig;
-import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTypes;
 import carbonconfiglib.gui.api.suggestion.SuggestionProviders.ModProvider;
-import carbonconfiglib.gui.screens.ConfigListScreen;
-import carbonconfiglib.gui.screens.ConfigRequestScreen;
-import carbonconfiglib.gui.screens.ConfigScreen;
-import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.impl.entries.ColorValue;
@@ -34,34 +24,21 @@ import carbonconfiglib.impl.entries.RegistryValue;
 import carbonconfiglib.impl.internal.ConfigLogger;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.impl.internal.InternalFeatures;
-import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.networking.CarbonNetwork;
 import carbonconfiglib.utils.AutomationType;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.gui.ModListScreen;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -84,8 +61,7 @@ public class CarbonConfig
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static final FileSystemWatcher CONFIGS = new FileSystemWatcher(new ConfigLogger(LOGGER), FMLPaths.CONFIGDIR.get(), EventHandler.INSTANCE);
 	public static final CarbonNetwork NETWORK = new CarbonNetwork();
-	public static BooleanSupplier MOD_GUI = () -> false;
-	public static BiPredicate<Integer, Integer> DEPENDENCY_VIEWER = (K, V) -> false;
+
 	ConfigHandler handler;
 	public static BoolValue FORGE_SUPPORT; 
 	public static BoolValue OVERWRITE_FORGE;
@@ -105,13 +81,9 @@ public class CarbonConfig
 		NeoForge.EVENT_BUS.addListener(this::load);
 		NeoForge.EVENT_BUS.addListener(this::unload);
 		NeoForge.EVENT_BUS.register(EventHandler.INSTANCE);
-		if(FMLEnvironment.dist.isClient()) {
+		if(FMLEnvironment.getDist().isClient()) {
 			InternalFeatures.loadDefaultSettings();
-			bus.addListener(this::onClientLoad);
-			bus.addListener(this::registerKeys);
-			bus.addListener(this::onResourceReloadRegister);
-			NeoForge.EVENT_BUS.addListener(this::onKeyPressed);
-			NeoForge.EVENT_BUS.addListener(this::onScreenKeyPressed);
+			CarbonConfigClient.INSTANCE.init(bus);
 			Config config = new Config("carbonconfig");
 			ConfigSection section = config.add("general");
 			FORGE_SUPPORT = section.addBool("enable-forge-support", true, "Enables that CarbonConfig automatically adds Forge Configs into its own Config Gui System").setRequiredReload(ReloadMode.GAME);
@@ -176,7 +148,7 @@ public class CarbonConfig
 
 	/**
 	 * Creates a ConfigBuilder that contains a Set of "Registry Keys"
-	 * (ResourceLocation).<br>
+	 * (Identifier).<br>
 	 * The idea behind that is you might want a filter or something about a specific
 	 * Type of Registry Element.<br>
 	 * Compared to the RegistryEntry this doesn't actually store the "Registry
@@ -207,94 +179,11 @@ public class CarbonConfig
 	public static <E> RegistryValue.Builder<E> createRegistryBuilder(String key, Class<E> clz) {
 		return RegistryValue.builder(key, clz);
 	}
-
-	/**
-	 * Helper function that allows to open a specific config folder in a remote
-	 * config.<br>
-	 * Remote config is defined as a config that is on the servers machine.<br>
-	 * In Singleplayer that could also mean that client configs do work.
-	 * 
-	 * @param config that should be opened
-	 * @param path   of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@OnlyIn(Dist.CLIENT)
-	public static void openRemoteConfigFolder(IModConfig config, String... path) {
-		openRemoteConfigFolder(config, BackgroundTexture.DEFAULT, path);
-	}
-
-	/**
-	 * Helper function that allows to open a specific config folder in a remote
-	 * config.<br>
-	 * Remote config is defined as a config that is on the servers machine.<br>
-	 * In Singleplayer that could also mean that client configs do work.
-	 * 
-	 * @param config  that should be opened
-	 * @param texture background that should be used
-	 * @param path    of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@OnlyIn(Dist.CLIENT)
-	public static void openRemoteConfigFolder(IModConfig config, BackgroundTexture texture, String... path) {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		if (server != null) {
-			openLocalConfigFolder(config, texture, path);
-			return;
-		} else if (config.getConfigType() == ConfigType.CLIENT) {
-			CarbonConfig.LOGGER.info("Tried to open a local config in the Remote Opener");
-			return;
-		}
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config when there was no remote attached");
-			return;
-		} else if (!mc.hasSingleplayerServer() && !mc.player.hasPermissions(4)) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");
-			return;
-		}
-		mc.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.screen, config, path));
-	}
-
-	/**
-	 * Helper function that allows to open a specific config folder in a local
-	 * config.<br>
-	 * Local config is defined as a config that is on the clients machine.<br>
-	 * This includes Client/Singleplayer/Shared or Common configs.
-	 * 
-	 * @param config that should be opened
-	 * @param path   of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@OnlyIn(Dist.CLIENT)
-	public static void openLocalConfigFolder(IModConfig config, String... path) {
-		openLocalConfigFolder(config, BackgroundTexture.DEFAULT, path);
-	}
-
-	/**
-	 * Helper function that allows to open a specific config folder in a local
-	 * config.<br>
-	 * Local config is defined as a config that is on the clients machine.<br>
-	 * This includes Client/Singleplayer/Shared or Common configs.
-	 * 
-	 * @param config  that should be opened
-	 * @param texture background that should be used
-	 * @param path    of the folders that should be traversed
-	 * @implNote you can't go into CompoundObjects
-	 */
-	@OnlyIn(Dist.CLIENT)
-	public static void openLocalConfigFolder(IModConfig config, BackgroundTexture texture, String... path) {
-		if (!config.isLocalConfig()) {
-			CarbonConfig.LOGGER.info("Tried to open a Remote config in the Local Opener");
-			return;
-		}
-		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(new ConfigScreen(config, texture.asHolder(), mc.screen).withWalker(path == null || path.length <= 0 ? null : ObjectArrayList.wrap(path)));
-	}
-
+	
 	public static boolean hasPermission(Player player, int permissionLevel) {
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		if (server.isSingleplayer() && server.isSingleplayerOwner(player.getGameProfile())) return true;
-		return player.hasPermissions(permissionLevel);
+		if (server.isSingleplayer() && server.isSingleplayerOwner(player.nameAndId())) return true;
+		return player.permissions().hasPermission(Permissions.COMMANDS_OWNER);
 	}
 
 	public void onCommonLoad(FMLCommonSetupEvent event) {
@@ -304,46 +193,7 @@ public class CarbonConfig
 			}
 		}
 	}
-
-	@OnlyIn(Dist.CLIENT)
-	public void onClientLoad(FMLClientSetupEvent event) {
-		EventHandler.INSTANCE.onConfigsLoaded();
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public void registerKeys(RegisterKeyMappingsEvent event) {
-		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, "key.carbon_config");
-		event.register(mapping);
-		MOD_GUI = mapping::isDown;
-		KeyMapping mappingOther = new KeyMapping("key.carbon_config.dep", GLFW.GLFW_KEY_KP_ADD, "key.carbon_config");
-		event.register(mappingOther);
-		DEPENDENCY_VIEWER = (K, S) -> mappingOther.matches(K, S) || mappingOther.matchesMouse(K);
-	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void onResourceReloadRegister(RegisterClientReloadListenersEvent event) {
-		event.registerReloadListener(SettingsLoader.INSTANCE);
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	public void onKeyPressed(InputEvent.Key event) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.setScreen(Screen.hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
-		}
-		else if(DEPENDENCY_VIEWER.test(event.getKey(), event.getScanCode()) && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.setScreen(new ModDependencyScreen());
-		}
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	public void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
-		if(event.getScreen() instanceof TitleScreen && DEPENDENCY_VIEWER.test(event.getKeyCode(), event.getScanCode())) {
-			Minecraft.getInstance().setScreen(new ModDependencyScreen());
-			event.setCanceled(true);
-		}
-	}
-
 	public void load(ServerAboutToStartEvent event) {
 		for (ConfigHandler handler : CONFIGS.getAllConfigs()) {
 			if (PerWorldProxy.isProxy(handler.getProxy())) {

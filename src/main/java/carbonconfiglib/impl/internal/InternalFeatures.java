@@ -20,14 +20,12 @@ import carbonconfiglib.gui.nodes.ColorElement;
 import carbonconfiglib.gui.nodes.RegistryElement;
 import carbonconfiglib.impl.entries.ColorValue;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
@@ -59,7 +57,6 @@ public class InternalFeatures
 		handlers.addTempParser('K');
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	public static void loadDefaultTypes() {
 		ISuggestionRenderer.Registry.register(Item.class, new SuggestionRenderers.ItemEntry());
 		ISuggestionRenderer.Registry.register(Block.class, new SuggestionRenderers.ItemEntry());
@@ -77,12 +74,12 @@ public class InternalFeatures
 	}
 	
 	public static void loadDefaultSettings() {
-		SettingsLoader.INSTANCE.registerParser(ResourceLocation.fromNamespaceAndPath("carbonconfig", "translation_key"), T -> T.has("key") ? new TranslatedKey(T.get("key").getAsString()) : null);
-		SettingsLoader.INSTANCE.registerParser(ResourceLocation.fromNamespaceAndPath("carbonconfig", "translation_comment"), T -> T.has("comment") ? new TranslatedComment(T.get("comment").getAsString()) : null);
-		SettingsLoader.INSTANCE.registerParser(ResourceLocation.fromNamespaceAndPath("carbonconfig", "color_type"), T -> T.has("hasAlpha") ? new ColorType(T.get("hasAlpha").getAsBoolean()) : null);
-		SettingsLoader.INSTANCE.registerParser(ResourceLocation.fromNamespaceAndPath("carbonconfig", "slider"), T -> T.has("stepSize") ? new FloatingSlider(T.get("stepSize").getAsDouble()) : null);
-		SettingsLoader.INSTANCE.registerParser(ResourceLocation.fromNamespaceAndPath("carbonconfig", "force_mode"), T -> T.has("forceText") ? new ForceMode(T.get("forceText").getAsBoolean()) : null);
-		SettingsLoader.INSTANCE.registerParser(ResourceLocation.fromNamespaceAndPath("carbonconfig", "force_selection"), T -> {
+		SettingsLoader.INSTANCE.registerParser(Identifier.fromNamespaceAndPath("carbonconfig", "translation_key"), T -> T.has("key") ? new TranslatedKey(T.get("key").getAsString()) : null);
+		SettingsLoader.INSTANCE.registerParser(Identifier.fromNamespaceAndPath("carbonconfig", "translation_comment"), T -> T.has("comment") ? new TranslatedComment(T.get("comment").getAsString()) : null);
+		SettingsLoader.INSTANCE.registerParser(Identifier.fromNamespaceAndPath("carbonconfig", "color_type"), T -> T.has("hasAlpha") ? new ColorType(T.get("hasAlpha").getAsBoolean()) : null);
+		SettingsLoader.INSTANCE.registerParser(Identifier.fromNamespaceAndPath("carbonconfig", "slider"), T -> T.has("stepSize") ? new FloatingSlider(T.get("stepSize").getAsDouble()) : null);
+		SettingsLoader.INSTANCE.registerParser(Identifier.fromNamespaceAndPath("carbonconfig", "force_mode"), T -> T.has("forceText") ? new ForceMode(T.get("forceText").getAsBoolean()) : null);
+		SettingsLoader.INSTANCE.registerParser(Identifier.fromNamespaceAndPath("carbonconfig", "force_selection"), T -> {
 			if(!T.has("selection")) return null;
 			List<Suggestion> suggestions = new ObjectArrayList<>();
 			for(JsonElement element : T.getAsJsonArray("selection")) {

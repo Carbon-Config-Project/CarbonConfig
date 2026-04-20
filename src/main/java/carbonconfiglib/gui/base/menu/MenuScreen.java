@@ -2,25 +2,14 @@ package carbonconfiglib.gui.base.menu;
 
 import java.util.List;
 
-import org.joml.Matrix4f;
-
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.client.ClientHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -81,48 +70,26 @@ public class MenuScreen extends BaseCarbonScreen {
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		drawArea(graphics.pose(), menuX, menuY, realWidth-1, realHeight-5);
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		drawArea(graphics, menuX, menuY-2, realWidth-1, realHeight-5);
 	}
 	
-	public void drawArea(PoseStack matrix, float x, float y, float widht, float height) {
-		Tesselator tes = Tesselator.getInstance();
-		BufferBuilder buffer = tes.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		float minX = 4 + x;
-		float maxX = minX + widht;
-		float minY = 4 + y;
-		float maxY = minY + height;
+	public void drawArea(GuiGraphicsExtractor graphics, int x, int y, int widht, int height) {
+		int minX = 4 + x;
+		int maxX = minX + widht;
+		int minY = 4 + y;
+		int maxY = minY + height;
 		
-		fillGradient(matrix, minX - 3, minY - 4, maxX + 3, minY - 3, -267386864, buffer);
-		fillGradient(matrix, minX - 3, maxY + 3, maxX + 3, maxY + 4, -267386864, buffer);
-		fillGradient(matrix, minX - 3, minY - 3, maxX + 3, maxY + 3, -267386864, buffer);
-		fillGradient(matrix, minX - 4, minY - 3, minX - 3, maxY + 3, -267386864, buffer);
-		fillGradient(matrix, maxX + 3, minY - 3, maxX + 4, maxY + 3, -267386864, buffer);
+		graphics.fill(minX - 3, minY - 4, maxX + 3, minY - 3, -267386864);
+		graphics.fill(minX - 3, maxY + 3, maxX + 3, maxY + 4, -267386864);
+		graphics.fill(minX - 3, minY - 3, maxX + 3, maxY + 3, -267386864);
+		graphics.fill(minX - 4, minY - 3, minX - 3, maxY + 3, -267386864);
+		graphics.fill(maxX + 3, minY - 3, maxX + 4, maxY + 3, -267386864);
 		
-		fillGradient(matrix, minX - 3, minY - 3 + 1, minX - 3 + 1, maxY + 3 - 1, 1347420415, buffer);
-		fillGradient(matrix, maxX + 2, minY - 3 + 1, maxX + 3, maxY + 3 - 1, 1347420415, buffer);
-		fillGradient(matrix, minX - 3, minY - 3, maxX + 3, minY - 3 + 1, 1347420415, buffer);
-		fillGradient(matrix, minX - 3, maxY + 2, maxX + 3, maxY + 3, 1344798847, buffer);
-		
-		GlStateManager._enableBlend();
-		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		GlStateManager._enableDepthTest();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-		GlStateManager._disableDepthTest();
-		GlStateManager._disableBlend();
-	}
-	
-	protected void fillGradient(PoseStack matrix, float left, float top, float right, float bottom, int color, BufferBuilder buffer) {
-		float a = (color >> 24 & 255) / 255F;
-		float r = (color >> 16 & 255) / 255F;
-		float g = (color >> 8 & 255) / 255F;
-		float b = (color & 255) / 255F;
-		Matrix4f stack = matrix.last().pose();
-		buffer.addVertex(stack, right, top, -10F).setColor(r, g, b, a);
-		buffer.addVertex(stack, left, top, -10F).setColor(r, g, b, a);
-		buffer.addVertex(stack, left, bottom, -10F).setColor(r, g, b, a);
-		buffer.addVertex(stack, right, bottom, -10F).setColor(r, g, b, a);
+		graphics.fill(minX - 3, minY - 3 + 1, minX - 3 + 1, maxY + 3 - 1, 1347420415);
+		graphics.fill(maxX + 2, minY - 3 + 1, maxX + 3, maxY + 3 - 1, 1347420415);
+		graphics.fill(minX - 3, minY - 3, maxX + 3, minY - 3 + 1, 1347420415);
+		graphics.fill(minX - 3, maxY + 2, maxX + 3, maxY + 3, 1344798847);
 	}
 	
 	@Override
@@ -136,13 +103,13 @@ public class MenuScreen extends BaseCarbonScreen {
 	}
 	
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if(super.mouseClicked(mouseX, mouseY, button)) return true;
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if(super.mouseClicked(event, doubleClick)) return true;
 		if(callback != null) callback.run();
 		ClientHooks.popGuiLayer(getMinecraft());
 		return false;
 	}
-	
+		
 	private static int countHeight(SubMenuItem menu, Font font) {
 		int height = 0;
 		for(IMenuItem item : menu.children()) {
@@ -207,7 +174,7 @@ public class MenuScreen extends BaseCarbonScreen {
 		}
 		
 		@Override
-		public int getItemHeight() {
+		public int getHeight() {
 			return height(item, font); 
 		}
 		
@@ -219,23 +186,23 @@ public class MenuScreen extends BaseCarbonScreen {
 		}
 		
 		@Override
-		public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			lastY = top;
+		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			lastY = getContentY();
 			List<FormattedCharSequence> sequence = font.split(item.name(), 180);
-			int baseY = Align.CENTER.alignStart(top, height, height(sequence.size()));
+			int baseY = Align.CENTER.alignStart(getContentY(), getContentHeight(), height(sequence.size()));
 			int entryHeight = height(1);
 			int offset = Align.CENTER.alignStart(0, entryHeight, font.lineHeight);
 			for(FormattedCharSequence entry : sequence) {
-				graphics.drawString(font, entry, left+1, baseY+offset, -1);
+				graphics.text(font, entry, getContentX(), baseY+offset, -1);
 				baseY += entryHeight;
 			}
 			if(item instanceof SubMenuItem) {
-				graphics.drawString(font, ">", left + width - 7, Align.CENTER.alignStart(top, height, font.lineHeight)+1, -1);
+				graphics.text(font, ">", getContentX() + getWidth() - 7, Align.CENTER.alignStart(getY(), getHeight(), font.lineHeight)+1, -1);
 			}
 		}
 		
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 			if(item instanceof MenuItem menu && menu.action != null) {
 				menu.action.run();
 				if(menu.closeScreen) MenuScreen.popAllMenus();

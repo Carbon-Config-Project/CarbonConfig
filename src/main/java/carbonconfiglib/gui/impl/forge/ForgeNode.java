@@ -2,10 +2,10 @@ package carbonconfiglib.gui.impl.forge;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
+import com.electronwill.nightconfig.core.UnmodifiableConfig.Entry;
 import com.google.common.collect.Iterables;
 
 import carbonconfiglib.gui.api.node.ConfigPath;
@@ -71,7 +71,7 @@ public class ForgeNode implements IConfigFolderNode
 	public List<IConfigNode> getChildren() {
 		if(children == null) {
 			children = new ObjectArrayList<>();
-			for(Map.Entry<String, Object> entry : specConfig.valueMap().entrySet()) {
+			for(Entry entry : specConfig.entrySet()) {
 				Object value = entry.getValue();
 				if(value instanceof UnmodifiableConfig) {
 					List<String> list = new ObjectArrayList<>(paths);

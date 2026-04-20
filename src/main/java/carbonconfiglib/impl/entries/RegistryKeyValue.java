@@ -19,7 +19,7 @@ import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.StructureList.ListBuilder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 import speiger.src.collections.objects.utils.ObjectSets;
@@ -39,13 +39,13 @@ import speiger.src.collections.objects.utils.ObjectSets;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Set<ResourceLocation>>
+public class RegistryKeyValue extends CollectionConfigEntry<Identifier, Set<Identifier>>
 {
 	NamedRegistry<?> registry;
 	Class<?> clz;
-	Predicate<ResourceLocation> filter;
+	Predicate<Identifier> filter;
 	
-	public RegistryKeyValue(String key, NamedRegistry<?> registry, Class<?> clz, Set<ResourceLocation> defaultValue, Predicate<ResourceLocation> filter, String... comment) {
+	public RegistryKeyValue(String key, NamedRegistry<?> registry, Class<?> clz, Set<Identifier> defaultValue, Predicate<Identifier> filter, String... comment) {
 		super(key, defaultValue, comment);
 		this.registry = registry;
 		this.clz = clz;
@@ -63,21 +63,21 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	}
 	
 	@Override
-	protected String serializedValue(MultilinePolicy policy, Set<ResourceLocation> value) {
+	protected String serializedValue(MultilinePolicy policy, Set<Identifier> value) {
 		String[] result = new String[value.size()];
 		int i = 0;
-		for(ResourceLocation entry : value) {
+		for(Identifier entry : value) {
 			result[i++] = entry.toString();
 		}
 		return serializeArray(policy, result);
 	}
 	
 	@Override
-	public ParseResult<Set<ResourceLocation>> parseValue(String value) {
+	public ParseResult<Set<Identifier>> parseValue(String value) {
 		String[] values = Helpers.splitArray(value, ",");
-		Set<ResourceLocation> result = new ObjectLinkedOpenHashSet<>();
+		Set<Identifier> result = new ObjectLinkedOpenHashSet<>();
 		for(int i = 0,m=values.length;i<m;i++) {
-			ResourceLocation location = ResourceLocation.tryParse(values[i]);
+			Identifier location = Identifier.tryParse(values[i]);
 			if(location == null || (filter != null && !filter.test(location))) continue;
 			result.add(location);
 		}
@@ -85,18 +85,18 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	}
 	
 	@Override
-	public ParseResult<Boolean> canSet(Set<ResourceLocation> value) {
+	public ParseResult<Boolean> canSet(Set<Identifier> value) {
 		ParseResult<Boolean> result = super.canSet(value);
 		if(result.hasError()) return result;
-		for(ResourceLocation entry : value) {
+		for(Identifier entry : value) {
 			if(!registry.containsKey(entry)) return ParseResult.partial(false, NoSuchElementException::new, "Value ["+entry+"] doesn't exist in the registry");
 			if(filter != null && !filter.test(entry)) return ParseResult.partial(false, IllegalArgumentException::new, "Value ["+entry+"] isn't allowed");
 		}
 		return ParseResult.success(true);
 	}
 	
-	private ParseResult<ResourceLocation> parseEntry(String value) {
-		ResourceLocation location = ResourceLocation.tryParse(value);
+	private ParseResult<Identifier> parseEntry(String value) {
+		Identifier location = Identifier.tryParse(value);
 		if(location == null) return ParseResult.error(value, "Id ["+value+"] isn't a valid resource location");
 		if(!registry.containsKey(location) || (filter != null && !filter.test(location))) return ParseResult.error(value, "Id ["+value+"] isn't valid");
 		return ParseResult.success(location);
@@ -104,7 +104,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	
 	@Override
 	public IStructuredData getDataType() {
-		return ListBuilder.variants(EntryDataType.STRING, ResourceLocation.class, this::parseEntry, ResourceLocation::toString).addSuggestions(ISuggestionProvider.wrapper(this::getSuggestions)).build(true);
+		return ListBuilder.variants(EntryDataType.STRING, Identifier.class, this::parseEntry, Identifier::toString).addSuggestions(ISuggestionProvider.wrapper(this::getSuggestions)).build(true);
 	}
 	
 	@Override
@@ -119,19 +119,19 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	
 	@Override
 	public void serialize(IWriteBuffer buffer) {
-		Set<ResourceLocation> value = getValue();
+		Set<Identifier> value = getValue();
 		buffer.writeVarInt(value.size());
-		for(ResourceLocation entry : value) {
+		for(Identifier entry : value) {
 			buffer.writeString(entry.toString());
 		}
 	}
 	
 	@Override
 	protected void deserializeValue(IReadBuffer buffer) {
-		Set<ResourceLocation> result = new ObjectLinkedOpenHashSet<>();
+		Set<Identifier> result = new ObjectLinkedOpenHashSet<>();
 		int size = buffer.readVarInt();
 		for(int i = 0;i<size;i++) {
-			ResourceLocation entry = ResourceLocation.tryParse(buffer.readString());
+			Identifier entry = Identifier.tryParse(buffer.readString());
 			if(entry != null) {
 				result.add(entry);
 			}
@@ -139,7 +139,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 	}
 	
 	@Override
-	protected Set<ResourceLocation> create(ResourceLocation value) {
+	protected Set<Identifier> create(Identifier value) {
 		return ObjectSets.singleton(value);
 	}
 	
@@ -152,7 +152,7 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		
 		@Override
 		public void provideSuggestions(Consumer<Suggestion> output, Predicate<Suggestion> filter) {
-			for(ResourceLocation entry : value.registry.getKeys()) {
+			for(Identifier entry : value.registry.getKeys()) {
 				Suggestion suggestion = Suggestion.namedTypeValue(value.registry.getName(entry), entry.toString(), value.clz);
 				if(filter.test(suggestion)) output.accept(suggestion);
 			}
@@ -163,9 +163,9 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 		Class<E> clz;
 		String key;
 		Set<E> unparsedValues = new ObjectLinkedOpenHashSet<>();
-		Set<ResourceLocation> values = new ObjectLinkedOpenHashSet<>();
-		Function<ResourceLocation, String> namingFunction;
-		Predicate<ResourceLocation> filter;
+		Set<Identifier> values = new ObjectLinkedOpenHashSet<>();
+		Function<Identifier, String> namingFunction;
+		Predicate<Identifier> filter;
 		String[] comments;
 		
 		private Builder(String key, Class<E> clz) {
@@ -184,17 +184,17 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 			return this;
 		}
 		
-		public Builder<E> addDefault(ResourceLocation... elements) {
+		public Builder<E> addDefault(Identifier... elements) {
 			values.addAll(ObjectArrayList.wrap(elements));
 			return this;
 		}
 		
-		public Builder<E> addDefaults(Collection<ResourceLocation> elements) {
+		public Builder<E> addDefaults(Collection<Identifier> elements) {
 			values.addAll(elements);
 			return this;
 		}
 		
-		public Builder<E> withFilter(Predicate<ResourceLocation> filter) {
+		public Builder<E> withFilter(Predicate<Identifier> filter) {
 			this.filter = filter;
 			return this;
 		}
@@ -204,9 +204,9 @@ public class RegistryKeyValue extends CollectionConfigEntry<ResourceLocation, Se
 			return this;
 		}
 		
-		private void parseValues(Function<E, ResourceLocation> keyGetter) {
+		private void parseValues(Function<E, Identifier> keyGetter) {
 			for(E entry : unparsedValues) {
-				ResourceLocation location = keyGetter.apply(entry);
+				Identifier location = keyGetter.apply(entry);
 				if(location != null) values.add(location);
 			}
 			unparsedValues.clear();

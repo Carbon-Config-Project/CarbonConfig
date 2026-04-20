@@ -57,13 +57,13 @@ public class ConfigLeaf implements IConfigNode
 		if(value == null) {
 			switch(type) {
 				case COMPOUND:
-					value = new CarbonCompound(entry.getKey(), path, mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonCompound(entry.getKey(), path, mode, data.asCompound(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(_ -> true), this::save);
 					break;
 				case LIST:
-					value = new CarbonArray(entry.getKey(), path, mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(T -> true), this::save);
+					value = new CarbonArray(entry.getKey(), path, mode, data.asList(), getName(), getTooltip(), entry.serialize(), entry.serializeDefault(), entry::canSetValue, () -> entry.getSuggestions(_ -> true), this::save);
 					break;
 				case SIMPLE:
-					value = new CarbonValue(entry.getKey(), mode, getName(), getTooltip(), IEntrySettings.copyMerge(entry.getSettings(), SettingsLoader.INSTANCE.getOverride(path)), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(T -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
+					value = new CarbonValue(entry.getKey(), mode, getName(), getTooltip(), IEntrySettings.copyMerge(entry.getSettings(), SettingsLoader.INSTANCE.getOverride(path)), entry.getDataType(), entry.areSuggestionsForced(), () -> entry.getSuggestions(_ -> true), entry.serialize(), entry.serializeDefault(), entry::canSetValue, this::save);
 					break;
 			}
 		}

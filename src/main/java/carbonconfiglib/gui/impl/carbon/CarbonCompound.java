@@ -103,9 +103,9 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	
 	protected IValueActions addEntry(String value, String defaultValue, IStructuredData type, String key, String translationKey) {
 		switch(type.getDataType()) {
-			case COMPOUND: return new CarbonCompound(key, path.append(key), mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).setAutosave(true);
-			case LIST: return new CarbonArray(key, path.append(key), mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, V) -> save(key, T)).setAutosave(true);
-			case SIMPLE: return new CarbonValue(key, mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), IEntrySettings.copyMerge(data.getEntrySetting(key), SettingsLoader.INSTANCE.getOverride(path.append(key))), type, data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, V) -> save(key, T)).setAutosave(true);
+			case COMPOUND: return new CarbonCompound(key, path.append(key), mode, type.asCompound(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, _) -> save(key, T)).setAutosave(true);
+			case LIST: return new CarbonArray(key, path.append(key), mode, type.asList(), IConfigNode.createLabel(key, translationKey), createTooltip(key), value, defaultValue, T -> isValid(key, T), () -> data.getSuggestions(key, this::isSuggestionValid), (T, _) -> save(key, T)).setAutosave(true);
+			case SIMPLE: return new CarbonValue(key, mode, IConfigNode.createLabel(key, translationKey), createTooltip(key), IEntrySettings.copyMerge(data.getEntrySetting(key), SettingsLoader.INSTANCE.getOverride(path.append(key))), type, data.isForcedSuggestion(key), () -> data.getSuggestions(key, this::isSuggestionValid), value, defaultValue, T -> isValid(key, T), (T, _) -> save(key, T)).setAutosave(true);
 			default: return null;
 		}
 	}

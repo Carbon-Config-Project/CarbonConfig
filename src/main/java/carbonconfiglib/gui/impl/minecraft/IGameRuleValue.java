@@ -1,11 +1,15 @@
 package carbonconfiglib.gui.impl.minecraft;
 
+import com.mojang.serialization.Codec;
+
 import carbonconfiglib.gui.api.types.DataType;
 import carbonconfiglib.utils.Helpers;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.world.level.GameRules.BooleanValue;
-import net.minecraft.world.level.GameRules.IntegerValue;
-import net.minecraft.world.level.GameRules.Key;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRules;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -24,6 +28,7 @@ import net.minecraft.world.level.GameRules.Key;
  */
 public interface IGameRuleValue
 {
+	public static final Codec<GameRules> RULES = GameRules.codec(FeatureFlags.REGISTRY.allFlags());
 	public void set(String value);
 	public ParseResult<Boolean> isValid(String value);
 	public String get();
@@ -31,31 +36,43 @@ public interface IGameRuleValue
 	public String getDescriptionId();
 	public DataType getType();
 	
-	public static IGameRuleValue bool(Key<BooleanValue> key, BooleanValue value) {
-		return new BooleanEntry(key, value);
+	public static IGameRuleValue bool(GameRule<Boolean> key, GameRules rules) {
+		return new BooleanEntry(key, rules);
 	}
 	
-	public static IGameRuleValue ints(Key<IntegerValue> key, IntegerValue value) {
-		return new IntegerEntry(key, value);
+	public static IGameRuleValue ints(GameRule<Integer> key, GameRules rules) {
+		return new IntegerEntry(key, rules);
+	}
+	
+	public static GameRules copy(GameRules original) {
+		return original.copy(FeatureFlags.REGISTRY.allFlags());
+	}
+	
+	public static CompoundTag write(GameRules rules) {
+		return RULES.encodeStart(NbtOps.INSTANCE, rules).getOrThrow().asCompound().get();
+	}
+	
+	public static GameRules read(CompoundTag tag) {
+		return RULES.decode(NbtOps.INSTANCE, tag).getOrThrow().getFirst();
 	}
 	
 	public static class BooleanEntry implements IGameRuleValue {
-		Key<BooleanValue> key;
-		BooleanValue value;
+		GameRule<Boolean> key;
+		GameRules rules;
 		
-		private BooleanEntry(Key<BooleanValue> key, BooleanValue value) {
+		private BooleanEntry(GameRule<Boolean> key, GameRules rules) {
 			this.key = key;
-			this.value = value;
+			this.rules = rules;
 		}
 		
 		@Override
-		public void set(String value) { this.value.set(Boolean.valueOf(value), null); }
+		public void set(String value) { this.rules.set(key, Boolean.valueOf(value), null); }
 		@Override
 		public ParseResult<Boolean> isValid(String value) { return ParseResult.success(true); }
 		@Override
-		public String get() { return String.valueOf(value.get()); }
+		public String get() { return String.valueOf(rules.get(key)); }
 		@Override
-		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getBoolean(key)); }
+		public String getDefault() { return String.valueOf(key.defaultValue()); }
 		@Override
 		public String getDescriptionId() { return key.getDescriptionId(); }
 		@Override
@@ -63,19 +80,19 @@ public interface IGameRuleValue
 	}
 	
 	public static class IntegerEntry implements IGameRuleValue {
-		Key<IntegerValue> key;
-		IntegerValue value;
+		GameRule<Integer> key;
+		GameRules rules;
 		
-		private IntegerEntry(Key<IntegerValue> key, IntegerValue value) {
+		private IntegerEntry(GameRule<Integer> key, GameRules rules) {
 			this.key = key;
-			this.value = value;
+			this.rules = rules;
 		}
 		
 		@Override
 		public void set(String value) {
 			ParseResult<Integer> result = Helpers.parseInt(value);
 			if(result.isValid()) {
-				this.value.set(result.getValue(), null);
+				rules.set(key, result.getValue(), null);
 			}
 		}
 		
@@ -86,9 +103,9 @@ public interface IGameRuleValue
 		}
 		
 		@Override
-		public String get() { return String.valueOf(value.get()); }
+		public String get() { return String.valueOf(rules.getAsString(key)); }
 		@Override
-		public String getDefault() { return String.valueOf(MinecraftConfig.DEFAULTS.getInt(key)); }
+		public String getDefault() { return String.valueOf(key.defaultValue()); }
 		@Override
 		public String getDescriptionId() { return key.getDescriptionId(); }
 		@Override

@@ -1,16 +1,14 @@
 package carbonconfiglib.networking.minecraft;
 
-import com.mojang.serialization.Dynamic;
-
 import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.gui.impl.minecraft.IGameRuleValue;
 import carbonconfiglib.networking.ICarbonPacket;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
@@ -39,11 +37,11 @@ public class SaveGameRulesPacket implements ICarbonPacket
 	}
 	
 	public SaveGameRulesPacket(FriendlyByteBuf buffer) {
-		rules = new GameRules(new Dynamic<>(NbtOps.INSTANCE, buffer.readNbt()));
+		rules = IGameRuleValue.read(buffer.readNbt());
 	}
 	
 	public void write(FriendlyByteBuf buffer) {
-		buffer.writeNbt(rules.createTag());
+		buffer.writeNbt(IGameRuleValue.write(rules));
 	}
 	
 	@Override
@@ -57,6 +55,6 @@ public class SaveGameRulesPacket implements ICarbonPacket
 		}
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 		if(server == null) return;
-		server.getGameRules().assignFrom(rules, server);
+		server.getGameRules().setAll(rules, server);
 	}
 }

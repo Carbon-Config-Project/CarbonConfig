@@ -8,6 +8,9 @@ import java.util.function.Predicate;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 
@@ -61,22 +64,19 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 	}
 	
 	@Override
-	public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
-		return isActive() && super.keyPressed(pKeyCode, pScanCode, pModifiers);
+	public boolean keyPressed(KeyEvent event) {
+		return isActive() && super.keyPressed(event);
 	}
-
+	
 	@Override
-	public boolean charTyped(char pCodePoint, int pModifiers) {
-		return isActive() && super.charTyped(pCodePoint, pModifiers);
+	public boolean charTyped(CharacterEvent event) {
+		return isActive() && super.charTyped(event);
 	}
-
-	@Override
-	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-		return isActive() && super.mouseClicked(pMouseX, pMouseY, pButton);
+	
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		return isActive() && super.mouseClicked(event, doubleClick);
 	}
-
-
-
+	
 	public static class TextState {
 		Predicate<String> filter = Objects::nonNull;
 		Function<TextState, Component> tooltip;
@@ -123,7 +123,7 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		}
 		
 		public TextState setTooltip(Component tooltip) {
-			this.tooltip = T -> tooltip;
+			this.tooltip = _ -> tooltip;
 			return this;
 		}
 		

@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.IModConfig.IConfigTarget;
@@ -20,7 +19,7 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
@@ -71,18 +70,18 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 		modlogo(2, 2, minY - 4, minY - 4);
 		listArea(minX, minY, maxX, maxY, listState);
 		text(-(searchWidth >> 1), minY - 20, searchWidth, 16, Align.CENTER, Align.START, searchState);
-		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
+		button(-80, -35, 160, 20, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), _ -> onClose());
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(0, width, 0, height, 0F, holder.getTexture());
-		GuiUtils.renderListOverlay(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, holder.getTexture());
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		if(!holder.shouldDisableInLevel() || minecraft.level == null) GuiUtils.renderBackground(graphics, 0, width, 0, height, 0F, holder.getTexture());
+		GuiUtils.renderListOverlay(graphics, 0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height, holder.getTexture());
 	}
 	
 	@Override
-	public void drawForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		GuiUtils.renderListShadow(0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
+	public void drawForeground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		GuiUtils.renderListShadow(graphics, 0, width, (int)(height * 0.15F), (int)(height * 0.8F), width, height);
 		GuiUtils.drawScrollingShadowText(graphics, font, header, 0, 0, width, (int)(height * 0.15F)-20, Align.CENTER, -1, 0);
 	}
 	
@@ -125,7 +124,7 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 				int index = folder.getNameCount();
 				path = Component.literal(folder.subpath(index-3, index).toString()).withStyle(ChatFormatting.GRAY);
 			}
-			button = addChild(new CarbonButton(0, 0, 52, 20, Component.translatable(Files.exists(target.getConfigFile()) ? "gui.carbonconfig.pick" : "gui.carbonconfig.create"), T -> onPick()));
+			button = addChild(new CarbonButton(0, 0, 52, 20, Component.translatable(Files.exists(target.getConfigFile()) ? "gui.carbonconfig.pick" : "gui.carbonconfig.create"), _ -> onPick()));
 		}
 		
 		public void init() {
@@ -141,16 +140,14 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 		}
 
 		@Override
-		public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-			button.setX(left+width-62);
-			button.setY(top + 2);
-			button.render(graphics, mouseX, mouseY, partialTicks);
-			GuiUtils.drawScrollingText(graphics, font, title, left+29, top+2, 150, 10, Align.START, -1, 0);
-			GuiUtils.drawScrollingText(graphics, font, path, left+29, top+12, 150, 10, Align.START, -1, 0);
+		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean selected, float partialTicks) {
+			button.setX(getContentRight()-62);
+			button.setY(getContentY() + 2);
+			button.extractRenderState(graphics, mouseX, mouseY, partialTicks);
+			GuiUtils.drawScrollingText(graphics, font, title, getContentX()+29, getContentY()+2, 150, 10, Align.START, -1, 0);
+			GuiUtils.drawScrollingText(graphics, font, path, getContentX()+29, getContentY()+12, 150, 10, Align.START, -1, 0);
 			if(texture != null) {
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				RenderSystem.setShaderTexture(0, texture.getId());
-				GuiUtils.drawTextureRegion(graphics, left, top, 0F, 0F, 24F, 24F, 64F, 64F, 64F, 64F);
+				graphics.blit(texture.getTextureView(), texture.getSampler(), 0, 0, 24, 24, 0F, 1F, 0F, 1F);
 			}
 		}
 		
@@ -173,7 +170,7 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 			try(InputStream stream = Files.newInputStream(iconFile)) {
 				NativeImage image = NativeImage.read(stream);
 				if(image == null || image.getWidth() != 64 || image.getHeight() != 64) return;
-				texture = new DynamicTexture(image);
+				texture = new DynamicTexture(() -> "Carbon Skin", image);
 				texture.upload();
 			}
 			catch(Exception e) { e.printStackTrace(); }

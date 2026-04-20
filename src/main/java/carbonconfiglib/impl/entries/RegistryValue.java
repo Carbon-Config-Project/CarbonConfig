@@ -18,7 +18,7 @@ import carbonconfiglib.utils.structure.IStructuredData;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.StructureList.ListBuilder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.sets.ObjectLinkedOpenHashSet;
 import speiger.src.collections.objects.utils.ObjectSets;
@@ -76,7 +76,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 		String[] values = Helpers.splitArray(value, ",");
 		Set<T> result = new ObjectLinkedOpenHashSet<>();
 		for(int i = 0,m=values.length;i<m;i++) {
-			ResourceLocation location = ResourceLocation.tryParse(values[i]);
+			Identifier location = Identifier.tryParse(values[i]);
 			if(location == null) continue;
 			T entry = registry.getValue(location);
 			if(entry == null || (filter != null && !filter.test(entry))) continue;
@@ -97,7 +97,7 @@ public class RegistryValue<T> extends CollectionConfigEntry<T, Set<T>>
 	}
 	
 	private ParseResult<T> parseEntry(String value) {
-		ResourceLocation location = ResourceLocation.tryParse(value);
+		Identifier location = Identifier.tryParse(value);
 		if(location == null) return ParseResult.error(value, "Id ["+value+"] isn't a valid resource location");
 		T entry = registry.getValue(location);
 		if(entry == null || (filter != null && !filter.test(entry))) return ParseResult.error(value, "Id ["+value+"] isn't valid");

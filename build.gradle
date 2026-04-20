@@ -2,19 +2,18 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.1.22'
     id 'net.darkhax.curseforgegradle' version '1.1.15'
     id 'com.modrinth.minotaur' version '2.+'
 }
 version = MC_VERSION + '-' + MOD_VERSION
 group = 'carbonconfiglib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'CarbonConfig-Neoforge'
+base.archivesName = 'CarbonConfig-Neoforge'
 jarJar.enable()
 
 
 
-// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 sourceSets {
     main {
@@ -34,16 +33,17 @@ runs {
     	}
     }
     client {}
-    server {
-        programArgument '--nogui'
-    }
+    server {}
     gameTestServer {}
-    data {
-        programArguments.addAll '--mod', "carbonconfig", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-    }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+minecraft {
+    accessTransformers {
+        file 'src/main/resources/META-INF/accesstransformer.cfg'
+    }
+}
 
 repositories {
     mavenLocal()
@@ -55,11 +55,10 @@ repositories {
    	}
 }
 
-
 dependencies {
-    implementation "net.neoforged:neoforge:21.0.167"
+    implementation "net.neoforged:neoforge:26.1.2.10-beta"
 	implementation ':Primitive Collections-0.8.9'
-	implementation "curse.maven:jei-238222:6829086"
+	implementation "curse.maven:jei-238222:7920926"
 	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")
 	}
@@ -115,11 +114,11 @@ publishMods.dependsOn('curseforge')
 modrinth {
 	token = System.getenv("Modrinth_API_Token");
 	projectId = 'carbon-config'
-	versionName = archivesBaseName.replace(" ", "")+"-"+version
+	versionName = base.archivesName.get().replace(" ", "")+"-"+version
 	versionNumber = MOD_VERSION
 	versionType = RELEASE_TYPE
 	uploadFile = jar
-	gameVersions = [MC_VERSION, '1.21.1']
+	gameVersions = [MC_VERSION]
 	loaders = ['neoforge']
 	
     def logs = new File(projectDir, "/changelogs/"+MOD_VERSION.replace(".", "")+".md");
@@ -134,12 +133,12 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
 		
 	def mainFile = upload(898104, jar)
     mainFile.releaseType = RELEASE_TYPE
-    mainFile.displayName = archivesBaseName.replace(" ", "")+"-"+version
+    mainFile.displayName = base.archivesName.get().replace(" ", "")+"-"+version
     
     def changelog = new File(projectDir, "/changelogs/"+MOD_VERSION.replace(".", "")+".md");
     mainFile.changelog = changelog.exists() ? changelog.getText('UTF-8') : "";
     mainFile.changelogType = 'markdown'
     mainFile.addGameVersion(MC_VERSION, '1.21.1', 'Server', 'Client')
-    mainFile.addJavaVersion('Java 21')
+    mainFile.addJavaVersion('Java 25')
 	mainFile.addModLoader('NeoForge')
 }

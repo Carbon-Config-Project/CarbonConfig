@@ -10,9 +10,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.Icon;
@@ -22,7 +19,10 @@ import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListMultiState;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.ClientHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -56,44 +56,43 @@ public class DropDownMenu<T> extends CarbonButton {
 	public DropDownState<T> getState() {
 		return state;
 	}
-	
+		
 	@Override
-	public void onPress() {
+	public void onPress(InputWithModifiers input) {
 		BaseCarbonScreen.pushExternalScreen(new DropDownScreen<>(this));
 	}
 	
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if(button == 2 && clicked(mouseX, mouseY)) {
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if(event.input() == 2 && this.isMouseOver(event.x(), event.y())) {
 			state.reset();
 			return true;
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
+	}
+	
+	public boolean shouldTakeFocusAfterInteraction() {
+		return false;
 	}
 	
 	@Override
 	@SuppressWarnings("rawtypes")
-	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		if(state.isSimpleButton()) {
 			Icon icon = state.getIcon();
 			if(icon != null) {
-				graphics.blitSprite(SPRITES.get(active, isHoveredOrFocused()), getX(), getY(), width, height);
-				RenderSystem.enableDepthTest();
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-				RenderSystem.enableBlend();
-				RenderSystem.defaultBlendFunc();
-				RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		    	GuiUtils.drawTextureRegion(graphics, getX()+2, getY()+2, width-4, height-4, state.getIcon(), state.iconWidth, state.iconHeight);
-		    	return;
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused()), getX(), getY(), width, height);
+				icon.drawIcon(graphics, getX()+2, getY()+2, width-4, height-4, state.iconWidth, state.iconHeight, -1);
+				return;
 			}
-			super.renderWidget(graphics, mouseX, mouseY, partialTick);
+			super.extractContents(graphics, mouseX, mouseY, partialTick);
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		boolean open = mc.screen instanceof DropDownScreen && ((DropDownScreen)mc.screen).owner == this;
+		boolean open = mc.screen instanceof DropDownScreen drop && drop.owner == this;
 		boolean up = open && ((DropDownScreen)mc.screen).isUp();
-		graphics.blitSprite(SPRITES.get(active, isHoveredOrFocused() || open), getX(), getY(), width-14, height);
-		graphics.blitSprite(SPRITES.get(active, isHoveredOrFocused() || open), getX()+width-15, getY(), 15, height);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused() || open), getX(), getY(), width-14, height);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused() || open), getX()+width-15, getY(), 15, height);
 		GuiUtils.drawScrollingShadowText(graphics, mc.font, getMessage(), getX()+2, getY(), width-18, height, Align.CENTER, getFGColor(), hash);
 		GuiUtils.drawScrollingShadowText(graphics, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), getX()+width-13, getY(), 11, height, Align.CENTER, getFGColor(), hash);
 	}
@@ -116,7 +115,7 @@ public class DropDownMenu<T> extends CarbonButton {
 			selections = (ownerState.isMultiSelection() ? new ListMultiState<DropDownEntry<T>>() : new ListState<DropDownEntry<T>>());
 			selections.setSelectable(true).setParentRowWidth();
 			Function<T, Component> text = ownerState.displayFunction;
-			Function<T, CarbonList.ListEntry<?>> render = ownerState.renderFunction != null ? ownerState.renderFunction : T -> null;
+			Function<T, CarbonList.ListEntry<?>> render = ownerState.renderFunction != null ? ownerState.renderFunction : _ -> null;
 			
 			if(ownerState.allowEmpty && !ownerState.isMultiSelection()) {
 				DropDownEntry<T> value = new DropDownEntry<T>(null, ownerState.empty, null);
@@ -167,11 +166,11 @@ public class DropDownMenu<T> extends CarbonButton {
 		}
 		
 		@Override
-		public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 			if(reOpen) {
 				reOpen = false;
 				Minecraft.getInstance().popGuiLayer();
-				owner.onPress();
+				owner.onPress(null);
 			}
 			int x = owner.getX() + ownerState.xOffset;
 			int y = owner.getY() + owner.getHeight();
@@ -183,14 +182,14 @@ public class DropDownMenu<T> extends CarbonButton {
 			renderSelection(graphics, x, y, width, height, 0xFFA0A0A0, 0xFF000000);
 		}
 		
-		public void renderSelection(GuiGraphics graphics, int left, int top, int width, int height, int frameColor, int backgroundColor) {
+		public void renderSelection(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int frameColor, int backgroundColor) {
 			graphics.fill(left, top, left + width, top + height, frameColor);
 			graphics.fill(left + 1, top + 1, left + width - 1, top + height - 1, backgroundColor);
 		}
 		
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			if(super.mouseClicked(mouseX, mouseY, button)) return true;
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			if(super.mouseClicked(event, doubleClick)) return true;
 			ClientHooks.popGuiLayer(getMinecraft());
 			return true;
 		}
@@ -217,22 +216,25 @@ public class DropDownMenu<T> extends CarbonButton {
 		}
 		
 		@Override
-		public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean selected, float partialTicks) {
 			if(owner.getHovered() == this) {
-				owner.renderSelection(graphics, left, top, width, height, GuiUtils.brighter(getSelectionColor(false), 0.8F), getSelectionBackgroundColor());
+				owner.extractSelection(graphics, this, GuiUtils.brighter(getSelectionColor(false), 0.8F), getSelectionBackgroundColor());
 			}
 			if(renderer != null) {
 				renderer.setOwner(owner);
-				renderer.render(graphics, x, top+1, left+1, width-2, height-2, mouseX, mouseY, selected, partialTicks);
+				renderer.setX(getX()+1);
+				renderer.setY(getY()+1);
+				renderer.setWidth(getWidth()-2);
+				renderer.setHeight(getHeight()-2);
+				renderer.extractContent(graphics, mouseX, mouseY, selected, partialTicks);
 				return;
 			}
-			GuiUtils.drawScrollingShadowText(graphics, font, text, left, top, width, height, Align.CENTER, -1, Objects.hashCode(data));
+			GuiUtils.drawScrollingShadowText(graphics, font, text, getContentX(), getContentY(), getContentWidth(), getContentHeight(), Align.CENTER, -1, Objects.hashCode(data));
 		}
 		
-		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 			owner.setSelected(data == null ? null : this);
-			return true;
+			return true;			
 		}
 	}
 	

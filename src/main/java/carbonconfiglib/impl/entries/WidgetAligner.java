@@ -1,6 +1,6 @@
 package carbonconfiglib.impl.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import org.joml.Matrix3x2f;
 
 import carbonconfiglib.api.IConfigSerializer;
 import carbonconfiglib.api.buffer.IReadBuffer;
@@ -10,9 +10,7 @@ import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.utils.ParsedCollections.ParsedMap;
 import carbonconfiglib.utils.structure.IStructuredData.EntryDataType;
 import carbonconfiglib.utils.structure.StructureCompound.CompoundBuilder;
-import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public record WidgetAligner(Align screenX, Align screenY, float xOffset, float yOffset, float scale)
 {
@@ -44,15 +42,13 @@ public record WidgetAligner(Align screenX, Align screenY, float xOffset, float y
 		return screenY.alignStart(0F, screenHeight, height*scale)+yOffset*screenHeight;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void applyToPose(GuiGraphics graphics, double screenWidth, double screenHeight, double width, double height) {
+	public void applyToPose(GuiGraphicsExtractor graphics, double screenWidth, double screenHeight, double width, double height) {
 		applyToPose(graphics.pose(), screenWidth, screenHeight, width, height);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void applyToPose(PoseStack stack, double screenWidth, double screenHeight, double width, double height) {
-		stack.translate(screenX.alignStart(0F, screenWidth, width*scale)+xOffset*screenWidth, screenY.alignStart(0F, screenHeight, height*scale)+yOffset*screenHeight, 0F);
-		stack.scale(scale, scale, 1F);
+	public void applyToPose(Matrix3x2f stack, double screenWidth, double screenHeight, double width, double height) {
+		stack.translate((float)(screenX.alignStart(0F, screenWidth, width*scale)+xOffset*screenWidth), (float)(screenY.alignStart(0F, screenHeight, height*scale)+yOffset*screenHeight));
+		stack.scale(scale, scale);
 	}
 	
 	private ParsedMap serialize() {

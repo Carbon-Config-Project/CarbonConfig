@@ -254,7 +254,7 @@ public class BackupManager {
 				UUID id = UUID.randomUUID();
 				MutableObject<Predicate<FriendlyByteBuf>> result = new MutableObject<>();
 				IModConfig net = configs.get(i).loadFromNetworking(id, result::setValue);
-				add(id, net, result.getValue());
+				add(id, net, result.get());
 			}
 		}
 		
@@ -280,8 +280,8 @@ public class BackupManager {
 				}
 				if(toCheck.isEmpty()) {
 					if(CarbonConfig.BACKUP_TOASTS.get()) {
-						if(mode == Mode.CREATE) Minecraft.getInstance().getToasts().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
-						else if(mode == Mode.LOAD) Minecraft.getInstance().getToasts().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.load")));
+						if(mode == Mode.CREATE) Minecraft.getInstance().getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+						else if(mode == Mode.LOAD) Minecraft.getInstance().getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.load")));
 					}
 					IRequestReceiver.Impl.unregister(this);
 				}

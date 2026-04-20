@@ -8,7 +8,7 @@ import java.util.function.ToIntFunction;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -37,18 +37,18 @@ public class NamedRegistry<T>
 	public static final NamedRegistry<MobEffect> MOB_EFFECTS = NamedRegistry.ofRegistry(BuiltInRegistries.MOB_EFFECT, T -> T.getDisplayName().getString());
 	
 	Function<T, String> nameFunction;
-	Supplier<Iterable<ResourceLocation>> keyProvider;
-	Function<T, ResourceLocation> keyGetter;
-	Predicate<ResourceLocation> containsKey;
-	ToIntFunction<ResourceLocation> keyToId;
-	IntFunction<ResourceLocation> idToKey;
+	Supplier<Iterable<Identifier>> keyProvider;
+	Function<T, Identifier> keyGetter;
+	Predicate<Identifier> containsKey;
+	ToIntFunction<Identifier> keyToId;
+	IntFunction<Identifier> idToKey;
 	Supplier<Iterable<T>> valueProvider;
-	Function<ResourceLocation, T> valueGetter;
+	Function<Identifier, T> valueGetter;
 	Predicate<T> containsValue;
 	ToIntFunction<T> valueToId;
 	IntFunction<T> idToValue;
 	
-	public NamedRegistry(Function<T, String> nameFunction, Supplier<Iterable<ResourceLocation>> keyProvider, Function<T, ResourceLocation> keyGetter, Predicate<ResourceLocation> containsKey, ToIntFunction<ResourceLocation> keyToId, IntFunction<ResourceLocation> idToKey, Supplier<Iterable<T>> valueProvider, Function<ResourceLocation, T> valueGetter, Predicate<T> containsValue, ToIntFunction<T> valueToId, IntFunction<T> idToValue) {
+	public NamedRegistry(Function<T, String> nameFunction, Supplier<Iterable<Identifier>> keyProvider, Function<T, Identifier> keyGetter, Predicate<Identifier> containsKey, ToIntFunction<Identifier> keyToId, IntFunction<Identifier> idToKey, Supplier<Iterable<T>> valueProvider, Function<Identifier, T> valueGetter, Predicate<T> containsValue, ToIntFunction<T> valueToId, IntFunction<T> idToValue) {
 		this.nameFunction = nameFunction;
 		this.keyProvider = keyProvider;
 		this.keyGetter = keyGetter;
@@ -64,27 +64,27 @@ public class NamedRegistry<T>
 	
 	public static <T> NamedRegistry<T> ofRegistry(Registry<T> registry, Function<T, String> nameFunction) {
 		return new NamedRegistry<T>(nameFunction, 
-				registry::keySet, registry::getKey, registry::containsKey, T -> registry.getId(registry.get(T)), T -> registry.getKey(registry.byId(T)), 
-				() -> registry, registry::get, T -> registry.containsKey(registry.getKey(T)), registry::getId, registry::byId);
+				registry::keySet, registry::getKey, registry::containsKey, T -> registry.getId(registry.getValue(T)), T -> registry.getKey(registry.byId(T)), 
+				() -> registry, registry::getValue, T -> registry.containsKey(registry.getKey(T)), registry::getId, registry::byId);
 	}
 	
-	public ResourceLocation getKey(T value) {
+	public Identifier getKey(T value) {
 		return keyGetter.apply(value);
 	}
 	
-	public boolean containsKey(ResourceLocation key) {
+	public boolean containsKey(Identifier key) {
 		return containsKey.test(key);
 	}
 	
-	public int getId(ResourceLocation key) {
+	public int getId(Identifier key) {
 		return keyToId.applyAsInt(key);
 	}
 	
-	public ResourceLocation getKey(int id) {
+	public Identifier getKey(int id) {
 		return idToKey.apply(id);
 	}
 	
-	public T getValue(ResourceLocation key) {
+	public T getValue(Identifier key) {
 		return valueGetter.apply(key);
 	}
 	
@@ -100,7 +100,7 @@ public class NamedRegistry<T>
 		return idToValue.apply(id);
 	}
 	
-	public Iterable<ResourceLocation> getKeys() {
+	public Iterable<Identifier> getKeys() {
 		return keyProvider.get();
 	}
 	
@@ -112,7 +112,7 @@ public class NamedRegistry<T>
 		return nameFunction != null;
 	}
 	
-	public String getName(ResourceLocation id) {
+	public String getName(Identifier id) {
 		return nameFunction == null ? id.toString() : nameFunction.apply(getValue(id));
 	}
 	

@@ -9,7 +9,7 @@ import carbonconfiglib.gui.base.widgets.CarbonSlider.SliderState;
 import carbonconfiglib.gui.nodes.base.ValueElement;
 import carbonconfiglib.impl.entries.ColorValue.ColorWrapper;
 import carbonconfiglib.utils.ParseResult;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -47,8 +47,8 @@ public class ColorElement extends ValueElement
 	}
 	
 	@Override
-	public int getItemHeight() {
-		if(isForcingText()) return super.getItemHeight();
+	public int getHeight() {
+		if(isForcingText()) return super.getHeight();
 		return (hasAlpha ? 50 : 38) + 20;
 	}
 
@@ -121,10 +121,10 @@ public class ColorElement extends ValueElement
 	}
 	
 	@Override
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		int color = generateColor();
 		graphics.fill(left, top, left+20, top+height-(hasAlpha ? 1 : 0), color);
-		GuiUtils.drawFrame(graphics, left, top, left+20, top+height-(hasAlpha ? 2 : 1), 0xFF848484, 1F);
+		GuiUtils.drawFrame(graphics, left, top, left+20, top+height-(hasAlpha ? 2 : 1), 0xFF848484, 1);
 		
 		if(isForcingText()) {
 			int realWidth = desiredWidth - 23;
@@ -134,7 +134,7 @@ public class ColorElement extends ValueElement
 			text.setY(top + 1);
 			text.setWidth(realWidth);
 			text.setHeight(height - 2);
-			text.render(graphics, mouseX, mouseY, partialTicks);
+			text.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 			return;
 		}
 		int realWidth = desiredWidth - 40;
@@ -146,27 +146,27 @@ public class ColorElement extends ValueElement
 		red.setY(top);
 		red.setWidth(realWidth);
 		red.setHeight(realHeight);
-		red.render(graphics, mouseX, mouseY, partialTicks);
+		red.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		graphics.fill(left+23, top+1, red.getX()-2, top+red.getHeight()-1, (int)(0xFF000000 | (red.get() & 0xFF) << 16));
-		GuiUtils.drawFrame(graphics, left+22, top, red.getX()-2, top+red.getHeight()-1, 0xFF848484, 1F);
+		GuiUtils.drawFrame(graphics, left+22, top, red.getX()-2, top+red.getHeight()-1, 0xFF848484, 1);
 		top += red.getHeight()+1;
 		
 		green.setX(left + xOff);
 		green.setY(top);
 		green.setWidth(realWidth);
 		green.setHeight(realHeight);
-		green.render(graphics, mouseX, mouseY, partialTicks);
+		green.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		graphics.fill(left+23, top+1, green.getX()-2, top+green.getHeight()-1, (int)(0xFF000000 | (green.get() & 0xFF) << 8));
-		GuiUtils.drawFrame(graphics, left+22, top, green.getX()-2, top+green.getHeight()-1, 0xFF848484, 1F);
+		GuiUtils.drawFrame(graphics, left+22, top, green.getX()-2, top+green.getHeight()-1, 0xFF848484, 1);
 		top += green.getHeight()+1;
 		
 		blue.setX(left + xOff);
 		blue.setY(top);
 		blue.setWidth(realWidth);
 		blue.setHeight(realHeight);
-		blue.render(graphics, mouseX, mouseY, partialTicks);
+		blue.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 		graphics.fill(left+23, top+1, blue.getX()-2, top+blue.getHeight()-1, (int)(0xFF000000 | (blue.get() & 0xFF)));
-		GuiUtils.drawFrame(graphics, left+22, top, blue.getX()-2, top+blue.getHeight()-1, 0xFF848484, 1F);
+		GuiUtils.drawFrame(graphics, left+22, top, blue.getX()-2, top+blue.getHeight()-1, 0xFF848484, 1);
 		top += blue.getHeight()+1;
 		
 		if(hasAlpha) {
@@ -174,13 +174,13 @@ public class ColorElement extends ValueElement
 			alpha.setY(top);
 			alpha.setWidth(realWidth);
 			alpha.setHeight(realHeight);
-			alpha.render(graphics, mouseX, mouseY, partialTicks);
+			alpha.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 			float value = alpha.get() / 255F;
 			int r = (int)((red.get() * value)) & 0xFF;
 			int g = (int)((green.get() * value)) & 0xFF;
 			int b = (int)((blue.get() * value)) & 0xFF;
 			graphics.fill(left+23, top+1, alpha.getX()-2, top+alpha.getHeight()-1, (int)(0xFF000000 | r << 16 | g << 8 | b));
-			GuiUtils.drawFrame(graphics, left+22, top, alpha.getX()-2, top+alpha.getHeight()-1, 0xFF848484, 1F);
+			GuiUtils.drawFrame(graphics, left+22, top, alpha.getX()-2, top+alpha.getHeight()-1, 0xFF848484, 1);
 			top += alpha.getHeight()+1;
 		}
 		
@@ -188,7 +188,7 @@ public class ColorElement extends ValueElement
 		text.setY(top+1);
 		text.setWidth(realWidth+xOff-24);
 		text.setHeight(realHeight-1);
-		text.render(graphics, mouseX, mouseY, partialTicks);
+		text.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
 	public static enum FormatType {

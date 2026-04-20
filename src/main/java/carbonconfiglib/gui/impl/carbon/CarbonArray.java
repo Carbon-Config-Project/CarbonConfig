@@ -94,9 +94,9 @@ public class CarbonArray implements IArrayNode, IValueActions
 	
 	protected IValueActions addEntry(String value, String defaultValue, int index) {
 		switch(inner.getDataType()) {
-			case COMPOUND: return new CarbonCompound(Integer.toString(index), path.append("array"), mode, inner.asCompound(), name.copy().append(index+": "), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
-			case LIST: return new CarbonArray(Integer.toString(index), path.append("array"), mode, inner.asList(), name.copy().append(index+": "), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(T -> true), this::save).setAutosave(true);
-			case SIMPLE: return new CarbonValue(null, mode, name.copy().append(index+": "), tooltip, null, inner, data.isForced(), () -> data.getSuggestions(T -> true), value, defaultValue, this::isValid, this::save).setAutosave(true);
+			case COMPOUND: return new CarbonCompound(Integer.toString(index), path.append("array"), mode, inner.asCompound(), name.copy().append(index+": "), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(_ -> true), this::save).setAutosave(true);
+			case LIST: return new CarbonArray(Integer.toString(index), path.append("array"), mode, inner.asList(), name.copy().append(index+": "), tooltip, value, defaultValue, this::isValid, () -> data.getSuggestions(_ -> true), this::save).setAutosave(true);
+			case SIMPLE: return new CarbonValue(null, mode, name.copy().append(index+": "), tooltip, null, inner, data.isForced(), () -> data.getSuggestions(_ -> true), value, defaultValue, this::isValid, this::save).setAutosave(true);
 			default: return null;
 		}
 	}

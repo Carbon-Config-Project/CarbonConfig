@@ -11,18 +11,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.joml.Matrix3x2fStack;
+
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
@@ -33,12 +24,11 @@ import carbonconfiglib.gui.base.menu.SubMenuItem;
 import carbonconfiglib.gui.base.screen.BaseCarbonScreen;
 import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.utils.Helpers;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -73,13 +63,13 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	@Override
 	protected void init() {
 		super.init();
-		button(-40, -30, 80, 16, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), T -> onClose());
-		button(-115, -48, 100, 16, Align.END, Align.END, Component.translatable("gui.carbonconfig.dependency.config"), T -> openConfigs());
-		button(-115, -30, 100, 16, Align.END, Align.END, Component.translatable("gui.carbonconfig.dependency.mods"), T -> openMods());
+		button(-40, -30, 80, 16, Align.CENTER, Align.END, Component.translatable("gui.carbonconfig.back"), _ -> onClose());
+		button(-115, -48, 100, 16, Align.END, Align.END, Component.translatable("gui.carbonconfig.dependency.config"), _ -> openConfigs());
+		button(-115, -30, 100, 16, Align.END, Align.END, Component.translatable("gui.carbonconfig.dependency.mods"), _ -> openMods());
 	}
 	
 	private void openConfigs() {
-		setScreen(Screen.hasShiftDown() ? new ModListScreen(this) : new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+		setScreen(minecraft.hasShiftDown() ? new ModListScreen(this) : new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 	}
 	
 	private void openMods() {
@@ -88,17 +78,16 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	
 	@Override
 	public void tick() {
-		if(!hasShiftDown() && !nodes.isEmpty()) return;
+		if(!minecraft.hasShiftDown() && !nodes.isEmpty()) return;
 		nodes.clear();
 		nodes.addAll(ModList.get().getMods().stream().map(IModInfo::getModId).map(ModNode::new).toList());
 		Set<String> installedMods = nodes.stream().map(ModNode::id).collect(Collectors.toSet());
 		Map<String, List<ModVersion>> dependentNodes = ModList.get().getMods().stream().flatMap(T -> T.getDependencies().stream()).filter(T -> !installedMods.contains(T.getModId())).filter(T -> T.getType() != DependencyType.INCOMPATIBLE && T.getType() != DependencyType.DISCOURAGED).collect(Collectors.groupingBy(ModVersion::getModId));
 		dependentNodes.forEach((K, V) -> nodes.add(new DependencyNode(K, V)));
-		
 		Map<String, ModNode> mapped = new Object2ObjectOpenHashMap<>();
 		nodes.forEach(T -> mapped.put(T.modId, T));
 		ModNode node = mapped.get("minecraft");
-		nodes.remove(mapped.put("forge", node));
+		nodes.remove(mapped.put("neoforge", node));
 		nodes.remove(node);
 		for(IModInfo info : ModList.get().getMods()) {
 			ModNode owner = mapped.get(info.getModId());
@@ -124,21 +113,21 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		if(pos != null && (pos.x != mouseX || pos.z != mouseY)) {
-			int diffX = pos.x - mouseX;
-			int diffY = pos.z - mouseY;
+	public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		if(pos != null && (pos.x() != mouseX || pos.z() != mouseY)) {
+			int diffX = pos.x() - mouseX;
+			int diffY = pos.z() - mouseY;
 			x -= diffX / scale;
 			y -= diffY / scale;
 			pos = new ChunkPos(mouseX, mouseY);
 		}
-		renderMenuBackground(graphics);
+		extractMenuBackground(graphics);
 		int bottomSpace = 75;
 		int legendenY = 47;
 		
 		GuiUtils.fillDropArea(graphics, 10, 10, width-20, height-20, -3750202, false);
 		GuiUtils.fillDropArea(graphics, 15, 25, width-30, height-bottomSpace-10, -7631989, true);
-		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.header"), centerX, 12, Align.CENTER, 4210752);
+		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.header"), centerX, 12, Align.CENTER, 0xFF404040);
 		graphics.fill(14, height-legendenY, 30, height-(legendenY-font.lineHeight), dependencyColors[0] | 0xFF000000);
 		graphics.fill(14, height-(legendenY-font.lineHeight-1), 30, height-(legendenY-font.lineHeight*2), dependencyColors[1] | 0xFF000000);
 		graphics.fill(14, height-(legendenY-font.lineHeight*2-1), 30, height-(legendenY-font.lineHeight*3), dependencyColors[2] | 0xFF000000);
@@ -148,71 +137,63 @@ public class ModDependencyScreen extends BaseCarbonScreen
 		GuiUtils.drawFrame(graphics, 14, height-(legendenY-font.lineHeight-1), 29, height-(legendenY-font.lineHeight*2)-1, 0xFF404040, 1);
 		GuiUtils.drawFrame(graphics, 14, height-(legendenY-font.lineHeight*2-1), 29, height-(legendenY-font.lineHeight*3)-1, 0xFF404040, 1);
 		GuiUtils.drawFrame(graphics, 14, height-(legendenY-font.lineHeight*3-1), 29, height-(legendenY-font.lineHeight*4)-1, 0xFF404040, 1);
-		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.legend"), 14, height-legendenY-font.lineHeight-3, Align.START, 4210752);
+		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.legend"), 14, height-legendenY-font.lineHeight-3, Align.START, 0xFF404040);
 		
-		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.required_need"), 31, height-legendenY, Align.START, 4210752);
-		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.optional_need"), 31, height-(legendenY-font.lineHeight-1), Align.START, 4210752);
-		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.required_have"), 31, height-(legendenY-font.lineHeight*2-1), Align.START, 4210752);
-		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.optional_have"), 31, height-(legendenY-font.lineHeight*3-1), Align.START, 4210752);
-
-		GuiUtils.pushScissors(15, 24, width-30, height-bottomSpace-9);
-		GuiUtils.renderBackground(15, width-15, 15, height-15, -x*0.2F*(scale*2), -y*0.2F*scale*2, BackgroundTexture.DEFAULT);
-		PoseStack stack = graphics.pose();
-		stack.pushPose();
-		stack.translate(centerX, centerY, 0F);
-		stack.scale(scale, scale, 1F);
+		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.required_need"), 31, height-legendenY, Align.START, 0xFF404040);
+		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.optional_need"), 31, height-(legendenY-font.lineHeight-1), Align.START, 0xFF404040);
+		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.required_have"), 31, height-(legendenY-font.lineHeight*2-1), Align.START, 0xFF404040);
+		drawUnalignedText(graphics, Component.translatable("gui.carbonconfig.dependency.optional_have"), 31, height-(legendenY-font.lineHeight*3-1), Align.START, 0xFF404040);
+		graphics.enableScissor(15, 24, width-15, height-bottomSpace+15);
+		GuiUtils.renderBackground(graphics, 15, width-15, 15, height-15, -x*0.2F*(scale*2), -y*0.2F*scale*2, BackgroundTexture.DEFAULT);
+		Matrix3x2fStack stack = graphics.pose();
+		stack.pushMatrix();
+		stack.translate(centerX, centerY);
+		stack.scale(scale, scale);
 		int radius = 10;
 		float textScale = Math.min(2.5F, 1F / scale);
 		float quadScale = Mth.clamp(textScale, 1F, 2F)*0.75F;
 		for(ModNode node : nodes) {
 			int x = (int)(node.x + this.x);
 			int y = (int)(node.y + this.y);
-			stack.pushPose();
-			stack.translate(x, y, 0F);
-			stack.scale(quadScale, quadScale, 1F);
+			stack.pushMatrix();
+			stack.translate(x, y);
+			stack.scale(quadScale, quadScale);
 			GuiUtils.drawCircle(graphics, 0, 0, radius, node.modId.hashCode() | 0xFF000000, 0xFF000000, 128, 1F);
-			stack.popPose();
+			stack.popMatrix();
 		}
 		if(focused != null) {
-			Tesselator tes = Tesselator.getInstance();
-			BufferBuilder builder = tes.begin(Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-			drawNode(graphics, focused, false, dependencyColors[2], dependencyColors[3], builder);
-			drawNode(graphics, focused, true, dependencyColors[0], dependencyColors[1], builder);
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			GlStateManager._enableBlend();
-			RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
-			BufferUploader.drawWithShader(builder.buildOrThrow());
-			GlStateManager._disableBlend();
+			drawNode(graphics, focused, false, dependencyColors[2], dependencyColors[3]);
+			drawNode(graphics, focused, true, dependencyColors[0], dependencyColors[1]);
 		}
 		for(ModNode node : nodes) {
 			int x = (int)(node.x + this.x);
 			int y = (int)(node.y + this.y);
-			stack.pushPose();
-			stack.translate(x, y, 0F);
-			stack.translate(0F, -radius*textScale-font.lineHeight, 0F);
-			stack.scale(textScale, textScale, 1F);
+			stack.pushMatrix();
+			stack.translate(x, y);
+			stack.translate(0F, -radius*textScale-font.lineHeight);
+			stack.scale(textScale, textScale);
 			boolean notLoaded = node instanceof DependencyNode;
 			Component name = Component.literal(ModList.get().getModContainerById(node.id()).map(ModContainer::getModInfo).map(IModInfo::getDisplayName).orElse(Helpers.firstLetterUppercase(node.id()))); 
 			drawUnalignedText(graphics, name, 0F, 0F, Align.CENTER, notLoaded ? 0xFFFF0000 : -1);
-			stack.popPose();
+			stack.popMatrix();
 		}
-		stack.popPose();
-		GuiUtils.popScissors();
+		stack.popMatrix();
+		graphics.disableScissor();
 	}
 	
-	private void drawNode(GuiGraphics graphics, ModNode source, boolean dep, int requiredColor, int optionalColor, VertexConsumer builder) {
+	private void drawNode(GuiGraphicsExtractor graphics, ModNode source, boolean dep, int requiredColor, int optionalColor) {
 		float textScale = Math.min(2.5F, 1F / scale);
 		float quadScale = Mth.clamp(textScale, 1F, 2F)*0.75F;
 		float radius = (dep ? 2.5F : -2.5F) * quadScale;
 		for(Map.Entry<ModNode, Boolean> entry : (dep ? source.dependencies : source.dependants).entrySet()) {
 			ModNode child = entry.getKey();
-			GuiUtils.drawLine(graphics.pose(), (float)source.x+this.x+radius, (float)source.y+this.y+radius, (float)child.x+this.x+radius, (float)child.y+this.y+radius, 2F, builder, entry.getValue() ? requiredColor : optionalColor);
-			if(entry.getValue()) drawNode(graphics, child, dep, requiredColor, optionalColor, builder);
+			GuiUtils.drawLine(graphics, (float)source.x+this.x+radius, (float)source.y+this.y+radius, (float)child.x+this.x+radius, (float)child.y+this.y+radius, 2F, entry.getValue() ? requiredColor : optionalColor);
+			if(entry.getValue()) drawNode(graphics, child, dep, requiredColor, optionalColor);
 		}
 	}
 	
 	@Override
-	public void collectTooltips(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks, Consumer<Component> tooltips) {
+	public void collectTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks, Consumer<Component> tooltips) {
 		double radius = 10 * scale;
 		float xOff = x * scale;
 		float yOff = y * scale;
@@ -229,8 +210,8 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	}
 	
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if(super.mouseClicked(mouseX, mouseY, button)) return true;
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if(super.mouseClicked(event, doubleClick)) return true;
 		double radius = 10 * scale;
 		float xOff = x * scale;
 		float yOff = y * scale;
@@ -238,16 +219,16 @@ public class ModDependencyScreen extends BaseCarbonScreen
 		for(ModNode node : nodes) {
 			int x = (int)(node.x * scale) + centerX;
 			int y = (int)(node.y * scale) + centerY;
-			if(mouseX >= x-radius+xOff && mouseX <= x+radius+xOff && mouseY >= y-radius+yOff && mouseY <= y+radius+yOff) {
+			if(event.x() >= x-radius+xOff && event.x() <= x+radius+xOff && event.y() >= y-radius+yOff && event.y() <= y+radius+yOff) {
 				found = node;
 			}
 		}
 		if(found != null) {
-			if(button == 0) {
+			if(event.input() == 0) {
 				focused = found;
 				return true;
 			}
-			else if(button == 1) {
+			else if(event.input() == 1) {
 				if(found instanceof DependencyNode) {
 					DependencyNode dep = (DependencyNode)found;
 					SubMenuItem item = new SubMenuItem("Root");
@@ -260,7 +241,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 						}
 						catch(Exception e) { e.printStackTrace(); }
 					});
-					pushScreen(new MenuScreen(item, (int)mouseX+5, (int)mouseY-5));
+					pushScreen(new MenuScreen(item, (int)event.x()+5, (int)event.y()-5));
 					return true;
 				}
 				SubMenuItem item = new SubMenuItem("Root");
@@ -299,32 +280,32 @@ public class ModDependencyScreen extends BaseCarbonScreen
 						});
 					}
 					
-					pushScreen(new MenuScreen(item, (int)mouseX+5, (int)mouseY-5));
+					pushScreen(new MenuScreen(item, (int)event.x()+5, (int)event.y()-5));
 				}
 				return true;
 			}
 		}
-		if(button == 0) {
-			pos = new ChunkPos((int)mouseX, (int)mouseY);
+		if(event.input() == 0) {
+			pos = new ChunkPos((int)event.x(), (int)event.y());
 			return true;
 		}
 		focused = null;
 		return false;
 	}
 	
+	
 	@Override
-	public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
+	public boolean mouseReleased(MouseButtonEvent event) {
 		if(pos != null) {
 			pos = null;
 			return true;
 		}
-		if(super.mouseReleased(pMouseX, pMouseY, pButton)) return true;
-		return false;
+		return super.mouseReleased(event);
 	}
 	
 	@Override
 	public boolean mouseScrolled(double pMouseX, double pMouseY, double scrollX, double scrollY) {
-		scale = Mth.clamp(scale - (float)scrollY * 0.01F * (Screen.hasShiftDown() ? 10 : 1F), 0.025F, 2F);
+		scale = Mth.clamp(scale - (float)scrollY * 0.01F * (minecraft.hasShiftDown() ? 10 : 1F), 0.025F, 2F);
 		return true;
 	}
 	

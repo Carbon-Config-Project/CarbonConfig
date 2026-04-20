@@ -13,7 +13,7 @@ import carbonconfiglib.gui.base.widgets.CarbonButton;
 import carbonconfiglib.gui.nodes.base.BaseElement;
 import carbonconfiglib.gui.nodes.base.IFolderNode;
 import carbonconfiglib.impl.ReloadMode;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -65,7 +65,7 @@ public class FolderElement extends BaseElement implements IFolderNode
 	@Override
 	protected ReloadMode getReloadState() { return null; }
 	
-	public void renderLeftPart(GuiGraphics graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(graphics, font, node.getName(), left, top, width-22, height, Align.START, -1, sinceFullyVisible);
 		boolean active = context.isElementActive(this);
 		button.setMessage(Component.literal(active ? "◀" : "▶"));
@@ -75,10 +75,10 @@ public class FolderElement extends BaseElement implements IFolderNode
 		button.setWidth(20);
 		button.setHeight(height);
 		button.active = node.getChildren().size() > 0;
-		button.render(graphics, mouseX, mouseY, partialTicks);
+		button.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 	}
 	
-	public void renderRightPart(GuiGraphics graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractRightPart(GuiGraphicsExtractor graphics, int left, int top, int desiredWidth, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
 		GuiUtils.drawScrollingShadowText(graphics, font, Component.translatable("gui.carbonconfig.elements", node.getChildren().size()), left, top, desiredWidth-2, height, Align.END, -1, sinceFullyVisible);
 	}
 	

@@ -3,18 +3,17 @@ package carbonconfiglib.gui.base.widgets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import carbonconfiglib.gui.base.helpers.Icon.IconPair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 
@@ -34,10 +33,10 @@ import net.minecraft.util.Mth;
  * limitations under the License.
  */
 public class CarbonCheckBox extends AbstractButton implements ITooltipProvider {
-	private static final ResourceLocation SELECTED_HIGHLIGHTED = ResourceLocation.tryParse("widget/checkbox_selected_highlighted");
-	private static final ResourceLocation SELECTED = ResourceLocation.tryParse("widget/checkbox_selected");
-	private static final ResourceLocation HIGLIGHTED = ResourceLocation.tryParse("widget/checkbox_highlighted");
-	private static final ResourceLocation NORMAL = ResourceLocation.tryParse("widget/checkbox");
+	private static final Identifier SELECTED_HIGHLIGHTED = Identifier.tryParse("widget/checkbox_selected_highlighted");
+	private static final Identifier SELECTED = Identifier.tryParse("widget/checkbox_selected");
+	private static final Identifier HIGLIGHTED = Identifier.tryParse("widget/checkbox_highlighted");
+	private static final Identifier NORMAL = Identifier.tryParse("widget/checkbox");
 	
 	
 	CheckBoxState state;
@@ -48,8 +47,8 @@ public class CarbonCheckBox extends AbstractButton implements ITooltipProvider {
 	}
 	
 	@Override
-	public void onPress() {
-		state.updateValue(!state.getValue());
+	public void onPress(InputWithModifiers input) {
+		state.updateValue(!state.getValue());		
 	}
 	
 	public CheckBoxState getState() {
@@ -61,7 +60,7 @@ public class CarbonCheckBox extends AbstractButton implements ITooltipProvider {
 	}
 
 	public CarbonCheckBox withTooltip(Component tooltip) {
-		this.state.tooltip = T -> tooltip;
+		this.state.tooltip = _ -> tooltip;
 		return this;
 	}
 
@@ -82,26 +81,20 @@ public class CarbonCheckBox extends AbstractButton implements ITooltipProvider {
 			tooltips.accept(result);
 		}
 	}
-
+	
 	@Override
-	public void renderWidget(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-		RenderSystem.enableDepthTest();
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		boolean notVanilla = state.getIcon() != null;
-		ResourceLocation location = isMouseOver(pMouseX, pMouseY) ? (!notVanilla && selected() ? SELECTED_HIGHLIGHTED : HIGLIGHTED) : (!notVanilla && selected() ? SELECTED : NORMAL);
-		graphics.blitSprite(location, getX(), getY(), width, height);
+		Identifier location = isMouseOver(mouseX, mouseY) ? (!notVanilla && selected() ? SELECTED_HIGHLIGHTED : HIGLIGHTED) : (!notVanilla && selected() ? SELECTED : NORMAL);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, location, getX(), getY(), width, height);
 		if(notVanilla) {
 			GuiUtils.drawTextureRegion(graphics, getX()+2, getY()+2, width-4, height-4, selected() ? state.getIcon().active() : state.getIcon().inactive(), 16, 16);
 		}
 		if (state.label != null) {
-			graphics.drawString(Minecraft.getInstance().font, state.label, this.getX() + 24, this.getY() + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
+			graphics.text(Minecraft.getInstance().font, state.label, this.getX() + 24, this.getY() + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
 		}
 	}
-	
+		
 	@Override
 	protected void updateWidgetNarration(NarrationElementOutput p_259858_) {}
 
@@ -167,7 +160,7 @@ public class CarbonCheckBox extends AbstractButton implements ITooltipProvider {
 		}
 		
 		public CheckBoxState setTooltip(Component tooltip) {
-			this.tooltip = T -> tooltip;
+			this.tooltip = _ -> tooltip;
 			return this;
 		}
 

@@ -2,8 +2,16 @@ package carbonconfiglib.gui.base.helpers;
 
 import java.util.EnumMap;
 
+import org.joml.Matrix3x2f;
+
 import carbonconfiglib.api.ConfigType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.Identifier;
 
 /**
  * Copyright 2023 Speiger, Meduris
@@ -22,10 +30,10 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class Icon
 {
-	public static final IconSheet LOGO_SHEET = new IconSheet(ResourceLocation.tryParse("carbonconfig:textures/gui/logo.png"), 400, 400);
+	public static final IconSheet LOGO_SHEET = new IconSheet(Identifier.tryParse("carbonconfig:textures/gui/logo.png"), 400, 400);
 	public static final Icon LOGO = LOGO_SHEET.create(0, 0);
 	
-	public static final IconSheet ICONS = new IconSheet(ResourceLocation.tryParse("carbonconfig:textures/gui/icons.png"), 80, 96);
+	public static final IconSheet ICONS = new IconSheet(Identifier.tryParse("carbonconfig:textures/gui/icons.png"), 80, 96);
 
 	public static final Icon DELETE = ICONS.create(0, 16);
 	public static final Icon REVERT = ICONS.create(0, 0);
@@ -57,15 +65,15 @@ public class Icon
 		this.y = y;
 	}
 
-	public ResourceLocation getTexture() {
+	public Identifier getTexture() {
 		return sheet.texture();
 	}
 	
-	public float getX() {
+	public int getX() {
 		return x;
 	}
 	
-	public float getY() {
+	public int getY() {
 		return y;
 	}
 
@@ -77,6 +85,21 @@ public class Icon
 		return sheet.height();
 	}
 	
+	
+	
+	public void drawIcon(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float texWidth, float texHeight, int color) {
+		drawIcon(graphics, x, y, 0F, 0F, width, height, texWidth, texHeight, color);
+	}
+	
+	public void drawIcon(GuiGraphicsExtractor graphics, int x, int y, float texX, float texY, int width, int height, float texWidth, float texHeight, int color) {
+		float t_minX = (this.x + texX) / getSheetWidth();
+		float t_minY = (this.y + texY) / getSheetHeight();
+		float t_maxX = (this.x + texX + texWidth) / getSheetWidth();
+		float t_maxY = (this.y + texY + texHeight) / getSheetHeight();
+		AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(sheet.texture());
+		graphics.submitGuiElementRenderState(new BlitRenderState(RenderPipelines.GUI_TEXTURED, TextureSetup.singleTexture(texture.getTextureView(), texture.getSampler()), new Matrix3x2f(graphics.pose()), x, y, x+width, y+height, t_minX, t_maxX, t_minY, t_maxY, color, graphics.peekScissorStack()));
+	}
+	
 	private static EnumMap<ConfigType, Icon> create(Icon first, Icon second, Icon third) {
 		EnumMap<ConfigType, Icon> icons = new EnumMap<>(ConfigType.class);
 		icons.put(ConfigType.CLIENT, first);
@@ -86,11 +109,11 @@ public class Icon
 	}
 	
 	public static class IconSheet {
-		ResourceLocation texture;
+		Identifier texture;
 		int width;
 		int height;
 		
-		public IconSheet(ResourceLocation texture, int width, int height) {
+		public IconSheet(Identifier texture, int width, int height) {
 			this.texture = texture;
 			this.width = width;
 			this.height = height;
@@ -112,7 +135,7 @@ public class Icon
 			return new IconPair(new Icon(this, x1, y), new Icon(this, x2, y));
 		}
 		
-		public ResourceLocation texture() {
+		public Identifier texture() {
 			return texture;
 		}
 		

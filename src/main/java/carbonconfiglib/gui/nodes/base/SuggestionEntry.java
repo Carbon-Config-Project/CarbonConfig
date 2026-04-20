@@ -5,7 +5,7 @@ import carbonconfiglib.gui.api.suggestion.ISuggestionRenderer;
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.widgets.CarbonList.ListEntry;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -36,16 +36,18 @@ public class SuggestionEntry extends ListEntry<SuggestionEntry> {
 	protected boolean containsSearch(String searchString) {
 		return false;
 	}
-
+	
 	@Override
-	public void render(GuiGraphics graphics, int x, int top, int left, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
+	public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean selected, float partialTicks) {
+		int left = getContentX();
+		int width = getContentWidth();
 		if(!isInFullView()) sinceFullyVisible = GuiUtils.currentMillseconds();
 		ISuggestionRenderer renderer = ISuggestionRenderer.Registry.getRendererForType(suggestion.getType());
 		if(renderer != null) {
-			renderer.renderSuggestion(graphics, suggestion.getValue(), left, (int)Align.CENTER.alignStart(top, height, 16));
+			renderer.renderSuggestion(graphics, suggestion.getValue(), left, (int)Align.CENTER.alignStart(getContentY(), getContentHeight(), 16));
 			left += 20;
 			width -= 20;
 		}
-		GuiUtils.drawScrollingShadowText(graphics, font, text, left, top, width, height, Align.CENTER, -1, sinceFullyVisible);
+		GuiUtils.drawScrollingShadowText(graphics, font, text, left, getContentY(), width, getContentHeight(), Align.CENTER, -1, sinceFullyVisible);
 	}
 }

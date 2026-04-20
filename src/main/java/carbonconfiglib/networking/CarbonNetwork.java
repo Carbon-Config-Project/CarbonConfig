@@ -17,8 +17,7 @@ import carbonconfiglib.networking.snyc.SyncPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -50,16 +49,16 @@ public class CarbonNetwork
 	
 	public void init(RegisterPayloadHandlersEvent event) {
 		PayloadRegistrar type = event.registrar("carbonconfig").optional().versioned(VERSION);
-		type.playBidirectional(SyncPacket.ID, SyncPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(BulkSyncPacket.ID, BulkSyncPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(ConfigRequestPacket.ID, ConfigRequestPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(ConfigAnswerPacket.ID, ConfigAnswerPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(SaveConfigPacket.ID, SaveConfigPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(RequestConfigPacket.ID, RequestConfigPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(SaveForgeConfigPacket.ID, SaveForgeConfigPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(RequestGameRulesPacket.ID, RequestGameRulesPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(SaveGameRulesPacket.ID, SaveGameRulesPacket.STREAM_CODEC, this::handlePacket);
-		type.playBidirectional(StateSyncPacket.ID, StateSyncPacket.STREAM_CODEC, this::handlePacket);
+		type.playBidirectional(SyncPacket.ID, SyncPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(BulkSyncPacket.ID, BulkSyncPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(ConfigRequestPacket.ID, ConfigRequestPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(ConfigAnswerPacket.ID, ConfigAnswerPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(SaveConfigPacket.ID, SaveConfigPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(RequestConfigPacket.ID, RequestConfigPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(SaveForgeConfigPacket.ID, SaveForgeConfigPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(RequestGameRulesPacket.ID, RequestGameRulesPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(SaveGameRulesPacket.ID, SaveGameRulesPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
+		type.playBidirectional(StateSyncPacket.ID, StateSyncPacket.STREAM_CODEC, this::handlePacket, this::handlePacket);
 	}
 	
 	protected void handlePacket(ICarbonPacket packet, IPayloadContext provider) {
@@ -78,14 +77,13 @@ public class CarbonNetwork
 		return entity != null ? entity : getClientPlayer();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	protected Player getClientPlayer() {
 		Minecraft mc = Minecraft.getInstance();
 		return mc == null ? null : mc.player;
 	}
 	
 	public void sendToServer(ICarbonPacket packet) {
-		PacketDistributor.sendToServer(packet);
+		ClientPacketDistributor.sendToServer(packet);
 	}
 	
 	public void sendToAllPlayers(ICarbonPacket packet) {

@@ -5,7 +5,7 @@ import java.util.function.Function;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -36,6 +36,6 @@ public interface ICarbonPacket extends CustomPacketPayload
 	}
 	
 	public static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createType(String id) {
-		return new CustomPacketPayload.Type<>(ResourceLocation.parse(id));
+		return new CustomPacketPayload.Type<>(Identifier.parse(id));
 	}
 }

@@ -130,7 +130,7 @@ public class FullTestCase
 		
 		public static IConfigSerializer<ExampleValue> createSerializer() {
 			MutableObject<IConfigSerializer<ExampleValue>> result = new MutableObject<>();
-			CompoundBuilder builder = new CompoundBuilder().addSetting(new CompoundArrayNamer<>(result::getValue, T -> Component.literal(T.name)))
+			CompoundBuilder builder = new CompoundBuilder().addSetting(new CompoundArrayNamer<>(result::get, T -> Component.literal(T.name)))
 					.simple("Name", EntryDataType.STRING).setComments("Testing my ", "New Line Comment")
 					.simple("Year", EntryDataType.INTEGER).addSuggestions(ISuggestionProvider.array(Suggestion.value("2000"), Suggestion.value("2005"), Suggestion.value("2017"), Suggestion.value("2023")))
 					.simple("Fluffyness", EntryDataType.DOUBLE)
@@ -144,7 +144,7 @@ public class FullTestCase
 					.enums("Dye", DyeColor.class).forceSuggestions(true)
 					.simple("Valid", EntryDataType.BOOLEAN);
 			result.setValue(IConfigSerializer.noSync(builder.build(), new ExampleValue(), ExampleValue::parse, ExampleValue::serialize));
-			return result.getValue();
+			return result.get();
 		}
 		
 		public static List<ExampleValue> createExample() {

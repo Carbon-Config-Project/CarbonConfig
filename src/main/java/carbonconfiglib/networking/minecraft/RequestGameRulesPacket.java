@@ -3,6 +3,7 @@ package carbonconfiglib.networking.minecraft;
 import java.util.UUID;
 
 import carbonconfiglib.CarbonConfig;
+import carbonconfiglib.gui.impl.minecraft.IGameRuleValue;
 import carbonconfiglib.networking.ICarbonPacket;
 import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
 import io.netty.buffer.Unpooled;
@@ -57,7 +58,7 @@ public class RequestGameRulesPacket implements ICarbonPacket
 		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 		if(server == null) return;
 		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-		buf.writeNbt(server.getGameRules().createTag());
+		buf.writeNbt(IGameRuleValue.write(server.getGameRules()));
 		byte[] data = new byte[buf.writerIndex()];
 		buf.readBytes(data);
 		CarbonConfig.NETWORK.sendToPlayer(new ConfigAnswerPacket(requestId, data), player);

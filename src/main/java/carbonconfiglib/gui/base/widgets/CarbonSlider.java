@@ -7,17 +7,16 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.LongFunction;
 
-import org.lwjgl.glfw.GLFW;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 
@@ -72,50 +71,46 @@ public class CarbonSlider extends CarbonBaseButton {
 		state.set((long)(state.getMin() + (state.getRange() * progress)));
 	}
 	
-	@Override
-	public void onClick(double mouseX, double mouseY) {
-		setFromMouse(mouseX);
+	public void onClick(MouseButtonEvent event, boolean doubleClick) {
+		setFromMouse(event.x());
 	}
 	
-	@Override
-	protected void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
-		setFromMouse(mouseX);
-		super.onDrag(mouseX, mouseY, dragX, dragY);
+	protected void onDrag(MouseButtonEvent event, double dx, double dy) {
+		setFromMouse(event.x());
 	}
 	
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
 		if(state.stepSize != 0 && active && visible) {
-			state.set(get() + (long)(state.stepSize * scrollY * (Screen.hasShiftDown() ? 10D : 1D) * (Screen.hasControlDown() ? 100D : 1D)));
+			Minecraft mc = Minecraft.getInstance();
+			state.set(get() + (long)(state.stepSize * scrollY * (mc.hasShiftDown() ? 10D : 1D) * (mc.hasControlDown() ? 100D : 1D)));
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean keyPressed(KeyEvent event) {
+		if(state.stepSize != 0 && active && visible && (event.isLeft() || event.isRight())) {
+			state.set(get() + (state.stepSize * ((event.isLeft() ? -1L : 0L) + (event.isRight() ? 1L : 0L)) * (event.hasShiftDown() ? 10L : 1L) * (event.hasControlDown() ? 100L : 1L)));
 			return true;
 		}
 		return false;
 	}
 	
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if(state.stepSize != 0 && active && visible && (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT)) {
-			state.set(get() + (state.stepSize * ((keyCode == GLFW.GLFW_KEY_LEFT ? -1L : 0L) + (keyCode == GLFW.GLFW_KEY_RIGHT ? 1L : 0L)) * (Screen.hasShiftDown() ? 10L : 1L) * (Screen.hasControlDown() ? 100L : 1L)));
-			return true;
-		}
-		return false;
-	}
-	
-	@Override
-	public void renderWidget(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 	      Minecraft minecraft = Minecraft.getInstance();
 	      Font font = minecraft.font;
-	      graphics.blitSprite(SPRITES.disabled(), getX(), getY(), width, height);
-	      this.renderBg(graphics, minecraft, pMouseX, pMouseY);
+	      graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.disabled(), getX(), getY(), width, height);
+	      this.renderBg(graphics, minecraft, mouseX, mouseY);
 	      int j = getFGColor();
 	      GuiUtils.drawScrollingText(graphics, font, getMessage(), getX(), getY()+1, width, height, Align.CENTER, j | Mth.ceil(this.alpha * 255.0F) << 24, 0);
 	}
 	
-	protected void renderBg(GuiGraphics graphics, Minecraft mc, int mouseX, int mouseY) {
-		if(isActive()) RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		else RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
+	protected void renderBg(GuiGraphicsExtractor graphics, Minecraft mc, int mouseX, int mouseY) {
+		int color = isActive() ? -1 : ARGB.colorFromFloat(0.5F, 0.5F, 0.5F, 1F);
 		double range = getProgress();
-		graphics.blitSprite(SPRITES.get(true, isActive() && isHoveredOrFocused()), this.getX() + (int)(range * (float)(this.width - 8)), getY(), 8, height);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(true, isActive() && isHoveredOrFocused()), this.getX() + (int)(range * (float)(this.width - 8)), getY(), 8, height, color);
 	}
 	
 	public static class SliderState {
@@ -171,7 +166,7 @@ public class CarbonSlider extends CarbonBaseButton {
 		}
 		
 		public SliderState setListener(Runnable run) {
-			listener = T -> run.run();
+			listener = _ -> run.run();
 			return this;
 		}
 		

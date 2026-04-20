@@ -2,15 +2,15 @@ package carbonconfiglib.gui.base.widgets;
 
 import java.util.Optional;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.Icon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 
 
 /**
@@ -65,28 +65,19 @@ public class CarbonButton extends CarbonBaseButton {
 		defaultButtonNarrationText(pNarrationElementOutput);
 	}
 	
-	public void renderIcon(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-		int j = getFGColor();
-		RenderSystem.setShaderColor(((j >> 16) & 0xFF) / 255F, ((j >> 8) & 0xFF) / 255F, (j & 0xFF) / 255F, 1F);
-		GuiUtils.drawTextureRegion(graphics, getX() + padding, getY() + padding, width-padding*2, height-padding*2, icon.get(), 16, 16);
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+	@Override
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+		if(selected) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHovered()), getX(), getY(), width, height, ARGB.colorFromFloat(1F, 0.5F, 0.5F, 0.5F));
+		else graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHovered()), getX(), getY(), width, height);
+		
+		if(highlighted) graphics.fill(getX()+2, getY()+2, getX()+getWidth()-2, getY()+getHeight()-2, 0x33FFFFFF);
+		
+		if(icon.isPresent()) renderIcon(graphics, mouseX, mouseY, partialTick);
+		GuiUtils.drawScrollingShadowText(graphics, Minecraft.getInstance().font, getMessage(), getX()+2, getY()+2, width-3, height-3, Align.CENTER, this.active ? -1 : 0xFFA0A0A0, hash);
+
 	}
 	
-	@Override
-	public void renderWidget(GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-		if(selected) {
-			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
-			graphics.blitSprite(SPRITES.get(active, isHovered()), getX(), getY(), width, height);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		}
-		else graphics.blitSprite(SPRITES.get(active, isHovered()), getX(), getY(), width, height);
-		if(highlighted) {
-			graphics.fill(getX()+2, getY()+2, getX()+getWidth()-2, getY()+getHeight()-2, 0x33FFFFFF);
-		}
-		
-		if (icon.isPresent()) {
-			renderIcon(graphics, pMouseX, pMouseY, pPartialTick);
-		}
-		GuiUtils.drawScrollingShadowText(graphics, Minecraft.getInstance().font, getMessage(), getX()+2, getY()+2, width-4, height-4, Align.CENTER, this.active ? 16777215 : 10526880, hash);
+	public void renderIcon(GuiGraphicsExtractor graphics, int pMouseX, int pMouseY, float pPartialTick) {
+		icon.get().drawIcon(graphics, getX() + padding, getY() + padding, width-padding*2, height-padding*2, 16, 16, getFGColor());
 	}
 }

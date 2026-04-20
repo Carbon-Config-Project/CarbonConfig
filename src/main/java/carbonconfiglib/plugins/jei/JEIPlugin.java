@@ -8,7 +8,7 @@ import carbonconfiglib.plugins.jei.configs.JEIConfigs;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.runtime.config.IJeiConfigManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModContainer;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
@@ -22,8 +22,8 @@ public class JEIPlugin implements IModPlugin, ICarbonPlugin
 	}
 	
 	@Override
-	public ResourceLocation getPluginUid() {
-		return ResourceLocation.fromNamespaceAndPath("carbonconfig", "jeiplugin");
+	public Identifier getPluginUid() {
+		return Identifier.fromNamespaceAndPath("carbonconfig", "jeiplugin");
 	}
 	
 	@Override
