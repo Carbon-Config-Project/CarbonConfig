@@ -29,6 +29,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.permissions.Permissions;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -211,5 +212,10 @@ public class CarbonConfigClient {
 				handler.load();
 			}
 		}
+	}
+	
+	public Player getClientPlayer() {
+		Minecraft mc = Minecraft.getInstance();
+		return mc == null ? null : mc.player;
 	}
 }

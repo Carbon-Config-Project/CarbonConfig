@@ -138,7 +138,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     def changelog = new File(projectDir, "/changelogs/"+MOD_VERSION.replace(".", "")+".md");
     mainFile.changelog = changelog.exists() ? changelog.getText('UTF-8') : "";
     mainFile.changelogType = 'markdown'
-    mainFile.addGameVersion(MC_VERSION, '1.21.1', 'Server', 'Client')
+    mainFile.addGameVersion(MC_VERSION, 'Server', 'Client')
     mainFile.addJavaVersion('Java 25')
 	mainFile.addModLoader('NeoForge')
 }

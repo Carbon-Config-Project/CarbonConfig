@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import carbonconfiglib.CarbonConfigClient;
 import carbonconfiglib.networking.carbon.ConfigAnswerPacket;
 import carbonconfiglib.networking.carbon.ConfigRequestPacket;
 import carbonconfiglib.networking.carbon.SaveConfigPacket;
@@ -14,7 +15,6 @@ import carbonconfiglib.networking.minecraft.RequestGameRulesPacket;
 import carbonconfiglib.networking.minecraft.SaveGameRulesPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -78,8 +78,7 @@ public class CarbonNetwork
 	}
 	
 	protected Player getClientPlayer() {
-		Minecraft mc = Minecraft.getInstance();
-		return mc == null ? null : mc.player;
+		return CarbonConfigClient.INSTANCE.getClientPlayer();
 	}
 	
 	public void sendToServer(ICarbonPacket packet) {
