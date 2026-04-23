@@ -310,7 +310,7 @@ public class CarbonConfig
 		MOD_GUI = mapping::getIsKeyPressed;
 		KeyBinding mappingOther = new KeyBinding("key.carbon_config.dep", Keyboard.KEY_NUMPAD1, "key.carbon_config");
 		ClientRegistry.registerKeyBinding(mappingOther);
-		DEPENDENCY_VIEWER = () -> GameSettings.isKeyDown(mappingOther);
+		DEPENDENCY_VIEWER = new KeyWrapper(mappingOther);
 	}
 	
 	@SubscribeEvent
@@ -345,6 +345,21 @@ public class CarbonConfig
 			if(PerWorldProxy.isProxy(handler.getProxy())) {
 				handler.unload();
 			}
+		}
+	}
+	
+	//Yes i love SideOnly. Don't care if others don't like it.
+	@SideOnly(Side.CLIENT)
+	private static class KeyWrapper implements BooleanSupplier {
+		KeyBinding binding;
+
+		public KeyWrapper(KeyBinding binding) {
+			this.binding = binding;
+		}
+		
+		@Override
+		public boolean getAsBoolean() {
+			return GameSettings.isKeyDown(binding); 
 		}
 	}
 }
