@@ -108,7 +108,7 @@ public class ForgeHelpers
 	
 	public static Object[] getRangeInfo(ValueSpec spec) {
 		Range<?> range = spec.getRange();
-		return new Object[] {range.getMin(), range.getMax()};
+		return range == null ? null : new Object[] {range.getMin(), range.getMax()};
 	}
 	
 }
