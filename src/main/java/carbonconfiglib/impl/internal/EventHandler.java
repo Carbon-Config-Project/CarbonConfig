@@ -126,6 +126,7 @@ public class EventHandler implements IConfigChangeListener
 	@Override
 	public void onConfigChanged(ConfigHandler config) {
 		if(FMLCommonHandler.instance().getSide() == Side.SERVER) {
+			if(FMLCommonHandler.instance().getMinecraftServerInstance() == null) return;
 			SyncPacket packet = SyncPacket.create(config, SyncType.SERVER_TO_CLIENT, false);
 			if(packet != null) CarbonConfig.NETWORK.sendToAllPlayers(packet);
 			return;
