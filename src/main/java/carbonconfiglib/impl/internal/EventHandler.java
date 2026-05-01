@@ -78,6 +78,7 @@ public class EventHandler implements IConfigChangeListener
 	@Override
 	public void onConfigChanged(ConfigHandler config) {
 		if(FMLEnvironment.getDist().isDedicatedServer()) {
+			if(ServerLifecycleHooks.getCurrentServer() == null) return;
 			SyncPacket packet = SyncPacket.create(config, SyncType.SERVER_TO_CLIENT, false);
 			if(packet != null) CarbonConfig.NETWORK.sendToAllPlayers(packet);
 			return;
