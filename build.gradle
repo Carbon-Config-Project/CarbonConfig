@@ -57,9 +57,9 @@ repositories {
 
 
 dependencies {
-    implementation "net.neoforged:neoforge:21.0.167"
+    implementation "net.neoforged:neoforge:21.1.228"
 	implementation ':Primitive Collections-0.8.9'
-	implementation "curse.maven:jei-238222:6829086"
+	implementation "curse.maven:jei-238222:7420587"
 	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")
 	}
@@ -119,7 +119,7 @@ modrinth {
 	versionNumber = MOD_VERSION
 	versionType = RELEASE_TYPE
 	uploadFile = jar
-	gameVersions = [MC_VERSION, '1.21.1']
+	gameVersions = [MC_VERSION]
 	loaders = ['neoforge']
 	
     def logs = new File(projectDir, "/changelogs/"+MOD_VERSION.replace(".", "")+".md");
