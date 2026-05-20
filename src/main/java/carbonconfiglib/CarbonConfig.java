@@ -36,6 +36,7 @@ import carbonconfiglib.impl.internal.EventHandler;
 import carbonconfiglib.impl.internal.InternalFeatures;
 import carbonconfiglib.impl.internal.SettingsLoader;
 import carbonconfiglib.networking.CarbonNetwork;
+import carbonconfiglib.plugins.PluginLoader;
 import carbonconfiglib.utils.AutomationType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -137,7 +138,10 @@ public class CarbonConfig
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
 		}
+		PluginLoader.loadPlugins();
 	}
+	
+
 	
 	/**
 	 * Creates a Setting with a PerWorld Proxy set by default.<br>

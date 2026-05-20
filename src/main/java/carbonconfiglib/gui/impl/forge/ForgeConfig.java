@@ -35,7 +35,6 @@ import net.neoforged.fml.config.IConfigSpec.ILoadedConfig;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.config.ModConfig.Type;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.utils.ObjectLists;
@@ -59,7 +58,7 @@ public class ForgeConfig implements IModConfig
 {
 	ModConfig config;
 	String fileName;
-	ModConfigSpec spec;
+	IConfigSpecProvider spec;
 	ILoadedConfig loaded;
 	CommentedConfig data;
 	CommentedConfig original;
@@ -69,7 +68,7 @@ public class ForgeConfig implements IModConfig
 	public ForgeConfig(ModConfig config) {
 		this.config = config;
 		this.fileName = validateString(config.getFileName());
-		spec = (ModConfigSpec)config.getSpec();
+		spec = IConfigSpecProvider.get(config.getSpec());
 		loaded = ObfuscationReflectionHelper.getPrivateValue(ModConfig.class, config, "loadedConfig");
 		data = loaded != null ? loaded.config() : null;
 		original = copy(data);
@@ -82,7 +81,7 @@ public class ForgeConfig implements IModConfig
 		this.data = data;
 		this.original = copy(data);
 		this.path = path;
-		spec = (ModConfigSpec)config.getSpec();
+		spec = IConfigSpecProvider.get(config.getSpec());
 		entries = collect();
 	}
 	

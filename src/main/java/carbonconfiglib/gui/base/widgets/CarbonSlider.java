@@ -116,6 +116,7 @@ public class CarbonSlider extends CarbonBaseButton {
 		else RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
 		double range = getProgress();
 		graphics.blitSprite(SPRITES.get(true, isActive() && isHoveredOrFocused()), this.getX() + (int)(range * (float)(this.width - 8)), getY(), 8, height);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 	
 	public static class SliderState {
