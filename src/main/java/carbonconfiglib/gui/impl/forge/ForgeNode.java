@@ -14,7 +14,6 @@ import carbonconfiglib.gui.api.node.IConfigNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
@@ -38,16 +37,16 @@ public class ForgeNode implements IConfigFolderNode
 	ConfigPath path;
 	List<String> paths;
 	CommentedConfig config;
-	ForgeConfigSpec spec;
+	IConfigSpecProvider spec;
 	UnmodifiableConfig specConfig;
 	List<IConfigNode> children;
 	Component tooltip;
 	
-	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, ForgeConfigSpec spec) {
+	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, IConfigSpecProvider spec) {
 		this(paths, path, config, spec, spec.getValues());
 	}
 	
- 	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, ForgeConfigSpec spec, UnmodifiableConfig specConfig) {
+ 	public ForgeNode(List<String> paths, ConfigPath path, CommentedConfig config, IConfigSpecProvider spec, UnmodifiableConfig specConfig) {
 		this.paths = paths;
 		this.path = path;
 		this.config = config;

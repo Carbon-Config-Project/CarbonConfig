@@ -2,7 +2,6 @@ package carbonconfiglib.gui.impl.forge;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -32,10 +31,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -61,7 +58,7 @@ public class ForgeConfig implements IModConfig
 {
 	ModConfig config;
 	String fileName;
-	ForgeConfigSpec spec;
+	IConfigSpecProvider spec;
 	CommentedConfig data;
 	CommentedConfig original;
 	List<ConfigValue<?>> entries;
@@ -70,7 +67,7 @@ public class ForgeConfig implements IModConfig
 	public ForgeConfig(ModConfig config) {
 		this.config = config;
 		this.fileName = validateString(config.getFileName());
-		spec = getSpec(config.getSpec());
+		spec = IConfigSpecProvider.get(config.getSpec());
 		data = config.getConfigData();
 		original = copy(data);
 		entries = collect();
@@ -82,7 +79,7 @@ public class ForgeConfig implements IModConfig
 		this.data = data;
 		this.original = copy(data);
 		this.path = path;
-		spec = getSpec(config.getSpec());
+		spec = IConfigSpecProvider.get(config.getSpec());
 		entries = collect();
 	}
 	
@@ -90,23 +87,6 @@ public class ForgeConfig implements IModConfig
 	public boolean canCreateConfigs() { return false; }
 	@Override
 	public boolean createConfig(Path path) { return false; }
-	
-	private ForgeConfigSpec getSpec(IConfigSpec<?> spec) {
-		//Mod to fix Night config fixes
-		if(spec instanceof ForgeConfigSpec) {
-			return (ForgeConfigSpec)spec;
-		}
-		try {
-			Class<?> clz = Class.forName("fuzs.nightconfigfixes.config.ConfigSpecWrapper");
-			if(clz == null) return null;
-			if(!clz.isInstance(spec)) return null;
-			Method method = clz.getMethod("getSpec");
-			method.setAccessible(true);
-			return (ForgeConfigSpec)method.invoke(spec);
-		}
-		catch(Exception e) {}
-		return null;
-	}
 	
 	protected static String validateString(String input) {
 		String sanitized = Path.of(input).getFileName().toString();
