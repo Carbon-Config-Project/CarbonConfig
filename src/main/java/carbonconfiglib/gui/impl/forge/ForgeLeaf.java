@@ -22,7 +22,6 @@ import carbonconfiglib.utils.structure.IStructuredData.StructureType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.ValueSpec;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -57,12 +56,12 @@ public class ForgeLeaf implements IConfigNode
 	ForgeArray array;
 	Component tooltip;
 	
-	public ForgeLeaf(ForgeConfigSpec spec, ConfigValue<?> data, ConfigPath path, CommentedConfig config) {
+	public ForgeLeaf(IConfigSpecProvider spec, ConfigValue<?> data, ConfigPath path, CommentedConfig config) {
 		this.data = data;
 		this.config = config;
 		this.path = path;
 		this.spec = getSpec(spec, data);
-		String[] array = buildComment(spec);
+		String[] array = buildComment();
 		if(array != null && array.length > 0) {
 			MutableComponent comp = Component.empty();
 			for(int i = 0;i<array.length;comp.append(Component.literal(array[i++]).withStyle(ChatFormatting.GRAY)).append("\n"));
@@ -231,15 +230,15 @@ public class ForgeLeaf implements IConfigNode
 		return comp;
 	}
 	
-	private String[] buildComment(ForgeConfigSpec spec) {
+	private String[] buildComment() {
 		String value = this.spec.getComment();
 		if(value == null) return null;
 		int cutoffPoint = getSmallerOfPresent(value.indexOf("Range: "), value.indexOf("Allowed Values: "));
 		return (cutoffPoint >= 0 ? value.substring(0, cutoffPoint) : value).split("\n");
 	}
 	
-	private ValueSpec getSpec(ForgeConfigSpec spec, ConfigValue<?> value) {
-		return spec.get(value.getPath()); 
+	private ValueSpec getSpec(IConfigSpecProvider spec, ConfigValue<?> value) {
+		return spec.getSpec().get(value.getPath()); 
 	}
 	/**
 	 * Function that finds the Lowest "present" index of a List/String. Idea is
