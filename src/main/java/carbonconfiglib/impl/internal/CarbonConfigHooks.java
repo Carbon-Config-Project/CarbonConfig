@@ -144,6 +144,34 @@ public class CarbonConfigHooks implements IFMLLoadingPlugin, IClassTransformer {
             }
         }
 
+        if ("cpw.mods.fml.client.FMLClientHandler".equals(transformedName)) {
+            ClassNode node = new ClassNode();
+            new ClassReader(basicClass).accept(node, 0);
+
+            for (final MethodNode method : node.methods) {
+                if (method.name.equals("finishMinecraftLoading") && method.desc.equals("()V")) {
+                    AbstractInsnNode a = method.instructions.getLast();
+
+                    while (a.getPrevious() != method.instructions.getFirst() && (a.getType() != AbstractInsnNode.INSN || a.getOpcode() != Opcodes.RETURN)) {
+                        a = a.getPrevious();
+                    }
+
+                    if (a.getOpcode() != Opcodes.RETURN)
+                        break;
+
+                    InsnList list = new InsnList();
+                    list.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    list.add(new FieldInsnNode(Opcodes.GETFIELD, "cpw/mods/fml/client/FMLClientHandler", "guiFactories", "Lcom/google/common/collect/BiMap;"));
+                    list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "carbonconfiglib/impl/internal/EventHandler", "registerGuiFactories", "(Lcom/google/common/collect/BiMap;)V", false));
+
+                    method.instructions.insertBefore(a, list);
+                    ClassWriter writer = new ClassWriter(0);
+                    node.accept(writer);
+                    return writer.toByteArray();
+                }
+            }
+        }
+
         return basicClass;
     }
 }
