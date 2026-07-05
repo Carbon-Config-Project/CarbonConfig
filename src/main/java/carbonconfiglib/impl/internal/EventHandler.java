@@ -18,14 +18,11 @@ import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
 import carbonconfiglib.gui.screens.ConfigScreenFactory;
 import carbonconfiglib.gui.screens.ModConfigList;
 import carbonconfiglib.impl.PerWorldProxy;
-import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.plugins.ICarbonPlugin;
 import carbonconfiglib.utils.SyncType;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.GuiModList;
 import cpw.mods.fml.client.IModGuiFactory;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.IFMLSidedHandler;
@@ -43,7 +40,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.common.config.Configuration;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.objects.maps.impl.hash.Object2ObjectLinkedOpenHashMap;
@@ -162,20 +158,6 @@ public class EventHandler implements IConfigChangeListener
 	
 	public static void registerGuiFactories(BiMap<ModContainer, IModGuiFactory> factory) {
 		INSTANCE.registerConfigs(factory);
-	}
-	
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void onGuiButtonClicked(ActionPerformedEvent.Pre event) {
-		if(event.gui instanceof GuiModList && event.button.id == 20) {
-			ModContainer container = Reflects.getSelectedMod((GuiModList)event.gui);
-			if(container == null) return;
-			IModGuiFactory factory = FMLClientHandler.instance().getGuiFactoryFor(container);
-			if(factory instanceof ConfigScreenFactory) {
-				event.setCanceled(true);
-				Minecraft.getMinecraft().displayGuiScreen(((ConfigScreenFactory)factory).createConfigGui(event.gui));
-			}
-		}
 	}
 	
 	public void processIMCEvents(Map<String, ModContainer> config, Map<ModContainer, ModContainer> remapping) {

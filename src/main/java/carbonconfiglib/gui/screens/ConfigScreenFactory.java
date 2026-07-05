@@ -24,19 +24,39 @@ import net.minecraft.client.gui.GuiScreen;
  */
 public class ConfigScreenFactory implements IModGuiFactory
 {
+	private static final ThreadLocal<IModConfigs> OPENING_CONFIGS = new ThreadLocal<>();
 	IModConfigs configs;
-	
+
 	public ConfigScreenFactory(IModConfigs configs) {
 		this.configs = configs;
 	}
-	
+
 	@Override
 	public void initialize(Minecraft minecraftInstance) {}
 	public GuiScreen createConfigGui(GuiScreen parentScreen) { return new ConfigListScreen(parentScreen, configs); }
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() { return null; }
 	@Override
-	public Class<? extends GuiScreen> mainConfigGuiClass() { return ConfigListScreen.class; }
+	public Class<? extends GuiScreen> mainConfigGuiClass() {
+		OPENING_CONFIGS.set(configs);
+		return EntryScreen.class;
+	}
+
+	public static class EntryScreen extends ConfigListScreen {
+        public EntryScreen(GuiScreen parentScreen) {
+            super(parentScreen, takeConfigs());
+        }
+    }
+
+	private static IModConfigs takeConfigs() {
+        IModConfigs configs = OPENING_CONFIGS.get();
+        OPENING_CONFIGS.remove();
+        if (configs == null) {
+            throw new IllegalStateException("GUI opened without prepared configs");
+        }
+        return configs;
+    }
+
 	@Override
 	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) { return null; }	
 }
