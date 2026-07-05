@@ -15,10 +15,8 @@ import carbonconfiglib.gui.base.screen.ITickableScreen;
 import carbonconfiglib.gui.impl.carbon.ModConfigs;
 import carbonconfiglib.gui.impl.forge.ForgeConfigs;
 import carbonconfiglib.gui.impl.minecraft.MinecraftConfigs;
-import carbonconfiglib.gui.screens.ConfigListScreen;
 import carbonconfiglib.gui.screens.ConfigScreenFactory;
 import carbonconfiglib.gui.screens.ModConfigList;
-import carbonconfiglib.gui.screens.ModDependencyScreen;
 import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.impl.Reflects;
 import carbonconfiglib.networking.carbon.StateSyncPacket;
@@ -33,7 +31,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.IFMLSidedHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModContainer;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -46,7 +43,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.common.config.Configuration;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -164,13 +160,8 @@ public class EventHandler implements IConfigChangeListener
 		}
 	}
 	
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void onGuiOpenedEvent(GuiOpenEvent event) {
-		GuiScreen screen = event.gui;
-		if(GuiModList.class.isInstance(screen) || ConfigListScreen.class.isInstance(screen) || ModDependencyScreen.class.isInstance(screen)) {
-			registerConfigs();
-		}
+	public static void registerGuiFactories(BiMap<ModContainer, IModGuiFactory> factory) {
+		INSTANCE.registerConfigs(factory);
 	}
 	
 	@SubscribeEvent
@@ -206,10 +197,9 @@ public class EventHandler implements IConfigChangeListener
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private void registerConfigs() {
-		if(loaded) return;
+	private void registerConfigs(BiMap<ModContainer, IModGuiFactory> factory) {
+		if(loaded || factory == null) return;
 		loaded = true;
-		BiMap<ModContainer, IModGuiFactory> factory = ObfuscationReflectionHelper.getPrivateValue(FMLClientHandler.class, FMLClientHandler.instance(), "guiFactories");
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
 			if(factory.containsKey(M)) return;
