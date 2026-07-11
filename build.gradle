@@ -37,6 +37,9 @@ minecraft {
     version = "1.12.2-14.23.0.2491"
     runDir = "run"
     mappings = "snapshot_20171003"
+    
+    clientJvmArgs += "-Dfml.coreMods.load=carbonconfiglib.impl.internal.CarbonConfigHooks"
+    serverJvmArgs += "-Dfml.coreMods.load=carbonconfiglib.impl.internal.CarbonConfigHooks"
 }
 
 repositories {
