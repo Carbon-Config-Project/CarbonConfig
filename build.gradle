@@ -124,6 +124,39 @@ processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+task fixLaunchFiles {
+    group = "internal"
+    description = "Launch Fixer to auto load ASM Patches"
+    doLast {
+        def coreModArg = '-Dfml.coreMods.load=carbonconfiglib.impl.internal.CarbonConfigHooks'
+        def patchedCount = 0
+        fileTree(dir: projectDir, include: "**/*.launch").each { launchFile ->
+            def content = launchFile.text
+            
+            if (content.contains('key="org.eclipse.jdt.launching.VM_ARGUMENTS"')) {
+                if (!content.contains(coreModArg)) {
+                    launchFile.text = content.replace('key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="', 'key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="' + coreModArg + ' ')
+                    println "--> Patched: ${launchFile}"
+                    patchedCount++
+                } else {
+                    println "--> Skipped: ${launchFile}"
+                }
+            }
+            else {
+               	launchFile.text = content.replace('</launchConfiguration>', "    <stringAttribute key=\"org.eclipse.jdt.launching.VM_ARGUMENTS\" value=\"${coreModArg}\"/>\n</launchConfiguration>");
+				println "--> Patched: ${launchFile}"
+				patchedCount++
+            }
+        }
+
+        if (patchedCount == 0) {
+            println "--> No Launch Files found"
+        } else {
+            println "--> Patched ${patchedCount} Files."
+        }
+    }
+}
+
 task deobfJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'deobf'
