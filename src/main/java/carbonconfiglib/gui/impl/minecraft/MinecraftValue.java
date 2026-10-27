@@ -114,7 +114,7 @@ public class MinecraftValue implements IValueNode
 	public Component getTooltip() {
 		String id = entry.getDescriptionId()+".description";
 		MutableComponent result = Component.empty();
-		if(I18n.exists(id)) {
+		if(!Objects.equals(I18n.get(id), id)) {
 			result.append(Component.translatable(id).withStyle(ChatFormatting.GRAY));
 		}
 		return result;

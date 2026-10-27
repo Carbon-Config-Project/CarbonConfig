@@ -431,10 +431,10 @@ public class ConfigScreen extends BaseCarbonScreen implements IElementContext, I
 		}
 		Screen owner = this;
 		if(mode == ReloadMode.GAME) {
-			minecraft.setScreen(new MultiChoiceScreen(_ -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+			minecraft.gui.setScreen(new MultiChoiceScreen(_ -> minecraft.gui.setScreen(owner), Component.translatable("gui.carbonconfig.restart.title"), Component.translatable("gui.carbonconfig.restart.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 		else if(mode == ReloadMode.WORLD && minecraft.level != null) {
-			minecraft.setScreen(new MultiChoiceScreen(_ -> minecraft.setScreen(owner), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
+			minecraft.gui.setScreen(new MultiChoiceScreen(_ -> minecraft.gui.setScreen(owner), Component.translatable("gui.carbonconfig.reload.title"), Component.translatable("gui.carbonconfig.reload.message").withStyle(ChatFormatting.GRAY), Component.translatable("gui.carbonconfig.ok")));
 		}
 	}
 }

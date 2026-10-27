@@ -348,7 +348,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 			}
 			BackupManager.createBackup(config);
 			updateBackup();
-			if(CarbonConfig.BACKUP_TOASTS.get()) mc.getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+			if(CarbonConfig.BACKUP_TOASTS.get()) mc.gui.toastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
 		}
 		
 		private void restoreBackup() {
@@ -358,7 +358,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 				return;
 			}
 			BackupManager.loadLastBackup(config);
-			if(CarbonConfig.BACKUP_TOASTS.get()) mc.getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
+			if(CarbonConfig.BACKUP_TOASTS.get()) mc.gui.toastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
 		}
 		
 		private void selectBackups() {
@@ -367,19 +367,19 @@ public class ConfigListScreen extends BaseCarbonScreen
 				pendingRequest = new BulkRequest(ObjectLists.singleton(config), Mode.LIST);
 				return;
 			}
-			setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, holder, config, BackupManager.listBackups(config)));
+			setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().gui.screen(), holder, config, BackupManager.listBackups(config)));
 		}
 		
 		public void open() {
 			Minecraft mc = Minecraft.getInstance();
 			if(shouldCreatePick()) {
-				mc.setScreen(new ConfigSelectScreen(mc.screen, holder, config));
+				mc.gui.setScreen(new ConfigSelectScreen(mc.gui.screen(), holder, config));
 			}
 			else if(isInWorldConfig() && !mc.hasSingleplayerServer()) {
-				mc.setScreen(new ConfigRequestScreen(holder, mc.screen, config));
+				mc.gui.setScreen(new ConfigRequestScreen(holder, mc.gui.screen(), config));
 			}
 			else {
-				mc.setScreen(new ConfigScreen(config, holder, mc.screen));				
+				mc.gui.setScreen(new ConfigScreen(config, holder, mc.gui.screen()));				
 			}
 		}
 		
@@ -389,7 +389,7 @@ public class ConfigListScreen extends BaseCarbonScreen
 				config.save(false);
 				return;
 			}
-			Screen parent = Minecraft.getInstance().screen;
+			Screen parent = Minecraft.getInstance().gui.screen();
 			setExternalScreen(new ConfirmScreen(T -> {
 				if(T) {
 					config.restoreDefault();

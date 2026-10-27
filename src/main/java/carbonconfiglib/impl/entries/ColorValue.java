@@ -92,8 +92,9 @@ public class ColorValue extends BasicConfigEntry<ColorWrapper>
 	
 	public static void addMCColorPalette(Consumer<Suggestion> result, Predicate<Suggestion> filter) {
 		for(ChatFormatting formatting : ChatFormatting.values()) {
-			if(!formatting.isColor()) continue;
-			Suggestion value = Suggestion.namedTypeValue(Helpers.firstLetterUppercase(formatting.getName()), ColorWrapper.serializeRGB(formatting.getColor()), ColorWrapper.class);
+			TextColor color = TextColor.fromLegacyFormat(formatting);
+			if(color == null) continue;
+			Suggestion value = Suggestion.namedTypeValue(Helpers.firstLetterUppercase(color.serialize()), ColorWrapper.serializeRGB(color.getValue()), ColorWrapper.class);
 			if(filter.test(value)) result.accept(value);
 		}
 	}

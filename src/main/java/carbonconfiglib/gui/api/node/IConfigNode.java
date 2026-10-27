@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.api.node;
 
 import java.util.List;
+import java.util.Objects;
 
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
@@ -47,7 +48,7 @@ public interface IConfigNode
 	public Component getTooltip();
 	
 	public static MutableComponent createLabel(String name, String translationKey) {
-		return translationKey != null && I18n.exists(translationKey) ? Component.translatable(translationKey) : createLabel(name);
+		return translationKey != null && !Objects.equals(I18n.get(translationKey), translationKey) ? Component.translatable(translationKey) : createLabel(name);
 	}
 	
 	public static MutableComponent createLabel(String name) {

@@ -1,6 +1,7 @@
 package carbonconfiglib.gui.impl.carbon;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.logging.log4j.util.Strings;
 
@@ -111,7 +112,7 @@ public class ConfigLeaf implements IConfigNode
 	public Component getTooltip() {
 		MutableComponent comp = Component.empty();
 		String key = entry.getTranslationComment();
-		if(key != null && I18n.exists(key)) {
+		if(key != null && !Objects.equals(I18n.get(key), key)) {
 			comp.append(Component.translatable(key).withStyle(ChatFormatting.GRAY)).append("\n");
 		}
 		else {

@@ -133,7 +133,7 @@ public class CarbonCompound implements ICompoundNode, IValueActions
 	private Component createTooltip(String key) {
 		MutableComponent comp = Component.empty();
 		String entryKey = data.getTranslationComment(key);
-		if(entryKey != null && I18n.exists(entryKey)) {
+		if(entryKey != null && !Objects.equals(I18n.get(entryKey), entryKey)) {
 			comp.append(Component.translatable(entryKey).withStyle(ChatFormatting.GRAY));
 		}
 		else {

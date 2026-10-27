@@ -24,7 +24,6 @@ import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.client.ClientHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 
@@ -89,8 +88,8 @@ public class DropDownMenu<T> extends CarbonButton {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		boolean open = mc.screen instanceof DropDownScreen drop && drop.owner == this;
-		boolean up = open && ((DropDownScreen)mc.screen).isUp();
+		boolean open = mc.gui.screen() instanceof DropDownScreen drop && drop.owner == this;
+		boolean up = open && ((DropDownScreen)mc.gui.screen()).isUp();
 		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused() || open), getX(), getY(), width-14, height);
 		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused() || open), getX()+width-15, getY(), 15, height);
 		GuiUtils.drawScrollingShadowText(graphics, mc.font, getMessage(), getX()+2, getY(), width-18, height, Align.CENTER, getFGColor(), hash);
@@ -128,7 +127,7 @@ public class DropDownMenu<T> extends CarbonButton {
 				if(ownerState.isSelected(entry)) selections.setSelected(value);
 			}
 			selections.setItemHeight(ownerState.getElementHeight()).setChangeListener(() -> {
-				if(!ownerState.isMultiSelection()) ClientHooks.popGuiLayer(getMinecraft());
+				if(!ownerState.isMultiSelection()) getMinecraft().gui.popScreenLayer();
 				if(selections.getSelectedItems().isEmpty() && !ownerState.isMultiSelection()) ownerState.reset();
 				else ownerState.replaceSelection(selections.getSelectedItems().stream().map(DropDownEntry::getEntry).toList());
 			});
@@ -169,7 +168,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		public void drawBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 			if(reOpen) {
 				reOpen = false;
-				Minecraft.getInstance().popGuiLayer();
+				getMinecraft().gui.popScreenLayer();
 				owner.onPress(null);
 			}
 			int x = owner.getX() + ownerState.xOffset;
@@ -190,7 +189,7 @@ public class DropDownMenu<T> extends CarbonButton {
 		@Override
 		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 			if(super.mouseClicked(event, doubleClick)) return true;
-			ClientHooks.popGuiLayer(getMinecraft());
+			getMinecraft().gui.popScreenLayer();
 			return true;
 		}
 	}

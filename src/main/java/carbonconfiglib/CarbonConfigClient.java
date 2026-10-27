@@ -103,7 +103,7 @@ public class CarbonConfigClient {
 			CarbonConfig.LOGGER.info("Tried to open a Remote config without permission");
 			return;
 		}
-		mc.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.screen, config, path));
+		mc.gui.setScreen(new ConfigRequestScreen(texture.asHolder(), mc.gui.screen(), config, path));
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class CarbonConfigClient {
 			return;
 		}
 		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(new ConfigScreen(config, texture.asHolder(), mc.screen).withWalker(path == null || path.length <= 0 ? null : ObjectArrayList.wrap(path)));
+		mc.gui.setScreen(new ConfigScreen(config, texture.asHolder(), mc.gui.screen()).withWalker(path == null || path.length <= 0 ? null : ObjectArrayList.wrap(path)));
 	}
 	
 	public void onClientLoad(FMLClientSetupEvent event) {
@@ -166,16 +166,16 @@ public class CarbonConfigClient {
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.setScreen(event.getKeyEvent().hasShiftDown() ? new ModListScreen(mc.screen) : new ConfigListScreen(mc.screen, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+			mc.gui.setScreen(event.getKeyEvent().hasShiftDown() ? new ModListScreen(mc.gui.screen()) : new ConfigListScreen(mc.gui.screen(), BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 		}
 		else if(DEPENDENCY_VIEWER.test(event.getKeyEvent()) && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.setScreen(new ModDependencyScreen());
+			mc.gui.setScreen(new ModDependencyScreen());
 		}
 	}
 	
 	public void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
 		if(event.getScreen() instanceof TitleScreen && DEPENDENCY_VIEWER.test(event.getKeyEvent())) {
-			Minecraft.getInstance().setScreen(new ModDependencyScreen());
+			Minecraft.getInstance().gui.setScreen(new ModDependencyScreen());
 			event.setCanceled(true);
 		}
 	}

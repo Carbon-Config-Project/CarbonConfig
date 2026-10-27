@@ -160,10 +160,10 @@ public class ConfigSelectScreen extends BaseCarbonScreen
 			}
 			IModConfig config = this.config.loadFromFile(file);
 			if(config == null) {
-				Minecraft.getInstance().setScreen(parent);
+				Minecraft.getInstance().gui.setScreen(parent);
 				return;
 			}
-			Minecraft.getInstance().setScreen(new ConfigScreen(config, holder, parent));
+			Minecraft.getInstance().gui.setScreen(new ConfigScreen(config, holder, parent));
 		}
 		
 		private void loadIcon(Path iconFile) {

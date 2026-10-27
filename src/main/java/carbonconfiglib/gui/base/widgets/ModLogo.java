@@ -34,16 +34,16 @@ public class ModLogo extends CarbonButton
 		MultiChoiceScreen screen = new MultiChoiceScreen(T -> {
 			if(T.isMain()) openURL("https://curseforge.com/minecraft/mc-mods/carbon-config");
 			else if(T.isOther()) openURL("https://modrinth.com/mod/carbon-config");
-			else minecraft.setScreen(owner);
+			else minecraft.gui.setScreen(owner);
 		}, Component.translatable("gui.carbonconfig.logo.link.title"), Component.translatable("gui.carbonconfig.logo.link.message").withStyle(ChatFormatting.GRAY), 
 		   Component.translatable("gui.carbonconfig.logo.link.curseforge"), Component.translatable("gui.carbonconfig.logo.link.modrinth"), Component.translatable("gui.carbonconfig.reset_all.cancel"));
-		minecraft.setScreen(screen);
+		minecraft.gui.setScreen(screen);
 	}
 	
 	private void openURL(String url) {
-		minecraft.setScreen(new ConfirmLinkScreen(T -> {
+		minecraft.gui.setScreen(new ConfirmLinkScreen(T -> {
             if (T) Util.getPlatform().openUri(url);
-            this.minecraft.setScreen(owner);
+            this.minecraft.gui.setScreen(owner);
          }, url, true));
 	}
 }

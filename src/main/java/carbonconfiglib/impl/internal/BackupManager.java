@@ -275,13 +275,13 @@ public class BackupManager {
 						BackupManager.loadLastBackup(entry.getKey());
 						break;
 					case LIST:
-						BaseCarbonScreen.setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().screen, BackgroundTexture.DEFAULT.asHolder(), entry.getKey(), BackupManager.listBackups(entry.getKey())));
+						BaseCarbonScreen.setExternalScreen(new BackupSelectionScreen(Minecraft.getInstance().gui.screen(), BackgroundTexture.DEFAULT.asHolder(), entry.getKey(), BackupManager.listBackups(entry.getKey())));
 						break;
 				}
 				if(toCheck.isEmpty()) {
 					if(CarbonConfig.BACKUP_TOASTS.get()) {
-						if(mode == Mode.CREATE) Minecraft.getInstance().getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
-						else if(mode == Mode.LOAD) Minecraft.getInstance().getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.load")));
+						if(mode == Mode.CREATE) Minecraft.getInstance().gui.toastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.create"), Component.translatable("gui.carbonconfig.toast.create.desc")));
+						else if(mode == Mode.LOAD) Minecraft.getInstance().gui.toastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.create.load")));
 					}
 					IRequestReceiver.Impl.unregister(this);
 				}

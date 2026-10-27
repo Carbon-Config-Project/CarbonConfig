@@ -58,6 +58,7 @@ public class WidgetAlignerScreen extends BaseCarbonScreen
 		this.serializer = serializer;
 		this.node.createTemp();
 		initDefault(getCurrentValue());
+		renderBackground = false;
 	}
 	
 	private void initDefault(WidgetAligner value) {

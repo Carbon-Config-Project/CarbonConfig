@@ -63,17 +63,17 @@ public class ConfigRequestScreen extends BaseCarbonScreen implements IRequestRec
 		if(!this.requestId.equals(requestId)) return;
 		if(result == null) return;
 		if(result.test(buf)) {
-			minecraft.setScreen(new ConfigScreen(config, texture, parent).withWalker(walker == null || walker.length <= 0 ? null : ObjectArrayList.wrap(walker)));
+			minecraft.gui.setScreen(new ConfigScreen(config, texture, parent).withWalker(walker == null || walker.length <= 0 ? null : ObjectArrayList.wrap(walker)));
 			return;
 		}
-		minecraft.setScreen(parent);
+		minecraft.gui.setScreen(parent);
 	}
 	
 	@Override
 	public void tick() {
 		super.tick();
 		tick++;
-		if(tick > 400) minecraft.setScreen(parent);
+		if(tick > 400) minecraft.gui.setScreen(parent);
 	}
 	
 	@Override

@@ -112,7 +112,7 @@ public class BackupSelectionScreen extends BaseCarbonScreen
 		
 		private void load() {
 			BackupManager.loadBackup(config, entry);
-			if(CarbonConfig.BACKUP_TOASTS.get()) Minecraft.getInstance().getToastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
+			if(CarbonConfig.BACKUP_TOASTS.get()) Minecraft.getInstance().gui.toastManager().addToast(new SystemToast(BulkRequest.BACKUP_HINT, Component.translatable("gui.carbonconfig.toast.load"), Component.translatable("gui.carbonconfig.toast.load.desc")));
 			owner.onClose();
 		}
 		

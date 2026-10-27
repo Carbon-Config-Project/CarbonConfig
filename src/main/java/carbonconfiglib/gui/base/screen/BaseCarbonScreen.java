@@ -31,7 +31,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.neoforge.client.ClientHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 
@@ -144,19 +143,19 @@ public class BaseCarbonScreen extends Screen
 	}
 	
 	protected void setScreen(Screen screen) {
-		Minecraft.getInstance().setScreen(screen);
+		Minecraft.getInstance().gui.setScreen(screen);
 	}
 	
 	public static void setExternalScreen(Screen screen) {
-		Minecraft.getInstance().setScreen(screen);
+		Minecraft.getInstance().gui.setScreen(screen);
 	}
 	
 	public static void pushExternalScreen(Screen screen) {
-		ClientHooks.pushGuiLayer(Minecraft.getInstance(), screen);
+		Minecraft.getInstance().gui.pushScreenLayer(screen);
 	}
 	
 	protected void pushScreen(Screen screen) {
-		ClientHooks.pushGuiLayer(minecraft, screen);
+		Minecraft.getInstance().gui.pushScreenLayer(screen);
 	}
 	
 	public void drawText(GuiGraphicsExtractor graphics, Component text, float x, float y, Align align, int color) {

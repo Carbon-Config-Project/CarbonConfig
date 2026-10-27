@@ -11,7 +11,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.neoforge.client.ClientHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
 /**
@@ -106,7 +105,7 @@ public class MenuScreen extends BaseCarbonScreen {
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		if(super.mouseClicked(event, doubleClick)) return true;
 		if(callback != null) callback.run();
-		ClientHooks.popGuiLayer(getMinecraft());
+		getMinecraft().gui.popScreenLayer();
 		return false;
 	}
 		
@@ -128,8 +127,8 @@ public class MenuScreen extends BaseCarbonScreen {
 	
 	public static void popAllMenus() {
 		Minecraft mc = Minecraft.getInstance();
-		while(mc.screen instanceof MenuScreen) {
-			ClientHooks.popGuiLayer(mc);
+		while(mc.gui.screen() instanceof MenuScreen) {
+			mc.gui.popScreenLayer();
 		}
 	}
 	
@@ -231,7 +230,7 @@ public class MenuScreen extends BaseCarbonScreen {
 			        if(x + width >= screenWidth) {
 			        	x = owner.getX() - width - 5;
 			        }
-					Minecraft.getInstance().pushGuiLayer((child = new MenuScreen(menu, x, lastY - 5).setParent(screen)));
+					Minecraft.getInstance().gui.pushScreenLayer((child = new MenuScreen(menu, x, lastY - 5).setParent(screen)));
 				}
 			}
 			else if(child != null && item.hoverable()) {
