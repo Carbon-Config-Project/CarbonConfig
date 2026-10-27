@@ -85,19 +85,16 @@ test {
 	exclude 'carbonconfiglib/**'
 }
 
-tasks.jarJar {
+jar {
     archiveClassifier.set("all")
+}
+
+tasks.jarJar {
+    archiveClassifier.set("")
     eachFile { fcd ->
         if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
         	fcd.exclude()
         }
-    }
-    doLast {
-        def jarFile = archiveFile.get().asFile
-        def newJar = new File(jarFile.parent, jarFile.name.replace("-all", ""))
-        
-        if (newJar.exists()) newJar.delete() // make sure no conflict
-        jarFile.renameTo(newJar)
     }
 }
 
@@ -117,7 +114,7 @@ modrinth {
 	versionName = base.archivesName.get().replace(" ", "")+"-"+version
 	versionNumber = MOD_VERSION
 	versionType = RELEASE_TYPE
-	uploadFile = jar
+	uploadFile = tasks.jarJar.archiveFile
 	gameVersions = [MC_VERSION]
 	loaders = ['neoforge']
 	
@@ -131,7 +128,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
 	description 'Publishes the mod to Curseforge'
 	apiToken = System.getenv("Curseforge_API_Token")
 		
-	def mainFile = upload(898104, jar)
+	def mainFile = upload(898104, tasks.jarJar.archiveFile)
     mainFile.releaseType = RELEASE_TYPE
     mainFile.displayName = base.archivesName.get().replace(" ", "")+"-"+version
     
