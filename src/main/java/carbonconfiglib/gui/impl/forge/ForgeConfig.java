@@ -212,12 +212,14 @@ public class ForgeConfig implements IModConfig
 		save(false);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private List<ConfigValue<?>> collect() {
 		List<ConfigValue<?>> values = new ObjectArrayList<>();
 		iterate(spec.getValues().valueMap().values(), values::add);
 		return values;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void iterate(Iterable<Object> source, Consumer<ConfigValue<?>> result) {
 		for(Object entry : source) {
 			if(entry instanceof ConfigValue) {

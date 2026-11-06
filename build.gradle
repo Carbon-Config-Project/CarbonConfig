@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.0.170'
     id 'net.darkhax.curseforgegradle' version '1.1.15'
     id 'com.modrinth.minotaur' version '2.+'
 }
@@ -50,6 +50,9 @@ repositories {
 	maven {
         url = "https://www.cursemaven.com"
     }
+ 	maven {
+ 		url = "https://maven.blamejared.com"
+	}
     flatDir {
        dirs("libs")
    	}
@@ -57,9 +60,10 @@ repositories {
 
 
 dependencies {
-    implementation "net.neoforged:neoforge:21.1.228"
+    implementation "net.neoforged:neoforge:21.1.238"
 	implementation ':Primitive Collections-0.8.9'
-	implementation "curse.maven:jei-238222:7420587"
+	implementation "curse.maven:jei-238222:9393327"
+	implementation "net.mezzdev.config:mezz_config-1.21.1-neoforge:0.6.11"
 	implementation "curse.maven:iceberg-520110:6423863"
 	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")

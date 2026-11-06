@@ -138,7 +138,6 @@ public class CarbonConfig
 			MODS_DISABLED = HashSetCache.create(blacklist, handler);
 			handler.register();
 		}
-		PluginLoader.loadPlugins();
 	}
 	
 
@@ -311,6 +310,7 @@ public class CarbonConfig
 
 	@OnlyIn(Dist.CLIENT)
 	public void onClientLoad(FMLClientSetupEvent event) {
+		PluginLoader.loadPlugins();
 		EventHandler.INSTANCE.onConfigsLoaded();
 	}
 

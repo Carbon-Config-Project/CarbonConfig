@@ -66,6 +66,7 @@ public class ForgeNode implements IConfigFolderNode
 		}
  	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public List<IConfigNode> getChildren() {
 		if(children == null) {
