@@ -1,5 +1,6 @@
 package carbonconfiglib.plugins;
 
+import carbonconfiglib.plugins.fuzz.FuzzPlugin;
 import carbonconfiglib.plugins.iceberg.IcebergPlugin;
 import carbonconfiglib.plugins.mezz.MezzPlugin;
 import net.neoforged.fml.ModList;
@@ -12,10 +13,17 @@ public class PluginLoader {
 		if(ModList.get().isLoaded("mezz_config")) {
 			loadMezzConfig();
 		}
+		if(ModList.get().isLoaded("forgeconfigapiport")) {
+			loadFuzz();
+		}
 	}
 	
 	private static void loadMezzConfig() {
 		new MezzPlugin();
+	}
+	
+	private static void loadFuzz() {
+		FuzzPlugin.register();
 	}
 	
 	private static void loadIceberg() {

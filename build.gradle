@@ -64,6 +64,7 @@ dependencies {
 	implementation ':Primitive Collections-0.8.9'
 	implementation "curse.maven:jei-238222:9393327"
 	implementation "net.mezzdev.config:mezz_config-1.21.1-neoforge:0.6.11"
+	implementation "curse.maven:forge-config-api-port-547434:7213611"
 	implementation "curse.maven:iceberg-520110:6423863"
 	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
 	 	jarJar.pin(it, "0.8.9")
