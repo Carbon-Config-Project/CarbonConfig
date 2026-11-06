@@ -1,76 +1,67 @@
-package carbonconfiglib.plugins.jei.configs;
+package carbonconfiglib.plugins.mezz.configs;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
 import carbonconfiglib.api.IEntrySettings;
-import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IArrayNode;
 import carbonconfiglib.gui.api.node.INode;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.impl.carbon.IValueActions;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
+import net.mezzdev.config.api.value.serializer.IConfigKeyValueSerializer;
+import net.mezzdev.config.api.value.serializer.IConfigListValueSerializer;
+import net.mezzdev.config.api.value.serializer.IConfigValueSerializer;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.utils.Stack;
 
-/**
- * Copyright 2026 Speiger, Meduris
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-public class JEIArray implements IArrayNode
-{
+public class MezzArray implements IArrayNode, IValueActions {
 	String nodeName;
 	Component name;
 	Component tooltip;
-	DataType type;
+	IConfigListValueSerializer<?> serializer;
+	IConfigValueSerializer<?> innerSerializer;
+	StructureType inner;
 	ReloadMode mode;
-	IRange range;
+	boolean forced;
 	Function<String, ParseResult<?>> isValid;
-	Supplier<List<Suggestion>> suggestions;
-	Consumer<List<String>> saved;
+	BiConsumer<String, IValueActions> saved;
 	
-	List<JEIValue> values = new ObjectArrayList<>();
-	Stack<List<String>> previous = new ObjectArrayList<>();
-	List<String> currentValues;
-	List<String> savedValues = new ObjectArrayList<>();
-	List<String> defaults;
+	List<IValueActions> values = new ObjectArrayList<>();
+	Stack<List<JsonElement>> previous = new ObjectArrayList<>();
+	List<JsonElement> currentValues;
+	List<JsonElement> savedValues = new ObjectArrayList<>();
+	List<JsonElement> defaults;
 	boolean autosave;
 	
-	public JEIArray(String nodeName, Component name, Component tooltip, ReloadMode mode, IRange range, DataType type, List<String> value, List<String> defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, Consumer<List<String>> saved) {
+	public MezzArray(String nodeName, Component name, Component tooltip, ReloadMode mode, IConfigListValueSerializer<?> serializer, String value, String defaultValue, Function<String, ParseResult<?>> isValid, BiConsumer<String, IValueActions> saved) {
 		this.nodeName = nodeName;
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
+		this.serializer = serializer;
+		this.innerSerializer = serializer.getElementSerializer();
+		this.inner = MezzHelpers.getType(innerSerializer);
+		this.forced = MezzHelpers.getDataType(innerSerializer) == DataType.ENUM;
 		this.mode = mode;
-		this.range = range;
-		this.type = type;
-		this.currentValues = value;
-		this.savedValues.addAll(value);
+		this.currentValues = MezzHelpers.encodeList(value);
+		this.savedValues.addAll(MezzHelpers.encodeList(value));
 		previous.push(new ObjectArrayList<>(currentValues));
-		this.defaults = defaultValue;
-		this.suggestions = suggestions;
+		this.defaults = MezzHelpers.encodeList(defaultValue);
 		this.saved = saved;
 		reload();
 	}
 	
-	public JEIArray withAutosave() {
+	public MezzArray withAutosave() {
 		autosave = true;
 		return this;
 	}
@@ -80,28 +71,51 @@ public class JEIArray implements IArrayNode
 		save();
 	}
 	
-	private void save(String value, JEIValue entry) {
+	private void save(String value, IValueActions entry) {
 		int index = values.indexOf(entry);
 		if(index == -1) return;
-		currentValues.set(0, value);
+		currentValues.set(index, MezzHelpers.encode(value));
 		autosave();
 	}
 	
 	public void save() {
-		saved.accept(currentValues); 
+		saved.accept(MezzHelpers.decodeList(currentValues), this); 
 		savedValues.clear();
 		savedValues.addAll(currentValues);
+	}
+	
+	@Override
+	public void set(String value) {
+		currentValues.clear();
+		currentValues.addAll(MezzHelpers.encodeList(value));
+		autosave();
 	}
 	
 	protected void reload() {
 		values.clear();
 		for(int i = 0;i<currentValues.size();i++) {
-			values.add(new JEIValue(null, name, tooltip, mode, range, type, currentValues.get(i), i >= defaults.size() ? null : defaults.get(i), suggestions, isValid, this::save).withAutosave());
+			values.add(addEntry(MezzHelpers.decode(currentValues.get(i)), i >= defaults.size() ? null : MezzHelpers.decode(defaults.get(i)), i));
 		}
 		autosave();
 	}
 	
-	protected List<String> getPrev() {
+	protected IValueActions addEntry(String value, String defaultValue, int index) {
+		if(innerSerializer instanceof IConfigListValueSerializer<?> list) {
+			return new MezzArray(Integer.toString(index), name, tooltip, mode, list, value, defaultValue, T -> isValid(index, T), this::save).withAutosave();
+		}
+		if(innerSerializer instanceof IConfigKeyValueSerializer<?, ?, ?> map) {
+			return new MezzPairValue(Integer.toString(index), name, tooltip, mode, map, value, defaultValue, T -> isValid(index, T), this::save).withAutosave();
+		}
+		return new MezzValue(null, name, tooltip, mode, innerSerializer, value, defaultValue, T -> isValid(index, T), this::save).withAutosave();
+	}
+	
+	private ParseResult<?> isValid(int index, String value) {
+		JsonArray array = MezzHelpers.merge(currentValues);
+		array.set(index, MezzHelpers.encode(value));
+		return MezzHelpers.parse(MezzHelpers.decode(array), serializer);
+	}
+	
+	protected List<JsonElement> getPrev() {
 		return previous.top();
 	}
 	
@@ -171,7 +185,7 @@ public class JEIArray implements IArrayNode
 	}
 	
 	@Override
-	public StructureType getInnerType() { return StructureType.SIMPLE; }
+	public StructureType getInnerType() { return inner; }
 	@Override
 	public IEntrySettings getSettings() { return null; }
 	@Override
@@ -189,18 +203,19 @@ public class JEIArray implements IArrayNode
 	@Override
 	public INode get(int index) { return values.get(index); }
 	@Override
-	public boolean isForcedSuggestion() { return false; }
+	public boolean isForcedSuggestion() { return forced; }
 	@Override
-	public List<Suggestion> getSuggestions() { return suggestions.get(); }
+	public List<Suggestion> getSuggestions() { return MezzHelpers.getSuggestions(innerSerializer); }
 	
 	@Override
 	public void createNode(String value) {
-		String defaultValue = defaults.isEmpty() ? type.getDefaultValue() : defaults.get(0);
+		String defaultValue = defaults.isEmpty() ? MezzHelpers.getDataType(serializer).getDefaultValue() : MezzHelpers.decode(defaults.get(0));
 		if(value == null) {
 			value = defaultValue;			
 		}
-		currentValues.add(value);
-		values.add(new JEIValue(null, name, tooltip, mode, range, type, value, defaultValue, suggestions, isValid, this::save).withAutosave());
+		int index = currentValues.size();
+		currentValues.add(MezzHelpers.encode(value));
+		values.add(addEntry(value, defaultValue, index));
 		autosave();
 	}
 	

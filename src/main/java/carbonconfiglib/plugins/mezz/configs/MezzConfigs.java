@@ -1,4 +1,4 @@
-package carbonconfiglib.plugins.jei.configs;
+package carbonconfiglib.plugins.mezz.configs;
 
 import java.util.List;
 
@@ -8,10 +8,9 @@ import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
 import carbonconfiglib.gui.api.background.BackgroundTexture.BackgroundHolder;
 import carbonconfiglib.gui.impl.carbon.ModConfigs;
-import mezz.jei.api.runtime.config.IJeiConfigFile;
 import net.fabricmc.loader.api.ModContainer;
+import net.mezzdev.config.api.schema.IConfigSchema;
 import speiger.src.collections.objects.lists.ObjectArrayList;
-import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -28,27 +27,27 @@ import speiger.src.collections.objects.utils.ObjectLists;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class JEIConfigs implements IModConfigs
+public class MezzConfigs implements IModConfigs
 {
 	ModContainer container;
-	List<IJeiConfigFile> configs;
+	List<IConfigSchema> configs;
 	
-	public JEIConfigs(ModContainer container, List<IJeiConfigFile> configs) {
+	public MezzConfigs(ModContainer container, List<IConfigSchema> configs) {
 		this.container = container;
 		this.configs = configs;
 	}
 
 	@Override
 	public String getModName() {
-		return "Jei";
+		return container.getMetadata().getName();
 	}
 	
 	@Override
 	public List<IModConfig> getConfigInstances(ConfigType type) {
-		if(type != ConfigType.CLIENT) return ObjectLists.empty();
 		List<IModConfig> config = new ObjectArrayList<>();
-		for(IJeiConfigFile file : configs) {
-			config.add(new JEIConfig(file));
+		for(IConfigSchema file : configs) {
+			if(MezzHelpers.toType(file.getType()) != type || !file.isActive()) continue;
+			config.add(new MezzConfig(file));
 		}
 		return config;
 	}

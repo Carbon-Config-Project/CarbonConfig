@@ -16,6 +16,7 @@ import carbonconfiglib.impl.PerWorldProxy;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.plugins.ICarbonPlugin;
+import carbonconfiglib.plugins.PluginLoader;
 import carbonconfiglib.utils.SyncType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -133,6 +134,7 @@ public class EventHandler implements IConfigChangeListener
 	@Environment(EnvType.CLIENT)
 	public void onConfigsLoaded() {
 		InternalFeatures.loadDefaultTypes();
+		PluginLoader.loadPlugins();
 		getOrCreateConfigs();
 	}
 	
