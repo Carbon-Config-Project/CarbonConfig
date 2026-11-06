@@ -18,6 +18,7 @@ import carbonconfiglib.networking.carbon.StateSyncPacket;
 import carbonconfiglib.networking.snyc.BulkSyncPacket;
 import carbonconfiglib.networking.snyc.SyncPacket;
 import carbonconfiglib.plugins.ICarbonPlugin;
+import carbonconfiglib.plugins.PluginLoader;
 import carbonconfiglib.utils.SyncType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -118,6 +119,7 @@ public class EventHandler implements IConfigChangeListener
 	@OnlyIn(Dist.CLIENT)
 	public void onConfigsLoaded() {
 		InternalFeatures.loadDefaultTypes();
+		PluginLoader.loadPlugins();
 		Object2ObjectMap<ModContainer, List<IModConfigs>> mappedConfigs = new Object2ObjectLinkedOpenHashMap<>();
 		configs.forEach((M, C) -> {
 			if(M.getCustomExtension(ConfigScreenFactory.class).isPresent()) return;

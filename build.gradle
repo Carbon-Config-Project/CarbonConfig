@@ -75,15 +75,19 @@ repositories {
     maven {
         url = "https://www.cursemaven.com"
     }
+    maven {
+ 		url = "https://maven.blamejared.com"
+	}
     flatDir {
        dirs("libs")
    	}
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.21-51.0.33'
+    minecraft 'net.minecraftforge:forge:1.21.1-52.1.20'
 //	implementation fg.deobf("curse.maven:the-one-probe-245211:3965693")
-	implementation "curse.maven:jei-238222:6829085"
+	implementation "net.mezzdev.config:mezz_config-1.21.1-forge:0.6.11"
+	implementation "curse.maven:jei-238222:9393325"
 	implementation "curse.maven:iceberg-520110:5625103"
     minecraftLibrary':Primitive Collections-0.8.9'
 	implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }

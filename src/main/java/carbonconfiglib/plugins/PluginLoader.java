@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import carbonconfiglib.gui.impl.forge.IConfigSpecProvider;
 import carbonconfiglib.gui.impl.forge.IConfigSpecProvider.ForgeSpec;
 import carbonconfiglib.plugins.iceberg.IcebergPlugin;
+import carbonconfiglib.plugins.mezz.MezzPlugin;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.IConfigSpec;
@@ -14,6 +15,13 @@ public class PluginLoader {
 		if(ModList.get().isLoaded("iceberg")) {
 			loadIceberg();
 		}
+		if(ModList.get().isLoaded("mezz_config")) {
+			loadMezzConfig();
+		}
+	}
+	
+	private static void loadMezzConfig() {
+		new MezzPlugin();
 	}
 	
 	private static void loadIceberg() {
