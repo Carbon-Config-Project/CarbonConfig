@@ -140,7 +140,7 @@ modrinth {
 	versionName = base.archivesName.get().replace(" ", "")+"-"+version
 	versionNumber = MOD_VERSION
 	versionType = RELEASE_TYPE
-	uploadFile = getReleaseJar()
+	uploadFile = jar
 	gameVersions = [MC_VERSION, '1.21.1']
 	loaders = ['fabric']
 	dependencies {
@@ -157,7 +157,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
 	description 'Publishes the mod to Curseforge'
 	apiToken = System.getenv("Curseforge_API_Token")
 		
-	def mainFile = upload(898104, getReleaseJar())
+	def mainFile = upload(898104, jar)
     mainFile.releaseType = RELEASE_TYPE
     mainFile.displayName = base.archivesName.get().replace(" ", "")+"-"+version
     
