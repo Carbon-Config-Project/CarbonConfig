@@ -2,6 +2,7 @@ package carbonconfiglib.plugins.mezz.configs;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,7 +36,9 @@ import net.mezzdev.config.serializers.DoubleSerializer;
 import net.mezzdev.config.serializers.EnumSerializer;
 import net.mezzdev.config.serializers.IntegerSerializer;
 import net.mezzdev.config.serializers.LongSerializer;
+import net.minecraft.Util;
 import speiger.src.collections.objects.lists.ObjectArrayList;
+import speiger.src.collections.objects.maps.impl.hash.Object2ObjectOpenHashMap;
 import speiger.src.collections.objects.utils.ObjectLists;
 
 /**
@@ -55,6 +58,8 @@ import speiger.src.collections.objects.utils.ObjectLists;
  */
 public class MezzHelpers
 {
+	public static final Map<String, DataType> CUSTOM = Util.make(new Object2ObjectOpenHashMap<String, DataType>().synchronize(), T -> T.put("mezz.jei.library.config.serializers.ColorNameSerializer.RgbColorSerializer", DataType.byClass(ColorWrapper.class)));
+	
 	public static String getConfigName(IConfigSchema schema) {
 		return schema.getPath().map(Path::getFileName).map(Path::toString).orElse("<Unknown>");
 	}
@@ -231,7 +236,7 @@ public class MezzHelpers
 			case DoubleSerializer D -> DataType.DOUBLE;
 			case ColorSerializer C -> DataType.byClass(ColorWrapper.class);
 			case EnumSerializer<?> E -> DataType.ENUM;
-			default -> DataType.STRING;
+			default -> CUSTOM.getOrDefault(serializer.getClass().getCanonicalName(), DataType.STRING);
 		};
 	}
 	
