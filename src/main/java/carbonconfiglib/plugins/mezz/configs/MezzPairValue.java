@@ -78,8 +78,8 @@ public class MezzPairValue implements ICompoundNode, IValueActions {
 	
 	private void reload() {
 		values.clear();
-		addEntry(currentValues[1], defaults[1], "Key", 1, keySerializer, () -> MezzHelpers.getSuggestions(keySerializer));
-		addEntry(currentValues[2], defaults[2], "Value", 2, valueSerializer, () -> MezzHelpers.getSuggestions(valueSerializer));
+		values.add(addEntry(currentValues[1], defaults[1], "Key", 1, keySerializer, () -> MezzHelpers.getSuggestions(keySerializer)));
+		values.add(addEntry(currentValues[2], defaults[2], "Value", 2, valueSerializer, () -> MezzHelpers.getSuggestions(valueSerializer)));
 		autosave();
 	}
 	
@@ -90,7 +90,7 @@ public class MezzPairValue implements ICompoundNode, IValueActions {
 		if(serializer instanceof IConfigKeyValueSerializer<?, ?, ?> map) {
 			return new MezzPairValue(name, IConfigNode.createLabel(name).append(this.name), tooltip, mode, map, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
 		}
-		return new MezzValue(name, IConfigNode.createLabel(name).append(this.name), tooltip, mode, serializer, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
+		return new MezzValue(name, IConfigNode.createLabel(name), tooltip, mode, serializer, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
 	}
 	
 	private void save(int index, String value) {
@@ -109,7 +109,7 @@ public class MezzPairValue implements ICompoundNode, IValueActions {
 	}
 	
 	@Override
-	public boolean isDefault() { return !Arrays.equals(getPrev(), defaults); }
+	public boolean isDefault() { return Arrays.equals(getPrev(), defaults); }
 	
 	@Override
 	public boolean isChanged() { return !Arrays.equals(getPrev(), currentValues); }
