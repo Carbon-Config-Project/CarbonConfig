@@ -92,12 +92,12 @@ public abstract class NumberElement extends ValueElement
 	protected abstract String toString(long value);
 	
 	private void onTextChanged(String value) {
-		text.setTextColor(0xE0E0E0);
+		text.setTextColor(0xFFE0E0E0);
 		result = null;
 		if(!value.isEmpty()) {
 			result = node.isValid(value);
 			if(!result.getValue()) {
-				text.setTextColor(0xFF0000);
+				text.setTextColor(0xFFFF0000);
 				return;
 			}
 			setValue(value);
@@ -106,11 +106,11 @@ public abstract class NumberElement extends ValueElement
 	}
 	
 	private void onSliderChanged() {
-		text.setTextColor(0xE0E0E0);
+		text.setTextColor(0xFFE0E0E0);
 		String value = toString(slider.get());
 		result = node.isValid(value);
 		if(!result.getValue()) {
-			text.setTextColor(0xFF0000);
+			text.setTextColor(0xFFFF0000);
 			return;
 		}
 		setValue(value);

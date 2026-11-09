@@ -8,9 +8,6 @@ import java.util.function.Predicate;
 import carbonconfiglib.gui.base.helpers.ITooltipProvider;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 
@@ -61,20 +58,6 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 			if(result == null) return;
 			tooltips.accept(result);
 		}
-	}
-	
-	@Override
-	public boolean keyPressed(KeyEvent event) {
-		return isActive() && super.keyPressed(event);
-	}
-	
-	@Override
-	public boolean charTyped(CharacterEvent event) {
-		return isActive() && super.charTyped(event);
-	}
-	
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		return isActive() && super.mouseClicked(event, doubleClick);
 	}
 	
 	public static class TextState {
