@@ -45,7 +45,7 @@ public class ForgeTest
     
     public ForgeTest()
 	{
-        ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.COMMON, SPEC);
+        ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.LOCAL, SPEC);
 
 	}
     

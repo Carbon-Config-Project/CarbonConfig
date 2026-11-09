@@ -118,7 +118,7 @@ public class ForgeConfig implements IModConfig
 	
 	@Override
 	public boolean isDynamicConfig() {
-		return config.getType() == Type.SERVER;
+		return config.getType() == Type.SYNCED;
 	}
 	
 	@Override
@@ -130,8 +130,9 @@ public class ForgeConfig implements IModConfig
 	public ConfigType getConfigType() {
 		switch(config.getType()) {
 			case CLIENT: return ConfigType.CLIENT;
-			case COMMON: return ConfigType.SHARED;
-			case SERVER: return ConfigType.SERVER;
+			case LOCAL: return ConfigType.SHARED;
+			case STARTUP: return ConfigType.SHARED;
+			case SYNCED: return ConfigType.SERVER;
 			default: throw new IllegalArgumentException("Type: "+config.getType()+", not supported");
 		}
 	}

@@ -78,6 +78,6 @@ public class CarbonButton extends CarbonBaseButton {
 	}
 	
 	public void renderIcon(GuiGraphicsExtractor graphics, int pMouseX, int pMouseY, float pPartialTick) {
-		icon.get().drawIcon(graphics, getX() + padding, getY() + padding, width-padding*2, height-padding*2, 16, 16, getFGColor());
+		icon.get().drawIcon(graphics, getX() + padding, getY() + padding, width-padding*2, height-padding*2, 16, 16, this.active ? -1 : -6250336);
 	}
 }

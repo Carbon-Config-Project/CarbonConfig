@@ -2,6 +2,8 @@ package carbonconfiglib.gui.nodes;
 
 import java.util.List;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IArrayNode;
 import carbonconfiglib.gui.base.helpers.Align;
@@ -220,7 +222,7 @@ public class ArrayElement extends NodeElement implements IFolderNode, ISortableN
 		
 		@Override
 		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-			if(event.input() == 0 && (event.hasShiftDown() || skip) && selector.isMouseOver(event.x(), event.y())) {
+			if(event.input() == InputConstants.MOUSE_BUTTON_LEFT && (event.hasShiftDown() || skip) && selector.isMouseOver(event.x(), event.y())) {
 				if(!owner.node.isForcedSuggestion()) {
 					owner.addElement(null);					
 					return true;

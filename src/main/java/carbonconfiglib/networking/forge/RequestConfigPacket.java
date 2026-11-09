@@ -46,6 +46,7 @@ public class RequestConfigPacket implements ICarbonPacket
 		this.fileName = fileName;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public RequestConfigPacket(FriendlyByteBuf buffer) {
 		type = buffer.readEnum(ModConfig.Type.class);
 		requestId = buffer.readUUID();
@@ -53,6 +54,7 @@ public class RequestConfigPacket implements ICarbonPacket
 		fileName = buffer.readUtf(32767);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeEnum(type);
 		buffer.writeUUID(requestId);

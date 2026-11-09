@@ -2,14 +2,13 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.1.38'
+    id 'net.neoforged.moddev' version '2.0.147' 
     id 'net.darkhax.curseforgegradle' version '1.1.15'
     id 'com.modrinth.minotaur' version '2.+'
 }
 version = MC_VERSION + '-' + MOD_VERSION
 group = 'carbonconfiglib' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 base.archivesName = 'CarbonConfig-Neoforge'
-jarJar.enable()
 
 
 
@@ -23,45 +22,61 @@ sourceSets {
  		}
     }
 }
-
-runs {
-    configureEach {
-        modSource project.sourceSets.main
-        //Required for JIJ iirc.
-		dependencies {
-    		runtime ':Primitive Collections-0.8.9'
+neoForge {
+	version = "26.3.0.99"
+	runs {
+    	configureEach {
+   		     //Required for JIJ iirc.
+			dependencies {
+    			implementation ':Primitive Collections-0.8.9'
+    		}
     	}
+    	client {
+    		client()
+    	}
+    	server {
+    		server()
+    	}
+	}
+	mods {
+		"carbonconfig" {
+			sourceSet(sourceSets.main)
+		}
+	}
+	unitTest {
+        enable()
+        testedMod = mods.carbonconfig
     }
-    client {}
-    server {}
-    gameTestServer {}
 }
+
+
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-minecraft {
-    accessTransformers {
-        file 'src/main/resources/META-INF/accesstransformer.cfg'
-    }
-}
 
 repositories {
     mavenLocal()
 	maven {
         url = "https://www.cursemaven.com"
     }
+    maven {
+ 		url = "https://maven.blamejared.com"
+	}
     flatDir {
        dirs("libs")
    	}
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:26.2.0.7-beta"
 	implementation ':Primitive Collections-0.8.9'
-	implementation "curse.maven:jei-238222:8333245"
-	jarJar(group: 'com.github.Speiger', name: 'Primitive Collections', version: '[0.8,0.9)') {
-	 	jarJar.pin(it, "0.8.9")
-	}
+	implementation "curse.maven:jei-238222:9453343"
+	implementation "net.mezzdev.config:mezz_config-26.3-neoforge:0.6.11"
+	jarJar(implementation('com.github.Speiger:Primitive Collections:0.8.9')) {
+        version {
+            strictly '[0.8,0.9)'
+            prefer '0.8.9'
+        }
+    }
 }
 
 publishing {
@@ -72,7 +87,7 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = "file://${project.projectDir}/repo"
         }
     }
 }
@@ -85,25 +100,26 @@ test {
 	exclude 'carbonconfiglib/**'
 }
 
-tasks.jarJar {
-    archiveClassifier.set("all")
+tasks.named('jar', Jar) {
     eachFile { fcd ->
         if (fcd.relativePath.pathString.startsWith("assets/carbonconfig/lang/") && !fcd.name.endsWith(".json")) {
-        	fcd.exclude()
+            fcd.exclude()
         }
     }
+    
     doLast {
         def jarFile = archiveFile.get().asFile
-        def newJar = new File(jarFile.parent, jarFile.name.replace("-all", ""))
-        
-        if (newJar.exists()) newJar.delete() // make sure no conflict
-        jarFile.renameTo(newJar)
+        if (jarFile.name.contains("-all")) {
+            def newJar = new File(jarFile.parent, jarFile.name.replace("-all", ""))
+            if (newJar.exists()) newJar.delete()
+            jarFile.renameTo(newJar)
+        }
     }
 }
 
 task publishMods() {
-	group 'publishing'
-	description 'Publishes the mod to all Mod Distributors'
+	group = 'publishing'
+	description = 'Publishes the mod to all Mod Distributors'
 	doLast {
 		System.out.println("Published Mods to Curseforge/Modrinth")
 	}
@@ -127,8 +143,8 @@ modrinth {
 
 task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) { 
 	mustRunAfter assemble
-	group 'publishing'
-	description 'Publishes the mod to Curseforge'
+	group = 'publishing'
+	description = 'Publishes the mod to Curseforge'
 	apiToken = System.getenv("Curseforge_API_Token")
 		
 	def mainFile = upload(898104, jar)

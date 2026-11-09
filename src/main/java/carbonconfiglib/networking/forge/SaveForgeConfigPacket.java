@@ -49,6 +49,7 @@ public class SaveForgeConfigPacket implements ICarbonPacket
 		this.data = data;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public SaveForgeConfigPacket(FriendlyByteBuf buffer) {
 		type = buffer.readEnum(ModConfig.Type.class);
 		modId = buffer.readUtf(32767);
@@ -56,6 +57,7 @@ public class SaveForgeConfigPacket implements ICarbonPacket
 		data = buffer.readByteArray();
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeEnum(type);
 		buffer.writeUtf(modId, 32767);

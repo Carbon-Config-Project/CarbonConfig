@@ -10,6 +10,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import carbonconfiglib.gui.base.helpers.Align;
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.Icon;
@@ -63,7 +65,7 @@ public class DropDownMenu<T> extends CarbonButton {
 	
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if(event.input() == 2 && this.isMouseOver(event.x(), event.y())) {
+		if(event.input() == InputConstants.MOUSE_BUTTON_MIDDLE && this.isMouseOver(event.x(), event.y())) {
 			state.reset();
 			return true;
 		}
@@ -92,8 +94,8 @@ public class DropDownMenu<T> extends CarbonButton {
 		boolean up = open && ((DropDownScreen)mc.gui.screen()).isUp();
 		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused() || open), getX(), getY(), width-14, height);
 		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(active, isHoveredOrFocused() || open), getX()+width-15, getY(), 15, height);
-		GuiUtils.drawScrollingShadowText(graphics, mc.font, getMessage(), getX()+2, getY(), width-18, height, Align.CENTER, getFGColor(), hash);
-		GuiUtils.drawScrollingShadowText(graphics, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), getX()+width-13, getY(), 11, height, Align.CENTER, getFGColor(), hash);
+		GuiUtils.drawScrollingShadowText(graphics, mc.font, getMessage(), getX()+2, getY(), width-18, height, Align.CENTER, this.active ? -1 : -6250336, hash);
+		GuiUtils.drawScrollingShadowText(graphics, mc.font, Component.literal(open ? (up ? "▲" : "▼") : "◀"), getX()+width-13, getY(), 11, height, Align.CENTER, this.active ? -1 : -6250336, hash);
 	}
 	
 	public static class DropDownScreen<T> extends BaseCarbonScreen {

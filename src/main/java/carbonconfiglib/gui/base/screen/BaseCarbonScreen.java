@@ -138,7 +138,7 @@ public class BaseCarbonScreen extends Screen
 		}
 		lastDrawnToolTipAmount = 0;
 		graphics.nextStratum();
-		graphics.tooltip(font, tooltips.stream().map(ClientTooltipComponent::create).toList(), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+		graphics.tooltip(font, tooltips.stream().map(ClientTooltipComponent::create).toList(), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null, false);
 		lastDrawnToolTipAmount = tooltips.size();
 	}
 	

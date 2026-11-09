@@ -3,7 +3,7 @@ package carbonconfiglib;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.config.ConfigHandler;
@@ -41,7 +41,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.gui.ModListScreen;
+import net.neoforged.neoforge.client.gui.modlist.ModListScreen;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -147,10 +147,10 @@ public class CarbonConfigClient {
 	public void registerKeys(RegisterKeyMappingsEvent event) {
 		Category category = new Category(Identifier.fromNamespaceAndPath("carbonconfig", "general"));
 		event.registerCategory(category);
-		KeyMapping mapping = new KeyMapping("key.carbon_config.key", GLFW.GLFW_KEY_KP_ENTER, category);
+		KeyMapping mapping = new KeyMapping("key.carbon_config.key", InputConstants.KEY_NUMPADENTER, category);
 		event.register(mapping);
 		MOD_GUI = mapping::isDown;
-		KeyMapping mappingOther = new KeyMapping("key.carbon_config.dep", GLFW.GLFW_KEY_KP_ADD, category);
+		KeyMapping mappingOther = new KeyMapping("key.carbon_config.dep", InputConstants.KEY_ADD, category);
 		event.register(mappingOther);
 		DEPENDENCY_VIEWER = T -> {
 			if(T instanceof KeyEvent keyEvent) return mappingOther.matches(keyEvent);
@@ -165,10 +165,10 @@ public class CarbonConfigClient {
 	
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.gui.setScreen(event.getKeyEvent().hasShiftDown() ? new ModListScreen(mc.gui.screen()) : new ConfigListScreen(mc.gui.screen(), BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == InputConstants.PRESS) {
+			mc.gui.setScreen(event.getKeyEvent().hasShiftDown() ? ModListScreen.create(mc.gui.screen()) : new ConfigListScreen(mc.gui.screen(), BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 		}
-		else if(DEPENDENCY_VIEWER.test(event.getKeyEvent()) && event.getAction() == GLFW.GLFW_PRESS) {
+		else if(DEPENDENCY_VIEWER.test(event.getKeyEvent()) && event.getAction() == InputConstants.PRESS) {
 			mc.gui.setScreen(new ModDependencyScreen());
 		}
 	}

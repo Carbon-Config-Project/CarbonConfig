@@ -79,6 +79,7 @@ public class ReadBuffer implements IReadBuffer
 	}
 	
 	@Override
+	@SuppressWarnings("deprecation")
 	public <T extends Enum<T>> T readEnum(Class<T> clz) {
 		return buf.readEnum(clz);
 	}

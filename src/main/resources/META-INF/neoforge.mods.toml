@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[4,)"
+loaderVersion="[3,)"
 license="Apache-2.0"
 [[accessTransformers]]
 	file="META-INF/accesstransformer.cfg"
@@ -9,7 +9,8 @@ license="Apache-2.0"
 	version="${file.jarVersion}"
 	displayName="Carbon Config Library"
 	displayURL="https://github.com/Carbon-Config-Project/CarbonConfig"
-	logoFile="carbonconfig.png"
+	iconFile="carbonconfig.png"
+	bannerFile="carbonconfig.png"
 	credits="Thanks to the IC2Classic team for open sourcing this"
 	authors="Meduris, Speiger"
 	description='''
@@ -18,12 +19,12 @@ license="Apache-2.0"
 	[[dependencies.carbonconfig]]
 		modId="neoforge"
 		required=true
-		versionRange="[26.2.0.7-beta,)"
+		versionRange="[26.3,)"
 		ordering="NONE"
 		side="BOTH"
 	[[dependencies.carbonconfig]]
 		modId="minecraft"
 		required=true
-		versionRange="[26.2,)"
+		versionRange="[26.3,)"
 		ordering="NONE"
 		side="BOTH"

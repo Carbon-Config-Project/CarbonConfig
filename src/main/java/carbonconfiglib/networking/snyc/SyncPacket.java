@@ -51,6 +51,7 @@ public class SyncPacket implements ICarbonPacket
 		this.entries = entries;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public SyncPacket(FriendlyByteBuf buffer) {
 		identifier = buffer.readUtf(32767);
 		type = buffer.readEnum(SyncType.class);
@@ -79,6 +80,7 @@ public class SyncPacket implements ICarbonPacket
 		return data.isEmpty() ? null : new SyncPacket(handler.getConfigIdentifer(), type, data);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeUtf(identifier);
 		buffer.writeEnum(type);

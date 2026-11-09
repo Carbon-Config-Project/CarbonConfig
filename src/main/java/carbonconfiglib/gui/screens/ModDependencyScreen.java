@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.joml.Matrix3x2fStack;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import carbonconfiglib.gui.api.IModConfigs;
 import carbonconfiglib.gui.api.background.BackgroundTexture;
@@ -28,13 +30,12 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
-import net.neoforged.neoforge.client.gui.ModListScreen;
+import net.neoforged.neoforge.client.gui.modlist.ModListScreen;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.IModInfo.DependencyType;
 import net.neoforged.neoforgespi.language.IModInfo.ModVersion;
@@ -69,11 +70,11 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	}
 	
 	private void openConfigs() {
-		setScreen(minecraft.hasShiftDown() ? new ModListScreen(this) : new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+		setScreen(minecraft.hasShiftDown() ? ModListScreen.create(this) : new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 	}
 	
 	private void openMods() {
-		Util.getPlatform().openUri(FMLPaths.MODSDIR.get().toUri());
+		Blaze3D.openPath(FMLPaths.MODSDIR.get());
 	}
 	
 	@Override
@@ -224,11 +225,11 @@ public class ModDependencyScreen extends BaseCarbonScreen
 			}
 		}
 		if(found != null) {
-			if(event.input() == 0) {
+			if(event.input() == InputConstants.MOUSE_BUTTON_LEFT) {
 				focused = found;
 				return true;
 			}
-			else if(event.input() == 1) {
+			else if(event.input() == InputConstants.MOUSE_BUTTON_RIGHT) {
 				if(found instanceof DependencyNode) {
 					DependencyNode dep = (DependencyNode)found;
 					SubMenuItem item = new SubMenuItem("Root");
@@ -237,7 +238,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 					if(dep.getURL() == null) item.addLabel(Component.translatable("gui.carbonconfig.dependency.not_provided"));
 					else item.addNode("gui.carbonconfig.dependency.open_page", () -> {
 						try {
-							Util.getPlatform().openUri(dep.getURL().toURI());
+							Blaze3D.openUri(dep.getURL().toURI());
 						}
 						catch(Exception e) { e.printStackTrace(); }
 					});
@@ -259,7 +260,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 					info.getModURL().ifPresentOrElse(T -> {
 						try {
 							URI uri = T.toURI();
-							item.addNode("gui.carbonconfig.dependency.open_page", () -> Util.getPlatform().openUri(uri));					
+							item.addNode("gui.carbonconfig.dependency.open_page", () -> Blaze3D.openUri(uri));					
 						}
 						catch(Exception e) { e.printStackTrace(); }
 					}, () -> {
@@ -268,7 +269,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 					Optional.ofNullable(((ModFileInfo)info.getOwningFile()).getIssueURL()).ifPresent(T -> {
 						try {
 							URI uri = T.toURI();
-							item.addNode("gui.carbonconfig.dependency.open_issue", () -> Util.getPlatform().openUri(uri));					
+							item.addNode("gui.carbonconfig.dependency.open_issue", () -> Blaze3D.openUri(uri));					
 						}
 						catch(Exception e) { e.printStackTrace(); }
 					});
@@ -285,7 +286,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 				return true;
 			}
 		}
-		if(event.input() == 0) {
+		if(event.input() == InputConstants.MOUSE_BUTTON_LEFT) {
 			pos = new ChunkPos((int)event.x(), (int)event.y());
 			return true;
 		}

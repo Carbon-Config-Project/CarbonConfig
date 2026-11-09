@@ -1,19 +1,20 @@
-package carbonconfiglib.plugins.jei.configs;
+package carbonconfiglib.plugins.mezz.configs;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import carbonconfiglib.api.IEntrySettings;
 import carbonconfiglib.api.IRange;
 import carbonconfiglib.api.ISuggestionProvider.Suggestion;
 import carbonconfiglib.gui.api.node.IValueNode;
 import carbonconfiglib.gui.api.types.DataType;
+import carbonconfiglib.gui.impl.carbon.IValueActions;
 import carbonconfiglib.impl.ReloadMode;
 import carbonconfiglib.utils.ParseResult;
 import carbonconfiglib.utils.structure.IStructuredData.StructureType;
+import net.mezzdev.config.api.value.serializer.IConfigValueSerializer;
 import net.minecraft.network.chat.Component;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 import speiger.src.collections.utils.Stack;
@@ -33,7 +34,7 @@ import speiger.src.collections.utils.Stack;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class JEIValue implements IValueNode
+public class MezzValue implements IValueNode, IValueActions
 {
 	String nodeName;
 	Component name;
@@ -41,9 +42,9 @@ public class JEIValue implements IValueNode
 	DataType type;
 	ReloadMode mode;
 	IRange range;
+	IConfigValueSerializer<?> serializer;
 	Function<String, ParseResult<?>> isValid;
-	Supplier<List<Suggestion>> suggestions;
-	BiConsumer<String, JEIValue> saved;
+	BiConsumer<String, IValueActions> saved;
 	
 	Stack<String> previous = new ObjectArrayList<>();
 	String current;
@@ -51,23 +52,23 @@ public class JEIValue implements IValueNode
 	String defaultValue;
 	boolean autosave;
 	
-	public JEIValue(String nodeName, Component name, Component tooltip, ReloadMode mode, IRange range, DataType type, String value, String defaultValue, Supplier<List<Suggestion>> suggestions, Function<String, ParseResult<?>> isValid, BiConsumer<String, JEIValue> saved) {
+	public MezzValue(String nodeName, Component name, Component tooltip, ReloadMode mode, IConfigValueSerializer<?> serializer, String value, String defaultValue, Function<String, ParseResult<?>> isValid, BiConsumer<String, IValueActions> saved) {
 		this.nodeName = nodeName;
 		this.name = name;
 		this.tooltip = tooltip;
 		this.isValid = isValid;
 		this.mode = mode;
-		this.range = range;
-		this.type = type;
+		this.serializer = serializer;
+		this.range = MezzHelpers.getRange(serializer);
+		this.type = MezzHelpers.getDataType(serializer);
 		this.current = value;
 		this.savedValue = value;
 		previous.push(current);
 		this.defaultValue = defaultValue;
-		this.suggestions = suggestions;
 		this.saved = saved;
 	}
 	
-	public JEIValue withAutosave() {
+	public MezzValue withAutosave() {
 		autosave = true;
 		return this;
 	}
@@ -116,7 +117,7 @@ public class JEIValue implements IValueNode
 	@Override
 	public ReloadMode getReloadState() { return mode; }
 	@Override
-		public String getNodeName() { return nodeName; }
+	public String getNodeName() { return nodeName; }
 	@Override
 	public Component getName() { return name; }
 	@Override
@@ -140,6 +141,6 @@ public class JEIValue implements IValueNode
 	@Override
 	public boolean isForcingSuggestions() { return type == DataType.ENUM; }
 	@Override
-	public List<Suggestion> getSuggestions() { return suggestions.get(); }
+	public List<Suggestion> getSuggestions() { return MezzHelpers.getSuggestions(serializer); }
 	
 }

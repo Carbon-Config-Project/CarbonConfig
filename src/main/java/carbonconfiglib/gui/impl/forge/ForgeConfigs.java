@@ -1,7 +1,9 @@
 package carbonconfiglib.gui.impl.forge;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IModConfig;
@@ -52,10 +54,10 @@ public class ForgeConfigs implements IModConfigs
 	
 	@Override
 	public List<IModConfig> getConfigInstances(ConfigType type) {
-		ModConfig.Type value = fromType(type);
+		Set<ModConfig.Type> values = fromType(type);
 		List<IModConfig> configs = new ObjectArrayList<>();
 		for(ModConfig config : this.configs) {
-			if(config.getType() == value) {
+			if(values.contains(config.getType())) {
 				configs.add(new ForgeConfig(config));
 			}
 		}
@@ -85,11 +87,11 @@ public class ForgeConfigs implements IModConfigs
 		return BackgroundTexture.DEFAULT;
 	}
 	
-	private ModConfig.Type fromType(ConfigType type) {
+	private Set<ModConfig.Type> fromType(ConfigType type) {
 		switch(type) {
-			case CLIENT: return ModConfig.Type.CLIENT;
-			case SERVER: return ModConfig.Type.SERVER;
-			case SHARED: return ModConfig.Type.COMMON;
+			case CLIENT: return EnumSet.of(ModConfig.Type.CLIENT);
+			case SERVER: return EnumSet.of(ModConfig.Type.SYNCED);
+			case SHARED: return EnumSet.of(ModConfig.Type.LOCAL, ModConfig.Type.STARTUP);
 			default: throw new UnsupportedOperationException();
 		}
 	}

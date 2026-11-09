@@ -79,6 +79,7 @@ public class WriteBuffer implements IWriteBuffer
 	}
 	
 	@Override
+	@SuppressWarnings("deprecation")
 	public void writeEnum(Enum<?> value) {
 		buf.writeEnum(value);
 	}

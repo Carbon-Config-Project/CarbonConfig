@@ -1,5 +1,9 @@
 package carbonconfiglib.gui.base.widgets;
 
+import java.net.URI;
+
+import com.mojang.blaze3d.Blaze3D;
+
 import carbonconfiglib.gui.base.helpers.GuiUtils;
 import carbonconfiglib.gui.base.helpers.Icon;
 import carbonconfiglib.gui.screens.MultiChoiceScreen;
@@ -10,7 +14,6 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 
 public class ModLogo extends CarbonButton
 {
@@ -42,8 +45,8 @@ public class ModLogo extends CarbonButton
 	
 	private void openURL(String url) {
 		minecraft.gui.setScreen(new ConfirmLinkScreen(T -> {
-            if (T) Util.getPlatform().openUri(url);
+            if (T) Blaze3D.openUri(URI.create(url));
             this.minecraft.gui.setScreen(owner);
-         }, url, true));
+         }, URI.create(url), true));
 	}
 }

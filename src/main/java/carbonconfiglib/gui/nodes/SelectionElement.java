@@ -62,12 +62,12 @@ public class SelectionElement extends ValueElement
 	}
 	
 	private void onTextChanged(String value) {
-		text.setTextColor(0xE0E0E0);
+		text.setTextColor(0xFFE0E0E0);
 		result = null;
 		if(!value.isEmpty()) {
 			result = node.isValid(value);
 			if(!result.getValue()) {
-				text.setTextColor(0xFF0000);
+				text.setTextColor(0xFFFF0000);
 				return;
 			}
 			setValue(value);
@@ -80,9 +80,10 @@ public class SelectionElement extends ValueElement
 		result = null;
 		String value = values.get(0).getValue();
 		if(value.isEmpty()) return;
+		text.setTextColor(0xFFE0E0E0);
 		result = node.isValid(value);
 		if(!result.getValue()) {
-			text.setTextColor(0xFF0000);
+			text.setTextColor(0xFFFF0000);
 			return;
 		}
 		setValue(value);

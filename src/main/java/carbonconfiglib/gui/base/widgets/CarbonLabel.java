@@ -43,7 +43,7 @@ public class CarbonLabel extends AbstractWidget implements ITooltipProvider
 	
 	@Override
 	protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		icon.drawIcon(graphics, getX()+2, getY()+2, width-4, height-4, 16, 16, getFGColor());
+		icon.drawIcon(graphics, getX()+2, getY()+2, width-4, height-4, 16, 16, this.active ? -1 : -6250336);
 	}
 		
 	@Override

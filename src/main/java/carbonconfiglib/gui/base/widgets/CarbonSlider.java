@@ -103,7 +103,7 @@ public class CarbonSlider extends CarbonBaseButton {
 	      Font font = minecraft.font;
 	      graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.disabled(), getX(), getY(), width, height);
 	      this.renderBg(graphics, minecraft, mouseX, mouseY);
-	      int j = getFGColor();
+	      int j = this.active ? -1 : -6250336;
 	      GuiUtils.drawScrollingText(graphics, font, getMessage(), getX(), getY()+1, width, height, Align.CENTER, j | Mth.ceil(this.alpha * 255.0F) << 24, 0);
 	}
 	
