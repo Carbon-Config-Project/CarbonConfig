@@ -47,6 +47,7 @@ public class MezzPairValue implements ICompoundNode, IValueActions {
 		this.tooltip = tooltip;
 		this.isValid = isValid;
 		this.mode = mode;
+		this.saved = saved;
 		this.serializer = serializer;
 		this.keySerializer = serializer.getKeySerializer();
 		this.valueSerializer = serializer.getValueSerializer();
