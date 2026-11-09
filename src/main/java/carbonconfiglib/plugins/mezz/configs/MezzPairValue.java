@@ -86,10 +86,10 @@ public class MezzPairValue implements ICompoundNode, IValueActions {
 	
 	private IValueActions addEntry(String value, String defaultValue, String name, int index, IConfigValueSerializer<?> serializer, Supplier<List<Suggestion>> suggestions) {
 		if(serializer instanceof IConfigListValueSerializer<?> list) {
-			return new MezzArray(name, IConfigNode.createLabel(name).append(this.name), tooltip, mode, list, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
+			return new MezzArray(name, IConfigNode.createLabel(name), tooltip, mode, list, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
 		}
 		if(serializer instanceof IConfigKeyValueSerializer<?, ?, ?> map) {
-			return new MezzPairValue(name, IConfigNode.createLabel(name).append(this.name), tooltip, mode, map, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
+			return new MezzPairValue(name, IConfigNode.createLabel(name), tooltip, mode, map, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
 		}
 		return new MezzValue(name, IConfigNode.createLabel(name), tooltip, mode, serializer, value, defaultValue, T -> isValid(index, T), (K, V) -> save(index, K)).withAutosave();
 	}
