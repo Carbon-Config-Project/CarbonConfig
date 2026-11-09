@@ -34,7 +34,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
-import net.neoforged.neoforge.client.gui.ModListScreen;
+import net.neoforged.neoforge.client.gui.modlist.ModListScreen;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.IModInfo.DependencyType;
 import net.neoforged.neoforgespi.language.IModInfo.ModVersion;
@@ -69,7 +69,7 @@ public class ModDependencyScreen extends BaseCarbonScreen
 	}
 	
 	private void openConfigs() {
-		setScreen(minecraft.hasShiftDown() ? new ModListScreen(this) : new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+		setScreen(minecraft.hasShiftDown() ? ModListScreen.create(this) : new ConfigListScreen(this, BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 	}
 	
 	private void openMods() {

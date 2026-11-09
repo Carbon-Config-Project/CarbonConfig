@@ -62,6 +62,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 		if(shouldRenderIndex()) {
 			Component comp = getOverride();
 			if(comp != null) return comp;
+			return Component.literal(index(node)+": ");
 		}
 		return super.getName();
 	}
@@ -73,8 +74,7 @@ public class CompoundElement extends NodeElement implements IFolderNode
 
 	@Override
 	public void extractLeftPart(GuiGraphicsExtractor graphics, int left, int top, int width, int height, int mouseX, int mouseY, boolean selected, float partialTicks) {
-		Component comp = shouldRenderIndex() ? getOverride() : null;
-		GuiUtils.drawScrollingShadowText(graphics, font, comp != null ? comp : node.getName(), left, top, width-23, height, Align.START, -1, sinceFullyVisible);
+		GuiUtils.drawScrollingShadowText(graphics, font, getName(), left, top, width-23, height, Align.START, -1, sinceFullyVisible);
 		boolean active = context.isElementActive(this);
 		button.setMessage(Component.literal(active ? "◀" : "▶"));
 		button.setSelected(active);

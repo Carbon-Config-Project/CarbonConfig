@@ -327,6 +327,7 @@ public class CarbonDynamicList<E extends DynamicEntry<E>> extends ContainerObjec
 		
 		@Override
 		public void setFocused(@Nullable GuiEventListener focused) {
+			super.setFocused(focused);
 		}
 		
 		@SuppressWarnings("unchecked")

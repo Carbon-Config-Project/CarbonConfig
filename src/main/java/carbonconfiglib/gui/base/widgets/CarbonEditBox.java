@@ -12,6 +12,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 
 
 /**
@@ -41,9 +42,38 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		this.state = state;
 		setValue(state.getValue());
 		setSuggestion(state.getValue().isEmpty() ? state.getSuggestion() : "");
-		setFilter(state.getFilter());
 		if(state.getMaxLength() > 0) setMaxLength(state.getMaxLength());
 		state.setOwner(this);
+	}
+	
+	@Override
+	public void setValue(String value) {
+		if(state.getFilter().test(value)) {
+			super.setValue(value);
+		}
+	}
+	
+	@Override
+	public void insertText(String input) {
+		String testValue = input;
+		int start = Math.min(getCursorPosition(), this.highlightPos);
+		int end = Math.max(getCursorPosition(), this.highlightPos);
+		int maxInsertionLength = this.maxLength - this.getValue().length() - (start - end);
+		if (maxInsertionLength > 0) {
+			String text = StringUtil.filterText(input);
+			int insertionLength = text.length();
+			if (maxInsertionLength < insertionLength) {
+				if (Character.isHighSurrogate(text.charAt(maxInsertionLength - 1))) {
+					maxInsertionLength--;
+				}
+				text = text.substring(0, maxInsertionLength);
+				insertionLength = maxInsertionLength;
+			}
+			testValue = new StringBuilder(this.getValue()).replace(start, end, text).toString();
+		}
+		if(state.getFilter().test(testValue)) {
+			super.insertText(input);
+		}
 	}
 	
 	public TextState getState() {
@@ -65,16 +95,16 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 	
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		return isActive() && super.keyPressed(event);
+		return visible && super.keyPressed(event);
 	}
 	
 	@Override
 	public boolean charTyped(CharacterEvent event) {
-		return isActive() && super.charTyped(event);
+		return visible && super.charTyped(event);
 	}
 	
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		return isActive() && super.mouseClicked(event, doubleClick);
+		return visible && super.mouseClicked(event, doubleClick);
 	}
 	
 	public static class TextState {
@@ -138,9 +168,6 @@ public class CarbonEditBox extends EditBox implements ITooltipProvider {
 		
 		public TextState setFilter(Predicate<String> filter, String defaultValue) {
 			this.filter = filter;
-			if(owner != null) {
-				owner.setFilter(filter);
-			}
 			if(filter != null && (!filter.test(value) || value.isEmpty())) {
 				setValue(defaultValue);
 			}

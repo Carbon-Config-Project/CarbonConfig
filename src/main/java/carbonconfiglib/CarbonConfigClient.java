@@ -41,7 +41,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.gui.ModListScreen;
+import net.neoforged.neoforge.client.gui.modlist.ModListScreen;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import speiger.src.collections.objects.lists.ObjectArrayList;
@@ -166,7 +166,7 @@ public class CarbonConfigClient {
 	public void onKeyPressed(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player != null && MOD_GUI.getAsBoolean() && event.getAction() == GLFW.GLFW_PRESS) {
-			mc.gui.setScreen(event.getKeyEvent().hasShiftDown() ? new ModListScreen(mc.gui.screen()) : new ConfigListScreen(mc.gui.screen(), BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
+			mc.gui.setScreen(event.getKeyEvent().hasShiftDown() ? ModListScreen.create(mc.gui.screen()) : new ConfigListScreen(mc.gui.screen(), BackgroundTexture.DEFAULT.asHolder(), EventHandler.INSTANCE.getAllConfigs()));
 		}
 		else if(DEPENDENCY_VIEWER.test(event.getKeyEvent()) && event.getAction() == GLFW.GLFW_PRESS) {
 			mc.gui.setScreen(new ModDependencyScreen());

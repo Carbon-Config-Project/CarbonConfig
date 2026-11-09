@@ -9,12 +9,11 @@ license="Apache-2.0"
 	version="${file.jarVersion}"
 	displayName="Carbon Config Library"
 	displayURL="https://github.com/Carbon-Config-Project/CarbonConfig"
-	logoFile="carbonconfig.png"
+	bannerFile="carbonconfig.png"
+	iconFile="carbonconfig.png"
 	credits="Thanks to the IC2Classic team for open sourcing this"
 	authors="Meduris, Speiger"
-	description='''
-		Carbon Config is IC2Classics Config Implementation made open source
-	'''
+	description="Carbon Config is IC2Classics Config Implementation made open source"
 	[[dependencies.carbonconfig]]
 		modId="neoforge"
 		required=true

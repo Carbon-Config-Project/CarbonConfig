@@ -1,13 +1,15 @@
-package carbonconfiglib.plugins.jei.configs;
+package carbonconfiglib.plugins.mezz.configs;
 
 import java.util.List;
+import java.util.Objects;
 
 import carbonconfiglib.gui.api.node.IConfigFolderNode;
 import carbonconfiglib.gui.api.node.IConfigNode;
-import mezz.jei.api.runtime.config.IJeiConfigCategory;
-import mezz.jei.api.runtime.config.IJeiConfigValue;
+import net.mezzdev.config.api.schema.category.IConfigEditorCategory;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import speiger.src.collections.objects.lists.ObjectArrayList;
+import net.minecraft.network.chat.MutableComponent;
 
 /**
  * Copyright 2026 Speiger, Meduris
@@ -24,27 +26,31 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class JEINode implements IConfigFolderNode
+public class MezzNode implements IConfigFolderNode
 {
-	IJeiConfigCategory category;
+	IConfigEditorCategory category;
 	List<IConfigNode> children;
 	
-	public JEINode(IJeiConfigCategory category) {
+	public MezzNode(IConfigEditorCategory category, List<IConfigNode> children) {
 		this.category = category;
+		this.children = children;
 	}
 
 	@Override
 	public List<IConfigNode> getChildren() {
-		if(children == null) {
-			children = new ObjectArrayList<>();
-			for(IJeiConfigValue<?> entry : category.getConfigValues()) {
-				children.add(new JEILeaf(entry));
-			}
-		}
 		return children;
 	}
 	
 	public String getNodeName() { return category.getName(); }
 	@Override
-	public Component getName() { return IConfigNode.createLabel(category.getName()); }
+	public Component getName() { return IConfigNode.createLabel(category.getName(), category.getLocalizationKey()); }
+	@Override
+	public Component getTooltip() {
+		MutableComponent comp = Component.empty();
+		String key = category.getDescriptionLocalizationKey();
+		if(key != null && !Objects.equals(I18n.get(key), key)) {
+			comp.append(Component.translatable(key).withStyle(ChatFormatting.GRAY)).append("\n");
+		}
+		return comp;
+	}
 }

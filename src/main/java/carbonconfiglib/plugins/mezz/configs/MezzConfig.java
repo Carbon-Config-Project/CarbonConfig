@@ -1,4 +1,4 @@
-package carbonconfiglib.plugins.jei.configs;
+package carbonconfiglib.plugins.mezz.configs;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,10 +11,10 @@ import carbonconfiglib.api.ConfigType;
 import carbonconfiglib.gui.api.IModConfig;
 import carbonconfiglib.gui.api.node.IConfigNode;
 import carbonconfiglib.impl.internal.BackupManager;
-import mezz.jei.api.runtime.config.IJeiConfigCategory;
-import mezz.jei.api.runtime.config.IJeiConfigFile;
-import mezz.jei.api.runtime.config.IJeiConfigValue;
-import mezz.jei.common.config.file.IConfigSchema;
+import net.mezzdev.config.api.schema.IConfigSchema;
+import net.mezzdev.config.api.schema.category.IConfigCategory;
+import net.mezzdev.config.api.value.IConfigValue;
+import net.mezzdev.config.schema.ConfigSchema;
 import net.minecraft.network.FriendlyByteBuf;
 import speiger.src.collections.objects.lists.ObjectArrayList;
 
@@ -33,24 +33,24 @@ import speiger.src.collections.objects.lists.ObjectArrayList;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class JEIConfig implements IModConfig
+public class MezzConfig implements IModConfig
 {
-	IJeiConfigFile file;
-	List<IJeiConfigValue<?>> entries = new ObjectArrayList<>();
+	IConfigSchema file;
+	List<IConfigValue<?>> entries = new ObjectArrayList<>();
 	
-	public JEIConfig(IJeiConfigFile file) {
+	public MezzConfig(IConfigSchema file) {
 		this.file = file;
-		for(IJeiConfigCategory cat : file.getCategories()) {
+		for(IConfigCategory cat : file.getCategories()) {
 			entries.addAll(cat.getConfigValues());
 		}
 	}
 	
 	@Override
-	public String getFileName() { return file.getPath().getFileName().toString(); }
+	public String getFileName() { return MezzHelpers.getConfigName(file); }
 	@Override
-	public String getConfigName() { return file.getPath().getFileName().toString(); }
+	public String getConfigName() { return MezzHelpers.getConfigName(file); }
 	@Override
-	public String getModId() { return "jei"; }
+	public String getModId() { return file.getModId(); }
 	@Override
 	public boolean isDynamicConfig() { return false; }
 	@Override
@@ -64,20 +64,20 @@ public class JEIConfig implements IModConfig
 	
 	@Override
 	public IConfigNode getRootNode() {
-		return new JEIRoot(file);
+		return new MezzRoot(file);
 	}
 	
 	@Override
 	public boolean isDefault() {
-		for(IJeiConfigValue<?> entry : entries) {
-			if(!JEIHelpers.isDefault(entry)) return false;
+		for(IConfigValue<?> entry : entries) {
+			if(!MezzHelpers.isDefault(entry)) return false;
 		}
 		return true;
 	}
 	
 	@Override
 	public void restoreDefault() {
-		entries.forEach(JEIHelpers::setDefault);
+		entries.forEach(MezzHelpers::setDefault);
 	}
 	
 	@Override
@@ -90,22 +90,26 @@ public class JEIConfig implements IModConfig
 	@Override
 	public void save(boolean createBackup) {
 		if(createBackup) BackupManager.createBackup(this);
-		if(file instanceof IConfigSchema schema) {
+		if(file instanceof ConfigSchema schema) {
 			schema.markDirty();
 		}
 	}
 	
 	@Override
 	public byte[] createBackup() {
-		try { return Files.readAllBytes(file.getPath()); }
-		catch(Exception e) { e.printStackTrace(); }
-		return new byte[0];
+		return file.getPath().map(T -> {
+			try { return Files.readAllBytes(T); }
+			catch(Exception e) { e.printStackTrace(); }
+			return new byte[0];
+		}).orElse(new byte[0]);
 	}
 	
 	@Override
 	public void loadBackup(byte[] data) {
-		try { Files.write(file.getPath(), data); }
-		catch(Exception e) { e.printStackTrace(); }
+		file.getPath().ifPresent(T -> {
+			try { Files.write(T, data); }
+			catch(Exception e) { e.printStackTrace(); }
+		});
 	}
 	
 }
